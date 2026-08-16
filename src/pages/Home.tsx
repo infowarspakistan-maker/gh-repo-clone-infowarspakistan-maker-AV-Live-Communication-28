@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, Phone, Video, Headphones, ShieldCheck, Box, Mic, Loader2, Sparkles, Projector } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Phone, Video, Headphones, ShieldCheck, Box, Mic, Loader2, Sparkles, Projector, Heart } from 'lucide-react';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -423,23 +423,86 @@ export function Home() {
                <Link 
                 to={`/product/${prod.id}`} 
                 key={prod.id} 
-                className="group bg-white rounded-[2.5rem] p-8 border border-gray-100 hover:shadow-2xl transition-all flex flex-col relative shrink-0 w-[280px] sm:w-[320px] lg:w-[calc(25%-1.5rem)] snap-start hover:-translate-y-2"
+                className="bg-white group cursor-pointer rounded-3xl overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative shrink-0 w-[280px] sm:w-[320px] lg:w-[calc(25%-1.5rem)] snap-start"
                >
-                  {prod.salePrice > 0 && (
-                    <span className="absolute top-6 left-6 bg-[#00B4D8] text-white text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg z-10">Special Offer</span>
-                  )}
-                  <div className="h-56 flex items-center justify-center mb-8 bg-gray-50/50 rounded-[2rem] p-8">
-                    {prod.images?.[0] ? (
-                      <img loading="lazy" src={prod.images[0]} alt={prod.productName} className="max-h-full object-contain group-hover:scale-110 transition-all duration-500" />
-                    ) : (
-                      <Box size={48} className="text-gray-200" />
+                  <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
+                    {(() => {
+                       const images = Array.isArray(prod.images) ? prod.images : (typeof prod.images === 'string' ? [prod.images] : (prod.image ? [prod.image] : []));
+                       const firstImage = images[0] || 'https://placehold.co/600x600?text=No+Image';
+                       const secondImage = images[1] || firstImage;
+                       return (
+                         <>
+                           <img loading="lazy" 
+                             src={firstImage} 
+                             alt={prod.productName} 
+                             className="absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out group-hover:opacity-0"
+                           />
+                           <img loading="lazy" 
+                             src={secondImage} 
+                             alt={prod.productName} 
+                             className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 scale-105"
+                           />
+                         </>
+                       );
+                    })()}
+                    
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/40 backdrop-blur-sm flex items-center justify-center text-[#1A2B4C] hover:bg-[#1A2B4C] hover:text-white transition-colors z-10 shadow-sm"
+                    >
+                      <Heart size={14} />
+                    </button>
+
+                    {prod.salePrice > 0 && (
+                      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#00B4D8] text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-sm z-10">
+                        Special Offer
+                      </div>
                     )}
                   </div>
-                  <div className="text-[10px] font-black text-[#00B4D8] uppercase tracking-widest mb-2">{prod.brand}</div>
-                  <h3 className="text-lg font-bold text-[#1A2B4C] mb-4 group-hover:text-[#00B4D8] transition-colors line-clamp-2 min-h-[3.5rem]">{prod.productName}</h3>
-                  <div className="mt-auto flex items-baseline gap-3">
-                    <span className="text-2xl font-black text-[#1A2B4C]">PKR { ((prod.salePrice || prod.regularPrice) ?? 0).toLocaleString() }</span>
-                    {(prod.salePrice ?? 0) > 0 && <span className="text-sm text-gray-400 line-through font-medium">{(prod.regularPrice ?? 0).toLocaleString()}</span>}
+
+                  <div className="p-6 flex flex-col flex-grow bg-white z-10 relative">
+                    <h3 className="font-bold text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 line-clamp-1">
+                      {prod.productName}
+                    </h3>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                       {prod.brand && (
+                         <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
+                           {prod.brand}
+                         </span>
+                       )}
+                       {prod.sku && (
+                         <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
+                           {prod.sku}
+                         </span>
+                       )}
+                    </div>
+
+                    <div className="text-gray-500 text-xs font-medium leading-relaxed line-clamp-2 mb-6" dangerouslySetInnerHTML={{ __html: prod.shortDescription || 'Professional unified communications equipment.' }} />
+                    
+                    <div className="mt-auto flex items-end justify-between gap-4 pt-4 border-t border-gray-50">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Price</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-black text-xl text-[#1A2B4C]">PKR { ((prod.salePrice || prod.regularPrice) ?? 0).toLocaleString() }</span>
+                          {(prod.salePrice ?? 0) > 0 && (
+                            <span className="text-[10px] text-gray-400 line-through font-bold">{(prod.regularPrice ?? 0).toLocaleString()}</span>
+                          )}
+                        </div>
+                      </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                        className="bg-[#1A2B4C] text-white px-4 py-2.5 rounded-lg text-xs font-bold hover:bg-[#00B4D8] transition-all shadow-md hover:shadow-lg active:scale-95 shrink-0 whitespace-nowrap"
+                      >
+                         View Details
+                      </button>
+                    </div>
                   </div>
                </Link>
             )) : (

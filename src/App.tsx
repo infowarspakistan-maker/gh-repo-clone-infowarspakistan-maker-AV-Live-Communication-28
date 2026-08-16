@@ -503,7 +503,7 @@ function Navbar() {
 
         {/* Main Navigation Row - Only visible when not scrolled */}
         <div className={`border-t border-gray-100 transition-[height,opacity] duration-300 hidden lg:block ${isScrolled ? 'h-0 opacity-0 overflow-hidden border-t-0' : 'h-14 opacity-100'}`}>
-          <div className="max-w-[1400px] mx-auto px-8 h-full flex items-center gap-8 text-[12px] font-bold text-[#1A2B4C] uppercase tracking-wider">
+          <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-full flex items-center gap-8 text-[12px] font-bold text-[#1A2B4C] uppercase tracking-wider">
             {/* HOME with Dropdown */}
             <div className="h-14 flex items-center group relative">
               <Link to="/" className="h-14 flex items-center border-b-[3px] border-transparent group-hover:border-[#00B4D8] group-hover:text-[#00B4D8] transition-colors">HOME</Link>
@@ -623,7 +623,7 @@ function Navbar() {
 
         {/* Mobile Menu Panel */}
         {isOpen && (
-          <div className="fixed top-[96px] bottom-16 left-0 right-0 bg-white px-4 pt-2 pb-24 space-y-4 shadow-2xl z-40 overflow-y-auto lg:hidden">
+          <div className={`fixed bottom-16 left-0 right-0 bg-white px-4 pt-2 pb-safe pb-24 space-y-4 shadow-2xl z-40 overflow-y-auto lg:hidden transition-all duration-300 ${isScrolled ? "top-[64px]" : "top-[96px]"}`}>
              <form onSubmit={(e) => { e.preventDefault(); handleSearchSubmit(); setIsOpen(false); }} className="py-2 mb-2 border-b border-gray-100 flex gap-2 relative sticky top-0 bg-white z-10">
                 <label htmlFor="mobile-navbar-search" className="sr-only">Search products</label>
                 <div className="relative flex-1">
@@ -815,7 +815,7 @@ export default function App() {
   return (
     <AuthProvider>
       <ScrollToTop />
-      <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-[#1A2B4C] font-sans selection:bg-[#00B4D8] selection:text-white pb-16 lg:pb-0">
+      <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-[#1A2B4C] font-sans selection:bg-[#00B4D8] selection:text-white">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[110] bg-[#00B4D8] text-white px-4 py-2 rounded-full font-bold shadow-lg transition-all">
           Skip to main content
         </a>

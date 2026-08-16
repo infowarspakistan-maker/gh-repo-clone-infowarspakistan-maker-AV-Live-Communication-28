@@ -677,79 +677,85 @@ export function Shop() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
-                    className="bg-white group cursor-pointer rounded-[2.5rem] overflow-hidden flex flex-col border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-2xl"
+                    className="bg-white group cursor-pointer rounded-3xl overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
                   >
-                    <Link to={`/product/${product.id}`} className="aspect-square bg-gray-50 overflow-hidden relative block">
-                      <img loading="lazy" 
-                        src={(Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || 'https://placehold.co/600x600?text=No+Image'} 
-                        alt={product.productName} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
+                    <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
+                      <Link to={`/product/${product.id}`} className="absolute inset-0 z-0">
+                        {(() => {
+                           const images = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
+                           const firstImage = images[0] || 'https://placehold.co/600x600?text=No+Image';
+                           const secondImage = images[1] || firstImage;
+                           return (
+                             <>
+                               <img loading="lazy" 
+                                 src={firstImage} 
+                                 alt={product.productName} 
+                                 className="absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out group-hover:opacity-0"
+                               />
+                               <img loading="lazy" 
+                                 src={secondImage} 
+                                 alt={product.productName} 
+                                 className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 scale-105"
+                               />
+                             </>
+                           );
+                        })()}
+                      </Link>
+                      
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          /* Optionally add wishlish logic later */
+                        }}
+                        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/40 backdrop-blur-sm flex items-center justify-center text-[#1A2B4C] hover:bg-[#1A2B4C] hover:text-white transition-colors z-10 shadow-sm"
+                      >
+                        <Heart size={14} />
+                      </button>
+
                       {product.salePrice < product.regularPrice && (
-                        <div className="absolute top-6 left-6 bg-[#00B4D8] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#00B4D8] text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-sm z-10">
                           Special Offer
                         </div>
                       )}
-                      <button 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setQuickViewProduct(product);
-                          }}
-                          className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm text-[#1A2B4C] px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-[#00B4D8] hover:text-white flex items-center gap-2 z-10"
-                        >
-                          <Eye size={14} /> Quick View
-                        </button>
+                    </div>
+
+                    <div className="p-6 flex flex-col flex-grow bg-white z-10 relative">
+                      <Link to={`/product/${product.id}`} className="block">
+                        <h3 className="font-bold text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 line-clamp-1">
+                          {product.productName}
+                        </h3>
                       </Link>
-                    <div className="p-8 flex flex-col flex-grow">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                           <span className="text-[10px] text-[#00B4D8] font-black uppercase tracking-widest">{product.brand}</span>
-                           <div className="w-1 h-1 bg-gray-200 rounded-full"></div>
-                           <span className="text-[10px] text-gray-400 font-semibold leading-normal uppercase tracking-widest">{product.sku}</span>
-                        </div>
-                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md ${
-                          (product.stockQuantity ?? 0) > 5 
-                            ? 'bg-emerald-50 text-emerald-600' 
-                            : (product.stockQuantity ?? 0) > 0 
-                              ? 'bg-amber-50 text-amber-600' 
-                              : 'bg-red-50 text-red-600'
-                        }`}>
-                          {(product.stockQuantity ?? 0) > 5 
-                            ? 'In Stock' 
-                            : (product.stockQuantity ?? 0) > 0 
-                              ? `Only ${product.stockQuantity} Left` 
-                              : 'Built to Order'}
-                        </span>
+                      
+                      <div className="flex flex-wrap gap-2 mb-4">
+                         {product.brand && (
+                           <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
+                             {product.brand}
+                           </span>
+                         )}
+                         {product.sku && (
+                           <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
+                             {product.sku}
+                           </span>
+                         )}
                       </div>
 
-                      {/* Dynamic Star Rating Badge for Grid PLP */}
-                      <div className="flex items-center gap-1.5 mb-3">
-                        <div className="flex items-center text-amber-500">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={11} fill={i < 4 ? "currentColor" : "none"} className={i < 4 ? "text-amber-500" : "text-gray-200"} />
-                          ))}
-                        </div>
-                        <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">4.8 (80+ Reviews)</span>
-                      </div>
-
-                      <Link to={`/product/${product.id}`} className="block flex-grow">
-                        <h3 className="font-black mb-2 leading-tight text-xl text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{product.productName}</h3>
-                      </Link>
-
-                      {/* Search Crawler Friendly Short Description */}
-                      <p className="text-gray-500 text-xs font-semibold leading-relaxed line-clamp-2 mb-6" dangerouslySetInnerHTML={{ __html: product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.' }} />
-
-                      <div className="mt-auto pt-6 flex items-center justify-between border-t border-gray-50">
+                      <div className="text-gray-500 text-xs font-medium leading-relaxed line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.' }} />
+                      
+                      <div className="mt-auto flex items-end justify-between gap-4 pt-4 border-t border-gray-50">
                         <div className="flex flex-col">
-                          <span className="font-black text-2xl text-[#1A2B4C]">Rs. {(product.salePrice ?? 0).toLocaleString()}</span>
-                          {product.salePrice < product.regularPrice && (
-                            <span className="text-xs text-gray-400 line-through font-bold">Rs. {(product.regularPrice ?? 0).toLocaleString()}</span>
-                          )}
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Price</span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="font-black text-xl text-[#1A2B4C]">Rs. {(product.salePrice ?? 0).toLocaleString()}</span>
+                            {product.salePrice < product.regularPrice && (
+                              <span className="text-[10px] text-gray-400 line-through font-bold">{(product.regularPrice ?? 0).toLocaleString()}</span>
+                            )}
+                          </div>
                         </div>
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
+                            e.preventDefault();
                             addToCart({
                               id: product.id!,
                               name: product.productName,
@@ -758,9 +764,9 @@ export function Shop() {
                               brand: product.brand
                             } as any);
                           }}
-                          className="bg-[#1A2B4C] text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-[#00B4D8] transition-all shadow-lg active:scale-95 shrink-0"
+                          className="bg-[#1A2B4C] text-white px-5 py-2.5 rounded-lg text-xs font-bold hover:bg-[#00B4D8] transition-all shadow-md hover:shadow-lg active:scale-95 shrink-0 whitespace-nowrap"
                         >
-                           <Zap size={20} />
+                           Add to cart
                         </button>
                       </div>
                     </div>

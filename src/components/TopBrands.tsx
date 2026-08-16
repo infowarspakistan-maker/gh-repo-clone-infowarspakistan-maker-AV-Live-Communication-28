@@ -95,7 +95,7 @@ export const brands = [
 export const TopBrands = () => {
   return (
     <div className="py-16 bg-white">
-      <div className="max-w-[1400px] mx-auto px-8">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8">
         <div className="flex justify-between items-end mb-12 relative">
           <h2 className="text-4xl font-black text-[#343A40] text-center w-full relative z-10">Featured Brands</h2>
           <Link to="/brands" className="text-sm font-bold text-[#1F558C] hover:text-[#00B4D8] absolute right-0 bottom-2 z-20">View All Brands</Link>

@@ -258,7 +258,7 @@ export function Contact() {
 
       {/* Map Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
-        <div className="rounded-[4rem] overflow-hidden border border-gray-100 h-[500px] bg-gray-100 shadow-xl group">
+        <div className="rounded-[4rem] overflow-hidden border border-gray-100 h-[400px] md:h-[600px] bg-gray-100 shadow-xl group">
            <iframe 
               src="https://storage.googleapis.com/maps-solutions-olnm31i0i8/locator-plus/10b8/locator-plus.html" 
               width="100%" 

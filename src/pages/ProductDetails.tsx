@@ -1002,16 +1002,73 @@ export function ProductDetails() {
           <div className="mt-16 pt-16 border-t border-gray-100">
             <h2 className="text-3xl font-black text-[#1A2B4C] mb-8 tracking-tight">Relevant Products</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 h-auto">
-              {relatedProducts.map(rp => (
-                <Link key={rp.id} to={`/product/${rp.id}`} className="group bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-[#00B4D8]/30 transition-all">
-                  <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden mb-6 relative">
-                    <img loading="lazy" src={rp.images?.[0] || 'https://placehold.co/600x600?text=No+Image'} alt={rp.productName} className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500" />
+              {relatedProducts.map(prod => (
+                <Link 
+                 to={`/product/${prod.id}`} 
+                 key={prod.id} 
+                 className="bg-white group cursor-pointer rounded-3xl overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
+               >
+                  <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
+                    {(() => {
+                       const images = Array.isArray(prod.images) ? prod.images : (typeof prod.images === 'string' ? [prod.images] : (prod.image ? [prod.image] : []));
+                       const firstImage = images[0] || 'https://placehold.co/600x600?text=No+Image';
+                       const secondImage = images[1] || firstImage;
+                       return (
+                         <>
+                           <img loading="lazy" 
+                             src={firstImage} 
+                             alt={prod.productName} 
+                             className="absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out group-hover:opacity-0"
+                           />
+                           <img loading="lazy" 
+                             src={secondImage} 
+                             alt={prod.productName} 
+                             className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 scale-105"
+                           />
+                         </>
+                       );
+                    })()}
+                    
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/40 backdrop-blur-sm flex items-center justify-center text-[#1A2B4C] hover:bg-[#1A2B4C] hover:text-white transition-colors z-10 shadow-sm"
+                    >
+                      <Heart size={14} />
+                    </button>
+
+                    {(prod.salePrice ?? 0) < (prod.regularPrice ?? 0) && (
+                      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#00B4D8] text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-sm z-10">
+                        Special Offer
+                      </div>
+                    )}
                   </div>
-                  <h3 className="font-black text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 line-clamp-2 leading-tight">{rp.productName}</h3>
-                  <div className="flex items-center justify-between">
-                    <span className="font-black text-lg">Rs. {(rp.salePrice ?? 0).toLocaleString()}</span>
+
+                  <div className="p-6 flex flex-col flex-grow bg-white z-10 relative">
+                    <h3 className="font-bold text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 line-clamp-1">
+                      {prod.productName}
+                    </h3>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                       {prod.brand && (
+                         <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
+                           {prod.brand}
+                         </span>
+                       )}
+                    </div>
+
+                    <div className="mt-auto flex items-end justify-between gap-4 pt-4 border-t border-gray-50">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Price</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-black text-lg text-[#1A2B4C]">Rs. { ((prod.salePrice || prod.regularPrice) ?? 0).toLocaleString() }</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </Link>
+               </Link>
               ))}
             </div>
           </div>
