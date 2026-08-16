@@ -1,0 +1,162 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Master Gate (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Reusable Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 3. Validation Blueprints
+    function isValidQuoteRequest(data) {
+      return data.keys().hasAll(['fullName', 'companyName', 'email', 'phone', 'projectTypes', 'budget', 'timeline', 'details', 'status', 'createdAt'])
+        && data.keys().size() == 10
+        && data.fullName is string && data.fullName.size() <= 200
+        && data.companyName is string && data.companyName.size() <= 200
+        && data.email is string && data.email.size() <= 200
+        && data.phone is string && data.phone.size() <= 50
+        && data.projectTypes is list && data.projectTypes.size() <= 20
+        && data.budget is string && data.budget.size() <= 100
+        && data.timeline is string && data.timeline.size() <= 100
+        && data.details is string && data.details.size() <= 2000
+        && data.status in ['pending', 'responded', 'closed']
+        && data.createdAt == request.time;
+    }
+
+    // 4. Collection Matches
+    
+    // Homepage - Public read, Admin write
+    match /homepage/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Products - Public read, Admin write
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Categories - Public read, Admin write
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // About/Contact - Public read, Admin write
+    match /about/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /contact/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders - Create for anyone, read for owner or admin
+    match /orders/{orderId} {
+      allow create: if true; 
+      allow read: if isAdmin() || (isSignedIn() && (existing().customerId == request.auth.uid || existing().customerEmail == request.auth.token.email));
+      allow update, delete: if isAdmin();
+    }
+
+    // RMA Requests
+    match /rma_requests/{rmaId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Wizard Leads
+    match /wizard_leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Event Quotes
+    match /event_quotes/{quoteId} {
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Quote Requests - EXPLICIT ALLOW CREATE
+    match /quote_requests/{quoteId} {
+      allow create: if isValidQuoteRequest(incoming());
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Users - Profile management
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && (incoming().role == 'customer' || (incoming().role == 'admin' && request.auth.token.email == 'infowarspakistan@gmail.com'));
+      allow update: if isOwner(userId) && (!incoming().diff(existing()).affectedKeys().hasAny(['role', 'uid', 'email'])) || isAdmin();
+    }
+
+    // Services Page Content
+    match /services_page/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Services Collection
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Settings
+    match /settings/{docId} {
+      allow read: if docId == 'global' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Stock History
+    match /stock_history/{historyId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Page Contents
+    match /page_contents/{pageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Blog Posts
+    match /blog_posts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admins - Only accessible via console or system for write, read for signed in
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "AV Live Communications",
+  "description": "B2B solution ecosystem for professional AV equipment, smart collaboration, and event management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

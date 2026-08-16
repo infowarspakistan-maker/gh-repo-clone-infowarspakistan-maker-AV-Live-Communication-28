@@ -1,0 +1,135 @@
+{
+  "entities": {
+    "Homepage": {
+      "title": "Homepage Content",
+      "description": "Content for the main landing page",
+      "type": "object",
+      "properties": {
+        "heroSlides": { "type": "array" },
+        "brands": { "type": "array" },
+        "solutions": { "type": "object" },
+        "stats": { "type": "object" },
+        "testimonials": { "type": "array" }
+      }
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Inventory items available for sale",
+      "type": "object",
+      "properties": {
+        "productName": { "type": "string" },
+        "brand": { "type": "string" },
+        "categoryIds": { "type": "array" },
+        "categorySlugs": { "type": "array" },
+        "regularPrice": { "type": "number" },
+        "salePrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "images": { "type": "array" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase records",
+      "type": "object",
+      "properties": {
+        "orderNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "tax": { "type": "number" },
+        "shippingCost": { "type": "number" },
+        "total": { "type": "number" },
+        "orderStatus": { "type": "string", "enum": ["pending", "processing", "shipped", "delivered", "cancelled"] },
+        "paymentStatus": { "type": "string", "enum": ["pending", "paid", "failed"] },
+        "paymentMethod": { "type": "string" },
+        "shippingAddress": { "type": "string" },
+        "billingAddress": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "RMARequest": {
+      "title": "RMA Request",
+      "description": "Return Merchandise Authorization requests",
+      "type": "object",
+      "properties": {
+        "orderNumber": { "type": "string" },
+        "productName": { "type": "string" },
+        "issue": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected", "received", "repaired", "replaced"] },
+        "customerEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "QuoteRequest": {
+      "title": "Quote Request",
+      "description": "Services quotation requests",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "companyName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "projectTypes": { "type": "array" },
+        "budget": { "type": "string" },
+        "timeline": { "type": "string" },
+        "details": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "responded", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "email", "phone", "projectTypes", "status"]
+    }
+  },
+  "firestore": {
+    "homepage/main": {
+      "schema": "Homepage",
+      "description": "Main homepage configuration document"
+    },
+    "products/{productId}": {
+      "schema": "Product",
+      "description": "Individual product documents"
+    },
+    "categories/{categoryId}": {
+      "schema": "object",
+      "description": "Product categories"
+    },
+    "orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer order documents"
+    },
+    "rma_requests/{rmaId}": {
+      "schema": "RMARequest",
+      "description": "Return authorization requests"
+    },
+    "quote_requests/{quoteId}": {
+      "schema": "QuoteRequest",
+      "description": "Service quote requests"
+    },
+    "services_page/main": {
+      "schema": "object",
+      "description": "Main services landing page configuration"
+    },
+    "services/{serviceId}": {
+      "schema": "object",
+      "description": "Enterprise-grade AV/communication services catalog"
+    },
+    "settings/{docId}": {
+      "schema": "object",
+      "description": "Global and payment integration settings"
+    },
+    "stock_history/{historyId}": {
+      "schema": "object",
+      "description": "Inventory stock adjustment history logs"
+    },
+    "page_contents/{pageId}": {
+      "schema": "object",
+      "description": "Dynamic custom page content documents"
+    }
+  }
+}

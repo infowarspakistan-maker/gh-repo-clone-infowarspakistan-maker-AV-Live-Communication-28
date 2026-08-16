@@ -1,0 +1,67 @@
+const fs = require('fs');
+const content = fs.readFileSync('src/pages/Shop.tsx', 'utf8');
+
+const quickViewModal = `
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setQuickViewProduct(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-[2rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row relative"
+          >
+            <button 
+              onClick={() => setQuickViewProduct(null)}
+              className="absolute top-4 right-4 bg-white text-gray-800 w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-red-50 hover:text-red-500 z-10 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <div className="w-full md:w-1/2 h-64 md:h-auto bg-gray-50 flex items-center justify-center p-8">
+               <img loading="lazy" src={quickViewProduct.images?.[0] || 'https://placehold.co/600x600?text=No+Image'} alt={quickViewProduct.productName} className="max-w-full max-h-full object-contain" />
+            </div>
+            <div className="w-full md:w-1/2 p-8 md:p-12 overflow-y-auto">
+               <div className="flex items-center gap-2 mb-4">
+                 <span className="text-xs text-[#00B4D8] font-black uppercase tracking-widest">{quickViewProduct.brand}</span>
+                 <div className="w-1 h-1 bg-gray-200 rounded-full"></div>
+                 <span className="text-xs text-gray-400 font-black uppercase tracking-widest">{quickViewProduct.sku}</span>
+               </div>
+               <h2 className="text-2xl md:text-3xl font-black text-[#1A2B4C] mb-6 leading-tight">{quickViewProduct.productName}</h2>
+               <div className="flex items-baseline gap-4 mb-6 pb-6 border-b border-gray-100">
+                  <span className="font-black text-3xl text-[#1A2B4C]">Rs. {quickViewProduct.salePrice.toLocaleString()}</span>
+                  {quickViewProduct.salePrice < quickViewProduct.regularPrice && (
+                    <span className="text-lg text-gray-400 line-through font-bold">Rs. {quickViewProduct.regularPrice.toLocaleString()}</span>
+                  )}
+               </div>
+               <p className="text-gray-500 text-sm leading-relaxed mb-8">
+                 {quickViewProduct.shortDescription || 'Professional-grade AV equipment tailored for enterprise deployment.'}
+               </p>
+               <div className="flex gap-4">
+                 <button 
+                   onClick={() => {
+                     addToCart({
+                       id: quickViewProduct.id,
+                       name: quickViewProduct.productName,
+                       price: quickViewProduct.salePrice,
+                       image: quickViewProduct.images?.[0] || '',
+                       brand: quickViewProduct.brand
+                     });
+                     setQuickViewProduct(null);
+                   }}
+                   className="flex-1 bg-[#1A2B4C] text-white h-14 rounded-xl flex items-center justify-center hover:bg-[#00B4D8] transition-colors shadow-lg font-black uppercase tracking-widest text-xs gap-2"
+                 >
+                   <Zap size={16} /> Add to Cart
+                 </button>
+                 <Link to={\`/product/\${quickViewProduct.id}\`} className="flex-1 bg-gray-100 text-[#1A2B4C] h-14 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors font-black uppercase tracking-widest text-xs">
+                   Full Details
+                 </Link>
+               </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+`;
+
+const updated = content.replace("    </div>\\n  );\\n}", quickViewModal + "\\n    </div>\\n  );\\n}");
+fs.writeFileSync('src/pages/Shop.tsx', updated);

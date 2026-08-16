@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+
+Sitemap: https://avlive.com.pk/sitemap.xml
