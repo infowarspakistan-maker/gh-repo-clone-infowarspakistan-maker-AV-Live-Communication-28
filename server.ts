@@ -6,6 +6,7 @@ import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import fs from 'fs';
+import { updateSheetData } from './server-utils/sheets';
 
 // Initialize Firebase Admin
 // We try to load from a local file if it exists, otherwise we rely on environment/defaults
@@ -236,7 +237,7 @@ async function startServer() {
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-      // Static routes
+      // Optimized Static routes (only core indexable pages)
       const staticRoutes = [
         '',
         '/shop',
@@ -251,27 +252,27 @@ async function startServer() {
         xml += '  <url>\n';
         xml += `    <loc>${baseUrl}${route}</loc>\n`;
         xml += '    <changefreq>daily</changefreq>\n';
-        xml += '    <priority>0.8</priority>\n';
+        xml += '    <priority>1.0</priority>\n';
         xml += '  </url>\n';
       }
 
-      // Dynamic Products
+      // Dynamic Products (only active)
       try {
-        const productsSnap = await db.collection('products').get();
+        const productsSnap = await db.collection('products').where('isActive', '==', true).get();
         productsSnap.forEach(doc => {
           xml += '  <url>\n';
           xml += `    <loc>${baseUrl}/product/${doc.id}</loc>\n`;
           xml += '    <changefreq>weekly</changefreq>\n';
-          xml += '    <priority>0.9</priority>\n';
+          xml += '    <priority>0.8</priority>\n';
           xml += '  </url>\n';
         });
       } catch (e) {
         console.error('Error fetching products for sitemap:', e);
       }
 
-      // Dynamic Categories
+      // Dynamic Categories (only active)
       try {
-        const categoriesSnap = await db.collection('categories').get();
+        const categoriesSnap = await db.collection('categories').where('isActive', '==', true).get();
         categoriesSnap.forEach(doc => {
           const data = doc.data();
           xml += '  <url>\n';
@@ -605,6 +606,17 @@ async function startServer() {
     }
   });
 
+  // Sheet Syncing Endpoint
+  app.post('/api/sync-sheets', verifyAdmin, async (req, res) => {
+    try {
+      const { spreadsheetId, range, values, accessToken } = req.body;
+      await updateSheetData(spreadsheetId, range, values, accessToken);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Product Management API
   app.get('/api/products', (req, res) => {
     res.json(products);
@@ -744,6 +756,15 @@ async function startServer() {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
+
+  // Global error handler for 5xx prevention
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('--- 5xx SERVER ERROR ---');
+    console.error('URL:', req.originalUrl);
+    console.error('Method:', req.method);
+    console.error('Stack:', err.stack);
+    res.status(500).json({ error: 'Internal Server Error' });
+  });
 
   app.listen(PORT, () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);

@@ -3,10 +3,11 @@ import { ArrowRight, ArrowLeft, Phone, Video, Headphones, ShieldCheck, Box, Mic,
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Product, 
+  Product, Service,
   HomepageData, GeneralSettings, ContactData, getGeneralSettings, getContactData, 
   subscribeToHomepage, 
-  subscribeToProducts 
+  subscribeToProducts,
+  subscribeToServices
 } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 
@@ -19,6 +20,7 @@ export function Home() {
   const [settings, setSettings] = useState<GeneralSettings | null>(null);
   const [contact, setContact] = useState<ContactData | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
@@ -58,9 +60,15 @@ export function Home() {
       setLoading(false);
     }, { isActive: true });
 
+    // Listen for services
+    const unsubscribeServices = subscribeToServices((data) => {
+      setServices(data);
+    });
+
     return () => {
       unsubscribeHome();
       unsubscribeProducts();
+      unsubscribeServices();
     };
   }, []);
 
@@ -445,6 +453,51 @@ export function Home() {
           </div>
         </div>
       </motion.div>
+
+      {/* Tabbed Intent Split */}
+      <div className="w-full py-16 bg-white" x-data="{ activeTab: 'solutions' }">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="flex justify-center gap-6 mb-12">
+            <button 
+              onClick={() => setActiveFilter('solutions')}
+              className={`px-8 py-3 rounded-full font-black uppercase tracking-widest text-sm transition-all ${activeFilter === 'solutions' ? 'bg-[#1A2B4C] text-white shadow-xl' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+            >
+              Event Solutions
+            </button>
+            <button 
+              onClick={() => setActiveFilter('shop')}
+              className={`px-8 py-3 rounded-full font-black uppercase tracking-widest text-sm transition-all ${activeFilter === 'shop' ? 'bg-[#1A2B4C] text-white shadow-xl' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+            >
+              Professional AV Shop
+            </button>
+          </div>
+
+          <div className="min-h-[400px]">
+            {activeFilter === 'solutions' ? (
+              <div className="grid md:grid-cols-3 gap-8">
+                {services.filter(s => s.isActive).slice(0, 3).map((s) => (
+                  <div key={s.id} className="bg-gray-50 rounded-3xl p-8 border border-gray-100 hover:shadow-xl transition-all">
+                    <img src={s.imageUrl} alt={s.title} className="w-full h-48 object-cover rounded-2xl mb-6" />
+                    <h3 className="text-xl font-black text-[#1A2B4C] mb-4">{s.title}</h3>
+                    <p className="text-gray-600 mb-6 line-clamp-3">{s.description.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ')}</p>
+                    <Link to={`/services/${s.slug}`} className="text-[#00B4D8] font-bold text-sm flex items-center gap-2">Learn More <ArrowRight size={16} /></Link>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-8">
+                {products.filter(p => p.isFeatured).slice(0, 3).map((p) => (
+                  <div key={p.id} className="bg-white rounded-3xl p-6 border border-gray-100 hover:shadow-xl transition-all">
+                    <img src={p.images?.[0]} alt={p.productName} className="w-full h-48 object-cover rounded-2xl mb-6" />
+                    <h3 className="text-lg font-bold text-[#1A2B4C] mb-2">{p.productName}</h3>
+                    <Link to={`/product/${p.id}`} className="text-[#00B4D8] font-bold text-sm">View Product</Link>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Brand Marquee */}
       <motion.div 

@@ -319,8 +319,8 @@ export function Shop() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-8 border-b border-gray-200">
           <div>
-            <h1 className="text-4xl font-black tracking-tight">Equipment Catalog</h1>
-            <p className="text-gray-400 mt-2 font-black uppercase tracking-widest text-[10px]">Industrial Grade AV Hardware</p>
+            <h1 className="text-4xl font-black tracking-tight">Professional Audio Visual Equipment & Hardware in Pakistan</h1>
+            <p className="text-gray-400 mt-2 font-black uppercase tracking-widest text-[10px]">Industrial Grade AV Solutions for Enterprise</p>
           </div>
           
           <div className="flex flex-wrap items-center gap-4">
@@ -693,12 +693,12 @@ export function Shop() {
                              <>
                                <img loading="lazy" 
                                  src={firstImage} 
-                                 alt={product.productName} 
+                                 alt={`Professional AV equipment: ${product.productName} by ${product.brand}`} 
                                  className="absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out group-hover:opacity-0"
                                />
                                <img loading="lazy" 
                                  src={secondImage} 
-                                 alt={product.productName} 
+                                 alt={`Side view of ${product.productName}`} 
                                  className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 scale-105"
                                />
                              </>

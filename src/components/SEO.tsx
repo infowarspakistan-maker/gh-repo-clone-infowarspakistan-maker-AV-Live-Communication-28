@@ -33,6 +33,7 @@ function toAbsoluteUrl(pathOrUrl?: string, defaultFallback: string = DEFAULT_DOM
   if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
     return pathOrUrl;
   }
+  // Ensure the path is clean and prepended with the domain
   const cleanPath = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
   return `${DEFAULT_DOMAIN}${cleanPath}`;
 }

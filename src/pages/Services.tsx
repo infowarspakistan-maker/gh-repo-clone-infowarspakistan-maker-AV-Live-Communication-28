@@ -20,7 +20,7 @@ export function Services() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: 'Services' }]} />
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 uppercase tracking-tighter">Event Management</h1>
+          <h1 className="text-4xl font-black mb-4 uppercase tracking-tighter">Event Management & AV Rental Services in Pakistan</h1>
           <p className="text-lg text-gray-500 font-medium mb-6">
             Book our professional teams for your next corporate summit, hybrid event, or e-Sports tournament.
           </p>
@@ -194,6 +194,26 @@ export function Services() {
           )}
         </div>
       </div>
+
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm">
+        <h2 className="text-3xl font-black mb-6">Why Choose AV Live for Event Management in Pakistan?</h2>
+        <p className="text-gray-600 leading-relaxed mb-4">
+          AV Live Communications is Pakistan's premier event management and professional audio-visual services company. We specialize in high-impact corporate solutions, including <strong>3D hologram production</strong>, immersive <strong>projection mapping</strong>, and comprehensive <strong>AV rental</strong> for corporate summits, hybrid meetings, and large-scale events.
+        </p>
+        <p className="text-gray-600 leading-relaxed mb-4">
+          Our certified engineering teams provide end-to-end support across <strong>Lahore, Karachi, and Islamabad</strong>. Whether you need an e-Sports arena setup, conference room AV integration, or a world-class hybrid event experience, AV Live delivers unmatched technical precision and reliability.
+        </p>
+        <p className="text-gray-600 leading-relaxed">
+          <strong>Our core services include:</strong>
+        </p>
+        <ul className="list-disc list-inside text-gray-600 leading-relaxed mt-2 space-y-1">
+          <li>Corporate Event Production & Management</li>
+          <li>Projection Mapping & 3D Hologram Technologies</li>
+          <li>Hybrid Event & Video Conferencing Integration</li>
+          <li>Esports Tournament Infrastructure</li>
+          <li>Professional AV Equipment Rental (SMD, Lighting, Sound)</li>
+        </ul>
+      </section>
 
       <DeepQueryModal 
         isOpen={isQuoteModalOpen} 

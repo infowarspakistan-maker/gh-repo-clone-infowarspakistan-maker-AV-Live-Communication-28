@@ -1328,6 +1328,7 @@ export interface GeneralSettings {
     keywords: string;
     ogImage: string;
   };
+  googleMerchantSheetUrl?: string;
   updatedAt?: Timestamp;
 }
 
@@ -1568,9 +1569,19 @@ export async function createService(service: Omit<Service, 'id'>): Promise<strin
 
 export async function updateService(id: string, updates: Partial<Service>): Promise<void> {
   const docRef = doc(db, 'services', id);
-  await updateDoc(docRef, {
-    ...updates,
-    updatedAt: serverTimestamp(),
+  await updateDoc(docRef, { ...updates, updatedAt: serverTimestamp() });
+}
+
+export function subscribeToServices(
+  callback: (services: Service[]) => void
+): Unsubscribe {
+  const q = query(collection(db, 'services'), orderBy('order', 'asc'));
+  return onSnapshot(q, (snapshot) => {
+    const services: Service[] = [];
+    snapshot.forEach((doc) => {
+      services.push({ id: doc.id, ...doc.data() } as Service);
+    });
+    callback(services);
   });
 }
 

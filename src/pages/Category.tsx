@@ -219,6 +219,13 @@ export function Category() {
           
         </div>
       </div>
+      
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm">
+        <h2 className="text-2xl font-black mb-6">Expert Guide: Choosing {currentCategory.name} in Pakistan</h2>
+        <p className="text-gray-600 leading-relaxed">
+          When investing in {currentCategory.name.toLowerCase()} for your corporate or commercial needs in Pakistan, it is crucial to select hardware that meets local infrastructure requirements while providing reliable performance. At AV Live, we provide PTA-compliant hardware solutions, ensuring seamless integration for your video conferencing, IP telephony, or AV infrastructure. Our technical consultants in Lahore, Karachi, and Islamabad are ready to help you navigate specifications, compatibility, and implementation for all our {currentCategory.name.toLowerCase()} products.
+        </p>
+      </section>
     </div>
   );
 }

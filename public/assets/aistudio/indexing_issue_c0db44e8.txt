@@ -1,0 +1,203 @@
+Examples
+
+URL	Last crawled
+https://avlive.com.pk/product/PAN-PT-RQ45K
+Aug 19, 2026
+https://avlive.com.pk/brands/grandstream
+Aug 18, 2026
+https://avlive.com.pk/brands/jabra
+Aug 15, 2026
+https://avlive.com.pk/returns
+Aug 15, 2026
+https://avlive.com.pk/shop?brand=logitech
+Aug 14, 2026
+https://avlive.com.pk/brands/dahua
+Aug 12, 2026
+https://avlive.com.pk/programs/quote
+Aug 12, 2026
+https://avlive.com.pk/category/intercom-paging-access
+Aug 10, 2026
+https://avlive.com.pk/products/compare
+Aug 9, 2026
+https://avlive.com.pk/products/ip-cameras
+Aug 9, 2026
+https://avlive.com.pk/brands/epson
+Aug 9, 2026
+https://avlive.com.pk/admin
+Aug 9, 2026
+https://avlive.com.pk/product/9137161U
+Aug 8, 2026
+https://avlive.com.pk/product/960-001308
+Aug 8, 2026
+https://avlive.com.pk/product/OPT-PK32-PHOTON
+Aug 8, 2026
+https://avlive.com.pk/product/DS-2DE4A425IW-DE
+Aug 8, 2026
+https://avlive.com.pk/brands/itc
+Aug 8, 2026
+https://avlive.com.pk/product/PVA-4CR12
+Aug 8, 2026
+https://avlive.com.pk/product/VS-LSD400W
+Aug 8, 2026
+https://avlive.com.pk/product/VA-6200MA
+Aug 8, 2026
+https://avlive.com.pk/product/SONY-VPL-XW5000
+Aug 8, 2026
+https://avlive.com.pk/product/UNV-IPC3612SR3-VF
+Aug 7, 2026
+https://avlive.com.pk/brands/yealink
+Aug 7, 2026
+https://avlive.com.pk/programs/promotions
+Aug 7, 2026
+https://avlive.com.pk/programs/blind-drop-shipping
+Aug 7, 2026
+https://avlive.com.pk/brands/axis
+Aug 7, 2026
+https://avlive.com.pk/product/UCM6308
+Aug 7, 2026
+https://avlive.com.pk/product/A09D4AA
+Aug 7, 2026
+https://avlive.com.pk/programs/reseller-program
+Aug 7, 2026
+https://avlive.com.pk/product/960-001563
+Aug 7, 2026
+https://avlive.com.pk/category/voip-phone-systems
+Aug 7, 2026
+https://avlive.com.pk/category/ip-cameras
+Aug 7, 2026
+https://avlive.com.pk/services/ai-development
+Aug 7, 2026
+https://avlive.com.pk/category/intercom
+Aug 7, 2026
+https://avlive.com.pk/services/ai-automation
+Aug 7, 2026
+https://avlive.com.pk/services/corporate-events
+Aug 7, 2026
+https://avlive.com.pk/product/DS-2CD2347G2-LU
+Aug 7, 2026
+https://avlive.com.pk/category/projectors
+Aug 7, 2026
+https://avlive.com.pk/product/7200-85830-012
+Aug 7, 2026
+https://avlive.com.pk/product/EPS-LS-FLEX-PLUS
+Aug 7, 2026
+https://avlive.com.pk/product/GXP2170
+Aug 7, 2026
+https://avlive.com.pk/product/STUDIO-X72
+Aug 7, 2026
+https://avlive.com.pk/product/OPT-GT4000UHD
+Aug 7, 2026
+https://avlive.com.pk/brands/bosch
+Aug 7, 2026
+https://avlive.com.pk/product/FAN-X4
+Aug 7, 2026
+https://avlive.com.pk/brands/3cx
+Aug 7, 2026
+https://avlive.com.pk/product/CS-KIT-EQ-C-K9
+Aug 7, 2026
+https://avlive.com.pk/brands/benq
+Aug 7, 2026
+https://avlive.com.pk/guides
+Aug 7, 2026
+https://avlive.com.pk/blog
+Aug 7, 2026
+https://avlive.com.pk/brands/2n
+Aug 7, 2026
+https://avlive.com.pk/brands/sony
+Aug 7, 2026
+https://avlive.com.pk/brands/panasonic
+Aug 7, 2026
+https://avlive.com.pk/brands/hikvision
+Aug 7, 2026
+https://avlive.com.pk/product/POL-C3220
+Aug 7, 2026
+https://avlive.com.pk/cart
+Aug 7, 2026
+https://avlive.com.pk/services
+Aug 7, 2026
+https://avlive.com.pk/rma
+Aug 7, 2026
+https://avlive.com.pk/brands/viewsonic
+Aug 7, 2026
+https://avlive.com.pk/shipping
+Aug 7, 2026
+https://avlive.com.pk/brands/poly
+Aug 7, 2026
+https://avlive.com.pk/setup-wizard
+Aug 7, 2026
+https://avlive.com.pk/voip-service
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=grandstream
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=fanvil
+Aug 7, 2026
+https://avlive.com.pk/brands
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=jabra
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=axis
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=3cx
+Aug 7, 2026
+https://avlive.com.pk/product/DAH-N43AL52
+Aug 7, 2026
+https://avlive.com.pk/shop
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=poly
+Aug 7, 2026
+https://avlive.com.pk/compare
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=dahua
+Aug 7, 2026
+https://avlive.com.pk/product/7599-838-199-1
+Aug 7, 2026
+https://avlive.com.pk/product/842T9AA
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=benq
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=cisco
+Aug 7, 2026
+https://avlive.com.pk/shop?brand=bosch
+Aug 7, 2026
+https://avlive.com.pk/brands/uniview
+Aug 7, 2026
+https://avlive.com.pk/product/CS-KITPRO-K9
+Aug 6, 2026
+https://avlive.com.pk/product/0871-001
+Aug 6, 2026
+https://avlive.com.pk/brands/fanvil
+Aug 6, 2026
+https://avlive.com.pk/product/VS-X1-4K-PRO
+Aug 6, 2026
+https://avlive.com.pk/product/CUCM-STD
+Aug 6, 2026
+https://avlive.com.pk/services/hybrid-events
+Aug 6, 2026
+https://avlive.com.pk/products
+Aug 6, 2026
+https://avlive.com.pk/product/BENQ-W4100I
+Aug 6, 2026
+https://avlive.com.pk/shop?brand=sony
+Aug 6, 2026
+https://avlive.com.pk/shop?brand=epson
+Aug 6, 2026
+https://avlive.com.pk/shop?brand=hikvision
+Aug 6, 2026
+https://avlive.com.pk/shop?brand=itc
+Aug 6, 2026
+https://avlive.com.pk/shop?brand=panasonic
+Aug 6, 2026
+https://avlive.com.pk/shop?brand=uniview
+Aug 6, 2026
+https://avlive.com.pk/about
+Aug 6, 2026
+https://avlive.com.pk/category/ip-phones
+Aug 6, 2026
+https://avlive.com.pk/product/POL-VOY-FOCUS
+Aug 6, 2026
+https://avlive.com.pk/products/intercom-paging-access
+Aug 5, 2026
+https://avlive.com.pk/shop?brand=viewsonic
+Aug 5, 2026
+https://avlive.com.pk/shop?brand=yealink
+Jul 31, 2026
