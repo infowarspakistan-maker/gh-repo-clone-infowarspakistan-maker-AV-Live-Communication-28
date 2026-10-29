@@ -1,0 +1,15 @@
+# AV Live Communications
+
+> AV Live Communications is Pakistan's premier enterprise Audio-Visual (AV) systems integrator and hardware distributor. Specializing in corporate boardroom automation, PTA-approved video conferencing solutions, IP telephony, and commercial audio installations across Lahore, Karachi, Islamabad, and nationwide.
+
+## Core Solutions & Product Catalogs
+- [Video Conferencing Hardware](https://avlive.com.pk/shop?category=video-conferencing): Enterprise all-in-one video bars, PTZ tracking cameras, and codec kits (Poly, Logitech, Yealink, Cisco).
+- [Boardroom & Smart Meeting Solutions](https://avlive.com.pk/category/boardroom-solutions): Interactive flat panels, wireless presentation systems, and acoustic ceiling microphones (Shure, Crestron).
+- [VoIP & IP Telephony](https://avlive.com.pk/shop?category=ip-phones): IP phones, PBX servers, and conference phones (Grandstream, Yealink, Cisco).
+- [Commercial Audio & PA Systems](https://avlive.com.pk/category/commercial-audio): Digital signal processors (DSPs), line array speakers, and auditorium sound engineering.
+
+## Regional Branch Offices & Contact
+- **Lahore Head Office**: Johar Town Block N / Main Gulberg III, Lahore, Punjab. Tel: +92-321-425-6263 / +92-42-35789012
+- **Karachi Regional Office**: Sharah-e-Faisal, PECHS Block 6, Karachi, Sindh.
+- **Islamabad Office**: Blue Area, Jinnah Avenue, Islamabad.
+- **Official Website**: https://avlive.com.pk

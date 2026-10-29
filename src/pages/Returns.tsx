@@ -7,7 +7,11 @@ import { SEO } from '../components/SEO';
 export function Returns() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="Returns" />
+      <SEO 
+        title="Return & Refund Policy | AV Live Communications" 
+        description="Transparent 30-day return policy and standard manufacturer warranty procedures on enterprise AV hardware and video conferencing equipment."
+        url="https://avlive.com.pk/returns"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

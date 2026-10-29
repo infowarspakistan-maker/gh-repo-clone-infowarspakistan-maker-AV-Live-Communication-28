@@ -68,7 +68,10 @@ export function Category() {
     <div className="bg-[#F8F9FA] min-h-screen pb-16 text-[#1A2B4C]">
       <SEO 
         title={`${currentCategory.name} | Professional AV Categories | AV Live`}
-        description={`Explore our selection of ${currentCategory.name}. High-quality hardware and professional deployments in Pakistan.`}
+        description={currentCategory.description || `Explore our selection of ${currentCategory.name}. High-quality commercial hardware and professional enterprise deployments in Pakistan.`}
+        image={currentCategory.imageUrl}
+        imageAlt={`${currentCategory.name} - Enterprise AV Solutions in Pakistan`}
+        url={`https://avlive.com.pk/category/${currentCategory.slug || currentCategory.id}`}
       />
       {/* Category Hero */}
       <div className="bg-white border-b border-gray-100 py-16 relative overflow-hidden">

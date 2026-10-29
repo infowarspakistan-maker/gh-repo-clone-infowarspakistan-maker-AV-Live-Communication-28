@@ -6,7 +6,11 @@ import { SEO } from '../components/SEO';
 export function Reseller() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="Reseller" />
+      <SEO 
+        title="Authorized Reseller & Channel Partner Program | AV Live Pakistan" 
+        description="Join Pakistan's leading AV distribution network. Tier-1 margins, dedicated technical training, partner deal registration, and authorized brand access."
+        url="https://avlive.com.pk/reseller"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

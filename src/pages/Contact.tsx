@@ -52,8 +52,11 @@ export function Contact() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
       <SEO 
-        title="Contact AV Live Communications | Expert AV Support Lahore"
-        description="Get in touch with our certified AV engineers. Offices in Lahore and Karachi. Expert support for IP phones, video conferencing, and AV integration."
+        title="Contact AV Live Communications | Expert AV Support Lahore & Karachi"
+        description="Get in touch with certified AV engineers. Corporate offices in Lahore, Karachi, and Islamabad. Inquire about equipment procurement, AMC contracts, or on-site acoustic demos."
+        url="https://avlive.com.pk/contact"
+        image="https://images.unsplash.com/photo-1423666639041-f56000c27a9a?auto=format&fit=crop&q=80&w=1200"
+        imageAlt="Contact AV Live Communications Pakistan"
         schema={{
           "@context": "https://schema.org",
           "@type": "ContactPage",

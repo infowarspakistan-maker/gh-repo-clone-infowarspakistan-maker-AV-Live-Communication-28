@@ -7,7 +7,13 @@ import { SEO } from '../components/SEO';
 export function BuyersGuides() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="Buyers Guides" />
+      <SEO 
+        title="Enterprise AV & Video Conferencing Buyers Guides | AV Live Pakistan"
+        description="Comprehensive procurement guides for choosing the best boardroom video bars, IP-PBX phone systems, acoustic ceiling mics, and interactive flat panels in Pakistan."
+        url="https://avlive.com.pk/buyers-guides"
+        image="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=1200"
+        imageAlt="AV Live Enterprise Equipment Buyers Guides"
+      />
       {/* Hero Section */}
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

@@ -5,7 +5,11 @@ import { SEO } from '../components/SEO';
 export function TermsOfService() {
   return (
     <div className="flex-1 w-full bg-[#f8f9fa] pb-16">
-      <SEO title="Terms Of Service" />
+      <SEO 
+        title="Terms of Service & Commercial Conditions | AV Live Pakistan" 
+        description="Review the terms and conditions for hardware procurement, licensing, enterprise service agreements, and technical maintenance."
+        url="https://avlive.com.pk/terms-of-service"
+      />
       <div className="bg-[#1A2B4C] text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-black mb-4">Terms of Service</h1>

@@ -11,8 +11,11 @@ export function Services() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen py-12 text-[#1A2B4C]">
       <SEO 
-        title="Event Management & AV Rental Services | AV Live Pakistan"
-        description="Book professional AV teams for corporate summits, hybrid events, or e-Sports tournaments. SMD screens, PA systems, and multi-camera live streaming."
+        title="Event Management & Commercial AV Rental Services | AV Live Pakistan"
+        description="Book certified AV engineers for corporate summits, hybrid meetings, and esports tournaments. SMD screens, high-fidelity sound, and broadcast cameras."
+        url="https://avlive.com.pk/services"
+        image="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=1200"
+        imageAlt="AV Live Event Management and Pro AV Services"
       />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: 'Services' }]} />

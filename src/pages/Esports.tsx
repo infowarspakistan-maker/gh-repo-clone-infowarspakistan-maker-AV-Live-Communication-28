@@ -10,7 +10,13 @@ export function Esports() {
   const [modalTitle, setModalTitle] = useState('Consult with our AV Expert');
   return (
     <div className="bg-[#1A2B4C] min-h-screen text-white">
-      <SEO title="Esports" />
+      <SEO 
+        title="Esports Tournament AV Production & Streaming Infrastructure | AV Live Pakistan" 
+        description="High refresh rate SMD screens, low-latency broadcast cameras, player comms networks, and live event production for esports arenas."
+        url="https://avlive.com.pk/esports"
+        image="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1920&q=80"
+        imageAlt="AV Live Esports Tournament Production Pakistan"
+      />
       <div className="relative h-[400px] overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 z-0">
           <img loading="lazy" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1920&q=80" alt="e-Sports Arena" className="w-full h-full object-cover opacity-20" />

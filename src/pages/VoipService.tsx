@@ -6,7 +6,11 @@ import { SEO } from '../components/SEO';
 export function VoipService() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="Voip Service" />
+      <SEO 
+        title="Enterprise VoIP & SIP Trunking Solutions | AV Live Pakistan" 
+        description="Reliable business VoIP phone lines, SIP trunking, cloud PBX integration, and international calling minutes configured for Pakistani enterprises."
+        url="https://avlive.com.pk/voip-service"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

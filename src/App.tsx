@@ -12,7 +12,7 @@ const Solutions = React.lazy(() => import('./pages/Solutions').then(m => ({ defa
 const Services = React.lazy(() => import('./pages/Services').then(m => ({ default: m.Services })));
 const Esports = React.lazy(() => import('./pages/Esports').then(m => ({ default: m.Esports })));
 const RoomDesigner = React.lazy(() => import('./pages/RoomDesigner').then(m => ({ default: m.RoomDesigner })));
-const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout').then(m => ({ default: m.AdminLayout })));
+const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout').then(m => ({ default: m.AdminLayout || m.default })));
 const Overview = React.lazy(() => import('./pages/admin/Overview').then(m => ({ default: m.Overview })));
 const HomepageEditor = React.lazy(() => import('./pages/admin/HomepageEditor').then(m => ({ default: m.HomepageEditor })));
 const AboutEditor = React.lazy(() => import('./pages/admin/AboutEditor').then(m => ({ default: m.AboutEditor })));
@@ -58,7 +58,10 @@ const Reseller = React.lazy(() => import('./pages/Reseller').then(m => ({ defaul
 const VoipService = React.lazy(() => import('./pages/VoipService').then(m => ({ default: m.VoipService })));
 const AdminLogin = React.lazy(() => import('./pages/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
 const Unauthorized = React.lazy(() => import('./pages/admin/Unauthorized').then(m => ({ default: m.Unauthorized })));
+const KeywordLandingPage = React.lazy(() => import('./pages/KeywordLandingPage').then(m => ({ default: m.KeywordLandingPage })));
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SettingsProvider } from './contexts/SettingsContext';
+import { CartProvider, useCart } from './contexts/CartContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Footer } from './components/Footer';
 import { CookieConsent } from './components/CookieConsent';
@@ -95,7 +98,7 @@ function Navbar() {
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [cartCount, setCartCount] = useState(getCartCount());
+  const { itemCount } = useCart();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
@@ -127,8 +130,6 @@ function Navbar() {
   };
 
   useEffect(() => {
-    const handleUpdate = () => setCartCount(getCartCount());
-    window.addEventListener('cart-updated', handleUpdate);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
     };
@@ -161,7 +162,6 @@ function Navbar() {
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('cart-updated', handleUpdate);
       unsubProducts();
       unsubCategories();
       document.removeEventListener('mousedown', handleClickOutside);
@@ -492,10 +492,10 @@ function Navbar() {
           </div>
 
           <div className="flex items-center shrink-0">
-            <Link to="/cart" aria-label={`Shopping cart, containing ${cartCount} items`} className="relative p-2 text-[#1A2B4C] hover:text-[#00B4D8] transition-colors group">
+            <Link to="/cart" aria-label={`Shopping cart, containing ${itemCount} items`} className="relative p-2 text-[#1A2B4C] hover:text-[#00B4D8] transition-colors group">
               <ShoppingCart size={24} className="group-hover:scale-110 transition-transform" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#F26522] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">{cartCount}</span>
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#F26522] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">{itemCount}</span>
               )}
             </Link>
           </div>
@@ -782,8 +782,8 @@ function Navbar() {
           <Link to="/cart" onClick={() => setIsOpen(false)} className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-[#00B4D8] transition-colors relative">
             <div className="relative">
               <ShoppingCart size={22} />
-              {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center z-10">{cartCount}</span>
+              {itemCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center z-10">{itemCount}</span>
               )}
             </div>
             <span className="text-[9px] font-black uppercase tracking-widest mt-1">Cart</span>
@@ -813,9 +813,11 @@ import { ScrollToTop } from "./components/ScrollToTop";
 export default function App() {
 
   return (
-    <AuthProvider>
-      <ScrollToTop />
-      <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-[#1A2B4C] font-sans selection:bg-[#00B4D8] selection:text-white">
+    <SettingsProvider>
+      <CartProvider>
+        <AuthProvider>
+          <ScrollToTop />
+          <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-[#1A2B4C] font-sans selection:bg-[#00B4D8] selection:text-white">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[110] bg-[#00B4D8] text-white px-4 py-2 rounded-full font-bold shadow-lg transition-all">
           Skip to main content
         </a>
@@ -840,6 +842,17 @@ export default function App() {
             <Route path="/services/:serviceSlug" element={<ServiceDetail />} />
             <Route path="/events-services" element={<Services />} />
             <Route path="/event-quote" element={<EventQuote />} />
+
+            {/* High-Intent SEO Commercial Keyword Routes */}
+            <Route path="/3d-hologram" element={<KeywordLandingPage />} />
+            <Route path="/projection-mapping" element={<KeywordLandingPage />} />
+            <Route path="/lahore" element={<KeywordLandingPage />} />
+            <Route path="/karachi" element={<KeywordLandingPage />} />
+            <Route path="/islamabad" element={<KeywordLandingPage />} />
+            <Route path="/video-conferencing" element={<KeywordLandingPage />} />
+            <Route path="/conference-room-solutions" element={<KeywordLandingPage />} />
+            <Route path="/zoom-rooms" element={<KeywordLandingPage />} />
+            <Route path="/microsoft-teams-rooms" element={<KeywordLandingPage />} />
 
             <Route path="/esports" element={<Esports />} />
             <Route path="/room-designer" element={<RoomDesigner />} />
@@ -901,6 +914,10 @@ export default function App() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+
+          {/* Fallback keyword landing page for unhandled top-level dynamic SEO slugs */}
+          <Route path="/:keywordSlug" element={<KeywordLandingPage />} />
+
         </Routes>
       </React.Suspense>
       </main>
@@ -909,6 +926,8 @@ export default function App() {
       <BackToTop />
       <CookieConsent />
       </div>
-    </AuthProvider>
+        </AuthProvider>
+      </CartProvider>
+    </SettingsProvider>
   );
 }

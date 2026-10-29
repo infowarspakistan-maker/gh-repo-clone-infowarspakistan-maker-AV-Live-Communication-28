@@ -101,9 +101,12 @@ export function ServiceDetail() {
   return (
     <div className="flex-1 w-full bg-[#f8f9fa] pb-16 overflow-hidden">
       <SEO 
-        title={`${service.title} | AV Live Communications`}
-        description={service.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Learn about ${service.title} services provided by AV Live.`}
+        title={`${service.title} | AV Live Communications Pakistan`}
+        description={service.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Professional ${service.title} enterprise deployment and support by AV Live Communications.`}
         image={service.imageUrl || 'https://avlive.com.pk/og-image.jpg'}
+        imageAlt={`${service.title} - AV Live Communications`}
+        url={`https://avlive.com.pk/services/${service.slug || service.id}`}
+        type="article"
         schema={serviceSchema}
       />
       {/* Hero Section */}

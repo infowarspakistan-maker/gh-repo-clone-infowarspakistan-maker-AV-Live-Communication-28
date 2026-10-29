@@ -6,7 +6,11 @@ import { SEO } from '../components/SEO';
 export function Promotions() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="Promotions" />
+      <SEO 
+        title="Promotions & Limited-Time Deals on AV Hardware | AV Live Pakistan" 
+        description="Exclusive corporate discounts, bundle packages, and seasonal promotional pricing on video conferencing systems and IP phones."
+        url="https://avlive.com.pk/promotions"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

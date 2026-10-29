@@ -103,13 +103,17 @@ export function Blog() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
       <SEO 
-        title="AV Live Blog | Latest Trends in Video Conferencing & VoIP"
-        description="Insights, Trends & Expert Advice. Stay updated with the latest in video conferencing, IP phones, AV integration, and event technology."
+        title="AV Live Insights & Tech Blog | Video Conferencing & VoIP Trends"
+        description="Expert insights, architectural guides, and industry trends on corporate video conferencing, IP telephony, Microsoft Teams Rooms, and smart boardroom automation in Pakistan."
+        url="https://avlive.com.pk/blog"
+        type="website"
+        image="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1200"
+        imageAlt="AV Live Communications - Tech Blog and Pro AV Guides"
         schema={{
           "@context": "https://schema.org",
           "@type": "Blog",
           "name": "AV Live Blog",
-          "description": "Insights, Trends & Expert Advice.",
+          "description": "Insights, Trends & Expert Advice on AV Solutions.",
           "publisher": {
             "@id": "https://avlive.com.pk/#organization"
           }

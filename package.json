@@ -27,6 +27,7 @@
     "firebase": "^12.16.0",
     "firebase-admin": "^14.1.0",
     "jspdf": "^4.2.1",
+    "jszip": "^3.10.2",
     "lucide-react": "^0.546.0",
     "motion": "^12.42.2",
     "papaparse": "^5.5.4",

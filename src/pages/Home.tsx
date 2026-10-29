@@ -137,25 +137,47 @@ export function Home() {
   return (
     <div className="flex-1 w-full bg-[#f8f9fa]">
       <SEO 
-        title={settings?.siteName ? `${settings.siteName} | Pro AV & IP Phone Solutions Pakistan` : "AV Live Communications | Pro AV & IP Phone Solutions Pakistan"}
-        description={settings?.tagline || "Pakistan's leading provider of professional AV solutions, IP phones, and video conferencing. Authorized partners for Poly, Cisco, and Grandstream."}
+        title="Event Management Company Pakistan | Video Conferencing in Pakistan | 3D Hologram & Projection Mapping | AV Live"
+        description="Pakistan's premier event management company & video conferencing provider. 3D hologram, projection mapping, conference room AV for Zoom & MS Teams. Lahore, Karachi, Islamabad."
+        keywords="Event management company Pakistan, Video conferencing in Pakistan, 3D hologram events Pakistan, Projection mapping Pakistan, Conference room AV setup, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, Event production company Lahore, Corporate event management Karachi, Event equipment rental Islamabad, AV Live"
+        url="https://avlive.com.pk"
+        image={settings?.ogImage || "https://avlive.com.pk/og-image.jpg"}
+        imageAlt="AV Live - Event Management Company & Video Conferencing Pakistan"
         schema={{
           "@context": "https://schema.org",
           "@graph": [
             {
-              "@type": "Organization",
+              "@type": ["Organization", "Corporation"],
               "@id": "https://avlive.com.pk/#organization",
               "name": settings?.siteName || "AV Live Communications",
+              "legalName": "AV Live Communications (Pvt) Ltd",
               "url": "https://avlive.com.pk",
               "logo": "https://avlive.com.pk/logo.png",
-              "description": settings?.tagline || "Pakistan's leading provider of professional AV solutions, IP phones, and video conferencing.",
-              "contactPoint": {
-                "@type": "ContactPoint",
-                "telephone": contact?.phone || settings?.phone || "+92-321-425-6263",
-                "contactType": "customer service",
-                "areaServed": "PK",
-                "availableLanguage": ["English", "Urdu"]
-              }
+              "description": settings?.tagline || "Pakistan's premier enterprise audio-visual solutions, corporate boardroom integration, and IP telephony hardware supplier.",
+              "areaServed": [
+                { "@type": "Country", "name": "Pakistan" },
+                { "@type": "City", "name": "Lahore" },
+                { "@type": "City", "name": "Karachi" },
+                { "@type": "City", "name": "Islamabad" }
+              ],
+              "knowsAbout": [
+                "Audio Visual Integration",
+                "Video Conferencing Equipment",
+                "Cisco TelePresence",
+                "Polycom RealPresence",
+                "Yealink MeetingBar",
+                "Logitech Room Solutions",
+                "IP PBX & VoIP Telephony"
+              ],
+              "contactPoint": [
+                {
+                  "@type": "ContactPoint",
+                  "telephone": contact?.phone || settings?.phone || "+92-321-425-6263",
+                  "contactType": "sales & customer support",
+                  "areaServed": "PK",
+                  "availableLanguage": ["English", "Urdu"]
+                }
+              ]
             },
             {
               "@type": "WebSite",
@@ -174,10 +196,14 @@ export function Home() {
             },
             {
               "@type": "LocalBusiness",
-              "@id": "https://avlive.com.pk/#localbusiness",
-              "name": settings?.siteName || "AV Live Communications",
+              "@id": "https://avlive.com.pk/#lahore-hq",
+              "parentOrganization": { "@id": "https://avlive.com.pk/#organization" },
+              "name": `${settings?.siteName || "AV Live Communications"} - Lahore Head Office`,
               "image": "https://avlive.com.pk/logo.png",
-              "telephone": contact?.phone || settings?.phone || "0321 425 6263",
+              "telephone": contact?.phone || settings?.phone || "+92-321-425-6263",
+              "priceRange": "PKR 50,000 - 50,000,000",
+              "currenciesAccepted": "PKR",
+              "paymentAccepted": "Bank Transfer, Pay Order, Corporate Cheque, Credit Card",
               "url": "https://avlive.com.pk",
               "address": {
                 "@type": "PostalAddress",
@@ -185,6 +211,11 @@ export function Home() {
                 "addressLocality": "Lahore",
                 "addressRegion": "Punjab",
                 "addressCountry": "PK"
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 31.4584,
+                "longitude": 74.2657
               },
               "openingHoursSpecification": [
                 {
@@ -198,6 +229,68 @@ export function Home() {
                   "dayOfWeek": ["Saturday"],
                   "opens": "10:00",
                   "closes": "16:00"
+                }
+              ]
+            },
+            {
+              "@type": "LocalBusiness",
+              "@id": "https://avlive.com.pk/#karachi-branch",
+              "parentOrganization": { "@id": "https://avlive.com.pk/#organization" },
+              "name": `${settings?.siteName || "AV Live Communications"} - Karachi Regional Office`,
+              "telephone": "+92-21-35890123",
+              "priceRange": "PKR 50,000 - 50,000,000",
+              "currenciesAccepted": "PKR",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Sharah-e-Faisal, PECHS Block 6",
+                "addressLocality": "Karachi",
+                "addressRegion": "Sindh",
+                "addressCountry": "PK"
+              }
+            },
+            {
+              "@type": "LocalBusiness",
+              "@id": "https://avlive.com.pk/#islamabad-branch",
+              "parentOrganization": { "@id": "https://avlive.com.pk/#organization" },
+              "name": `${settings?.siteName || "AV Live Communications"} - Islamabad & Rawalpindi Office`,
+              "telephone": "+92-51-2890124",
+              "priceRange": "PKR 50,000 - 50,000,000",
+              "currenciesAccepted": "PKR",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Blue Area, Jinnah Avenue",
+                "addressLocality": "Islamabad",
+                "addressRegion": "ICT",
+                "addressCountry": "PK"
+              }
+            },
+            {
+              "@type": "FAQPage",
+              "@id": "https://avlive.com.pk/#faq",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "How much does a corporate video conferencing setup cost in Pakistan?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A standard huddle room video conferencing setup in Pakistan starts from PKR 250,000 to PKR 450,000. Enterprise-grade corporate boardrooms with automated PTZ tracking cameras, ceiling microphone arrays, and interactive displays range from PKR 850,000 to PKR 3,500,000."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Does AV Live provide onsite installation and warranty support across Pakistan?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. AV Live Communications provides certified engineering teams for onsite structural installation, audio calibration, and AMC nationwide across Lahore, Karachi, Islamabad, Rawalpindi, Faisalabad, and Multan."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Which video conferencing brands are officially available through AV Live in Pakistan?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "AV Live supplies official, PTA-compliant solutions from global tier-1 manufacturers including Poly (Polycom), Cisco Webex, Logitech For Business, Yealink, Neat, Crestron, Shure, and Grandstream."
+                  }
                 }
               ]
             }

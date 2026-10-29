@@ -50,6 +50,9 @@ export function About() {
       <SEO 
         title="About AV Live Communications | Pakistan's AV Integration Leaders"
         description="Learn about our 15-year journey of unifying people and ideas. AV Live is Pakistan's premier systems integrator for professional communication technology."
+        url="https://avlive.com.pk/about"
+        image="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
+        imageAlt="About AV Live Communications Pakistan"
         schema={{
           "@context": "https://schema.org",
           "@type": "AboutPage",

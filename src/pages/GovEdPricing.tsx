@@ -6,7 +6,11 @@ import { SEO } from '../components/SEO';
 export function GovEdPricing() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="Gov Ed Pricing" />
+      <SEO 
+        title="Government & Education Institutional AV Pricing | AV Live Pakistan" 
+        description="Special institutional discounting, tender compliance, and subsidized pricing on professional AV and video conferencing for universities, schools, and government departments."
+        url="https://avlive.com.pk/gov-ed-pricing"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

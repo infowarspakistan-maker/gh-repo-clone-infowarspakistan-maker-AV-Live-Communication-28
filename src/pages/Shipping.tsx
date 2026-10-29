@@ -6,7 +6,11 @@ import { SEO } from '../components/SEO';
 export function Shipping() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="Shipping" />
+      <SEO 
+        title="Nationwide Shipping & Delivery Policy | AV Live Pakistan" 
+        description="Fast, insured nationwide shipping across Karachi, Lahore, Islamabad, Faisalabad, Peshawar, and Quetta for fragile commercial AV equipment."
+        url="https://avlive.com.pk/shipping"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

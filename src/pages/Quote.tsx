@@ -56,7 +56,11 @@ export function Quote() {
   if (success) {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center p-4">
-      <SEO title="Quote" />
+        <SEO 
+          title="Quote Request Transmitted | AV Live Communications" 
+          description="Your quote request has been received. Our AV solution architects will contact you within 24 hours."
+          url="https://avlive.com.pk/quote"
+        />
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -80,6 +84,11 @@ export function Quote() {
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
+      <SEO 
+        title="Request a Custom Enterprise AV Quote | AV Live Pakistan" 
+        description="Request official pricing and architecture designs for corporate video conferencing, boardroom automation, IP-PBX systems, and LED display installations."
+        url="https://avlive.com.pk/quote"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

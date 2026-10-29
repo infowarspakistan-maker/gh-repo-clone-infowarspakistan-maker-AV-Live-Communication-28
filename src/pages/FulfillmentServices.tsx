@@ -6,7 +6,11 @@ import { SEO } from '../components/SEO';
 export function FulfillmentServices() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="Fulfillment Services" />
+      <SEO 
+        title="AV Hardware Warehousing & Fulfillment Services | AV Live Pakistan" 
+        description="Enterprise warehousing, inventory stocking, serialized tracking, and nationwide logistics fulfillment for enterprise AV technology distributors."
+        url="https://avlive.com.pk/fulfillment-services"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

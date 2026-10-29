@@ -3,7 +3,27 @@ Allow: /
 Disallow: /admin/
 Disallow: /cart
 Disallow: /checkout
+Disallow: /api/
 Disallow: /*?*sort=
 Disallow: /*?*filter=
+
+# Explicit Authorizations for AI Search & Overviews
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
 
 Sitemap: https://avlive.com.pk/sitemap.xml

@@ -15,12 +15,13 @@ import {
   Eye, ArrowRight, Star, Heart,
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { addToCart } from '../lib/cart';
+import { useCart } from '../contexts/CartContext';
 import { subscribeToProducts, subscribeToCategories, Product, Category } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export function Shop() {
+  const { addToCart } = useCart();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -306,8 +307,11 @@ export function Shop() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen py-12 text-[#1A2B4C]">
       <SEO 
-        title="Shop Professional AV Hardware & IP Phones | AV Live"
-        description="Browse our extensive collection of IP phones, video conferencing systems, and professional audio visual hardware. Competitive pricing and nationwide delivery."
+        title="Shop Professional AV Hardware, Video Conferencing & IP Phones | AV Live Pakistan"
+        description="Browse Pakistan's largest inventory of professional AV hardware, Microsoft Teams & Zoom Rooms video bars, Cisco & Yealink IP telephony, and commercial audio systems with nationwide delivery."
+        url="https://avlive.com.pk/shop"
+        image="https://avlive.com.pk/og-image.jpg"
+        imageAlt="AV Live Communications - Professional AV Equipment Catalog"
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: 'Shop' }]} />

@@ -25,7 +25,11 @@ export function Compare() {
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="Compare" />
+      <SEO 
+        title="Side-by-Side Equipment Comparison Matrix | AV Live Pakistan" 
+        description="Compare specifications, features, audio pickup range, and pricing across leading video conferencing bars, IP phones, and enterprise hardware."
+        url="https://avlive.com.pk/compare"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

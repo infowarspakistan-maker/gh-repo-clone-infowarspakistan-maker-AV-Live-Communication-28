@@ -40,7 +40,11 @@ const FAQS = [
 export function FAQs() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
-      <SEO title="F A Qs" />
+      <SEO 
+        title="Frequently Asked Questions (FAQs) | AV Live Communications" 
+        description="Find answers to common questions about AV hardware procurement, boardroom video conferencing setup, PTA compliance, warranty, and nationwide shipping across Pakistan."
+        url="https://avlive.com.pk/faqs"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

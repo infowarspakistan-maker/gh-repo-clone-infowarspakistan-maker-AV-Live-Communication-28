@@ -39,7 +39,11 @@ export function RMA() {
   if (success) {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center p-4">
-      <SEO title="R M A" />
+        <SEO 
+          title="RMA Submitted | Hardware Return & Warranty Support" 
+          description="Your RMA request has been submitted. AV Live Communications hardware warranty and repair support."
+          url="https://avlive.com.pk/rma"
+        />
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -63,6 +67,11 @@ export function RMA() {
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
+      <SEO 
+        title="RMA & Warranty Return Request | AV Live Communications" 
+        description="Submit Return Merchandise Authorization (RMA) requests for warranty claims, technical inspections, or hardware replacement on enterprise AV systems."
+        url="https://avlive.com.pk/rma"
+      />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">

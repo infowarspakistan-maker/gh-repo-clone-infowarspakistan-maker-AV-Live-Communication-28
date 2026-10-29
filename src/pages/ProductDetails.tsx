@@ -214,9 +214,17 @@ export function ProductDetails() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen text-[#1A2B4C]">
       <SEO 
-        title={`${product.productName} | ${product.brand} | AV Live`}
-        description={product.seoMetaDescription || product.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Buy ${product.productName} by ${product.brand}. Expert AV hardware and collaboration tools.`}
+        title={`${product.productName} | ${product.brand || 'Enterprise Gear'} | AV Live`}
+        description={product.seoMetaDescription || product.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Buy ${product.productName} by ${product.brand}. Official warranty, nationwide delivery in Pakistan, and enterprise support.`}
         image={productImages[0] || product.image}
+        imageAlt={`${product.productName} by ${product.brand || 'AV Live'} - Enterprise AV Equipment`}
+        url={`https://avlive.com.pk/product/${product.id}`}
+        type="product"
+        price={getSelectedPrice() || product.salePrice || product.regularPrice}
+        currency="PKR"
+        brand={product.brand}
+        sku={product.sku}
+        availability={(product.stockQuantity ?? 0) > 0 ? 'in stock' : 'preorder'}
         schema={productSchema}
       />
       

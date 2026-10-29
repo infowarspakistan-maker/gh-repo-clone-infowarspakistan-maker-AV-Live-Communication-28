@@ -77,7 +77,13 @@ export function RoomDesigner() {
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen py-12 text-[#1A2B4C]">
-      <SEO title="Room Designer" />
+      <SEO 
+        title="Interactive SMD Screen & LED Video Wall Calculator | AV Live Pakistan" 
+        description="Design and calculate custom LED SMD video wall dimensions, pixel pitch resolution, power draw, and price estimations with instant PDF export."
+        url="https://avlive.com.pk/room-designer"
+        image="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1200"
+        imageAlt="Interactive SMD Video Wall Room Designer"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-12">

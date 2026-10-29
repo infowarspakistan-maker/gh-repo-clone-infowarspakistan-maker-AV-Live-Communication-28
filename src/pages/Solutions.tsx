@@ -27,7 +27,11 @@ export function Solutions() {
 
   return (
     <div className="py-16 bg-[#F8F9FA] min-h-screen text-[#1A2B4C]">
-      <SEO title="Solutions" />
+      <SEO 
+        title="Enterprise AV Architectures & Turnkey Solutions | AV Live Pakistan" 
+        description="Explore turnkey solutions for smart boardrooms, auditoriums, town halls, executive briefing centers, and hybrid meeting spaces across Pakistan."
+        url="https://avlive.com.pk/solutions"
+      />
       <motion.div 
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         initial="hidden"
