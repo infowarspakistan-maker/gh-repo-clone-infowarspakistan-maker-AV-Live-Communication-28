@@ -17,6 +17,7 @@ import {
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { subscribeToProducts, subscribeToCategories, Product, Category } from '../lib/firebase/firestore-helpers';
+import { getCanonicalProductSlug, resolveProductPricing } from '../lib/gmc-feed';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 
@@ -292,26 +293,77 @@ export function Shop() {
   };
 
   const isAnyFilterActive = searchQuery || selectedCategory || selectedBrands.length > 0 || minPrice || maxPrice;
+  const shouldNoIndexFaceted = Boolean(
+    searchQuery || minPrice || maxPrice || (sortOption && sortOption !== 'featured') || selectedBrands.length > 1
+  );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
-        <div className="text-center">
-          <Loader2 className="animate-spin text-[#00B4D8] mx-auto mb-4" size={40} />
-          <p className="text-gray-400 font-black uppercase tracking-widest text-[10px]">Syncing Gear Catalog...</p>
-        </div>
-      </div>
-    );
-  }
+  const activeSingleBrandName =
+    selectedBrands.length === 1
+      ? availableBrands.find((b) => b.normalized === selectedBrands[0])?.name ||
+        selectedBrands[0].toUpperCase()
+      : null;
+
+  const shopSeoTitle = activeSingleBrandName
+    ? `${activeSingleBrandName} Video Conferencing & AV Hardware in Pakistan | Official Dealer | AV Live`
+    : selectedCategoryName
+      ? `${selectedCategoryName} | Video Conference in Pakistan & Enterprise AV Shop | AV Live`
+      : 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live';
+
+  const shopSeoDescription = activeSingleBrandName
+    ? `Buy genuine ${activeSingleBrandName} video conferencing, IP phones, and professional AV hardware in Pakistan with official warranty and nationwide delivery.`
+    : "Browse Pakistan's largest inventory of Video Conference in Pakistan hardware, Polycom Group 500, Poly Studio X70, Cisco & Yealink IP telephony, and Corporate Event Management gear.";
+
+  const shopSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': 'https://avlive.com.pk/shop#collection',
+        name: shopSeoTitle,
+        description: shopSeoDescription,
+        url: 'https://avlive.com.pk/shop',
+        isPartOf: { '@id': 'https://avlive.com.pk/#website' },
+        mainEntity: {
+          '@type': 'ItemList',
+          numberOfItems: sortedAndFilteredProducts.length,
+          itemListElement: sortedAndFilteredProducts.slice(0, 24).map((prod, idx) => {
+            const slug = getCanonicalProductSlug(prod);
+            const { effectivePrice } = resolveProductPricing(prod);
+            return {
+              '@type': 'ListItem',
+              position: idx + 1,
+              url: `https://avlive.com.pk/product/${slug}`,
+              name: prod.productName,
+              item: {
+                '@type': 'Product',
+                name: prod.productName,
+                url: `https://avlive.com.pk/product/${slug}`,
+                brand: { '@type': 'Brand', name: prod.brand || 'AV Live' },
+                offers: {
+                  '@type': 'Offer',
+                  priceCurrency: 'PKR',
+                  price: effectivePrice.toFixed(2),
+                  availability: 'https://schema.org/InStock',
+                },
+              },
+            };
+          }),
+        },
+      },
+    ],
+  };
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen py-12 text-[#1A2B4C]">
       <SEO 
-        title="Shop Professional AV Hardware, Video Conferencing & IP Phones | AV Live Pakistan"
-        description="Browse Pakistan's largest inventory of professional AV hardware, Microsoft Teams & Zoom Rooms video bars, Cisco & Yealink IP telephony, and commercial audio systems with nationwide delivery."
+        title={shopSeoTitle}
+        description={shopSeoDescription}
+        keywords="Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, AV hardware shop Pakistan"
         url="https://avlive.com.pk/shop"
         image="https://avlive.com.pk/og-image.jpg"
         imageAlt="AV Live Communications - Professional AV Equipment Catalog"
+        noindex={shouldNoIndexFaceted}
+        schema={shopSchema}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: 'Shop' }]} />
@@ -319,8 +371,14 @@ export function Shop() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-8 border-b border-gray-200">
           <div>
-            <h1 className="text-4xl font-black tracking-tight">Professional Audio Visual Equipment & Hardware in Pakistan</h1>
-            <p className="text-gray-400 mt-2 font-black uppercase tracking-widest text-[10px]">Industrial Grade AV Solutions for Enterprise</p>
+            <h1 className="text-4xl font-black tracking-tight">
+              {activeSingleBrandName
+                ? `${activeSingleBrandName} Video Conferencing & AV Hardware in Pakistan`
+                : 'Professional Audio Visual & Video Conferencing Hardware in Pakistan'}
+            </h1>
+            <p className="text-gray-400 mt-2 font-black uppercase tracking-widest text-[10px]">
+              Official Polycom Group 500, Poly X70, Zoom Rooms & Corporate Event Equipment
+            </p>
           </div>
           
           <div className="flex flex-wrap items-center gap-4">
@@ -667,14 +725,25 @@ export function Shop() {
           <div className="flex-1">
             <div className="mb-6 flex justify-between items-center">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                Showing {sortedAndFilteredProducts.length} of {products.length} hardware modules
+                {loading
+                  ? 'Loading verified hardware inventory...'
+                  : `Showing ${sortedAndFilteredProducts.length} of ${products.length} hardware modules`}
               </p>
             </div>
 
-            {/* Products container */}
+            {loading ? (
+              <div className="py-24 flex items-center justify-center bg-white rounded-[2.5rem] border border-gray-100">
+                <div className="text-center">
+                  <Loader2 className="animate-spin text-[#00B4D8] mx-auto mb-4" size={40} />
+                  <p className="text-gray-400 font-black uppercase tracking-widest text-[10px]">Syncing Gear Catalog...</p>
+                </div>
+              </div>
+            ) : (
             <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" : "flex flex-col gap-6"}>
-              {sortedAndFilteredProducts.map((product, index) => (
-                viewMode === 'grid' ? (
+              {sortedAndFilteredProducts.map((product, index) => {
+                const productSlug = getCanonicalProductSlug(product);
+                const { regularPrice: cardRegularPrice, effectivePrice: cardEffectivePrice, hasSale: cardHasSale } = resolveProductPricing(product);
+                return viewMode === 'grid' ? (
                   // Grid View Card
                   <motion.div 
                     key={product.id}
@@ -684,7 +753,7 @@ export function Shop() {
                     className="bg-white group cursor-pointer rounded-3xl overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
                   >
                     <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
-                      <Link to={`/product/${product.id}`} className="absolute inset-0 z-0">
+                      <Link to={`/product/${productSlug}`} className="absolute inset-0 z-0">
                         {(() => {
                            const images = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
                            const firstImage = images[0] || 'https://placehold.co/600x600?text=No+Image';
@@ -710,14 +779,13 @@ export function Shop() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          /* Optionally add wishlish logic later */
                         }}
                         className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/40 backdrop-blur-sm flex items-center justify-center text-[#1A2B4C] hover:bg-[#1A2B4C] hover:text-white transition-colors z-10 shadow-sm"
                       >
                         <Heart size={14} />
                       </button>
 
-                      {product.salePrice < product.regularPrice && (
+                      {cardHasSale && (
                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#00B4D8] text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-sm z-10">
                           Special Offer
                         </div>
@@ -725,7 +793,7 @@ export function Shop() {
                     </div>
 
                     <div className="p-6 flex flex-col flex-grow bg-white z-10 relative">
-                      <Link to={`/product/${product.id}`} className="block">
+                      <Link to={`/product/${productSlug}`} className="block">
                         <h3 className="font-bold text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 line-clamp-1">
                           {product.productName}
                         </h3>
@@ -750,9 +818,9 @@ export function Shop() {
                         <div className="flex flex-col">
                           <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Price</span>
                           <div className="flex items-baseline gap-2">
-                            <span className="font-black text-xl text-[#1A2B4C]">Rs. {(product.salePrice ?? 0).toLocaleString()}</span>
-                            {product.salePrice < product.regularPrice && (
-                              <span className="text-[10px] text-gray-400 line-through font-bold">{(product.regularPrice ?? 0).toLocaleString()}</span>
+                            <span className="font-black text-xl text-[#1A2B4C]">Rs. {cardEffectivePrice.toLocaleString()}</span>
+                            {cardHasSale && (
+                              <span className="text-[10px] text-gray-400 line-through font-bold">{cardRegularPrice.toLocaleString()}</span>
                             )}
                           </div>
                         </div>
@@ -763,7 +831,7 @@ export function Shop() {
                             addToCart({
                               id: product.id!,
                               name: product.productName,
-                              price: product.salePrice,
+                              price: cardEffectivePrice,
                               image: (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || '',
                               brand: product.brand
                             } as any);
@@ -784,13 +852,13 @@ export function Shop() {
                     transition={{ delay: index * 0.03 }}
                     className="bg-white group rounded-[2rem] overflow-hidden flex flex-col sm:flex-row border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-xl p-6 gap-6"
                   >
-                    <Link to={`/product/${product.id}`} className="w-full sm:w-48 h-48 bg-gray-50 rounded-2xl overflow-hidden relative shrink-0 block">
+                    <Link to={`/product/${productSlug}`} className="w-full sm:w-48 h-48 bg-gray-50 rounded-2xl overflow-hidden relative shrink-0 block">
                       <img loading="lazy" 
                         src={(Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || 'https://placehold.co/600x600?text=No+Image'} 
                         alt={product.productName} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
-                      {product.salePrice < product.regularPrice && (
+                      {cardHasSale && (
                         <div className="absolute top-4 left-4 bg-[#00B4D8] text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-md">
                           Special Offer
                         </div>
@@ -838,7 +906,7 @@ export function Shop() {
                         <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">4.8 (80+ Reviews)</span>
                       </div>
                       
-                      <Link to={`/product/${product.id}`}>
+                      <Link to={`/product/${productSlug}`}>
                         <h3 className="font-black text-lg sm:text-xl text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 leading-tight">
                           {product.productName}
                         </h3>
@@ -848,9 +916,9 @@ export function Shop() {
                       
                       <div className="flex flex-wrap items-center justify-between pt-4 border-t border-gray-50 mt-auto gap-4">
                         <div className="flex items-baseline gap-2">
-                          <span className="font-black text-xl text-[#1A2B4C]">Rs. {(product.salePrice ?? 0).toLocaleString()}</span>
-                          {product.salePrice < product.regularPrice && (
-                            <span className="text-xs text-gray-400 line-through font-bold">Rs. {(product.regularPrice ?? 0).toLocaleString()}</span>
+                          <span className="font-black text-xl text-[#1A2B4C]">Rs. {cardEffectivePrice.toLocaleString()}</span>
+                          {cardHasSale && (
+                            <span className="text-xs text-gray-400 line-through font-bold">Rs. {cardRegularPrice.toLocaleString()}</span>
                           )}
                         </div>
                         <button 
@@ -859,7 +927,7 @@ export function Shop() {
                             addToCart({
                               id: product.id!,
                               name: product.productName,
-                              price: product.salePrice,
+                              price: cardEffectivePrice,
                               image: (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || '',
                               brand: product.brand
                             } as any);
@@ -871,8 +939,8 @@ export function Shop() {
                       </div>
                     </div>
                   </motion.div>
-                )
-              ))}
+                );
+              })}
               
               {sortedAndFilteredProducts.length === 0 && (
                 <div className="col-span-full py-16 text-center bg-white rounded-[2.5rem] border border-gray-100 shadow-sm px-6">
@@ -890,6 +958,7 @@ export function Shop() {
                 </div>
               )}
             </div>
+            )}
           </div>
         </div>
 

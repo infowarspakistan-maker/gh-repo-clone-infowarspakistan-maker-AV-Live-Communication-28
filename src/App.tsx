@@ -64,7 +64,18 @@ import { SettingsProvider } from './contexts/SettingsContext';
 import { CartProvider, useCart } from './contexts/CartContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Footer } from './components/Footer';
-import { CookieConsent } from './components/CookieConsent';
+
+const CookieConsent = React.lazy(() => import('./components/CookieConsent').then(m => ({ default: m.CookieConsent })));
+const AIAssist = React.lazy(() => import('./components/AIAssist').then(m => ({ default: m.AIAssist })));
+
+const DEFAULT_NAV_CATEGORIES = [
+  { id: 'cat-projectors', name: 'Projectors', slug: 'projectors', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-voip', name: 'VoIP Phone Systems', slug: 'voip-phone-systems', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-intercom', name: 'Intercom, Paging & Access', slug: 'intercom-paging-access', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-video', name: 'Video Conferencing', slug: 'video-conferencing', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-headsets', name: 'Headsets', slug: 'headsets', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-phones', name: 'IP Phones', slug: 'ip-phones', isActive: true, parentId: null, type: 'product' },
+];
 
 function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
@@ -107,11 +118,11 @@ function Navbar() {
   // Search and Suggestions State
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>(DEFAULT_NAV_CATEGORIES);
   const [searchSuggestions, setSearchSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [navCategories, setNavCategories] = useState<any[]>([]);
+  const [navCategories, setNavCategories] = useState<any[]>(DEFAULT_NAV_CATEGORIES);
   const [mobileExpandedCategory, setMobileExpandedCategory] = useState<string | null>(null);
 
   const getInitials = () => {
@@ -133,7 +144,7 @@ function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     // Fetch active products and parent categories
     const unsubProducts = subscribeToProducts((data) => {
@@ -142,8 +153,10 @@ function Navbar() {
 
     const unsubCategories = subscribeToCategories((cats) => {
       const productCats = cats.filter(c => c.isActive && ((c as any).type === 'product'));
-      setNavCategories(productCats);
-      setCategories(productCats.filter(c => !c.parentId));
+      if (productCats.length > 0) {
+        setNavCategories(productCats);
+        setCategories(productCats.filter(c => !c.parentId));
+      }
     });
 
     // Handle click outside suggestions and user menu
@@ -293,9 +306,9 @@ function Navbar() {
         </div>
       </div>
 
-      <div className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md transition-[box-shadow,border-color] duration-300 ${isScrolled ? 'shadow-md border-b border-gray-100' : 'border-b border-gray-200'}`}>
+      <div className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md transition-shadow duration-200 ${isScrolled ? 'shadow-md border-b border-gray-100' : 'border-b border-gray-200'}`}>
         
-        <div className={`max-w-[1400px] mx-auto px-4 md:px-8 flex items-center justify-between gap-4 md:gap-8 transition-[height] duration-300 ${isScrolled ? 'h-16' : 'h-24'}`}>
+        <div className={`max-w-[1400px] mx-auto px-4 md:px-8 flex items-center justify-between gap-4 md:gap-8 ${isScrolled ? 'h-16' : 'h-24'}`}>
           <div className="flex items-center gap-4 md:gap-8 flex-1">
             <Link to="/" className={`flex flex-col justify-center shrink-0 transition-transform origin-left duration-300 ${isScrolled ? 'scale-75 md:scale-90' : 'scale-100'}`}>
               <div className="flex items-stretch">
@@ -502,7 +515,7 @@ function Navbar() {
         </div>
 
         {/* Main Navigation Row - Only visible when not scrolled */}
-        <div className={`border-t border-gray-100 transition-[height,opacity] duration-300 hidden lg:block ${isScrolled ? 'h-0 opacity-0 overflow-hidden border-t-0' : 'h-14 opacity-100'}`}>
+        <div className={`border-t border-gray-100 transition-opacity duration-200 hidden lg:block ${isScrolled ? 'h-0 opacity-0 overflow-hidden border-t-0' : 'h-14 opacity-100'}`}>
           <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-full flex items-center gap-8 text-[12px] font-bold text-[#1A2B4C] uppercase tracking-wider">
             {/* HOME with Dropdown */}
             <div className="h-14 flex items-center group relative">
@@ -636,25 +649,25 @@ function Navbar() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full border border-gray-200 rounded-full py-2.5 pl-5 pr-10 text-sm focus:outline-none focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8]/10 bg-gray-50/50 text-[#1A2B4C] font-semibold" 
                   />
-                  <button type="submit" className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#00B4D8]">
+                  <button type="submit" aria-label="Submit search" className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#00B4D8]">
                     <Search size={16} />
                   </button>
                 </div>
              </form>
             
              {/* Nested Home & Corporate Info */}
-             <div className="px-2 font-black text-gray-400 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1">Home & Information</div>
+             <div className="px-2 font-black text-slate-600 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1">Home & Information</div>
              <div className="pl-3 space-y-2.5">
                <Link to="/" className="hover:text-[#00B4D8] block text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Home Page</Link>
                <div className="pl-4 space-y-2 border-l border-gray-200 ml-1">
-                 <Link to="/about" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-500" onClick={() => setIsOpen(false)}>About Us</Link>
-                 <Link to="/contact" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-500" onClick={() => setIsOpen(false)}>Contact Us</Link>
-                 <Link to="/blog" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-500" onClick={() => setIsOpen(false)}>Company Blog</Link>
-                 <Link to="/guides" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-500" onClick={() => setIsOpen(false)}>Buyer's Guides</Link>
+                 <Link to="/about" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-600" onClick={() => setIsOpen(false)}>About Us</Link>
+                 <Link to="/contact" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-600" onClick={() => setIsOpen(false)}>Contact Us</Link>
+                 <Link to="/blog" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-600" onClick={() => setIsOpen(false)}>Company Blog</Link>
+                 <Link to="/guides" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-600" onClick={() => setIsOpen(false)}>Buyer's Guides</Link>
                </div>
              </div>
             
-             <div className="px-2 font-black text-gray-400 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1 mt-6">Products</div>
+             <div className="px-2 font-black text-slate-600 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1 mt-6">Products</div>
             {categories.map(parent => {
               const subCats = navCategories.filter(c => c.parentId === parent.id);
               const isExpanded = mobileExpandedCategory === parent.id;
@@ -665,7 +678,8 @@ function Navbar() {
                     {subCats.length > 0 && (
                       <button 
                         onClick={() => setMobileExpandedCategory(isExpanded ? null : (parent.id || null))}
-                        className="p-2 text-gray-400 hover:text-[#00B4D8] transition-colors"
+                        aria-label={`Toggle ${parent.name} subcategories`}
+                        className="p-2 text-gray-500 hover:text-[#00B4D8] transition-colors"
                       >
                         <ChevronDown size={18} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                       </button>
@@ -807,7 +821,6 @@ const Cart = React.lazy(() => import('./pages/Cart').then(m => ({ default: m.Car
 const Checkout = React.lazy(() => import('./pages/Checkout').then(m => ({ default: m.Checkout })));
 const SetupWizard = React.lazy(() => import('./pages/SetupWizard').then(m => ({ default: m.SetupWizard })));
 
-import { AIAssist } from './components/AIAssist';
 import { ScrollToTop } from "./components/ScrollToTop";
 
 export default function App() {
@@ -922,9 +935,11 @@ export default function App() {
       </React.Suspense>
       </main>
       <Footer />
-      <AIAssist />
+      <React.Suspense fallback={null}>
+        <AIAssist />
+        <CookieConsent />
+      </React.Suspense>
       <BackToTop />
-      <CookieConsent />
       </div>
         </AuthProvider>
       </CartProvider>

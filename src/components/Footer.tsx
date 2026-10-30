@@ -3,12 +3,24 @@ import { MapPin, Phone, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { subscribeToCategories } from '../lib/firebase/firestore-helpers';
 
+const DEFAULT_FOOTER_CATEGORIES = [
+  { id: 'cat-projectors', name: 'Projectors', slug: 'projectors', isActive: true, type: 'product' },
+  { id: 'cat-voip', name: 'VoIP Phone Systems', slug: 'voip-phone-systems', isActive: true, type: 'product' },
+  { id: 'cat-intercom', name: 'Intercom, Paging & Access', slug: 'intercom-paging-access', isActive: true, type: 'product' },
+  { id: 'cat-video', name: 'Video Conferencing', slug: 'video-conferencing', isActive: true, type: 'product' },
+  { id: 'cat-headsets', name: 'Headsets', slug: 'headsets', isActive: true, type: 'product' },
+  { id: 'cat-phones', name: 'IP Phones', slug: 'ip-phones', isActive: true, type: 'product' },
+];
+
 export function Footer() {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>(DEFAULT_FOOTER_CATEGORIES);
 
   useEffect(() => {
     const unsub = subscribeToCategories((cats) => {
-      setCategories(cats.filter(c => c.isActive && ((c as any).type === 'product' || !(c as any).type || c.id.startsWith('parent-') || c.id.startsWith('child-'))));
+      const filtered = cats.filter(c => c.isActive && ((c as any).type === 'product' || !(c as any).type || c.id.startsWith('parent-') || c.id.startsWith('child-')));
+      if (filtered.length > 0) {
+        setCategories(filtered);
+      }
     });
     return () => unsub();
   }, []);
@@ -16,6 +28,7 @@ export function Footer() {
   return (
     <footer className="bg-[#1C4E70] text-white pt-12 pb-safe pb-24 lg:pb-8">
       <div className="max-w-[1400px] mx-auto px-4 md:px-8">
+        <h2 className="sr-only">Footer Navigation &amp; Contact Directory</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Shop */}
           <div>

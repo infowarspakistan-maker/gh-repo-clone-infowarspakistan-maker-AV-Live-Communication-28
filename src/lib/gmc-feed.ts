@@ -113,6 +113,17 @@ export const PRODUCT_GMC_METADATA: Record<
     defaultDescription:
       'Polycom RealPresence Group 500 HD Video Conferencing System (7200-64550-001) in Pakistan. Ideal for conference rooms and executive boardrooms with EagleEye IV PTZ camera, dual-monitor 1080p60 video collaboration, and nationwide installation by AV Live.',
   },
+  'polycom-realpresence-group-500-pakistan': {
+    gtin: '610807784364',
+    mpn: '7200-64550-001',
+    brand: 'Polycom',
+    color: 'Black',
+    highlight: 'Polycom RealPresence Group 500 1080p60 enterprise video conference system for boardrooms',
+    defaultSpecs:
+      'Video Resolution:1080p 60fps HD video and content sharing;Camera:Polycom EagleEye IV 12x optical zoom PTZ camera;Audio:Polycom NoiseBlock and Acoustic Fence technology;Interfaces:Dual HDMI output, HDMI/VGA input, Gigabit Ethernet;Warranty:1-Year Local Replacement & SLA Support in Pakistan',
+    defaultDescription:
+      'Polycom RealPresence Group 500 HD Video Conferencing System (7200-64550-001) in Pakistan. Ideal for conference rooms and executive boardrooms with EagleEye IV PTZ camera, dual-monitor 1080p60 video collaboration, and nationwide installation by AV Live.',
+  },
   'axis-a8105-e-door-station-pakistan': {
     gtin: computeUpc12('73310210871'),
     mpn: '0871-001',
@@ -603,13 +614,59 @@ export function formatGmcProductDetail(rawSpecs?: string | null, defaultSpecs?: 
   return formattedEntries.join(',');
 }
 
+export const PRODUCT_ID_TO_SEO_SLUG: Record<string, string> = {
+  T1XLMubVYmFzeIfC7V9B: 'polycom-realpresence-group-500-pakistan',
+  wMbGVClqbDS2LFrv5HyX: 'google-meet-hardware-license-pakistan',
+};
+
+export const SEO_SLUG_TO_PRODUCT_ID: Record<string, string> = {
+  'polycom-realpresence-group-500-pakistan': 'T1XLMubVYmFzeIfC7V9B',
+  'google-meet-hardware-license-pakistan': 'wMbGVClqbDS2LFrv5HyX',
+};
+
+/**
+ * Returns the canonical SEO-friendly slug for any product object or ID.
+ */
+export function getCanonicalProductSlug(product?: Record<string, any> | null, fallbackId?: string): string {
+  const rawSlug = sanitizeTsvText(product?.slug);
+  const rawId = sanitizeTsvText(product?.id || fallbackId);
+  if (rawId && PRODUCT_ID_TO_SEO_SLUG[rawId]) {
+    return PRODUCT_ID_TO_SEO_SLUG[rawId];
+  }
+  if (rawSlug && PRODUCT_ID_TO_SEO_SLUG[rawSlug]) {
+    return PRODUCT_ID_TO_SEO_SLUG[rawSlug];
+  }
+  return rawSlug || rawId || 'hardware';
+}
+
+/**
+ * Resolves consistent PKR pricing across UI, Product JSON-LD, OpenGraph, and Google Merchant Center feed
+ * so there is never a price mismatch warning in GMC.
+ */
+export function resolveProductPricing(product?: Record<string, any> | null): {
+  regularPrice: number;
+  salePrice: number;
+  effectivePrice: number;
+  hasSale: boolean;
+} {
+  const rawRegular = Number(product?.regularPrice ?? product?.price ?? 0);
+  const rawSale = Number(product?.salePrice ?? 0);
+  const regularPrice = rawRegular > 0 ? rawRegular : rawSale > 0 ? rawSale : 50000;
+  const salePrice = rawSale > 0 ? rawSale : regularPrice;
+  const effectivePrice = salePrice > 0 ? salePrice : regularPrice;
+  const hasSale = salePrice > 0 && salePrice < regularPrice;
+  return { regularPrice, salePrice, effectivePrice, hasSale };
+}
+
 /**
  * Converts a Firestore Product document into a 40-column Google Merchant Center row object
  * matching the exact template columns and rules.
  */
 export function formatProductToGmcRow(product: Record<string, any>): Record<string, string> {
   const id = sanitizeTsvText(product.id || product.slug || product.sku);
-  const meta: Partial<(typeof PRODUCT_GMC_METADATA)[string]> = PRODUCT_GMC_METADATA[id] || {};
+  const canonicalSlug = getCanonicalProductSlug(product, id);
+  const meta: Partial<(typeof PRODUCT_GMC_METADATA)[string]> =
+    PRODUCT_GMC_METADATA[id] || PRODUCT_GMC_METADATA[canonicalSlug] || {};
 
   // Parse images safely
   let images: string[] = [];
@@ -646,9 +703,7 @@ export function formatProductToGmcRow(product: Record<string, any>): Record<stri
   const stock = Number(product.stockQuantity ?? 10);
   const availability = stock > 0 || id === 'wMbGVClqbDS2LFrv5HyX' ? 'in_stock' : 'out_of_stock';
 
-  const regularPriceNum = Number(product.regularPrice || product.salePrice || 50000);
-  const salePriceNum = Number(product.salePrice || regularPriceNum);
-  const hasSale = salePriceNum > 0 && salePriceNum < regularPriceNum;
+  const { regularPrice: regularPriceNum, salePrice: salePriceNum, hasSale } = resolveProductPricing(product);
 
   const price = `${regularPriceNum.toFixed(2)} PKR`;
   const salePrice = hasSale ? `${salePriceNum.toFixed(2)} PKR` : '';
@@ -664,7 +719,7 @@ export function formatProductToGmcRow(product: Record<string, any>): Record<stri
   );
 
   const productDetail = formatGmcProductDetail(product.specifications, meta.defaultSpecs);
-  const link = `https://avlive.com.pk/product/${encodeURIComponent(id)}`;
+  const link = `https://avlive.com.pk/product/${encodeURIComponent(canonicalSlug)}`;
   const mainImage = images[0] || 'https://avlive.com.pk/og-image.jpg';
   const additionalImages = images.slice(1, 10).join(',');
 

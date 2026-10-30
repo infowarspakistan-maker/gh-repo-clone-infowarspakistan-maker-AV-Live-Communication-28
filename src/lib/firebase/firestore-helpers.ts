@@ -774,11 +774,37 @@ export interface StockHistoryEntry {
   createdAt?: Timestamp;
 }
 
-export async function getProduct(id: string): Promise<Product | null> {
-  const docSnap = await getDoc(doc(db, 'products', id));
+export async function getProduct(idOrSlug: string): Promise<Product | null> {
+  const mappedId =
+    idOrSlug === 'polycom-realpresence-group-500-pakistan'
+      ? 'T1XLMubVYmFzeIfC7V9B'
+      : idOrSlug;
+
+  const docSnap = await getDoc(doc(db, 'products', mappedId));
   if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() } as Product;
+    const data = docSnap.data() as Product;
+    return {
+      id: docSnap.id,
+      ...data,
+      slug:
+        docSnap.id === 'T1XLMubVYmFzeIfC7V9B'
+          ? 'polycom-realpresence-group-500-pakistan'
+          : data.slug || docSnap.id,
+    };
   }
+
+  // Fallback: query by slug field in Firestore
+  const slugQuery = query(
+    collection(db, 'products'),
+    where('slug', '==', idOrSlug),
+    firestoreLimit(1)
+  );
+  const slugSnap = await getDocs(slugQuery);
+  if (!slugSnap.empty) {
+    const firstDoc = slugSnap.docs[0];
+    return { id: firstDoc.id, ...(firstDoc.data() as Product) };
+  }
+
   return null;
 }
 

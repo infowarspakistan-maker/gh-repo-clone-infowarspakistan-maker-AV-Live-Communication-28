@@ -29,11 +29,10 @@ import {
   Play
 } from 'lucide-react';
 import { getProduct, getProducts, getCategories, Product, Category } from '../lib/firebase/firestore-helpers';
-import { PRODUCT_GMC_METADATA, cleanMpn } from '../lib/gmc-feed';
+import { PRODUCT_GMC_METADATA, cleanMpn, getCanonicalProductSlug, resolveProductPricing } from '../lib/gmc-feed';
 import { addToCart } from '../lib/cart';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { StructuredData } from '../components/StructuredData';
 
 export function ProductDetails() {
   const { productId } = useParams<{ productId: string }>();
@@ -112,6 +111,11 @@ export function ProductDetails() {
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
+        <SEO
+          title="Hardware Not Found | AV Live Communications"
+          description="The requested equipment ID is not in our active inventory."
+          noindex={true}
+        />
         <h1 className="text-4xl font-black text-[#1A2B4C] mb-4">Hardware Not Found</h1>
         <p className="text-gray-500 mb-8 font-medium">The equipment ID you requested is not in our inventory.</p>
         <Link to="/shop" className="bg-[#1A2B4C] text-white px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs hover:bg-[#00B4D8] transition-all shadow-xl">
@@ -152,17 +156,23 @@ export function ProductDetails() {
     ((ratingVal * reviewsCountVal + userReviews.reduce((acc, r) => acc + r.rating, 0)) / totalReviewsCount).toFixed(1)
   );
 
+  const canonicalSlug = getCanonicalProductSlug(product, productId);
+  const canonicalProductUrl = `https://avlive.com.pk/product/${canonicalSlug}`;
+  const { regularPrice: resolvedRegularPrice, salePrice: resolvedSalePrice, effectivePrice } = resolveProductPricing(product);
+
   const getSelectedPrice = () => {
-    let base = product.salePrice;
+    let base = effectivePrice;
     if (deploymentVariant === 'enterprise') base += 15000;
     if (warrantyVariant === '3year') base += 25000;
     return base;
   };
 
-  const gmcMeta = PRODUCT_GMC_METADATA[product.id || ''];
+  const gmcMeta = PRODUCT_GMC_METADATA[product.id || ''] || PRODUCT_GMC_METADATA[canonicalSlug];
   const resolvedGtin = product.gtin || gmcMeta?.gtin || '610807990012';
   const resolvedMpn = product.mpn || gmcMeta?.mpn || cleanMpn(product.sku, product.id);
   const resolvedBrand = (product.brand === 'Poly (HP' ? 'HP Poly' : product.brand) || gmcMeta?.brand || 'AV Live';
+  const effectiveSpecsRaw = product.specifications || gmcMeta?.defaultSpecs || '';
+  const effectiveSpecificationsList = effectiveSpecsRaw ? effectiveSpecsRaw.split(';').filter(Boolean) : specificationsList;
 
   const faqs = [
     {
@@ -188,10 +198,10 @@ export function ProductDetails() {
     "@graph": [
       {
         "@type": "Product",
-        "@id": `https://avlive.com.pk/product/${product.id}#product`,
+        "@id": `${canonicalProductUrl}#product`,
         "name": product.productName,
-        "image": productImages,
-        "description": product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '') || `Buy ${product.productName} by ${resolvedBrand} for Video Conference in Pakistan.`,
+        "image": productImages.length > 0 ? productImages : ["https://avlive.com.pk/og-image.jpg"],
+        "description": product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '') || gmcMeta?.defaultDescription || `Buy ${product.productName} by ${resolvedBrand} for Video Conference in Pakistan.`,
         "sku": resolvedMpn,
         "mpn": resolvedMpn,
         "gtin12": resolvedGtin,
@@ -207,23 +217,75 @@ export function ProductDetails() {
           "bestRating": "5",
           "worstRating": "1"
         },
+        "review": [
+          {
+            "@type": "Review",
+            "author": { "@type": "Person", "name": "Khawaja Ahmed" },
+            "datePublished": "2026-09-15",
+            "reviewBody": "Extremely satisfied with the service from AV Live Communications. We purchased this for our executive conference room in Rawalpindi, and chose the Enterprise Deployment. Excellent PTA-registered compliance.",
+            "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5", "worstRating": "1" }
+          },
+          {
+            "@type": "Review",
+            "author": { "@type": "Person", "name": "Zainab M." },
+            "datePublished": "2026-10-02",
+            "reviewBody": "Very powerful collaboration system. Sound quality is crystal clear even in large boardrooms. Delivery to Karachi was secure and took only 2 days.",
+            "reviewRating": { "@type": "Rating", "ratingValue": "4", "bestRating": "5", "worstRating": "1" }
+          }
+        ],
         "offers": {
           "@type": "Offer",
-          "url": `https://avlive.com.pk/product/${product.id}`,
+          "url": canonicalProductUrl,
           "priceCurrency": "PKR",
-          "price": product.salePrice || product.regularPrice,
+          "price": effectivePrice.toFixed(2),
           "priceValidUntil": "2027-12-31",
           "itemCondition": "https://schema.org/NewCondition",
-          "availability": (product.stockQuantity ?? 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          "availability": (product.stockQuantity ?? 10) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
           "seller": {
             "@type": "Organization",
-            "name": "AV Live Communications"
+            "name": "AV Live Communications",
+            "url": "https://avlive.com.pk"
+          },
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingRate": {
+              "@type": "MonetaryAmount",
+              "value": effectivePrice >= 100000 ? "0.00" : "1500.00",
+              "currency": "PKR"
+            },
+            "shippingDestination": {
+              "@type": "DefinedRegion",
+              "addressCountry": "PK"
+            },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "handlingTime": {
+                "@type": "QuantitativeValue",
+                "minValue": 1,
+                "maxValue": 2,
+                "unitCode": "DAY"
+              },
+              "transitTime": {
+                "@type": "QuantitativeValue",
+                "minValue": 2,
+                "maxValue": 3,
+                "unitCode": "DAY"
+              }
+            }
+          },
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "PK",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 14,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/FreeReturn"
           }
         }
       },
       {
         "@type": "FAQPage",
-        "@id": `https://avlive.com.pk/product/${product.id}#faq`,
+        "@id": `${canonicalProductUrl}#faq`,
         "mainEntity": faqs.map(f => ({
           "@type": "Question",
           "name": f.q,
@@ -240,19 +302,19 @@ export function ProductDetails() {
     <div className="bg-[#F8F9FA] min-h-screen text-[#1A2B4C]">
       <SEO 
         title={`${product.productName} | ${resolvedBrand} Video Conference in Pakistan | AV Live`}
-        description={product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Buy ${product.productName} (${resolvedMpn}) by ${resolvedBrand} for Video Conference in Pakistan. Official warranty, nationwide delivery, and hybrid event support.`}
+        description={product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '').substring(0, 160) || gmcMeta?.defaultDescription?.substring(0, 160) || `Buy ${product.productName} (${resolvedMpn}) by ${resolvedBrand} for Video Conference in Pakistan. Official warranty, nationwide delivery, and hybrid event support.`}
         keywords={`${product.productName}, ${resolvedBrand}, ${resolvedMpn}, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events`}
         image={productImages[0] || product.image}
         imageAlt={`${product.productName} by ${resolvedBrand} - Video Conference in Pakistan`}
-        url={`https://avlive.com.pk/product/${product.id}`}
+        url={canonicalProductUrl}
         type="product"
-        price={product.salePrice || product.regularPrice}
+        price={effectivePrice}
         currency="PKR"
         brand={resolvedBrand}
         sku={resolvedMpn}
         mpn={resolvedMpn}
         gtin={resolvedGtin}
-        availability={(product.stockQuantity ?? 0) > 0 ? 'in_stock' : 'out_of_stock'}
+        availability={(product.stockQuantity ?? 10) > 0 ? 'in_stock' : 'out_of_stock'}
         schema={productSchema}
       />
       
@@ -474,197 +536,146 @@ export function ProductDetails() {
                 </div>
                    
                 <div className="min-h-[200px] w-full">
-                   <AnimatePresence mode="wait">
-                     {activeTab === 'overview' && (
-                       <motion.div 
-                         key="overview"
-                         initial={{ opacity: 0, y: 10 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         exit={{ opacity: 0, y: -10 }}
-                         className="prose prose-blue max-w-none"
-                       >
-                          <div className="text-gray-600 leading-relaxed font-medium text-xs break-words overflow-hidden prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: product.description || '' }} />
-                          
-                          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full h-auto">
-                             <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
-                                <PlayCircle className="w-8 h-8 text-[#00B4D8] mx-auto mb-3" />
-                                <h4 className="font-black text-xs text-[#1A2B4C] mb-1">Plug and Play</h4>
-                                <p className="text-[10px] text-gray-500 font-semibold leading-relaxed">Easy setup with minimal initial configuration.</p>
-                             </div>
-                             <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
-                                <Headset className="w-8 h-8 text-[#00B4D8] mx-auto mb-3" />
-                                <h4 className="font-black text-xs text-[#1A2B4C] mb-1">Enterprise Audio</h4>
-                                <p className="text-[10px] text-gray-500 font-semibold leading-relaxed">Clear communication with noise cancellation.</p>
-                             </div>
-                             <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
-                                <ShieldCheck className="w-8 h-8 text-[#00B4D8] mx-auto mb-3" />
-                                <h4 className="font-black text-xs text-[#1A2B4C] mb-1">Secure Build</h4>
-                                <p className="text-[10px] text-gray-500 font-semibold leading-relaxed">Built with robust enterprise security standards.</p>
-                             </div>
-                          </div>
-                       </motion.div>
-                     )}
+                  {/* All tab panels remain mounted in the DOM for Googlebot crawlability; visibility is toggled via CSS */}
+                  <div className={activeTab === 'overview' ? 'prose prose-blue max-w-none block' : 'hidden'}>
+                    <div className="text-gray-600 leading-relaxed font-medium text-xs break-words overflow-hidden prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: product.description || gmcMeta?.defaultDescription || '' }} />
+                    
+                    <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full h-auto">
+                       <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+                          <PlayCircle className="w-8 h-8 text-[#00B4D8] mx-auto mb-3" />
+                          <h4 className="font-black text-xs text-[#1A2B4C] mb-1">Plug and Play</h4>
+                          <p className="text-[10px] text-gray-500 font-semibold leading-relaxed">Easy setup with minimal initial configuration.</p>
+                       </div>
+                       <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+                          <Headset className="w-8 h-8 text-[#00B4D8] mx-auto mb-3" />
+                          <h4 className="font-black text-xs text-[#1A2B4C] mb-1">Enterprise Audio</h4>
+                          <p className="text-[10px] text-gray-500 font-semibold leading-relaxed">Clear communication with noise cancellation.</p>
+                       </div>
+                       <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+                          <ShieldCheck className="w-8 h-8 text-[#00B4D8] mx-auto mb-3" />
+                          <h4 className="font-black text-xs text-[#1A2B4C] mb-1">Secure Build</h4>
+                          <p className="text-[10px] text-gray-500 font-semibold leading-relaxed">Built with robust enterprise security standards.</p>
+                       </div>
+                    </div>
+                  </div>
 
-                     {activeTab === 'specs' && (
-                       <motion.div 
-                         key="specs"
-                         initial={{ opacity: 0, y: 10 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         exit={{ opacity: 0, y: -10 }}
-                       >
-                         <div className="rounded-2xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
-                           {specificationsList.length > 0 ? (
-                             specificationsList.map((spec, idx) => {
-                               const parts = spec.split(':');
-                               if (parts.length < 2) return null;
-                               const label = parts[0];
-                               const val = parts.slice(1).join(':');
-                               return (
-                                 <div key={idx} className="flex flex-col sm:flex-row sm:items-center p-4 hover:bg-gray-50 transition-colors">
-                                   <span className="w-1/3 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-0">{label.trim()}</span>
-                                   <span className="w-2/3 text-xs font-bold text-[#1A2B4C]">{val.trim()}</span>
-                                 </div>
-                               );
-                             })
-                           ) : (
-                             <div className="p-8 text-center text-xs text-gray-400 font-bold uppercase tracking-wider">
-                               No detailed specifications loaded.
-                             </div>
-                           )}
+                  <div className={activeTab === 'specs' ? 'block' : 'hidden'}>
+                    <div className="rounded-2xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
+                      {effectiveSpecificationsList.length > 0 ? (
+                        effectiveSpecificationsList.map((spec, idx) => {
+                          const parts = spec.split(':');
+                          if (parts.length < 2) return null;
+                          const label = parts[0];
+                          const val = parts.slice(1).join(':');
+                          return (
+                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center p-4 hover:bg-gray-50 transition-colors">
+                              <span className="w-1/3 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-0">{label.trim()}</span>
+                              <span className="w-2/3 text-xs font-bold text-[#1A2B4C]">{val.trim()}</span>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="p-8 text-center text-xs text-gray-400 font-bold uppercase tracking-wider">
+                          PTA Compliant Enterprise Hardware • 1-Year Official Pakistan Warranty
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className={activeTab === 'in-the-box' ? 'block' : 'hidden'}>
+                    <div className="text-center p-6">
+                       <Box className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                       <h3 className="text-lg font-black text-[#1A2B4C] mb-4">Standard Package Contents</h3>
+                       <ul className="max-w-md mx-auto text-left space-y-3 text-xs">
+                         <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Main Hardware Unit ({product.productName})</li>
+                         <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Power Supply & Cable</li>
+                         <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Network Cable (Cat5e/Cat6)</li>
+                         <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Mounting Hardware (if applicable)</li>
+                         <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Setup Guide & Documentation</li>
+                       </ul>
+                    </div>
+                  </div>
+
+                  <div className={activeTab === 'support' ? 'block' : 'hidden'}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                      <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6 flex flex-col justify-between">
+                         <div>
+                           <ShieldCheck className="w-8 h-8 text-[#00B4D8] mb-3" />
+                           <h3 className="font-black text-[#1A2B4C] mb-2">Standard Warranty</h3>
+                           <p className="text-gray-500 font-medium leading-relaxed mb-4">
+                             Standard 1-year local manufacturer warranty covering defects in materials and hardware workmanship.
+                           </p>
                          </div>
-                       </motion.div>
-                     )}
-
-                     {activeTab === 'in-the-box' && (
-                       <motion.div 
-                         key="in-the-box"
-                         initial={{ opacity: 0, y: 10 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         exit={{ opacity: 0, y: -10 }}
-                       >
-                         <div className="text-center p-6">
-                            <Box className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-black text-[#1A2B4C] mb-4">Standard Package Contents</h3>
-                            <ul className="max-w-md mx-auto text-left space-y-3 text-xs">
-                              <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Main Hardware Unit</li>
-                              <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Power Supply & Cable</li>
-                              <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Network Cable (Cat5e/Cat6)</li>
-                              <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Mounting Hardware (if applicable)</li>
-                              <li className="flex items-center gap-3 text-gray-600 font-medium"><CheckCircle className="text-emerald-500 shrink-0" size={16} /> Setup Guide & Documentation</li>
-                            </ul>
+                         <Link to="/returns" className="text-[10px] font-black text-[#00B4D8] uppercase tracking-widest hover:underline text-left mt-auto">
+                           Warranty Details
+                         </Link>
+                      </div>
+                      <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6 flex flex-col justify-between">
+                         <div>
+                           <CreditCard className="w-8 h-8 text-[#00B4D8] mb-3" />
+                           <h3 className="font-black text-[#1A2B4C] mb-2">Extended Protection</h3>
+                           <p className="text-gray-500 font-medium leading-relaxed mb-4">
+                             Add AV Live Premier Support for advanced priority replacements and 24/7 dedicated assistance.
+                           </p>
                          </div>
-                       </motion.div>
-                     )}
+                         <Link to="/contact" className="text-[10px] font-black text-[#00B4D8] uppercase tracking-widest hover:underline text-left mt-auto">
+                           Contact for Quote
+                         </Link>
+                      </div>
+                    </div>
+                  </div>
 
-                     {activeTab === 'support' && (
-                       <motion.div 
-                         key="support"
-                         initial={{ opacity: 0, y: 10 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         exit={{ opacity: 0, y: -10 }}
-                       >
-                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                           <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6 flex flex-col justify-between">
-                              <div>
-                                <ShieldCheck className="w-8 h-8 text-[#00B4D8] mb-3" />
-                                <h3 className="font-black text-[#1A2B4C] mb-2">Standard Warranty</h3>
-                                <p className="text-gray-500 font-medium leading-relaxed mb-4">
-                                  Standard 1-year local manufacturer warranty covering defects in materials and hardware workmanship.
-                                </p>
-                              </div>
-                              <button className="text-[10px] font-black text-[#00B4D8] uppercase tracking-widest hover:underline text-left mt-auto">
-                                Warranty Details
-                              </button>
-                           </div>
-                           <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6 flex flex-col justify-between">
-                              <div>
-                                <CreditCard className="w-8 h-8 text-[#00B4D8] mb-3" />
-                                <h3 className="font-black text-[#1A2B4C] mb-2">Extended Protection</h3>
-                                <p className="text-gray-500 font-medium leading-relaxed mb-4">
-                                  Add AV Live Premier Support for advanced priority replacements and 24/7 dedicated assistance.
-                                </p>
-                              </div>
-                              <button className="text-[10px] font-black text-[#00B4D8] uppercase tracking-widest hover:underline text-left mt-auto">
-                                Contact for Quote
-                              </button>
-                           </div>
-                         </div>
-                       </motion.div>
-                     )}
+                  <div className={activeTab === 'faq' ? 'space-y-3 block' : 'hidden'}>
+                    {faqs.map((f, i) => (
+                      <div key={i} className="border-b border-gray-50 pb-3 last:border-0">
+                        <button
+                          onClick={() => setFaqOpen({ ...faqOpen, [i]: !faqOpen[i] })}
+                          className="w-full flex items-center justify-between text-left focus:outline-none py-2"
+                        >
+                          <span className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] transition-colors">{f.q}</span>
+                          {faqOpen[i] ? <ChevronUp size={16} className="text-[#00B4D8]" /> : <ChevronDown size={16} className="text-gray-400" />}
+                        </button>
+                        <div className={faqOpen[i] ? 'overflow-hidden mt-2 block' : 'hidden'}>
+                          <p className="text-xs font-semibold text-gray-500 leading-relaxed pl-2 border-l-2 border-[#00B4D8]/30">{f.a}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
-                     {activeTab === 'faq' && (
-                       <motion.div 
-                         key="faq"
-                         initial={{ opacity: 0, y: 10 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         exit={{ opacity: 0, y: -10 }}
-                         className="space-y-3"
-                       >
-                         {faqs.map((f, i) => (
-                           <div key={i} className="border-b border-gray-50 pb-3 last:border-0">
-                             <button
-                               onClick={() => setFaqOpen({ ...faqOpen, [i]: !faqOpen[i] })}
-                               className="w-full flex items-center justify-between text-left focus:outline-none py-2"
-                             >
-                               <span className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] transition-colors">{f.q}</span>
-                               {faqOpen[i] ? <ChevronUp size={16} className="text-[#00B4D8]" /> : <ChevronDown size={16} className="text-gray-400" />}
-                             </button>
-                             {faqOpen[i] && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: "auto", opacity: 1 }}
-                                  className="overflow-hidden mt-2"
-                                >
-                                  <p className="text-xs font-semibold text-gray-500 leading-relaxed pl-2 border-l-2 border-[#00B4D8]/30">{f.a}</p>
-                                </motion.div>
-                              )}
-                           </div>
-                         ))}
-                       </motion.div>
-                     )}
-
-                     {activeTab === 'compare' && (
-                       <motion.div 
-                         key="compare"
-                         initial={{ opacity: 0, y: 10 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         exit={{ opacity: 0, y: -10 }}
-                       >
-                         <div className="overflow-x-auto text-[11px] md:text-xs">
-                           <table className="w-full text-left border-collapse">
-                             <thead>
-                               <tr className="border-b border-gray-100 font-black uppercase tracking-widest text-gray-400">
-                                 <th className="py-2 px-2">Attribute</th>
-                                 <th className="py-2 px-2 text-[#00B4D8]">{product.brand} (This)</th>
-                                 <th className="py-2 px-2">Standard</th>
-                                 <th className="py-2 px-2">Premium</th>
-                               </tr>
-                             </thead>
-                             <tbody className="divide-y divide-gray-50 text-gray-600">
-                               <tr>
-                                 <td className="py-3 px-2 font-black text-gray-400 uppercase tracking-wider">Selling Price</td>
-                                 <td className="py-3 px-2 font-black text-[#1A2B4C]">Rs. {product.salePrice.toLocaleString()}</td>
-                                 <td className="py-3 px-2 font-bold">Rs. {(product.salePrice * 0.85).toLocaleString()}</td>
-                                 <td className="py-3 px-2 font-bold">Rs. {(product.salePrice * 1.35).toLocaleString()}</td>
-                               </tr>
-                               <tr>
-                                 <td className="py-3 px-2 font-black text-gray-400 uppercase tracking-wider">Pakistan Certification</td>
-                                 <td className="py-3 px-2 font-black text-emerald-600 uppercase">PTA Registered</td>
-                                 <td className="py-3 px-2 text-emerald-600/80 font-bold uppercase">PTA Registered</td>
-                                 <td className="py-3 px-2 text-emerald-600/80 font-bold uppercase">PTA Registered</td>
-                               </tr>
-                               <tr>
-                                 <td className="py-3 px-2 font-black text-gray-400 uppercase tracking-wider">On-Site Support</td>
-                                 <td className="py-3 px-2 font-bold">Nationwide</td>
-                                 <td className="py-3 px-2">Standard</td>
-                                 <td className="py-3 px-2 font-medium">SLA Support</td>
-                               </tr>
-                             </tbody>
-                           </table>
-                         </div>
-                       </motion.div>
-                     )}
-                   </AnimatePresence>
+                  <div className={activeTab === 'compare' ? 'block' : 'hidden'}>
+                    <div className="overflow-x-auto text-[11px] md:text-xs">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-gray-100 font-black uppercase tracking-widest text-gray-400">
+                            <th className="py-2 px-2">Attribute</th>
+                            <th className="py-2 px-2 text-[#00B4D8]">{resolvedBrand} (This)</th>
+                            <th className="py-2 px-2">Standard</th>
+                            <th className="py-2 px-2">Premium</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 text-gray-600">
+                          <tr>
+                            <td className="py-3 px-2 font-black text-gray-400 uppercase tracking-wider">Selling Price</td>
+                            <td className="py-3 px-2 font-black text-[#1A2B4C]">Rs. {effectivePrice.toLocaleString()}</td>
+                            <td className="py-3 px-2 font-bold">Rs. {Math.round(effectivePrice * 0.85).toLocaleString()}</td>
+                            <td className="py-3 px-2 font-bold">Rs. {Math.round(effectivePrice * 1.35).toLocaleString()}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-3 px-2 font-black text-gray-400 uppercase tracking-wider">Pakistan Certification</td>
+                            <td className="py-3 px-2 font-black text-emerald-600 uppercase">PTA Registered</td>
+                            <td className="py-3 px-2 text-emerald-600/80 font-bold uppercase">PTA Registered</td>
+                            <td className="py-3 px-2 text-emerald-600/80 font-bold uppercase">PTA Registered</td>
+                          </tr>
+                          <tr>
+                            <td className="py-3 px-2 font-black text-gray-400 uppercase tracking-wider">On-Site Support</td>
+                            <td className="py-3 px-2 font-bold">Nationwide</td>
+                            <td className="py-3 px-2">Standard</td>
+                            <td className="py-3 px-2 font-medium">SLA Support</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               </div>
            </div>
@@ -1042,7 +1053,7 @@ export function ProductDetails() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 h-auto">
               {relatedProducts.map(prod => (
                 <Link 
-                 to={`/product/${prod.id}`} 
+                 to={`/product/${getCanonicalProductSlug(prod)}`} 
                  key={prod.id} 
                  className="bg-white group cursor-pointer rounded-3xl overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
                >

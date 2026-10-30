@@ -33,9 +33,12 @@
     <meta name="twitter:domain" content="avlive.com.pk" />
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231A2B4C'/><text y='70' x='10' fill='white' style='font: bold 60px sans-serif;'>AV</text></svg>" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1511578314322-379afb476865?w=1920&q=80" fetchpriority="high" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" /></noscript>
     
     <!-- Schema.org Interconnected Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -273,12 +276,15 @@
         var loader = document.getElementById('initial-loader');
         if (loader) {
           loader.style.opacity = '0';
-          setTimeout(function () { loader.remove(); }, 250);
+          setTimeout(function () { loader.remove(); }, 150);
         }
       }
-      window.addEventListener('DOMContentLoaded', dismissInitialLoader);
-      window.addEventListener('load', dismissInitialLoader);
-      setTimeout(dismissInitialLoader, 800);
+      if (document.readyState !== 'loading') {
+        dismissInitialLoader();
+      } else {
+        window.addEventListener('DOMContentLoaded', dismissInitialLoader);
+      }
+      setTimeout(dismissInitialLoader, 200);
     </script>
   </body>
 </html>

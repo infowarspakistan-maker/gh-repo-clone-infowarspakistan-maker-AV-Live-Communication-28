@@ -50,7 +50,8 @@ export function AIAssist() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 w-16 h-16 bg-[#00B4D8] text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-[#0096B4] transition-all z-50 ${isOpen ? 'scale-0' : 'scale-100'} hover:scale-110`}
+        aria-label="Open AV Assist chat"
+        className={`fixed bottom-6 right-6 w-16 h-16 bg-[#00B4D8] text-[#1A2B4C] rounded-full flex items-center justify-center shadow-2xl hover:bg-[#0096B4] hover:text-white transition-transform z-50 ${isOpen ? 'scale-0' : 'scale-100'} hover:scale-110`}
       >
         <Bot size={28} />
       </button>
@@ -67,17 +68,18 @@ export function AIAssist() {
             {/* Header */}
             <div className="bg-[#1A2B4C] text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#00B4D8] rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#00B4D8] text-[#1A2B4C] rounded-full flex items-center justify-center">
                   <Bot size={20} />
                 </div>
                 <div>
                   <h3 className="font-bold">AV Assist</h3>
-                  <p className="text-xs text-gray-300">AI Sales & Support</p>
+                  <p className="text-xs text-slate-300">AI Sales & Support</p>
                 </div>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="text-gray-300 hover:text-white transition-colors"
+                aria-label="Close AV Assist chat"
+                className="text-slate-300 hover:text-white transition-colors"
               >
                 <X size={24} />
               </button>
@@ -93,7 +95,7 @@ export function AIAssist() {
                   <div 
                     className={`max-w-[85%] p-3 rounded-2xl text-sm ${
                       msg.role === 'user' 
-                        ? 'bg-[#00B4D8] text-white rounded-tr-none' 
+                        ? 'bg-[#00B4D8] text-[#1A2B4C] font-medium rounded-tr-none' 
                         : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none shadow-sm'
                     }`}
                   >
@@ -119,6 +121,7 @@ export function AIAssist() {
               <div className="flex items-center gap-2">
                 <input
                   type="text"
+                  aria-label="Ask about products or quotes"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
@@ -127,8 +130,9 @@ export function AIAssist() {
                 />
                 <button 
                   onClick={handleSend}
+                  aria-label="Send message"
                   disabled={!input.trim() || isTyping}
-                  className="w-12 h-12 bg-[#00B4D8] text-white rounded-xl flex items-center justify-center disabled:opacity-50 hover:bg-[#0096B4] transition-colors"
+                  className="w-12 h-12 bg-[#00B4D8] text-[#1A2B4C] rounded-xl flex items-center justify-center disabled:opacity-50 hover:bg-[#0096B4] hover:text-white transition-colors"
                 >
                   <Send size={18} />
                 </button>

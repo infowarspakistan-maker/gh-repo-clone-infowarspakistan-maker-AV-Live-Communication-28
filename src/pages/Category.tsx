@@ -3,9 +3,48 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight, Box, Settings, Mic, Video, ShieldCheck, Speaker, Loader2, Zap, LayoutGrid, Layers, Heart } from 'lucide-react';
 import { subscribeToCategories, subscribeToProducts, Product, Category as CategoryType } from '../lib/firebase/firestore-helpers';
+import { getCanonicalProductSlug, resolveProductPricing } from '../lib/gmc-feed';
 import { addToCart } from '../lib/cart';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+
+const FALLBACK_PRODUCT_CATEGORIES: Record<string, { name: string; description: string }> = {
+  'video-conferencing': {
+    name: 'Video Conferencing Systems',
+    description:
+      'Enterprise Video Conference in Pakistan hardware including Polycom RealPresence Group 500, Poly Studio X70, Logitech Rally Bar, Cisco Room Kits, and Zoom/Teams boardroom solutions.',
+  },
+  'ip-phones': {
+    name: 'Enterprise IP Phones',
+    description:
+      'Executive SIP & VoIP desk phones from Cisco, Yealink, Polycom VVX, Grandstream, and Fanvil with PoE and HD voice for Pakistani enterprises.',
+  },
+  'voip-phone-systems': {
+    name: 'VoIP Phone Systems & IP PBX',
+    description:
+      'Scalable IP PBX appliances and unified communications licensing from 3CX, Grandstream UCM, Cisco CUCM, and FreePBX.',
+  },
+  projectors: {
+    name: 'Commercial Laser & 4K Projectors',
+    description:
+      'High-lumen 4K UHD and laser installation projectors from Panasonic, BenQ, Epson, Sony, Optoma, and ViewSonic for auditoriums and 3D projection mapping in Pakistan.',
+  },
+  headsets: {
+    name: 'Professional UC & Call Center Headsets',
+    description:
+      'Active noise-cancelling (ANC) wireless and USB headsets from Jabra Evolve, HP Poly Voyager/Blackwire, and Yealink for hybrid work and contact centers.',
+  },
+  'ip-cameras': {
+    name: 'IP Security & PTZ Cameras',
+    description:
+      'NDAA-compliant network surveillance, Starlight WDR domes, and optical PTZ cameras from Axis, Hikvision, Dahua, and Uniview.',
+  },
+  'intercom-paging-access': {
+    name: 'SIP Intercom, Paging & Public Address',
+    description:
+      'Commercial PA amplifiers, EN 54-16 voice alarm controllers, and SIP video door intercoms from Bosch PAVIRO, 2N, Axis, and ITC.',
+  },
+};
 
 export function Category() {
   const { categorySlug } = useParams<{ categorySlug: string }>();
@@ -29,7 +68,20 @@ export function Category() {
     };
   }, []);
 
-  const currentCategory = categories.find(c => c.slug === categorySlug);
+  const fallbackCat = categorySlug ? FALLBACK_PRODUCT_CATEGORIES[categorySlug] : undefined;
+  const currentCategory: CategoryType | undefined =
+    categories.find(c => c.slug === categorySlug) ||
+    (fallbackCat && categorySlug
+      ? {
+          id: categorySlug,
+          name: fallbackCat.name,
+          slug: categorySlug,
+          description: fallbackCat.description,
+          parentId: null,
+          displayOrder: 1,
+          isActive: true,
+        }
+      : undefined);
   
   const subcategories = currentCategory 
     ? categories.filter(c => c.parentId === currentCategory.id && c.isActive)
@@ -41,7 +93,7 @@ export function Category() {
 
   const brandsIncategory = Array.from(new Set(categoryProducts.map(p => p.brand || 'Unknown'))).sort();
 
-  if (loading) {
+  if (loading && !currentCategory) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
         <div className="text-center">
@@ -69,6 +121,8 @@ export function Category() {
     );
   }
 
+  const canonicalCategoryUrl = `https://avlive.com.pk/category/${currentCategory.slug || currentCategory.id}`;
+
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16 text-[#1A2B4C]">
       <SEO 
@@ -77,19 +131,46 @@ export function Category() {
         keywords={`${currentCategory.name}, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, AV Live`}
         image={currentCategory.imageUrl}
         imageAlt={`${currentCategory.name} - Video Conference in Pakistan & Enterprise AV Solutions`}
-        url={`https://avlive.com.pk/category/${currentCategory.slug || currentCategory.id}`}
+        url={canonicalCategoryUrl}
         schema={{
           "@context": "https://schema.org",
           "@graph": [
             {
               "@type": "CollectionPage",
-              "@id": `https://avlive.com.pk/category/${currentCategory.slug || currentCategory.id}`,
+              "@id": `${canonicalCategoryUrl}#collection`,
               "name": `${currentCategory.name} - Video Conference in Pakistan | AV Live`,
               "description": currentCategory.description || `Enterprise ${currentCategory.name} hardware in Pakistan.`,
-              "url": `https://avlive.com.pk/category/${currentCategory.slug || currentCategory.id}`
+              "url": canonicalCategoryUrl,
+              "mainEntity": {
+                "@type": "ItemList",
+                "numberOfItems": categoryProducts.length,
+                "itemListElement": categoryProducts.slice(0, 24).map((prod, idx) => {
+                  const slug = getCanonicalProductSlug(prod);
+                  const { effectivePrice } = resolveProductPricing(prod);
+                  return {
+                    "@type": "ListItem",
+                    "position": idx + 1,
+                    "url": `https://avlive.com.pk/product/${slug}`,
+                    "name": prod.productName,
+                    "item": {
+                      "@type": "Product",
+                      "name": prod.productName,
+                      "url": `https://avlive.com.pk/product/${slug}`,
+                      "brand": { "@type": "Brand", "name": prod.brand || "AV Live" },
+                      "offers": {
+                        "@type": "Offer",
+                        "priceCurrency": "PKR",
+                        "price": effectivePrice.toFixed(2),
+                        "availability": "https://schema.org/InStock"
+                      }
+                    }
+                  };
+                })
+              }
             },
             {
               "@type": "FAQPage",
+              "@id": `${canonicalCategoryUrl}#faq`,
               "mainEntity": [
                 {
                   "@type": "Question",
@@ -196,7 +277,10 @@ export function Category() {
              </div>
 
              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-                {categoryProducts.map((product, idx) => (
+                {categoryProducts.map((product, idx) => {
+                  const prodSlug = getCanonicalProductSlug(product);
+                  const { effectivePrice } = resolveProductPricing(product);
+                  return (
                   <motion.div 
                     key={product.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -204,7 +288,7 @@ export function Category() {
                     transition={{ delay: idx * 0.05 }}
                     className="bg-white group rounded-[2.5rem] overflow-hidden border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-2xl"
                   >
-                    <Link to={`/product/${product.id}`} className="aspect-square bg-gray-50 overflow-hidden block">
+                    <Link to={`/product/${prodSlug}`} className="aspect-square bg-gray-50 overflow-hidden block">
                        <img loading="lazy" 
                          src={(Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || 'https://placehold.co/600x600?text=No+Image'} 
                          alt={product.productName} 
@@ -216,16 +300,16 @@ export function Category() {
                           <span className="text-[10px] text-[#00B4D8] font-black uppercase tracking-widest">{product.brand}</span>
                           <span className="text-[10px] text-gray-300 font-black tracking-widest">{product.sku}</span>
                        </div>
-                       <Link to={`/product/${product.id}`} className="block">
+                       <Link to={`/product/${prodSlug}`} className="block">
                           <h3 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2 leading-tight mb-8 h-10">{product.productName}</h3>
                        </Link>
                        <div className="flex items-center justify-between pt-6 border-t border-gray-50">
-                          <span className="text-xl font-black">Rs. {(product.salePrice ?? 0).toLocaleString()}</span>
+                          <span className="text-xl font-black">Rs. {effectivePrice.toLocaleString()}</span>
                           <button 
                             onClick={() => addToCart({
                               id: product.id!,
                               name: product.productName,
-                              price: product.salePrice,
+                              price: effectivePrice,
                               image: (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || '',
                               brand: product.brand
                             } as any)}
@@ -236,7 +320,8 @@ export function Category() {
                        </div>
                     </div>
                   </motion.div>
-                ))}
+                  );
+                })}
 
                 {categoryProducts.length === 0 && (
                   <div className="col-span-full py-16 text-center bg-white rounded-[4rem] border border-gray-100">

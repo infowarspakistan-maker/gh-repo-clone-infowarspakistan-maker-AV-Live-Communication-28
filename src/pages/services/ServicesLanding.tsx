@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Users, MonitorPlay, Gamepad2, BrainCircuit, Bot, Cog, Loader2, Sparkles, ShieldCheck, Zap } from 'lucide-react';
-import { subscribeToServicesPage, ServicePageData, getAllServices, Service } from '../../lib/firebase/firestore-helpers';
+import { ArrowRight, Cog, Sparkles, ShieldCheck, Zap } from 'lucide-react';
+import { subscribeToServicesPage, ServicePageData, getAllServices } from '../../lib/firebase/firestore-helpers';
+import { FALLBACK_SERVICES_CATALOG, mergeWithFallbackServices, EnrichedService } from '../../lib/services-catalog';
 import { SEO } from '../../components/SEO';
+import { Breadcrumbs } from '../../components/Breadcrumbs';
 
 export function ServicesLanding() {
   const [pageData, setPageData] = useState<ServicePageData | null>(null);
-  const [allServices, setAllServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [allServices, setAllServices] = useState<EnrichedService[]>(FALLBACK_SERVICES_CATALOG);
 
   useEffect(() => {
     const fetchData = async () => {
-      const services = await getAllServices();
-      setAllServices(services);
+      try {
+        const services = await getAllServices();
+        setAllServices(mergeWithFallbackServices(services));
+      } catch (e) {
+        console.warn('Using fallback services catalog:', e);
+      }
       
       const unsubscribe = subscribeToServicesPage((data) => {
         setPageData(data);
-        setLoading(false);
       });
       return unsubscribe;
     };
@@ -31,52 +35,62 @@ export function ServicesLanding() {
     };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa]">
-        <div className="text-center">
-          <Loader2 className="animate-spin text-[#00B4D8] mx-auto mb-4" size={40} />
-          <p className="text-gray-400 font-black uppercase tracking-widest text-[10px]">Loading Service Solutions...</p>
-        </div>
-      </div>
-    );
-  }
-
   const data = {
     heroHeading: pageData?.heroHeading || 'Beyond Products. We Deliver Experiences.',
-    heroSubheading: pageData?.heroSubheading || 'Whether it\'s a 500-person corporate gala, a high-stakes esports tournament, or an AI system that runs your business processes—we bring your vision to life.',
+    heroSubheading: pageData?.heroSubheading || 'Whether it\'s a 500-person corporate gala, a hybrid summit bridged with Poly X70 & Polycom Group 500 video conferencing, a 3D Hologram Display launch, or an AI system that runs your business processes—we bring your vision to life.',
     heroImageUrl: pageData?.heroImageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=2000',
-    introText: pageData?.introText || 'We bridge the gap between human intelligence and technical excellence.',
+    introText: pageData?.introText || 'We bridge the gap between enterprise AV engineering, Corporate event management, and AI intelligence.',
     serviceIds: pageData?.serviceIds || [],
     ctaText: pageData?.ctaText || 'Consult an Expert',
     ctaLink: pageData?.ctaLink || '/contact'
   };
 
   const displayedServices = allServices.filter(s => 
-    data.serviceIds.includes(s.id || '') || (data.serviceIds.length === 0 && s.isActive)
+    data.serviceIds.includes(s.id || '') || (data.serviceIds.length === 0 && s.isActive !== false)
   );
 
   return (
     <div className="flex-1 w-full bg-[#f8f9fa] pb-16">
       <SEO
         title="Corporate Event Management, Hybrid Events & Video Conferencing Services | AV Live Pakistan"
-        description="Full-scale Corporate Event Management, Hybrid Event Production, 3D Hologram Displays, Video Conferencing Boardroom Integration, and AI Automation in Lahore, Karachi, and Islamabad."
+        description="Full-scale Corporate Event Management, Hybrid Event Production, 3D Hologram Displays, Video Conferencing Boardroom Integration (Polycom Group 500, Poly X70), and AI Automation in Lahore, Karachi, and Islamabad."
         keywords="Corporate event management, Event management, hybrid event, Hologram Display, events, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, AV Live"
         url="https://avlive.com.pk/services"
         image={data.heroImageUrl}
         schema={{
           "@context": "https://schema.org",
-          "@type": "Service",
-          "name": "Corporate Event Management, Hybrid Events & Video Conferencing Integration",
-          "provider": {
-            "@type": "LocalBusiness",
-            "name": "AV Live Communications",
-            "url": "https://avlive.com.pk"
-          },
-          "areaServed": ["Lahore", "Karachi", "Islamabad", "Pakistan"],
-          "description": "Enterprise corporate event management, hybrid events, 3D hologram stage displays, and video conferencing boardroom integration in Pakistan."
+          "@graph": [
+            {
+              "@type": "Service",
+              "@id": "https://avlive.com.pk/services#service",
+              "name": "Corporate Event Management, Hybrid Events & Video Conferencing Integration",
+              "url": "https://avlive.com.pk/services",
+              "provider": {
+                "@id": "https://avlive.com.pk/#organization"
+              },
+              "areaServed": ["Lahore", "Karachi", "Islamabad", "Pakistan"],
+              "description": "Enterprise corporate event management, hybrid events, 3D hologram stage displays, and video conferencing boardroom integration in Pakistan.",
+              "hasOfferCatalog": {
+                "@type": "OfferCatalog",
+                "name": "AV Live Enterprise Event & Integration Services",
+                "itemListElement": displayedServices.map((svc, idx) => ({
+                  "@type": "Offer",
+                  "position": idx + 1,
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": svc.title,
+                    "description": svc.description?.replace(/<[^>]*>?/gm, ''),
+                    "url": `https://avlive.com.pk/services/${svc.slug}`
+                  }
+                }))
+              }
+            }
+          ]
         }}
       />
+      <div className="max-w-7xl mx-auto px-4 pt-6">
+        <Breadcrumbs items={[{ label: 'Services' }]} />
+      </div>
       {/* Hero Section */}
       <div className="relative h-[600px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">

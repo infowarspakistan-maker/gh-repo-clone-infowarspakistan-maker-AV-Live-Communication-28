@@ -11,10 +11,10 @@ export function Services() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen py-12 text-[#1A2B4C]">
       <SEO 
-        title="Corporate Event Management, Hybrid Events & Hologram Display Services | Video Conference in Pakistan | AV Live"
-        description="Pakistan's premier Corporate event management, hybrid event broadcasting, 3D Hologram Display stages, and Video Conference in Pakistan engineering services across Lahore, Karachi, and Islamabad."
-        keywords="Event management, Corporate event management, hybrid event, Hologram Display, events, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, 3D hologram events Pakistan, Projection mapping Pakistan, AV Live"
-        url="https://avlive.com.pk/services"
+        title="Event Production, AV Equipment Rental & Corporate Event Management | Hybrid Events & Hologram Display | AV Live Pakistan"
+        description="Book turnkey Corporate event management, SMD LED screen rental, 3D Hologram Display stages, line-array PA systems, and hybrid event Video Conference in Pakistan across Lahore, Karachi & Islamabad."
+        keywords="Event management, Corporate event management, hybrid event, Hologram Display, events, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, AV equipment rental Pakistan, SMD screen rental Lahore Karachi Islamabad"
+        url="https://avlive.com.pk/events-services"
         image="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=1200"
         imageAlt="AV Live Corporate Event Management, Hybrid Event & Hologram Display Services"
         schema={{
@@ -22,8 +22,9 @@ export function Services() {
           "@graph": [
             {
               "@type": "Service",
-              "@id": "https://avlive.com.pk/services#service",
-              "name": "Corporate Event Management, Hybrid Events & Hologram Display Production",
+              "@id": "https://avlive.com.pk/events-services#service",
+              "name": "Event Production, AV Equipment Rental & Hybrid Event Management in Pakistan",
+              "url": "https://avlive.com.pk/events-services",
               "serviceType": ["Event management", "Corporate event management", "hybrid event", "Hologram Display", "Video Conference in Pakistan"],
               "provider": { "@id": "https://avlive.com.pk/#organization" },
               "areaServed": ["Lahore", "Karachi", "Islamabad", "Pakistan"],
@@ -31,7 +32,7 @@ export function Services() {
             },
             {
               "@type": "FAQPage",
-              "@id": "https://avlive.com.pk/services#faq",
+              "@id": "https://avlive.com.pk/events-services#faq",
               "mainEntity": [
                 {
                   "@type": "Question",
@@ -63,9 +64,9 @@ export function Services() {
         }}
       />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Breadcrumbs items={[{ label: 'Services' }]} />
+        <Breadcrumbs items={[{ label: 'Services', path: '/services' }, { label: 'Event Production & AV Rental' }]} />
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-black mb-4 uppercase tracking-tighter">Event Management & AV Rental Services in Pakistan</h1>
+          <h1 className="text-4xl font-black mb-4 uppercase tracking-tighter">Event Management, Hybrid Event & AV Rental Configurator in Pakistan</h1>
           <p className="text-lg text-gray-500 font-medium mb-6">
             Book our professional teams for your next corporate summit, hybrid event, or e-Sports tournament.
           </p>
@@ -233,7 +234,7 @@ export function Services() {
               </div>
               <div className="pt-6 flex justify-between items-center">
                 <button onClick={() => setStep(3)} className="text-gray-500 px-8 py-3 rounded-full hover:bg-gray-50 border border-gray-200 font-bold text-sm uppercase tracking-wider">Back</button>
-                <button onClick={() => alert('Quotation Request Submitted!')} className="bg-[#1A2B4C] text-white px-8 py-3 rounded-full hover:bg-[#00B4D8] font-bold text-sm uppercase tracking-wider transition-colors">Submit Request</button>
+                <button onClick={() => { setModalTitle('Complete Your Event Quotation'); setIsQuoteModalOpen(true); }} className="bg-[#1A2B4C] text-white px-8 py-3 rounded-full hover:bg-[#00B4D8] font-bold text-sm uppercase tracking-wider transition-colors">Submit Request</button>
               </div>
             </div>
           )}

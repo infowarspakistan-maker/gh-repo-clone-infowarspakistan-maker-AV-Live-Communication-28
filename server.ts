@@ -7,7 +7,13 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import fs from 'fs';
 import { updateSheetData } from './server-utils/sheets';
-import { generateGmcTsv, generateGmcSheetMatrix } from './src/lib/gmc-feed';
+import {
+  generateGmcTsv,
+  generateGmcSheetMatrix,
+  getCanonicalProductSlug,
+  PRODUCT_GMC_METADATA,
+} from './src/lib/gmc-feed';
+import { FALLBACK_SERVICES_CATALOG } from './src/lib/services-catalog';
 
 // Initialize Firebase Admin
 // We try to load from a local file if it exists, otherwise we rely on environment/defaults
@@ -287,12 +293,12 @@ async function startServer() {
         const productsSnap = await db.collection('products').where('isActive', '==', true).get();
         productsSnap.forEach(doc => {
           const data = doc.data();
-          const slug = data.slug || doc.id;
+          const slug = getCanonicalProductSlug(data, doc.id);
           xml += '  <url>\n';
           xml += `    <loc>${baseUrl}/product/${slug}</loc>\n`;
           xml += `    <lastmod>${today}</lastmod>\n`;
           xml += '    <changefreq>weekly</changefreq>\n';
-          xml += '    <priority>0.8</priority>\n';
+          xml += `    <priority>${slug === 'polycom-realpresence-group-500-pakistan' ? '0.9' : '0.8'}</priority>\n`;
           xml += '  </url>\n';
         });
       } catch (e) {
@@ -823,12 +829,12 @@ async function startServer() {
     }
   });
 
-  // Server-side SEO Canonical & Metadata injector for Googlebot first-wave HTML crawls
+  // Server-side SEO Canonical, Metadata & Structured Data injector for Googlebot first-wave HTML crawls
   function injectRouteSeoIntoHtml(html: string, reqPath: string): string {
     const cleanPath = reqPath === '/' ? '' : reqPath.replace(/\/+$/, '');
     const canonicalUrl = `https://avlive.com.pk${cleanPath}`;
 
-    const routeMeta: Record<string, { title: string; description: string; noindex?: boolean }> = {
+    const routeMeta: Record<string, { title: string; description: string; noindex?: boolean; schema?: Record<string, any> }> = {
       '/shop': {
         title: 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live',
         description: 'Buy genuine Video Conference in Pakistan hardware: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Yealink, and Corporate Event Management equipment.'
@@ -846,16 +852,16 @@ async function startServer() {
         description: 'Immersive 3D projection mapping in Pakistan for corporate galas, building facades, and hybrid events using 20,000+ ANSI lumen laser projectors.'
       },
       '/events-services': {
-        title: 'Corporate Event Management Pakistan | Hybrid Events & 3D Hologram | AV Live',
-        description: 'Turnkey corporate event management, hybrid event broadcasting, 3D hologram stage production, and SMD LED wall rental in Lahore, Karachi, and Islamabad.'
+        title: 'Event Production, AV Equipment Rental & Corporate Event Management | Hybrid Events & Hologram Display | AV Live Pakistan',
+        description: 'Book turnkey Corporate event management, SMD LED screen rental, 3D Hologram Display stages, line-array PA systems, and hybrid event Video Conference in Pakistan across Lahore, Karachi & Islamabad.'
       },
       '/services': {
-        title: 'Corporate Event Management, Video Conferencing & AI Solutions | AV Live Pakistan',
-        description: 'Full-service corporate event management, hybrid event production, 3D hologram displays, video conferencing boardroom integration, and AI automation in Pakistan.'
+        title: 'Corporate Event Management, Hybrid Events & Video Conferencing Services | AV Live Pakistan',
+        description: 'Full-scale Corporate Event Management, Hybrid Event Production, 3D Hologram Displays, Video Conferencing Boardroom Integration (Polycom Group 500, Poly X70), and AI Automation in Lahore, Karachi, and Islamabad.'
       },
       '/solutions': {
-        title: 'AV & Unified Communication Solutions | Video Conference in Pakistan | AV Live',
-        description: 'Explore boardroom video conferencing, corporate event management, hybrid event staging, and enterprise VoIP solutions across Pakistan.'
+        title: 'Video Conference in Pakistan, Hybrid Event & 3D Hologram Solutions | Polycom Group 500 & Poly X70 | AV Live',
+        description: 'Explore turnkey solutions for Video Conference in Pakistan (Polycom Group 500, Poly X70), smart boardrooms, Corporate event management, hybrid event broadcasting, and 3D Hologram Displays.'
       },
       '/faqs': {
         title: 'Frequently Asked Questions (FAQs) | Video Conference & Event Management | AV Live',
@@ -878,11 +884,87 @@ async function startServer() {
       }
     };
 
+    let matched = routeMeta[cleanPath];
+
+    // Dynamic Product Route SSR Metadata & Schema Injection (/product/:slug)
+    if (!matched && cleanPath.startsWith('/product/')) {
+      const slug = cleanPath.replace('/product/', '');
+      const gmcMeta = PRODUCT_GMC_METADATA[slug];
+      if (gmcMeta) {
+        const readableName = slug
+          .replace(/-pakistan$/, '')
+          .split('-')
+          .map(w => w.toUpperCase() === 'IP' || w.toUpperCase() === 'PTZ' || w.toUpperCase() === 'USB' || w.toUpperCase() === '4K' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ');
+        const title = `${readableName} (${gmcMeta.mpn}) | ${gmcMeta.brand} Video Conference in Pakistan | AV Live`;
+        const description = gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} MPN ${gmcMeta.mpn} with 1-year Pakistan warranty and nationwide deployment.`;
+        matched = {
+          title,
+          description,
+          schema: {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            '@id': `${canonicalUrl}#product`,
+            name: readableName,
+            sku: gmcMeta.mpn,
+            mpn: gmcMeta.mpn,
+            gtin12: gmcMeta.gtin,
+            gtin: gmcMeta.gtin,
+            description,
+            brand: { '@type': 'Brand', name: gmcMeta.brand },
+            offers: {
+              '@type': 'Offer',
+              url: canonicalUrl,
+              priceCurrency: 'PKR',
+              price: '50000.00',
+              itemCondition: 'https://schema.org/NewCondition',
+              availability: 'https://schema.org/InStock',
+              seller: { '@type': 'Organization', name: 'AV Live Communications', url: 'https://avlive.com.pk' }
+            }
+          }
+        };
+      }
+    }
+
+    // Dynamic Service Detail Route SSR Metadata & Schema Injection (/services/:serviceSlug)
+    if (!matched && cleanPath.startsWith('/services/')) {
+      const serviceSlug = cleanPath.replace('/services/', '');
+      const svc = FALLBACK_SERVICES_CATALOG.find(s => s.slug === serviceSlug);
+      if (svc) {
+        matched = {
+          title: `${svc.title} | AV Live Communications Pakistan`,
+          description: svc.description,
+          schema: {
+            '@context': 'https://schema.org',
+            '@type': 'Service',
+            '@id': `${canonicalUrl}#service`,
+            name: svc.title,
+            description: svc.description,
+            url: canonicalUrl,
+            provider: { '@id': 'https://avlive.com.pk/#organization' },
+            areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
+          }
+        };
+      }
+    }
+
+    // Dynamic Category Route SSR Metadata Injection (/category/:categorySlug)
+    if (!matched && cleanPath.startsWith('/category/')) {
+      const catSlug = cleanPath.replace('/category/', '');
+      const readableCat = catSlug
+        .split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+      matched = {
+        title: `${readableCat} | Video Conference in Pakistan | Polycom Group 500 & Poly X70 | AV Live`,
+        description: `Explore genuine ${readableCat} in Pakistan including Polycom Group 500, Poly X70, and enterprise Video conference & Corporate event management hardware.`
+      };
+    }
+
     let updated = html
       .replace(/<link rel="canonical" href="https:\/\/avlive\.com\.pk" \/>/, `<link rel="canonical" href="${canonicalUrl}" />`)
       .replace(/<meta property="og:url" content="https:\/\/avlive\.com\.pk" \/>/, `<meta property="og:url" content="${canonicalUrl}" />`);
 
-    const matched = routeMeta[cleanPath];
     if (matched) {
       updated = updated
         .replace(/<title>[\s\S]*?<\/title>/, `<title>${matched.title}</title>`)
@@ -895,14 +977,24 @@ async function startServer() {
           '<meta name="robots" content="noindex, nofollow" />'
         );
       }
+      if (matched.schema) {
+        const schemaTag = `<script type="application/ld+json" id="ssr-route-schema">${JSON.stringify(matched.schema)}</script>\n  </head>`;
+        updated = updated.replace('</head>', schemaTag);
+      }
     }
 
     return updated;
   }
 
-  // Legacy redirects for broken/old slugs so Googlebot receives clean 301s
+  // Legacy & Raw Firestore ID redirects so Googlebot receives clean 301s to canonical SEO slugs
   app.get('/voip-service', (req, res) => res.redirect(301, '/voip-service-providers'));
   app.get('/products/compare', (req, res) => res.redirect(301, '/compare'));
+  app.get('/product/T1XLMubVYmFzeIfC7V9B', (req, res) =>
+    res.redirect(301, '/product/polycom-realpresence-group-500-pakistan')
+  );
+  app.get('/product/wMbGVClqbDS2LFrv5HyX', (req, res) =>
+    res.redirect(301, '/product/google-meet-hardware-license-pakistan')
+  );
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
@@ -913,12 +1005,20 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath, { index: false }));
+    app.use('/assets', express.static(path.join(distPath, 'assets'), {
+      maxAge: '1y',
+      immutable: true,
+    }));
+    app.use(express.static(distPath, {
+      index: false,
+      maxAge: '1h',
+    }));
     app.get('*', (req, res) => {
       const indexPath = path.join(distPath, 'index.html');
       if (fs.existsSync(indexPath)) {
         const rawHtml = fs.readFileSync(indexPath, 'utf8');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
         res.send(injectRouteSeoIntoHtml(rawHtml, req.path));
       } else {
         res.status(404).send('Application build not found');

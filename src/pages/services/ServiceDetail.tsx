@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowRight, Loader2, Info } from 'lucide-react';
-import { getAllServices, Service } from '../../lib/firebase/firestore-helpers';
+import { getAllServices } from '../../lib/firebase/firestore-helpers';
+import { FALLBACK_SERVICES_CATALOG, mergeWithFallbackServices, EnrichedService } from '../../lib/services-catalog';
 import { DeepQueryModal } from '../../components/DeepQueryModal';
 import { SEO } from '../../components/SEO';
+import { Breadcrumbs } from '../../components/Breadcrumbs';
 
 function formatContent(content: string) {
   if (!content) return '';
@@ -55,28 +57,37 @@ function formatContent(content: string) {
 
 export function ServiceDetail() {
   const { serviceSlug } = useParams<{ serviceSlug: string }>();
-  const navigate = useNavigate();
-  const [service, setService] = useState<Service | null>(null);
-  const [loading, setLoading] = useState(true);
+  const initialFallback = FALLBACK_SERVICES_CATALOG.find(s => s.slug === serviceSlug) || null;
+  const [service, setService] = useState<EnrichedService | null>(initialFallback);
+  const [loading, setLoading] = useState(!initialFallback);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('Consult with our AV Expert');
 
   useEffect(() => {
-    const fetchService = async () => {
-      const allServices = await getAllServices();
-      const found = allServices.find(s => s.slug === serviceSlug);
-      if (found) {
-        setService(found);
-      } else {
-        // Option to navigate to 404 or services page
-        navigate('/services');
-      }
+    const matchedFallback = FALLBACK_SERVICES_CATALOG.find(s => s.slug === serviceSlug) || null;
+    if (matchedFallback) {
+      setService(matchedFallback);
       setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
+    const fetchService = async () => {
+      try {
+        const allServices = await getAllServices();
+        const merged = mergeWithFallbackServices(allServices);
+        const found = merged.find(s => s.slug === serviceSlug || s.id === serviceSlug) || null;
+        setService(found);
+      } catch (e) {
+        console.warn('Error fetching service details, using fallback:', e);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchService();
-  }, [serviceSlug, navigate]);
+  }, [serviceSlug]);
 
-  if (loading) {
+  if (loading && !service) {
     return (
       <div className="flex-1 min-h-screen flex items-center justify-center bg-[#f8f9fa]">
         <Loader2 className="animate-spin text-[#00B4D8]" size={40} />
@@ -96,16 +107,42 @@ export function ServiceDetail() {
     );
   }
 
+  const canonicalUrl = `https://avlive.com.pk/services/${service.slug || service.id}`;
+  const serviceFaqs = service.faqs || [
+    {
+      q: `Does AV Live provide ${service.title} in Lahore, Karachi, and Islamabad?`,
+      a: `Yes, AV Live Communications provides nationwide ${service.title}, Corporate event management, hybrid event broadcasting, 3D Hologram Display stages, and Video Conference in Pakistan (Polycom Group 500 & Poly X70) across Lahore, Karachi, and Islamabad.`
+    }
+  ];
+
   const serviceSchema = {
     "@context": "https://schema.org",
-    "@type": "Service",
-    "name": service.title,
-    "provider": {
-      "@type": "LocalBusiness",
-      "name": "AV Live Communications"
-    },
-    "description": service.description?.replace(/<[^>]*>?/gm, ''),
-    "url": `https://avlive.com.pk/services/${service.slug || service.id}`
+    "@graph": [
+      {
+        "@type": "Service",
+        "@id": `${canonicalUrl}#service`,
+        "name": service.title,
+        "serviceType": service.serviceType || service.category || "Corporate event management & AV Integration",
+        "provider": {
+          "@id": "https://avlive.com.pk/#organization"
+        },
+        "areaServed": ["Lahore", "Karachi", "Islamabad", "Pakistan"],
+        "description": service.description?.replace(/<[^>]*>?/gm, ''),
+        "url": canonicalUrl
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${canonicalUrl}#faq`,
+        "mainEntity": serviceFaqs.map(f => ({
+          "@type": "Question",
+          "name": f.q,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": f.a
+          }
+        }))
+      }
+    ]
   };
 
   return (
@@ -113,12 +150,16 @@ export function ServiceDetail() {
       <SEO 
         title={`${service.title} | AV Live Communications Pakistan`}
         description={service.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Professional ${service.title} enterprise deployment and support by AV Live Communications.`}
+        keywords={service.keywords || `${service.title}, Corporate event management, Event management, hybrid event, Hologram Display, events, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70`}
         image={service.imageUrl || 'https://avlive.com.pk/og-image.jpg'}
         imageAlt={`${service.title} - AV Live Communications`}
-        url={`https://avlive.com.pk/services/${service.slug || service.id}`}
-        type="article"
+        url={canonicalUrl}
+        type="website"
         schema={serviceSchema}
       />
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <Breadcrumbs items={[{ label: 'Services', path: '/services' }, { label: service.title }]} />
+      </div>
       {/* Hero Section */}
       <div className="bg-[#1A2B4C] text-white py-24 relative overflow-hidden">
         {service.imageUrl && (
@@ -135,7 +176,7 @@ export function ServiceDetail() {
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-16 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-16 w-full overflow-hidden">
         {/* Content */}
-        <div className="w-full min-w-0">
+        <div className="w-full min-w-0 space-y-12">
           <div className="bg-white rounded-[3rem] p-6 sm:p-12 border border-gray-100 shadow-sm w-full overflow-hidden">
             {service.detailedContent ? (
                <div className="prose prose-lg max-w-none break-words prose-headings:font-black prose-headings:text-[#1A2B4C] prose-a:text-[#00B4D8] prose-img:rounded-3xl prose-p:text-gray-600 prose-p:leading-relaxed prose-strong:text-[#1A2B4C] marker:text-[#00B4D8] [&_*]:break-words" dangerouslySetInnerHTML={{ __html: formatContent(service.detailedContent) }} />
@@ -147,6 +188,20 @@ export function ServiceDetail() {
                </div>
             )}
           </div>
+
+          {serviceFaqs.length > 0 && (
+            <div className="bg-white rounded-[3rem] p-6 sm:p-12 border border-gray-100 shadow-sm">
+              <h2 className="text-2xl font-black text-[#1A2B4C] mb-6">Frequently Asked Questions ({service.title})</h2>
+              <div className="space-y-4">
+                {serviceFaqs.map((faq, i) => (
+                  <div key={i} className="p-6 rounded-2xl bg-[#f8f9fa] border border-gray-100">
+                    <h3 className="font-bold text-[#1A2B4C] mb-2">{faq.q}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed font-medium">{faq.a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
