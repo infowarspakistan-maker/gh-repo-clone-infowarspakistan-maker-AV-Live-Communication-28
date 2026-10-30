@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Calendar, Users, MonitorPlay, Gamepad2, BrainCircuit, Bot, Cog, Loader2, Sparkles, ShieldCheck, Zap } from 'lucide-react';
 import { subscribeToServicesPage, ServicePageData, getAllServices, Service } from '../../lib/firebase/firestore-helpers';
+import { SEO } from '../../components/SEO';
 
 export function ServicesLanding() {
   const [pageData, setPageData] = useState<ServicePageData | null>(null);
@@ -57,10 +58,29 @@ export function ServicesLanding() {
 
   return (
     <div className="flex-1 w-full bg-[#f8f9fa] pb-16">
+      <SEO
+        title="Corporate Event Management, Hybrid Events & Video Conferencing Services | AV Live Pakistan"
+        description="Full-scale Corporate Event Management, Hybrid Event Production, 3D Hologram Displays, Video Conferencing Boardroom Integration, and AI Automation in Lahore, Karachi, and Islamabad."
+        keywords="Corporate event management, Event management, hybrid event, Hologram Display, events, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, AV Live"
+        url="https://avlive.com.pk/services"
+        image={data.heroImageUrl}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "name": "Corporate Event Management, Hybrid Events & Video Conferencing Integration",
+          "provider": {
+            "@type": "LocalBusiness",
+            "name": "AV Live Communications",
+            "url": "https://avlive.com.pk"
+          },
+          "areaServed": ["Lahore", "Karachi", "Islamabad", "Pakistan"],
+          "description": "Enterprise corporate event management, hybrid events, 3D hologram stage displays, and video conferencing boardroom integration in Pakistan."
+        }}
+      />
       {/* Hero Section */}
       <div className="relative h-[600px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img loading="lazy" src={data.heroImageUrl} alt="Services" className="w-full h-full object-cover" />
+          <img fetchPriority="high" src={data.heroImageUrl} alt="Corporate Event Management and Video Conferencing Services in Pakistan" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-[#1A2B4C]/80 mix-blend-multiply"></div>
         </div>
         

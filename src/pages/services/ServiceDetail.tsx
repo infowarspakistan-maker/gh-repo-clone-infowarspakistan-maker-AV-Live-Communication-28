@@ -84,7 +84,17 @@ export function ServiceDetail() {
     );
   }
 
-  if (!service) return null;
+  if (!service) {
+    return (
+      <div className="flex-1 min-h-screen flex flex-col items-center justify-center bg-[#f8f9fa] px-4 text-center">
+        <SEO title="Service Not Found | AV Live Communications" noindex={true} />
+        <h1 className="text-3xl font-black text-[#1A2B4C] mb-4">Service Not Found</h1>
+        <Link to="/services" className="bg-[#1A2B4C] text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#00B4D8] transition-all">
+          View All Services
+        </Link>
+      </div>
+    );
+  }
 
   const serviceSchema = {
     "@context": "https://schema.org",
@@ -113,7 +123,7 @@ export function ServiceDetail() {
       <div className="bg-[#1A2B4C] text-white py-24 relative overflow-hidden">
         {service.imageUrl && (
            <div className="absolute inset-0 z-0">
-             <img loading="lazy" src={service.imageUrl} alt={service.title} className="w-full h-full object-cover mix-blend-overlay opacity-30" />
+             <img fetchPriority="high" src={service.imageUrl} alt={service.title} className="w-full h-full object-cover mix-blend-overlay opacity-30" />
            </div>
         )}
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full overflow-hidden">

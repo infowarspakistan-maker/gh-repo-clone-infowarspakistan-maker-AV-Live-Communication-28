@@ -595,7 +595,7 @@ function Navbar() {
 
             {/* AI SOLUTIONS */}
             <div className="h-14 flex items-center group relative">
-              <span className="h-14 flex items-center border-b-[3px] border-transparent hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors cursor-pointer">AI SOLUTIONS</span>
+              <Link to="/services/ai-development" className="h-14 flex items-center border-b-[3px] border-transparent hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors cursor-pointer">AI SOLUTIONS</Link>
               <div className="absolute top-14 left-0 w-[300px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6">
                 <ul className="space-y-4 text-[14px] text-gray-600 font-medium capitalize tracking-normal">
                   <li><Link to="/services/ai-development" className="hover:text-[#00B4D8] transition-colors block">AI Development</Link></li>
@@ -607,7 +607,7 @@ function Navbar() {
 
             {/* VOIP & UC */}
             <div className="h-14 flex items-center group relative">
-              <span className="h-14 flex items-center border-b-[3px] border-transparent hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors cursor-pointer">VOIP & UC</span>
+              <Link to="/voip-service-providers" className="h-14 flex items-center border-b-[3px] border-transparent hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors cursor-pointer">VOIP &amp; UC</Link>
               <div className="absolute top-14 left-0 w-[300px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6">
                 <ul className="space-y-4 text-[14px] text-gray-600 font-medium capitalize tracking-normal">
                   <li><Link to="/product/3cx-pro-8-sc-pakistan" className="hover:text-[#00B4D8] transition-colors block">3CX Phone System</Link></li>

@@ -34,11 +34,17 @@ export function Footer() {
 
           {/* Information */}
           <div>
-            <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Information</h3>
+            <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Information &amp; SEO Hubs</h3>
             <ul className="space-y-4 text-sm text-gray-200">
               <li><Link to="/about" className="hover:text-[#00B4D8] transition-colors">About Us</Link></li>
+              <li><Link to="/video-conferencing" className="hover:text-[#00B4D8] transition-colors">Video Conferencing in Pakistan</Link></li>
+              <li><Link to="/events-services" className="hover:text-[#00B4D8] transition-colors">Corporate Event Management</Link></li>
+              <li><Link to="/3d-hologram" className="hover:text-[#00B4D8] transition-colors">3D Hologram Displays</Link></li>
+              <li><Link to="/projection-mapping" className="hover:text-[#00B4D8] transition-colors">3D Projection Mapping</Link></li>
+              <li><Link to="/zoom-rooms" className="hover:text-[#00B4D8] transition-colors">Zoom Rooms Pakistan</Link></li>
+              <li><Link to="/microsoft-teams-rooms" className="hover:text-[#00B4D8] transition-colors">Microsoft Teams Rooms</Link></li>
               <li><Link to="/guides" className="hover:text-[#00B4D8] transition-colors">Buyer's Guides</Link></li>
-              <li><Link to="/products/compare" className="hover:text-[#00B4D8] transition-colors">Comparison Charts</Link></li>
+              <li><Link to="/compare" className="hover:text-[#00B4D8] transition-colors">Comparison Charts</Link></li>
               <li><Link to="/faqs" className="hover:text-[#00B4D8] transition-colors">FAQs</Link></li>
               <li><Link to="/payment" className="hover:text-[#00B4D8] transition-colors">Payment Methods</Link></li>
               <li><Link to="/returns" className="hover:text-[#00B4D8] transition-colors">Returns</Link></li>
@@ -50,17 +56,19 @@ export function Footer() {
 
           {/* Programs */}
           <div>
-            <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Programs</h3>
+            <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Programs &amp; Cities</h3>
             <ul className="space-y-4 text-sm text-gray-200">
               <li><Link to="/programs/blind-drop-shipping" className="hover:text-[#00B4D8] transition-colors">Blind Drop Shipping</Link></li>
-              <li><Link to="/programs/government-education-pricing" className="hover:text-[#00B4D8] transition-colors">Government & Education Pricing</Link></li>
+              <li><Link to="/programs/government-education-pricing" className="hover:text-[#00B4D8] transition-colors">Government &amp; Education Pricing</Link></li>
               <li><Link to="/programs/fulfillment-services" className="hover:text-[#00B4D8] transition-colors">Product Fulfillment Services</Link></li>
               <li><Link to="/programs/promotions" className="hover:text-[#00B4D8] transition-colors">Promotions</Link></li>
               <li><Link to="/programs/provisioning-services" className="hover:text-[#00B4D8] transition-colors">Provisioning Services</Link></li>
-              <li><Link to="/contact" className="hover:text-[#00B4D8] transition-colors">Quote Request</Link></li>
+              <li><Link to="/event-quote" className="hover:text-[#00B4D8] transition-colors">24-Hour Custom Quote</Link></li>
               <li><Link to="/programs/reseller-program" className="hover:text-[#00B4D8] transition-colors">Reseller Program</Link></li>
-              <li><Link to="/voip-service" className="hover:text-[#00B4D8] transition-colors">VoIP Phone Service</Link></li>
-              <li><Link to="/voip-service" className="hover:text-[#00B4D8] transition-colors">VoIP Service Providers</Link></li>
+              <li><Link to="/voip-service-providers" className="hover:text-[#00B4D8] transition-colors">VoIP Service Providers</Link></li>
+              <li><Link to="/lahore" className="hover:text-[#00B4D8] transition-colors">AV &amp; Events Lahore</Link></li>
+              <li><Link to="/karachi" className="hover:text-[#00B4D8] transition-colors">AV &amp; Events Karachi</Link></li>
+              <li><Link to="/islamabad" className="hover:text-[#00B4D8] transition-colors">AV &amp; Events Islamabad</Link></li>
             </ul>
           </div>
 
@@ -78,7 +86,7 @@ export function Footer() {
               <li className="flex items-start gap-4">
                 <Phone className="shrink-0 w-5 h-5 mt-0.5" />
                 <div>
-                  0321 425 6263
+                  +92 321 425 6263 / +92 42 3233 4782
                 </div>
               </li>
               <li className="flex items-center gap-4">

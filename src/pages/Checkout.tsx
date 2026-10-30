@@ -126,6 +126,7 @@ export function Checkout() {
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen py-16 text-[#1A2B4C]">
+      <SEO title="Secure Checkout | AV Live Communications" noindex={true} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-12">
            <div>

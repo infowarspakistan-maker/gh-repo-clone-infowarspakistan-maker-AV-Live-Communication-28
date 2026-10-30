@@ -226,7 +226,8 @@
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        transition: opacity 0.5s ease;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
       }
       .spinner {
         width: 50px;
@@ -246,22 +247,38 @@
         letter-spacing: 2px;
       }
     </style>
+    <script>
+      // Immediately align canonical URL with the current path for search engine crawlers
+      (function () {
+        try {
+          var cleanPath = window.location.pathname === '/' ? '' : window.location.pathname.replace(/\/+$/, '');
+          var canonicalUrl = 'https://avlive.com.pk' + cleanPath;
+          var link = document.querySelector('link[rel="canonical"]');
+          if (link) link.setAttribute('href', canonicalUrl);
+          var ogUrl = document.querySelector('meta[property="og:url"]');
+          if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
-    <div id="initial-loader">
+    <div id="initial-loader" aria-hidden="true">
       <div class="spinner"></div>
       <div class="brand-text">AV LIVE</div>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      window.addEventListener('load', () => {
-        const loader = document.getElementById('initial-loader');
+      function dismissInitialLoader() {
+        var loader = document.getElementById('initial-loader');
         if (loader) {
           loader.style.opacity = '0';
-          setTimeout(() => loader.remove(), 500);
+          setTimeout(function () { loader.remove(); }, 250);
         }
-      });
+      }
+      window.addEventListener('DOMContentLoaded', dismissInitialLoader);
+      window.addEventListener('load', dismissInitialLoader);
+      setTimeout(dismissInitialLoader, 800);
     </script>
   </body>
 </html>

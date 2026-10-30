@@ -249,8 +249,36 @@ const LANDING_CONFIGS: Record<string, LandingConfig> = {
 
 export function KeywordLandingPage() {
   const { keywordSlug } = useParams<{ keywordSlug: string }>();
-  const slug = keywordSlug?.toLowerCase() || 'video-conferencing';
-  const config = LANDING_CONFIGS[slug] || LANDING_CONFIGS['video-conferencing'];
+  const slug = keywordSlug?.toLowerCase() || '';
+  const config = LANDING_CONFIGS[slug];
+
+  if (!config) {
+    return (
+      <div className="flex-1 w-full bg-[#F8F9FA] min-h-[70vh] flex flex-col items-center justify-center px-4 py-20 text-center">
+        <SEO
+          title="Page Not Found (404) | AV Live Communications Pakistan"
+          description="The requested page could not be found. Explore AV Live's Video Conferencing in Pakistan, Polycom Group 500, Poly X70, and Corporate Event Management solutions."
+          noindex={true}
+        />
+        <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.3em] mb-3">Error 404</span>
+        <h1 className="text-4xl md:text-5xl font-black text-[#1A2B4C] mb-4">Page Not Found</h1>
+        <p className="text-gray-500 max-w-xl mb-8 font-medium">
+          The URL <code className="bg-gray-200 px-2 py-0.5 rounded text-[#1A2B4C]">/{slug}</code> does not exist or has moved. Explore our core enterprise solutions below:
+        </p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Link to="/video-conferencing" className="bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all">
+            Video Conferencing in Pakistan
+          </Link>
+          <Link to="/events-services" className="bg-[#00B4D8] hover:bg-[#0096B4] text-white font-black px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all">
+            Corporate Event Management
+          </Link>
+          <Link to="/shop" className="bg-white border border-gray-200 hover:border-[#1A2B4C] text-[#1A2B4C] font-black px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all">
+            Browse Hardware Catalog
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 w-full bg-[#F8F9FA] pb-16">

@@ -55,6 +55,11 @@ export function Category() {
   if (!currentCategory) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
+        <SEO
+          title="Category Not Found | AV Live Communications"
+          description="The requested hardware category does not exist."
+          noindex={true}
+        />
         <h1 className="text-4xl font-black text-[#1A2B4C] mb-4">Classification Error</h1>
         <p className="text-gray-500 mb-8 font-medium">The hardware category you requested is not indexed.</p>
         <Link to="/shop" className="bg-[#1A2B4C] text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#00B4D8] transition-all shadow-xl">
@@ -114,7 +119,7 @@ export function Category() {
             className="w-32 h-32 bg-[#1A2B4C] text-[#00B4D8] rounded-[2.5rem] flex items-center justify-center shrink-0 shadow-2xl"
           >
             {currentCategory.imageUrl ? (
-              <img loading="lazy" src={currentCategory.imageUrl} alt={currentCategory.name} className="w-full h-full object-cover rounded-[2.5rem]" />
+              <img fetchPriority="high" src={currentCategory.imageUrl} alt={currentCategory.name} className="w-full h-full object-cover rounded-[2.5rem]" />
             ) : (
               <Layers size={48} />
             )}

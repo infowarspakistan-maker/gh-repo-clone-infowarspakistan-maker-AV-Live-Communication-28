@@ -235,6 +235,7 @@ async function startServer() {
   app.get('/sitemap.xml', async (req, res) => {
     try {
       const baseUrl = 'https://avlive.com.pk';
+      const today = new Date().toISOString().split('T')[0];
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
@@ -244,9 +245,16 @@ async function startServer() {
         '/shop',
         '/solutions',
         '/services',
+        '/events-services',
+        '/event-quote',
         '/contact',
         '/about',
+        '/faqs',
         '/blog',
+        '/compare',
+        '/guides',
+        '/reviews',
+        '/voip-service-providers',
         '/3d-hologram',
         '/projection-mapping',
         '/video-conferencing',
@@ -255,14 +263,22 @@ async function startServer() {
         '/microsoft-teams-rooms',
         '/lahore',
         '/karachi',
-        '/islamabad'
+        '/islamabad',
+        '/services/corporate-events',
+        '/services/hybrid-events',
+        '/services/expo-organizing',
+        '/services/esports-events',
+        '/services/ai-development',
+        '/services/ai-agents-workers',
+        '/services/ai-automation'
       ];
 
       for (const route of staticRoutes) {
         xml += '  <url>\n';
         xml += `    <loc>${baseUrl}${route}</loc>\n`;
-        xml += '    <changefreq>daily</changefreq>\n';
-        xml += '    <priority>1.0</priority>\n';
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += '    <changefreq>weekly</changefreq>\n';
+        xml += `    <priority>${route === '' ? '1.0' : '0.9'}</priority>\n`;
         xml += '  </url>\n';
       }
 
@@ -270,8 +286,11 @@ async function startServer() {
       try {
         const productsSnap = await db.collection('products').where('isActive', '==', true).get();
         productsSnap.forEach(doc => {
+          const data = doc.data();
+          const slug = data.slug || doc.id;
           xml += '  <url>\n';
-          xml += `    <loc>${baseUrl}/product/${doc.id}</loc>\n`;
+          xml += `    <loc>${baseUrl}/product/${slug}</loc>\n`;
+          xml += `    <lastmod>${today}</lastmod>\n`;
           xml += '    <changefreq>weekly</changefreq>\n';
           xml += '    <priority>0.8</priority>\n';
           xml += '  </url>\n';
@@ -280,13 +299,26 @@ async function startServer() {
         console.error('Error fetching products for sitemap:', e);
       }
 
-      // Dynamic Categories (only active)
+      // Dynamic Categories (only active product categories, excluding navigation pages)
+      const excludedCategorySlugs = new Set([
+        'about', 'compare', 'faqs', 'guides', 'payment', 'returns', 'reviews', 'rma',
+        'shipping', 'blog', 'contact', 'privacy-policy', 'terms-of-service',
+        'blind-drop-shipping', 'fulfillment-services', 'government-education-pricing',
+        'promotions', 'provisioning-services', 'quote', 'reseller-program',
+        'ai-agents-workers', 'ai-automation', 'ai-development', 'corporate-events',
+        'esports-events', 'expo-organizing', 'hybrid-events', 'voip-service-providers'
+      ]);
       try {
         const categoriesSnap = await db.collection('categories').where('isActive', '==', true).get();
         categoriesSnap.forEach(doc => {
           const data = doc.data();
+          const slug = data.slug || doc.id;
+          if ((data.type && data.type !== 'product') || excludedCategorySlugs.has(slug)) {
+            return;
+          }
           xml += '  <url>\n';
-          xml += `    <loc>${baseUrl}/category/${data.slug || doc.id}</loc>\n`;
+          xml += `    <loc>${baseUrl}/category/${slug}</loc>\n`;
+          xml += `    <lastmod>${today}</lastmod>\n`;
           xml += '    <changefreq>weekly</changefreq>\n';
           xml += '    <priority>0.8</priority>\n';
           xml += '  </url>\n';
@@ -791,6 +823,87 @@ async function startServer() {
     }
   });
 
+  // Server-side SEO Canonical & Metadata injector for Googlebot first-wave HTML crawls
+  function injectRouteSeoIntoHtml(html: string, reqPath: string): string {
+    const cleanPath = reqPath === '/' ? '' : reqPath.replace(/\/+$/, '');
+    const canonicalUrl = `https://avlive.com.pk${cleanPath}`;
+
+    const routeMeta: Record<string, { title: string; description: string; noindex?: boolean }> = {
+      '/shop': {
+        title: 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live',
+        description: 'Buy genuine Video Conference in Pakistan hardware: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Yealink, and Corporate Event Management equipment.'
+      },
+      '/video-conferencing': {
+        title: 'Video Conferencing in Pakistan | Polycom Group 500, Poly X70, Zoom & Teams | AV Live',
+        description: 'Enterprise video conferencing in Pakistan. Official integration of Polycom Group 500, Poly X70, Logitech Rally, Zoom Rooms & Microsoft Teams Rooms across Lahore, Karachi & Islamabad.'
+      },
+      '/3d-hologram': {
+        title: '3D Hologram Events Pakistan | Holographic Stage Displays & HoloGauze | AV Live',
+        description: 'Book high-impact 3D hologram displays in Pakistan for corporate product launches, keynote telepresence, and hybrid events in Lahore, Karachi & Islamabad.'
+      },
+      '/projection-mapping': {
+        title: '3D Projection Mapping Pakistan | Architectural & Stage Mapping | AV Live',
+        description: 'Immersive 3D projection mapping in Pakistan for corporate galas, building facades, and hybrid events using 20,000+ ANSI lumen laser projectors.'
+      },
+      '/events-services': {
+        title: 'Corporate Event Management Pakistan | Hybrid Events & 3D Hologram | AV Live',
+        description: 'Turnkey corporate event management, hybrid event broadcasting, 3D hologram stage production, and SMD LED wall rental in Lahore, Karachi, and Islamabad.'
+      },
+      '/services': {
+        title: 'Corporate Event Management, Video Conferencing & AI Solutions | AV Live Pakistan',
+        description: 'Full-service corporate event management, hybrid event production, 3D hologram displays, video conferencing boardroom integration, and AI automation in Pakistan.'
+      },
+      '/solutions': {
+        title: 'AV & Unified Communication Solutions | Video Conference in Pakistan | AV Live',
+        description: 'Explore boardroom video conferencing, corporate event management, hybrid event staging, and enterprise VoIP solutions across Pakistan.'
+      },
+      '/faqs': {
+        title: 'Frequently Asked Questions (FAQs) | Video Conference & Event Management | AV Live',
+        description: 'Answers to common questions about Video Conference in Pakistan, Polycom Group 500, Poly X70, Corporate Event Management, 3D Hologram displays, and nationwide delivery.'
+      },
+      '/cart': {
+        title: 'Project Staging Cart | AV Live Communications',
+        description: 'Review your enterprise AV and video conferencing hardware staging cart.',
+        noindex: true
+      },
+      '/checkout': {
+        title: 'Secure Checkout | AV Live Communications',
+        description: 'Complete your enterprise AV hardware procurement order.',
+        noindex: true
+      },
+      '/admin': {
+        title: 'Admin Portal | AV Live',
+        description: 'Restricted administrative portal.',
+        noindex: true
+      }
+    };
+
+    let updated = html
+      .replace(/<link rel="canonical" href="https:\/\/avlive\.com\.pk" \/>/, `<link rel="canonical" href="${canonicalUrl}" />`)
+      .replace(/<meta property="og:url" content="https:\/\/avlive\.com\.pk" \/>/, `<meta property="og:url" content="${canonicalUrl}" />`);
+
+    const matched = routeMeta[cleanPath];
+    if (matched) {
+      updated = updated
+        .replace(/<title>[\s\S]*?<\/title>/, `<title>${matched.title}</title>`)
+        .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${matched.description}" />`)
+        .replace(/<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${matched.title}" />`)
+        .replace(/<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${matched.description}" />`);
+      if (matched.noindex) {
+        updated = updated.replace(
+          /<meta name="robots" content="[^"]*" \/>/,
+          '<meta name="robots" content="noindex, nofollow" />'
+        );
+      }
+    }
+
+    return updated;
+  }
+
+  // Legacy redirects for broken/old slugs so Googlebot receives clean 301s
+  app.get('/voip-service', (req, res) => res.redirect(301, '/voip-service-providers'));
+  app.get('/products/compare', (req, res) => res.redirect(301, '/compare'));
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
@@ -800,9 +913,16 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, { index: false }));
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      const indexPath = path.join(distPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        const rawHtml = fs.readFileSync(indexPath, 'utf8');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(injectRouteSeoIntoHtml(rawHtml, req.path));
+      } else {
+        res.status(404).send('Application build not found');
+      }
     });
   }
 

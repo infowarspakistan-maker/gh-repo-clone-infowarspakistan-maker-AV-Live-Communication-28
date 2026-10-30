@@ -1,15 +1,28 @@
-# AV Live Communications
+# AV Live Communications (avlive.com.pk)
 
-> AV Live Communications is Pakistan's premier enterprise Audio-Visual (AV) systems integrator and hardware distributor. Specializing in corporate boardroom automation, PTA-approved video conferencing solutions, IP telephony, and commercial audio installations across Lahore, Karachi, Islamabad, and nationwide.
+> AV Live Communications is Pakistan's premier enterprise Audio-Visual (AV) systems integrator, Video Conferencing hardware distributor, and Corporate Event Management company. Operating across Lahore, Karachi, Islamabad, and nationwide, AV Live specializes in two primary commercial pillars: (1) Video Conferencing in Pakistan (Polycom Group 500, Poly Studio X70, Logitech Rally, Zoom Rooms, Microsoft Teams Rooms) and (2) Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Displays, and 3D Projection Mapping.
 
-## Core Solutions & Product Catalogs
-- [Video Conferencing Hardware](https://avlive.com.pk/shop?category=video-conferencing): Enterprise all-in-one video bars, PTZ tracking cameras, and codec kits (Poly, Logitech, Yealink, Cisco).
-- [Boardroom & Smart Meeting Solutions](https://avlive.com.pk/category/boardroom-solutions): Interactive flat panels, wireless presentation systems, and acoustic ceiling microphones (Shure, Crestron).
-- [VoIP & IP Telephony](https://avlive.com.pk/shop?category=ip-phones): IP phones, PBX servers, and conference phones (Grandstream, Yealink, Cisco).
-- [Commercial Audio & PA Systems](https://avlive.com.pk/category/commercial-audio): Digital signal processors (DSPs), line array speakers, and auditorium sound engineering.
+## Pillar 1: Video Conferencing in Pakistan & Boardroom Hardware
+- [Video Conferencing in Pakistan Hub](https://avlive.com.pk/video-conferencing): Complete boardroom AV design, acoustic calibration, and multi-camera tracking systems.
+- [Polycom RealPresence Group 500 & Poly Studio X70](https://avlive.com.pk/category/video-conferencing): Genuine Polycom Group 500 codecs, Poly X70 dual-4K AI video bars, Poly Studio X50/X30, Logitech Rally Bar, Cisco Room Kits, and Yealink MeetingBars.
+- [Zoom Rooms Integration Pakistan](https://avlive.com.pk/zoom-rooms): Certified Zoom Rooms hardware procurement and one-touch tablet room deployment.
+- [Microsoft Teams Rooms (MTR) Pakistan](https://avlive.com.pk/microsoft-teams-rooms): Certified Microsoft Teams Rooms for huddle spaces, executive boardrooms, and townhall auditoriums.
+- [Conference Room AV Solutions](https://avlive.com.pk/conference-room-solutions): Shure ceiling microphone arrays, QSC Q-SYS DSPs, Crestron control, and interactive flat panels.
+- [VoIP & IP Telephony](https://avlive.com.pk/category/ip-phones): 3CX, FreePBX, Grandstream, Yealink, and Cisco IP phones and PBX servers.
 
-## Regional Branch Offices & Contact
-- **Lahore Head Office**: Johar Town Block N / Main Gulberg III, Lahore, Punjab. Tel: +92-321-425-6263 / +92-42-35789012
-- **Karachi Regional Office**: Sharah-e-Faisal, PECHS Block 6, Karachi, Sindh.
-- **Islamabad Office**: Blue Area, Jinnah Avenue, Islamabad.
-- **Official Website**: https://avlive.com.pk
+## Pillar 2: Corporate Event Management, Hybrid Events & 3D Hologram Displays
+- [Corporate Event Management & AV Production](https://avlive.com.pk/events-services): End-to-end corporate galas, AGMs, product launches, and multinational summits across Pakistan.
+- [3D Hologram Display Events](https://avlive.com.pk/3d-hologram): Life-size holographic telepresence stages, HoloGauze projection, and 3D floating product displays.
+- [3D Projection Mapping Pakistan](https://avlive.com.pk/projection-mapping): Architectural building facade projection mapping and immersive 360-degree stage visuals using 20,000+ ANSI lumen laser projectors.
+- [Hybrid Event Management](https://avlive.com.pk/services/hybrid-events): Broadcast-grade multi-camera switching, two-way remote keynote integration with Zoom/Teams, and live streaming.
+- [24-Hour Custom Event & AV Quote](https://avlive.com.pk/event-quote): Fast-track B2B and government/education proposals with a 15-minute WhatsApp/phone SLA.
+
+## Regional Experience Centers & Standardized NAP
+- **Lahore Experience Center (Head Office)**: Johar Town Block N, Lahore, Punjab, Pakistan | Tel: +92 42 3233 4782 | Mobile/WhatsApp: +92 321 425 6263 | Page: https://avlive.com.pk/lahore
+- **Karachi Regional Office**: Clifton Executive Office / Shahrah-e-Faisal, Karachi, Sindh, Pakistan | Tel: +92 21 3589 0123 | Page: https://avlive.com.pk/karachi
+- **Islamabad Regional Office**: Blue Area Commercial Hub, Jinnah Avenue, Islamabad, ICT, Pakistan | Tel: +92 51 2890 124 | Page: https://avlive.com.pk/islamabad
+- **Email**: info@avlive.com.pk | sales@avlive.com.pk
+
+## Structured Feeds & Sitemaps
+- **XML Sitemap**: https://avlive.com.pk/sitemap.xml
+- **Google Merchant Center 40-Column Product Feed (TSV)**: https://avlive.com.pk/feed/google-merchant.tsv

@@ -5,6 +5,23 @@ import { SEO } from '../components/SEO';
 
 const FAQS = [
   {
+    category: "Video Conferencing & Corporate Event Management",
+    questions: [
+      {
+        q: "Which systems are best for Video Conference in Pakistan for medium and large boardrooms?",
+        a: "For medium-to-large executive boardrooms in Pakistan, our most reliable deployments are the Poly Studio X70 (Poly X70) all-in-one dual-4K video bar, the Polycom RealPresence Group 500 (Polycom Group 500) codec system, and Logitech Rally Bar kits certified for Zoom Rooms and Microsoft Teams Rooms."
+      },
+      {
+        q: "Does AV Live supply genuine Polycom Group 500 and Poly X70 systems with warranty in Pakistan?",
+        a: "Yes. AV Live Communications provides genuine Polycom Group 500 and Poly Studio X70 hardware with official warranty, acoustic calibration, and on-site engineering installation across Lahore, Karachi, and Islamabad."
+      },
+      {
+        q: "What Corporate event management, hybrid event, and Hologram Display services do you provide?",
+        a: "We deliver turnkey Corporate event management across Pakistan—including 3D Hologram Display stage setups, 3D architectural projection mapping, hybrid event multi-cam broadcasting for Zoom and MS Teams, SMD LED video walls, and concert-grade audio."
+      }
+    ]
+  },
+  {
     category: "Ordering & Products",
     questions: [
       { q: "Do you have physical products on display?", a: "Yes! Our Johar Town Block N, Lahore shop is open for walk-in customers to test IP Phones, Headsets, and Cameras." },
@@ -38,12 +55,29 @@ const FAQS = [
 ];
 
 export function FAQs() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": FAQS.flatMap(group =>
+      group.questions.map(item => ({
+        "@type": "Question",
+        "name": item.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": item.a
+        }
+      }))
+    )
+  };
+
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
       <SEO 
-        title="Frequently Asked Questions (FAQs) | AV Live Communications" 
-        description="Find answers to common questions about AV hardware procurement, boardroom video conferencing setup, PTA compliance, warranty, and nationwide shipping across Pakistan."
+        title="FAQs | Video Conference in Pakistan, Polycom Group 500, Poly X70 & Event Management | AV Live" 
+        description="Answers to common questions about Video Conference in Pakistan, Polycom Group 500, Poly X70, Corporate event management, hybrid events, Hologram Displays, and nationwide shipping."
+        keywords="Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, AV Live FAQs"
         url="https://avlive.com.pk/faqs"
+        schema={faqSchema}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
