@@ -47,9 +47,9 @@ function toAbsoluteUrl(pathOrUrl?: string, defaultFallback: string = DEFAULT_DOM
 }
 
 export function SEO({ 
-  title = 'Video Conference in Pakistan | Polycom Group 500 & Poly X70 | Corporate Event Management & Hologram Display | AV Live', 
-  description = "Leading provider of Video Conference in Pakistan (Polycom Group 500, Poly X70, Cisco, Logitech) & Corporate Event Management, Hybrid Event Production, and 3D Hologram Display across Lahore, Karachi & Islamabad.",
-  keywords = 'Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, Conference room AV setup, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, AV Live',
+  title = 'Video Conference | Event Management | AV Live', 
+  description = "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events.",
+  keywords = 'Video Conference, Event Management, AV Live, Video Conference in Pakistan, Event Management Company Pakistan, Polycom Group 500, Poly X70, Logitech Rally Bar, Corporate Event Management, 3D Hologram Display, Hybrid Events',
   image = DEFAULT_IMAGE,
   imageAlt,
   imageWidth = 1200,

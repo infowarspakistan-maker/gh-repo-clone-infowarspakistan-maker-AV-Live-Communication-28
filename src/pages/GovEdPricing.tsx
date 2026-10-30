@@ -10,6 +10,27 @@ export function GovEdPricing() {
         title="Government & Education Institutional AV Pricing | AV Live Pakistan" 
         description="Special institutional discounting, tender compliance, and subsidized pricing on professional AV and video conferencing for universities, schools, and government departments."
         url="https://avlive.com.pk/programs/government-education-pricing"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/programs/government-education-pricing#service',
+              name: 'Government, HEC University & Public Sector AV Pricing Program',
+              serviceType: 'Public Sector & Educational AV Procurement',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: 'PK',
+              url: 'https://avlive.com.pk/programs/government-education-pricing'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Government & Education Pricing', item: 'https://avlive.com.pk/programs/government-education-pricing' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

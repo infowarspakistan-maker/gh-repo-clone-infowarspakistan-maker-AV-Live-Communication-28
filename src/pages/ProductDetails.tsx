@@ -585,7 +585,48 @@ export function ProductDetails() {
                 <div className="min-h-[200px] w-full">
                   {/* All tab panels remain mounted in the DOM for Googlebot crawlability; visibility is toggled via CSS */}
                   <div className={activeTab === 'overview' ? 'prose prose-blue max-w-none block' : 'hidden'}>
+                    {/* Answer-First AEO Executive Summary */}
+                    <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-4 mb-6 not-prose">
+                      <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
+                        Answer-First Hardware Verdict
+                      </span>
+                      <p className="text-xs sm:text-sm font-bold text-[#1A2B4C] leading-relaxed">
+                        The <strong>{product.productName}</strong> (Official MPN: <strong>{resolvedMpn}</strong>, GTIN: {resolvedGtin}) by <strong>{resolvedBrand}</strong> is an enterprise-grade solution priced at <strong>Rs. {effectivePrice.toLocaleString()}</strong> in Pakistan. {gmcMeta?.highlight ? `${gmcMeta.highlight}. ` : ''}Includes a 1-year official local replacement warranty, PTA compliance, and nationwide deployment across Lahore, Karachi, and Islamabad.
+                      </p>
+                    </div>
+
                     <div className="text-gray-600 leading-relaxed font-medium text-xs break-words overflow-hidden prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: product.description || gmcMeta?.defaultDescription || '' }} />
+
+                    {/* Semantic HTML Quick-Spec Matrix for Google Featured Snippets & AI Crawlers */}
+                    <div className="mt-6 overflow-x-auto rounded-2xl border border-gray-100 not-prose">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <caption className="bg-gray-50 text-[#1A2B4C] font-black text-left px-4 py-2.5 text-[10px] uppercase tracking-widest border-b border-gray-100">
+                          {product.productName} — Verified Technical &amp; Commercial Summary
+                        </caption>
+                        <tbody className="divide-y divide-gray-100">
+                          <tr>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px] w-2/5">Manufacturer &amp; Brand</th>
+                            <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedBrand}</td>
+                          </tr>
+                          <tr>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Part Number (MPN) / SKU</th>
+                            <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedMpn}</td>
+                          </tr>
+                          <tr>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">GS1 GTIN / UPC</th>
+                            <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedGtin}</td>
+                          </tr>
+                          <tr>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Reference Price (PKR)</th>
+                            <td className="py-2.5 px-4 font-black text-[#00B4D8]">Rs. {effectivePrice.toLocaleString()} (FBR GST Invoice Available)</td>
+                          </tr>
+                          <tr>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Warranty &amp; SLA</th>
+                            <td className="py-2.5 px-4 font-bold text-emerald-600">1-Year Official Local Warranty (Upgradable to 3-Year SLA)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                     
                     <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full h-auto">
                        <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
@@ -604,23 +645,40 @@ export function ProductDetails() {
                           <p className="text-[10px] text-gray-500 font-semibold leading-relaxed">Built with robust enterprise security standards.</p>
                        </div>
                     </div>
+
+                    {/* High-Intent Buyer Comparison Links */}
+                    <div className="mt-6 pt-5 border-t border-gray-100 flex flex-wrap gap-2 not-prose">
+                      <Link to="/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan" className="text-[10px] font-black uppercase tracking-wider bg-gray-50 hover:bg-[#00B4D8]/10 text-[#1A2B4C] hover:text-[#00B4D8] px-3 py-1.5 rounded-full border border-gray-200 transition-colors">
+                        Rally Bar vs Poly X50 Guide →
+                      </Link>
+                      <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="text-[10px] font-black uppercase tracking-wider bg-gray-50 hover:bg-[#00B4D8]/10 text-[#1A2B4C] hover:text-[#00B4D8] px-3 py-1.5 rounded-full border border-gray-200 transition-colors">
+                        Boardroom BoM Price Guide →
+                      </Link>
+                      <Link to="/compare" className="text-[10px] font-black uppercase tracking-wider bg-gray-50 hover:bg-[#00B4D8]/10 text-[#1A2B4C] hover:text-[#00B4D8] px-3 py-1.5 rounded-full border border-gray-200 transition-colors">
+                        Compare Hardware Side-by-Side →
+                      </Link>
+                    </div>
                   </div>
 
                   <div className={activeTab === 'specs' ? 'block' : 'hidden'}>
-                    <div className="rounded-2xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
+                    <div className="rounded-2xl border border-gray-100 overflow-hidden">
                       {effectiveSpecificationsList.length > 0 ? (
-                        effectiveSpecificationsList.map((spec, idx) => {
-                          const parts = spec.split(':');
-                          if (parts.length < 2) return null;
-                          const label = parts[0];
-                          const val = parts.slice(1).join(':');
-                          return (
-                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center p-4 hover:bg-gray-50 transition-colors">
-                              <span className="w-1/3 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-0">{label.trim()}</span>
-                              <span className="w-2/3 text-xs font-bold text-[#1A2B4C]">{val.trim()}</span>
-                            </div>
-                          );
-                        })
+                        <table className="w-full text-left border-collapse">
+                          <tbody className="divide-y divide-gray-50">
+                            {effectiveSpecificationsList.map((spec, idx) => {
+                              const parts = spec.split(':');
+                              if (parts.length < 2) return null;
+                              const label = parts[0];
+                              const val = parts.slice(1).join(':');
+                              return (
+                                <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                                  <th className="w-1/3 p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">{label.trim()}</th>
+                                  <td className="w-2/3 p-4 text-xs font-bold text-[#1A2B4C]">{val.trim()}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
                       ) : (
                         <div className="p-8 text-center text-xs text-gray-400 font-bold uppercase tracking-wider">
                           PTA Compliant Enterprise Hardware • 1-Year Official Pakistan Warranty

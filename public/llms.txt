@@ -17,12 +17,20 @@
 - [Hybrid Event Management](https://avlive.com.pk/services/hybrid-events): Broadcast-grade multi-camera switching, two-way remote keynote integration with Zoom/Teams, and live streaming.
 - [24-Hour Custom Event & AV Quote](https://avlive.com.pk/event-quote): Fast-track B2B and government/education proposals with a 15-minute WhatsApp/phone SLA.
 
+## Pillar 3: High-Intent Hardware Comparisons & Room-Size BoM Guides (2026)
+- [Logitech Rally Bar vs. Poly Studio X50 & X52 Comparison](https://avlive.com.pk/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan): Side-by-side optical zoom, microphone range, and PKR pricing for Pakistani boardrooms.
+- [Yealink vs. Cisco Room Kits Enterprise Comparison](https://avlive.com.pk/blog/yealink-vs-cisco-video-conferencing-pakistan): Security, H.323/SIP codecs, and turnkey budget comparison for banks, defense, and enterprises.
+- [6-to-30 Person Boardroom AV System BoM & Price Guide Pakistan](https://avlive.com.pk/blog/boardroom-av-system-price-guide-pakistan): Complete Bill of Materials and PKR pricing tiers for huddle rooms, conference rooms, and auditoriums.
+- [Enterprise AV Solutions for Banks, Hospitals & Universities](https://avlive.com.pk/blog/banking-healthcare-university-av-solutions-pakistan): Vertical AV & UC architectures with PPRA and FBR compliance.
+- [Ceiling Microphone Arrays vs. Table Microphones Acoustic Guide](https://avlive.com.pk/blog/shure-bosch-ceiling-microphones-vs-table-mics-pakistan): Beamforming ceiling arrays vs. daisy-chained table mics for reverberant boardrooms.
+
 ## Regional Experience Centers & Standardized NAP
 - **Lahore Experience Center (Head Office)**: Johar Town Block N, Lahore, Punjab, Pakistan | Tel: +92 42 3233 4782 | Mobile/WhatsApp: +92 321 425 6263 | Page: https://avlive.com.pk/lahore
 - **Karachi Regional Office**: Clifton Executive Office / Shahrah-e-Faisal, Karachi, Sindh, Pakistan | Tel: +92 21 3589 0123 | Page: https://avlive.com.pk/karachi
 - **Islamabad Regional Office**: Blue Area Commercial Hub, Jinnah Avenue, Islamabad, ICT, Pakistan | Tel: +92 51 2890 124 | Page: https://avlive.com.pk/islamabad
 - **Email**: info@avlive.com.pk | sales@avlive.com.pk
 
-## Structured Feeds & Sitemaps
+## Structured Feeds, Full LLM Catalog & Sitemaps
+- **Full LLM Hardware & Pricing Knowledge Base**: https://avlive.com.pk/llms-full.txt
 - **XML Sitemap**: https://avlive.com.pk/sitemap.xml
 - **Google Merchant Center 40-Column Product Feed (TSV)**: https://avlive.com.pk/feed/google-merchant.tsv

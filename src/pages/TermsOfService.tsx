@@ -9,6 +9,24 @@ export function TermsOfService() {
         title="Terms of Service & Commercial Conditions | AV Live Pakistan" 
         description="Review the terms and conditions for hardware procurement, licensing, enterprise service agreements, and technical maintenance."
         url="https://avlive.com.pk/terms-of-service"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebPage',
+              '@id': 'https://avlive.com.pk/terms-of-service#webpage',
+              name: 'Terms of Service & Commercial Conditions — AV Live Pakistan',
+              url: 'https://avlive.com.pk/terms-of-service'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Terms of Service', item: 'https://avlive.com.pk/terms-of-service' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">

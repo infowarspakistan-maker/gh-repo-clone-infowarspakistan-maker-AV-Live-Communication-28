@@ -492,14 +492,79 @@ export function Category() {
         </div>
       </div>
       
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm">
-        <h2 className="text-2xl font-black mb-4">Expert Guide: Choosing {currentCategory.name} & Video Conference in Pakistan</h2>
-        <p className="text-gray-600 leading-relaxed mb-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-white rounded-[32px] p-8 sm:p-10 border border-gray-100 shadow-sm space-y-6">
+        <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-5">
+          <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
+            Answer-First Procurement Summary ({currentCategory.name})
+          </span>
+          <p className="text-sm sm:text-base font-bold text-[#1A2B4C] leading-relaxed">
+            For enterprise deployments in Pakistan, AV Live supplies {categoryProducts.length} verified <strong>{currentCategory.name}</strong> models from {brandsIncategory.slice(0, 5).join(', ') || 'HP Poly, Cisco, Logitech, and Yealink'}—complete with GS1 GTIN/MPN verification, official 1-to-3 year Pakistan warranty, and turnkey installation in Lahore, Karachi, and Islamabad.
+          </p>
+        </div>
+
+        <h2 className="text-2xl font-black text-[#1A2B4C]">
+          {currentCategory.name} Comparison &amp; Reference Price Matrix (Pakistan)
+        </h2>
+
+        {categoryProducts.length > 0 && (
+          <div className="overflow-x-auto rounded-2xl border border-gray-200">
+            <table className="w-full text-left border-collapse text-xs sm:text-sm">
+              <caption className="bg-[#1A2B4C] text-white font-black text-left px-5 py-3 text-xs uppercase tracking-wider">
+                Top {currentCategory.name} Models — Specifications &amp; PKR Pricing
+              </caption>
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
+                  <th className="py-3 px-4">Hardware Model</th>
+                  <th className="py-3 px-4">Brand</th>
+                  <th className="py-3 px-4">Part Number (SKU/MPN)</th>
+                  <th className="py-3 px-4">Reference Price (PKR)</th>
+                  <th className="py-3 px-4">Warranty &amp; Availability</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {categoryProducts.slice(0, 8).map((prod) => {
+                  const slug = getCanonicalProductSlug(prod);
+                  const { effectivePrice } = resolveProductPricing(prod);
+                  return (
+                    <tr key={prod.id || slug} className="hover:bg-gray-50/80 transition-colors">
+                      <td className="py-3 px-4 font-black text-[#1A2B4C]">
+                        <Link to={`/product/${slug}`} className="hover:text-[#00B4D8] transition-colors">
+                          {prod.productName}
+                        </Link>
+                      </td>
+                      <td className="py-3 px-4 font-bold text-gray-600">{prod.brand}</td>
+                      <td className="py-3 px-4 font-mono text-xs text-gray-500">{prod.sku || prod.mpn || 'Official OEM'}</td>
+                      <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. {effectivePrice.toLocaleString()}</td>
+                      <td className="py-3 px-4 font-bold text-emerald-600">In Stock • 1-Yr Official PK Warranty</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <p className="text-gray-600 leading-relaxed">
           When investing in <strong>{currentCategory.name.toLowerCase()}</strong> for your corporate boardroom, <strong>hybrid event</strong>, or <strong>Corporate event management</strong> infrastructure in Pakistan, selecting genuine, PTA-compliant hardware is critical. At AV Live, we supply and integrate flagship <strong>Video conference</strong> systems—including the <strong>Polycom Group 500</strong> and <strong>Poly X70</strong>—alongside commercial audio, IP telephony, and <strong>Hologram Display</strong> solutions.
         </p>
         <p className="text-gray-600 leading-relaxed">
           Our certified technical consultants in <strong>Lahore, Karachi, and Islamabad</strong> provide acoustic room surveys, GS1-verified hardware procurement, and turnkey onsite installation for all <strong>{currentCategory.name.toLowerCase()}</strong> deployments.
         </p>
+
+        <div className="pt-4 border-t border-gray-100 flex flex-wrap gap-3">
+          <Link to="/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+            Logitech Rally Bar vs. Poly Studio X50 Guide →
+          </Link>
+          <Link to="/blog/yealink-vs-cisco-video-conferencing-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+            Yealink vs. Cisco Room Kits Comparison →
+          </Link>
+          <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+            6–30 Person Boardroom BoM Price Guide →
+          </Link>
+          <Link to="/blog/banking-healthcare-university-av-solutions-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+            Banking, Healthcare &amp; University AV Guide →
+          </Link>
+        </div>
       </section>
     </div>
   );

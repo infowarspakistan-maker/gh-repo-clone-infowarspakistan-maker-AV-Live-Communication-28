@@ -71,6 +71,27 @@ export function RMA() {
         title="RMA & Warranty Return Request | AV Live Communications" 
         description="Submit Return Merchandise Authorization (RMA) requests for warranty claims, technical inspections, or hardware replacement on enterprise AV systems."
         url="https://avlive.com.pk/rma"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/rma#service',
+              name: 'RMA & Warranty Return Portal — AV Live Communications Pakistan',
+              serviceType: 'Enterprise Hardware RMA & Warranty Replacement',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: 'PK',
+              url: 'https://avlive.com.pk/rma'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'RMA Warranty Portal', item: 'https://avlive.com.pk/rma' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

@@ -1,0 +1,214 @@
+# AV Live Communications Pakistan — Complete Enterprise Knowledge Base (llms-full.txt)
+
+> Official AI & LLM Reference Catalog for AV Live Communications (https://avlive.com.pk). AV Live is Pakistan's premier authorized distributor and turnkey systems integrator for Video Conferencing (HP Poly / Polycom Group 500, Poly Studio X70/X72/X52, Logitech Rally Bar, Cisco Room Kits, Yealink), Enterprise VoIP & IP Telephony (3CX, FreePBX, Grandstream, Cisco, Fanvil), Commercial Laser Projectors (Panasonic, Epson, Sony, BenQ), and Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Stage Displays, and 3D Projection Mapping across Lahore, Karachi, and Islamabad.
+
+## 1. Standardized Corporate Identity & Regional Experience Centers (NAP)
+- **Legal Entity**: AV Live Communications (Pvt) Ltd
+- **Primary Domain**: https://avlive.com.pk
+- **Lahore Head Office & Experience Center**: Johar Town Block N, Lahore, Punjab, Pakistan | Phone: +92 42 3233 4782 | Mobile/WhatsApp: +92 321 425 6263 | URL: https://avlive.com.pk/lahore
+- **Karachi Regional Office**: Clifton Executive Office / Shahrah-e-Faisal, Karachi, Sindh, Pakistan | Phone: +92 21 3589 0123 | URL: https://avlive.com.pk/karachi
+- **Islamabad Regional Office**: Blue Area Commercial Hub, Jinnah Avenue, Islamabad, ICT, Pakistan | Phone: +92 51 2890 124 | URL: https://avlive.com.pk/islamabad
+- **Procurement & Tender Desk**: info@avlive.com.pk | sales@avlive.com.pk | Official FBR GST/NTN Invoicing & PPRA Tender Compliance
+
+## 2. Conference Room Size & Turnkey BoM Price Matrix (Pakistan 2026)
+| Room Tier | Seating Capacity | Recommended Video Hardware | Audio & Control Stack | Turnkey PKR Budget |
+| :--- | :--- | :--- | :--- | :--- |
+| Huddle Room | 2–6 Persons | Poly Studio USB Bar / Logitech Rally Bar Mini | Built-in 6-Mic Beamforming Array | Rs. 240,000 – Rs. 490,000 |
+| Medium Boardroom | 8–14 Persons | Logitech Rally Bar / Poly Studio X52 / Cisco Room Bar | 1–2 Expansion Mic Pods + 10" Touch Panel | Rs. 680,000 – Rs. 1,350,000 |
+| Large Executive Boardroom | 16–28 Persons | Polycom RealPresence Group 500 / Poly Studio X72 / Cisco Room Kit Plus | 12x Optical PTZ / Dual 4K + Ceiling/Table Mic Array | Rs. 1,450,000 – Rs. 2,650,000 |
+| Townhall / Auditorium | 30–100+ Persons | Cisco Room Kit Pro / Poly G7500 + Dual PTZ Cameras | Bosch PAVIRO / Ceiling Array + Laser Projector / SMD LED Wall | Rs. 2,800,000 – Rs. 5,500,000+ |
+
+## 3. Turnkey Enterprise Services Catalog
+### Corporate Event Management & Turnkey Stage Production in Pakistan
+- **Canonical URL**: https://avlive.com.pk/services/corporate-events
+- **Summary**: End-to-end Corporate event management, executive summit staging, fine-pitch SMD LED video walls, line-array PA sound, and 3D Hologram Display production across Lahore, Karachi, and Islamabad.
+
+### Hybrid Event Production & Live Video Conference Broadcasting in Pakistan
+- **Canonical URL**: https://avlive.com.pk/services/hybrid-events
+- **Summary**: Broadcast-grade hybrid event engineering combining multi-camera SDI switching, zero-echo acoustic mix-minus, and enterprise Video Conference in Pakistan via Poly X70 and Polycom Group 500.
+
+### Expo Organizing, Custom Exhibition Booths & Hologram Display Pavilions
+- **Canonical URL**: https://avlive.com.pk/services/expo-organizing
+- **Summary**: Turnkey trade show and expo organizing in Pakistan featuring custom 3D exhibition stalls, SMD video walls, interactive kiosks, and 3D Hologram Display attractors at Expo Centre Lahore & Karachi.
+
+### e-Sports Tournament Arena Setup & Broadcast Production in Pakistan
+- **Canonical URL**: https://avlive.com.pk/services/esports-events
+- **Summary**: High-refresh tournament LAN arenas, low-latency SDI broadcast observation, stage SMD LED walls, and concert-grade lighting for e-Sports events across Pakistan.
+
+### Enterprise AI Development & Smart AV Room Intelligence in Pakistan
+- **Canonical URL**: https://avlive.com.pk/services/ai-development
+- **Summary**: Custom enterprise AI software development, intelligent meeting room analytics, automated transcription, and computer-vision integration for corporate operations in Pakistan.
+
+### Autonomous AI Agents & Digital Workers for Enterprise Support
+- **Canonical URL**: https://avlive.com.pk/services/ai-agents-workers
+- **Summary**: 24/7 autonomous AI agents for lead qualification, SIP/VoIP voice reception, WhatsApp business automation, and technical support triage in Pakistan.
+
+### Enterprise Workflow & n8n Business Process Automation in Pakistan
+- **Canonical URL**: https://avlive.com.pk/services/ai-automation
+- **Summary**: End-to-end business workflow automation using n8n, webhooks, CRM synchronization, automated B2B quotation pipelines, and smart AV room scheduling.
+
+### Boardroom AV & Video Conferencing Integration
+- **Canonical URL**: https://avlive.com.pk/services/boardroom-integration
+- **Summary**: Turnkey executive boardroom AV design, acoustic calibration, Polycom Group 500 & Poly Studio X70 deployment, and Zoom / Microsoft Teams Rooms integration across Pakistan.
+
+### Enterprise VoIP Telephony & IP PBX Deployment
+- **Canonical URL**: https://avlive.com.pk/services/voip-telephony
+- **Summary**: Scalable SIP IP PBX systems, multi-branch VoIP trunking, call center queues, and PoE desk phone provisioning for 3CX, FreePBX, Grandstream UCM, and Cisco CUCM in Pakistan.
+
+## 4. High-Intent Buyer Guides & Brand-vs-Brand Comparisons
+### The Future of Video Conferencing in Pakistan: Trends to Watch in 2026
+- **Canonical URL**: https://avlive.com.pk/blog/future-of-video-conferencing-pakistan-2026
+- **Direct Answer**: In 2026, enterprise video conferencing in Pakistan is defined by dual-4K AI speaker-tracking bars (Poly Studio X70/X72, Logitech Rally Bar) and standards-based H.323/SIP codecs (Polycom RealPresence Group 500, Cisco Room Kit Plus) certified for Microsoft Teams Rooms and Zoom Rooms with local PTA compliance.
+- **2026 Pakistan Enterprise Video Conferencing Architecture Matrix**:
+  | Room Tier | Recommended System | Camera Optics | Mic Pickup Range | Reference Price (PKR) |
+  | :--- | :--- | :--- | :--- | :--- |
+  | Huddle Room (2–6 Pax) | Poly Studio USB / Logitech Rally Bar Mini | 4K 120° FOV Electronic Pan-Tilt | 4.5m – 5m Beamforming | Rs. 210,000 – 485,000 |
+  | Medium Boardroom (8–14 Pax) | Logitech Rally Bar / Poly Studio X52 | 4K 15x HD Zoom / DirectorAI | 6m – 7m + Expansion Pod | Rs. 650,000 – 980,000 |
+  | Executive Boardroom (14–28 Pax) | Polycom Group 500 / Poly Studio X72 / Cisco Room Kit Plus | 12x Optical PTZ / Dual 4K Lenses | 7.6m+ Ceiling / Table Array | Rs. 1,150,000 – 2,450,000 |
+
+### IP Phones vs. Softphones: Which Is Right for Your Business?
+- **Canonical URL**: https://avlive.com.pk/blog/ip-phones-vs-softphones-pakistan
+- **Direct Answer**: Physical PoE SIP desk phones (Cisco 8841, Yealink T46S, Polycom VVX 250, Grandstream GXP2170) provide 99.999% uptime on isolated voice VLANs with hardware acoustic echo cancellation, whereas softphones (3CX, Grandstream Wave) suit mobile field teams. Most Pakistani enterprises deploy a hybrid 70% desk IP phone + 30% mobile softphone architecture.
+- **Hardware SIP IP Phones vs. Enterprise Softphones Comparison**:
+  | Evaluation Metric | Hardware PoE IP Phones (Yealink / Poly / Cisco) | Software Softphones (3CX / Wave App) |
+  | :--- | :--- | :--- |
+  | Network Reliability | Dedicated Voice VLAN + PoE backup (independent of PC OS crashes) | Dependent on laptop Wi-Fi/OS stability and USB headset battery |
+  | Audio Processing | Dedicated DSP chip with Acoustic Fence / HD Opus codec | Host CPU audio processing |
+  | Upfront Endpoint Cost (PKR) | Rs. 16,500 – Rs. 85,000 per desk unit | Rs. 0 hardware (requires Rs. 15,000+ ANC headset) |
+  | Best Deployment Role | Receptionists, C-Suite Executives, Banking Counters, Call Centers | Remote Sales Teams, Field Engineers, Hybrid Staff |
+
+### How to Choose the Right Video Conferencing Equipment for Your Meeting Rooms
+- **Canonical URL**: https://avlive.com.pk/blog/how-to-choose-video-conferencing-equipment
+- **Direct Answer**: Match your video conferencing hardware to room seating and table length: use wide-angle 120° USB/appliance bars (Poly Studio USB, Rally Bar Mini) for 2–6 person huddle rooms, dual-camera AI bars (Poly Studio X52, Logitech Rally Bar) for 8–12 person medium rooms, and optical PTZ codecs (Polycom Group 500, Poly Studio X72, Cisco Room Kit Plus) for 14–30+ seat boardrooms.
+
+### Understanding Public Address Systems: Components Every Facility Needs
+- **Canonical URL**: https://avlive.com.pk/blog/understanding-public-address-systems-pakistan
+- **Direct Answer**: A commercial Public Address (PA) and Voice Evacuation system in Pakistan requires five core layers: EN 54-16 zone controllers (Bosch PAVIRO, ITC Audio), 100V Class-D power amplifiers, multi-zone gooseneck paging stations, acoustic ceiling/horn loudspeakers, and SIP intercom gateways integrated with your facility IP PBX and fire alarm panel.
+
+### Hybrid Events 101: How to Engage Both In-Person and Virtual Audiences
+- **Canonical URL**: https://avlive.com.pk/blog/hybrid-events-101-av-integration-pakistan
+- **Direct Answer**: Turnkey hybrid event production in Pakistan combines physical stage engineering (P2.5 SMD LED video walls, 3D hologram projection stages, line-array PA sound) with multi-camera 4K PTZ broadcast switching and acoustic mix-minus routing so remote Zoom, Microsoft Teams, and YouTube audiences interact with zero echo or latency.
+
+### AV Live Communications: 15 Years of Unifying People and Ideas
+- **Canonical URL**: https://avlive.com.pk/blog/av-live-communications-15-years-pakistan
+- **Direct Answer**: Established in 2010 with regional engineering hubs in Lahore, Karachi, and Islamabad, AV Live Communications is Pakistan's authorized distributor and turnkey systems integrator for HP Poly (Polycom), Cisco, Logitech, Yealink, Bosch, Jabra, and commercial 3D hologram & corporate event productions.
+
+### Logitech Rally Bar vs. Poly Studio X50 & X52: Which Video Bar Wins for Pakistani Boardrooms?
+- **Canonical URL**: https://avlive.com.pk/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan
+- **Direct Answer**: Choose the Logitech Rally Bar (960-001308) if your boardroom requires motorized optical PTZ lens zoom (15x total zoom) and up to 4 daisy-chained Rally Mic Pods for long tables (12–20 seats). Choose the Poly Studio X50 or X52 if you want faster all-in-one electronic DirectorAI framing, Poly NoiseBlockAI acoustic fencing, and a lower total cost of ownership for 6–12 person medium rooms.
+- **Logitech Rally Bar vs. HP Poly Studio X50 / X52 Technical & PKR Price Comparison**:
+  | Specification | Logitech Rally Bar (960-001308) | HP Poly Studio X50 / X52 | Polycom RealPresence Group 500 |
+  | :--- | :--- | :--- | :--- |
+  | Ideal Room Capacity | Medium to Large (10–20 Seats) | Medium Boardroom (6–12 Seats) | Large Executive Room (14–28 Seats) |
+  | Camera Sensor & Zoom | Motorized Optical PTZ + AI Viewfinder (15x HD Zoom) | 4K 20MP UltraHD 5x Digital Zoom with DirectorAI | EagleEye IV 12x Optical Motorized PTZ |
+  | Microphone Pickup Range | 4.5m Base + up to 4 Rally Mic Pods (15m+ table coverage) | 6m Next-Gen Beamforming + 1 Expansion Mic | 7.6m RealPresence Table Microphone Array |
+  | Audio Noise Suppression | RightSound AI Voice Leveling & Anti-Vibration Enclosure | Poly NoiseBlockAI & Acoustic Fence Technology | Polycom Siren 22 & Acoustic Clarity |
+  | Native OS Support | CollabOS (Zoom Rooms, Microsoft Teams Rooms, USB BYOD) | Poly VideoOS (Zoom, Microsoft Teams, Google Meet, USB) | Standards H.323 / SIP + Zoom/Teams Interop |
+  | Reference Price in Pakistan | Rs. 845,000 – Rs. 960,000 (Official Warranty) | Rs. 640,000 – Rs. 795,000 (Official Warranty) | Rs. 685,000 – Rs. 920,000 (Codec + 12x PTZ Kit) |
+
+### Yealink vs. Cisco Room Kits: Enterprise Video Conferencing Comparison in Pakistan
+- **Canonical URL**: https://avlive.com.pk/blog/yealink-vs-cisco-video-conferencing-pakistan
+- **Direct Answer**: Cisco Room Kit Plus and Room Bar Pro are the gold standard for banks, defense agencies, and multinationals requiring hardware H.323/SIP encryption, Webex Control Hub telemetry, and native Microsoft Teams Rooms certification. Yealink and HP Poly Studio/Group series deliver 30%–45% lower acquisition cost with plug-and-play Teams/Zoom versatility for commercial enterprises.
+- **Cisco Room Kit Plus vs. HP Poly Studio X72 vs. Yealink Enterprise Comparison**:
+  | Feature / Requirement | Cisco Room Kit Plus / Pro | HP Poly Studio X72 / G7500 | Yealink Enterprise Room Series |
+  | :--- | :--- | :--- | :--- |
+  | Primary Target Sector | Commercial Banks, Defense, Multinationals, Government | Corporate Enterprises, Universities, Financial Hubs | SMEs, Growing Corporates, Multi-Branch Offices |
+  | Camera Architecture | Quad Camera 5K Sensor Array + SpeakerTrack | Dual 4K 20MP Cameras (70° + 120° FOV) / EagleEye IV | Dual-Eye 4K AI Camera + Wireless Content Pod |
+  | Security & Encryption | End-to-End AES-256 + H.323/SIP Standards + Control Hub | FIPS 140-2 Validated Crypto + Poly Lens Cloud | TLS/SRTP Encryption + Yealink Device Management |
+  | Multi-Display Support | Dual / Triple 4K HDMI Output + Cisco Room Navigator | Dual 4K HDMI Output + TC8/TC10 Touch Controller | Dual 4K HDMI Output + Touch Console |
+  | Estimated Turnkey Budget (PKR) | Rs. 1,650,000 – Rs. 3,200,000+ | Rs. 950,000 – Rs. 1,850,000 | Rs. 550,000 – Rs. 1,150,000 |
+
+### 6-to-30 Person Boardroom AV System BoM & Price Guide in Pakistan (2026)
+- **Canonical URL**: https://avlive.com.pk/blog/boardroom-av-system-price-guide-pakistan
+- **Direct Answer**: In Pakistan, a complete turnkey 4–6 person huddle room AV setup costs Rs. 240,000–Rs. 490,000; an 8–14 person executive conference room costs Rs. 680,000–Rs. 1,350,000; and a 16–30 person large boardroom with dual displays, 12x optical PTZ tracking cameras, and ceiling/table microphone arrays costs Rs. 1,450,000–Rs. 3,500,000+ including installation and acoustic tuning.
+- **2026 Pakistan Conference Room Bill of Materials (BoM) & Turnkey Price Tiers**:
+  | Room Size & Dimensions | Core Video Codec / Bar | Audio & Control Hardware | Display Configuration | Turnkey BoM Price (PKR) |
+  | :--- | :--- | :--- | :--- | :--- |
+  | 4–6 Person Huddle Room (3m × 4m) | Poly Studio USB Bar or Logitech Rally Bar Mini | Built-in 6-Mic Beamforming Array + Auto-Framing | Single 65"–75" 4K Commercial Display | Rs. 240,000 – Rs. 490,000 |
+  | 8–14 Person Conference Room (4.5m × 7m) | Logitech Rally Bar or Poly Studio X52 | 1–2 Expansion Table Mic Pods + 10" Touch Controller | Single 85" Display or Dual 65" 4K Displays | Rs. 680,000 – Rs. 1,350,000 |
+  | 16–24 Person Executive Boardroom (6m × 10m) | Polycom RealPresence Group 500 / Poly Studio X72 / Cisco Room Kit Plus | Ceiling Beamforming Mic Array or 3 Daisy-Chained Table Mics + Touch Panel | Dual 75"–85" 4K Displays or P1.8 Indoor LED Wall | Rs. 1,450,000 – Rs. 2,650,000 |
+  | 25–40+ Seat Townhall / Training Room (8m × 14m+) | Cisco Room Kit Pro / Poly G7500 + Dual PTZ Cameras | Bosch / Shure Ceiling Array + QSC DSP + Ceiling Speakers | Laser Projector (7,000+ Lumens) or P2.5 SMD LED Video Wall | Rs. 2,800,000 – Rs. 5,500,000+ |
+
+### Enterprise AV Architecture for Banks, Hospitals & Universities in Pakistan
+- **Canonical URL**: https://avlive.com.pk/blog/banking-healthcare-university-av-solutions-pakistan
+- **Direct Answer**: Industry vertical AV deployments in Pakistan require specialized compliance: commercial banks prioritize encrypted Cisco/Poly H.323 boardrooms and multi-branch Grandstream/3CX SIP PBXs; HEC universities deploy lecture-capture PTZ cameras and 7,000-lumen laser projectors; and hospitals utilize telemedicine carts and EN 54-16 Bosch IP public address systems.
+- **Industry Vertical AV & Unified Communications Blueprint (Pakistan)**:
+  | Industry Sector | Core Video & Collaboration Stack | Voice & Paging Infrastructure | Primary Compliance / SLA Requirement |
+  | :--- | :--- | :--- | :--- |
+  | Commercial Banking & FinTech | Cisco Room Kit Plus / Polycom Group 500 + Touch Control | Cisco CUCM / Grandstream UCM6308 + Executive IP Phones | AES-256 Encryption, Multi-Branch SIP Trunking, 4-Hour Onsite SLA |
+  | HEC Universities & Higher Ed | Poly Studio X52 + Hikvision/Poly Optical PTZ Lecture Cameras | Bosch PAVIRO Campus PA + Classroom Speakerphones | PPRA Tender Compliance, HEC Smart Classroom Standards |
+  | Hospitals & Telemedicine | Mobile 4K Telemedicine Carts (Poly Studio USB + PTZ) | 2N SIP Cleanroom Intercoms + Multi-Zone Nurse Paging | Low-Latency High-CRI Diagnostic Video & Hygienic IP65 Endpoints |
+  | Government & Command Centers | Poly G7500 / Cisco Pro + 24/7 SMD Video Wall Controllers | Delegated Bosch Discussion Microphones + Encrypted PBX | On-Premise Air-Gapped H.323/SIP Operation & Redundant Power |
+
+### Ceiling Microphone Arrays vs. Table Microphones: Acoustic Guide for Pakistani Boardrooms
+- **Canonical URL**: https://avlive.com.pk/blog/shure-bosch-ceiling-microphones-vs-table-mics-pakistan
+- **Direct Answer**: Choose table expansion microphones (Logitech Rally Mic Pods, Poly Expansion Mics) for the highest voice-to-reverberation ratio at 60% lower cost in standard boardrooms. Choose ceiling beamforming arrays or Bosch digital conference systems when your executive boardroom requires a 100% cable-free marble/wood table or flexible reconfigurable seating.
+- **Ceiling Beamforming Arrays vs. Table Expansion Mics vs. Gooseneck Conference Systems**:
+  | Audio Architecture | Table Aesthetics | Acoustic Environment Tolerance | Best Room Application | Relative Cost Tier |
+  | :--- | :--- | :--- | :--- | :--- |
+  | Daisy-Chained Table Mic Pods (Poly / Logitech) | Minimal (1–4 compact pods on table) | Excellent in untreated or glass-walled rooms (close proximity) | 8–20 Person Standard Corporate Boardrooms | PKR Tier 1 (Most Cost-Effective) |
+  | Ceiling Beamforming Microphone Arrays | 100% Cable-Free Table Surface | Requires RT60 < 0.6s acoustic treatment & low HVAC noise | Luxury C-Suite Boardrooms & Multipurpose Training Rooms | PKR Tier 3 (Premium DSP + Dante) |
+  | Dedicated Chairman/Delegate Gooseneck Units (Bosch) | Dedicated push-to-talk console per seat | Highest speech intelligibility in massive halls (zero crosstalk) | 20–100+ Seat Ministries, Parliament & Board of Governors | PKR Tier 2–3 (Scales per seat) |
+
+## 5. Verified Enterprise Hardware Catalog (Canonical Slugs, MPNs & Reference PKR Pricing)
+| Product Name | Brand | Official MPN | GTIN / UPC | Reference Price (PKR) | Key Highlight | Canonical URL |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2N IP Vario Intercom | 2N | 9137161U | 859515961616 | Rs. 125,000 | SIP compliant IP door intercom with stainless steel chassis and PoE support | https://avlive.com.pk/product/2n-ip-vario-intercom-pakistan |
+| 3CX Pro 8 Sc | 3CX | 3CX-PRO-8 | 840046030087 | Rs. 125,000 | 8 simultaneous calls enterprise IP PBX software license with CRM integration | https://avlive.com.pk/product/3cx-pro-8-sc-pakistan |
+| Polycom Realpresence Group 500 | Polycom | 7200-64550-001 | 610807784364 | Rs. 125,000 | Polycom RealPresence Group 500 1080p60 enterprise video conference system for boardrooms | https://avlive.com.pk/product/polycom-realpresence-group-500-pakistan |
+| Axis A8105 E Door Station | Axis | 0871-001 | 733102108717 | Rs. 125,000 | Compact network video door station with 1080p WDR camera and SIP intercom | https://avlive.com.pk/product/axis-a8105-e-door-station-pakistan |
+| Axis M3065 V Camera | Axis | AXIS-M3065-V | 733102130657 | Rs. 125,000 | Ultra-compact fixed mini dome 1080p network camera with WDR and Zipstream | https://avlive.com.pk/product/axis-m3065-v-camera-pakistan |
+| Benq Tk705i | BenQ | BENQ-TK705I | 840046070519 | Rs. 125,000 | True 4K UHD HDR high-brightness projector for auditoriums and hybrid events | https://avlive.com.pk/product/benq-tk705i-pakistan |
+| Benq W4100i | BenQ | BENQ-W4100I | 840046041007 | Rs. 125,000 | 4K AI Cinema & Presentation Laser Projector with 100% DCI-P3 color accuracy | https://avlive.com.pk/product/benq-w4100i-pakistan |
+| Bosch Paviro Pva 2p500 | Bosch | PVA-2P500 | 871733225004 | Rs. 125,000 | Professional 2 x 500W Class-D power amplifier for commercial PA and evacuation | https://avlive.com.pk/product/bosch-paviro-pva-2p500-pakistan |
+| Bosch Paviro Pva 4cr12 | Bosch | PVA-4CR12 | 871733240120 | Rs. 125,000 | 12-zone intelligent public address and voice alarm system controller | https://avlive.com.pk/product/bosch-paviro-pva-4cr12-pakistan |
+| Cisco 8841 IP Phone | Cisco | CP-8841-K9 | 882658884108 | Rs. 125,000 | 5-line Gigabit color display enterprise IP desk phone with wideband audio | https://avlive.com.pk/product/cisco-8841-ip-phone-pakistan |
+| Cisco Cucm License | Cisco | CUCM-STD | 882658001000 | Rs. 125,000 | Cisco Unified Communications Manager enterprise call control and VoIP license | https://avlive.com.pk/product/cisco-cucm-license-pakistan |
+| Cisco Room Bar | Cisco | CS-BAR-NR-K9 | 889728001090 | Rs. 125,000 | All-in-one AI video bar for Webex, Microsoft Teams, and Zoom meeting rooms | https://avlive.com.pk/product/cisco-room-bar-pakistan |
+| Cisco Room Kit Eq | Cisco | CS-KIT-EQ-C-K9 | 889728002080 | Rs. 125,000 | AI-powered flagship quad-camera codec bundle for large enterprise boardrooms | https://avlive.com.pk/product/cisco-room-kit-eq-pakistan |
+| Cisco Room Kit | Cisco | CS-KIT-K9 | 882658901157 | Rs. 125,000 | Integrated 5K Ultra HD camera, speakers, and microphones for medium rooms | https://avlive.com.pk/product/cisco-room-kit-pakistan |
+| Cisco Room Kit Plus | Cisco | CS-KITPLPTZ4K-K9 | 882658902147 | Rs. 125,000 | Enterprise video conferencing kit with Quad Camera and Codec Plus for up to 14 people | https://avlive.com.pk/product/cisco-room-kit-plus-pakistan |
+| Cisco Room Kit Pro | Cisco | CS-KITPRO-K9 | 882658903137 | Rs. 125,000 | Complete boardroom and auditorium video conferencing bundle with Quad Camera | https://avlive.com.pk/product/cisco-room-kit-pro-pakistan |
+| Cisco Webex Room Kit Plus | Cisco | CS-KITPLUS-K9 | 882658904127 | Rs. 125,000 | Cisco Webex Room Kit Plus collaboration system for large conference rooms | https://avlive.com.pk/product/cisco-webex-room-kit-plus-pakistan |
+| Dahua N43al52 Bullet | Dahua | DAH-N43AL52 | 819309043522 | Rs. 125,000 | 4MP Starlight IR bullet network security camera with AI perimeter protection | https://avlive.com.pk/product/dahua-n43al52-bullet-pakistan |
+| Epson Lifestudio Flex Plus | Epson | EPS-LS-FLEX-PLUS | 010343965010 | Rs. 125,000 | 3LCD high-lumen smart laser projector for corporate presentations and events | https://avlive.com.pk/product/epson-lifestudio-flex-plus-pakistan |
+| Fanvil X4 IP Phone | Fanvil | FANVIL-X4 | 693729560049 | Rs. 125,000 | 4-line enterprise IP phone with dual color displays and HD voice | https://avlive.com.pk/product/fanvil-x4-ip-phone-pakistan |
+| Freepbx Enterprise | FreePBX | FREEPBX-ENT | 840046090012 | Rs. 125,000 | Turnkey enterprise IP PBX appliance and Asterisk unified communications system | https://avlive.com.pk/product/freepbx-enterprise-pakistan |
+| Grandstream Gxp2170 | Grandstream | GXP2170 | 694727372177 | Rs. 125,000 | 12-line Gigabit enterprise IP phone with 4.3-inch color LCD and Bluetooth | https://avlive.com.pk/product/grandstream-gxp2170-pakistan |
+| Grandstream Ucm6304 | Grandstream | UCM6304 | 694727376342 | Rs. 125,000 | Enterprise IP PBX appliance supporting up to 2000 users and 300 concurrent calls | https://avlive.com.pk/product/grandstream-ucm6304-pakistan |
+| Grandstream Ucm6308 | Grandstream | UCM6308 | 694727376380 | Rs. 125,000 | High-capacity IP PBX supporting 3000 users, 450 concurrent calls, and 8 FXO/FXS ports | https://avlive.com.pk/product/grandstream-ucm6308-pakistan |
+| Hikvision Colorvu Camera | Hikvision | DS-2CD2347G2-LU | 842571234725 | Rs. 125,000 | 4MP ColorVu 24/7 full-color turret network camera with AcuSense and built-in mic | https://avlive.com.pk/product/hikvision-colorvu-camera-pakistan |
+| Hikvision PTZ Camera | Hikvision | DS-2DE4A425IW-DE | 842571442502 | Rs. 125,000 | 4MP 25x Optical Zoom DarkFighter IR Network PTZ Camera for large venues | https://avlive.com.pk/product/hikvision-ptz-camera-pakistan |
+| Horion K6a Bundle Special Offer | Horion | HRN-K6A-65-BUNDLE | 697182406654 | Rs. 125,000 | 65-inch 4K UHD Interactive Smart Board with 48MP AI Camera and 8-Mic Array | https://avlive.com.pk/product/horion-k6a-bundle-special-offer |
+| ITC Va 6200ma | ITC | VA-6200MA | 694126406206 | Rs. 125,000 | 8-zone voice evacuation and public address master controller with 500W amplifier | https://avlive.com.pk/product/itc-va-6200ma-pakistan |
+| Jabra Evolve 75 | Jabra | 7599-838-109 | 706487017509 | Rs. 125,000 | Wireless Bluetooth stereo headset with superior Active Noise Cancellation and busylight | https://avlive.com.pk/product/jabra-evolve-75-pakistan |
+| Jabra Evolve2 65 | Jabra | 26599-989-999 | 706487020080 | Rs. 125,000 | 3-microphone call technology wireless UC headset with 37-hour battery life | https://avlive.com.pk/product/jabra-evolve2-65-pakistan |
+| Logitech Rally Bar Mini | Logitech | 960-001336 | 097855162991 | Rs. 125,000 | Premier all-in-one 4K AI video conferencing bar for small to medium meeting rooms | https://avlive.com.pk/product/logitech-rally-bar-mini-pakistan |
+| Logitech Rally Bar | Logitech | 960-001308 | 097855162168 | Rs. 125,000 | Flagship all-in-one video bar with motorized PTZ optical zoom for medium to large rooms | https://avlive.com.pk/product/logitech-rally-bar-pakistan |
+| Optoma Gt4000uhd | Optoma | OPT-GT4000UHD | 796435446710 | Rs. 125,000 | 4000-lumen 4K UHD ultra-short throw DuraCore laser projector for boardrooms and stages | https://avlive.com.pk/product/optoma-gt4000uhd-pakistan |
+| Optoma Pk32 Pocket | Optoma | OPT-PK32-PHOTON | 796435443207 | Rs. 125,000 | Ultra-portable LED pocket projector for mobile executive presentations | https://avlive.com.pk/product/optoma-pk32-pocket-pakistan |
+| Panasonic Pt Rq45k | Panasonic | PAN-PT-RQ45K | 885170450011 | Rs. 125,000 | 40,000-lumen 3-Chip DLP 4K SOLID SHINE laser projector for 3D projection mapping and expos | https://avlive.com.pk/product/panasonic-pt-rq45k-pakistan |
+| Panasonic Pt Vmz82 | Panasonic | PAN-PT-VMZ82 | 885170820012 | Rs. 125,000 | 8,000-lumen compact WUXGA laser LCD projector for bright corporate auditoriums | https://avlive.com.pk/product/panasonic-pt-vmz82-pakistan |
+| Poly Blackwire C3220 | HP Poly | 209745-201 | 017229160835 | Rs. 125,000 | Hi-fi stereo USB-A wired UC headset with noise-canceling microphone and inline controls | https://avlive.com.pk/product/poly-blackwire-c3220-pakistan |
+| Poly G7500 | HP Poly | 7200-87310-001 | 196548573226 | Rs. 125,000 | Modular 4K Ultra HD video conferencing codec and content sharing system for large boardrooms | https://avlive.com.pk/product/poly-g7500-pakistan |
+| Poly Studio USB Video Bar | Poly | 7200-85830-012 | 610807882558 | Rs. 125,000 | Premier 4K USB video bar with Poly DirectorAI speaker tracking and Acoustic Fence | https://avlive.com.pk/product/poly-studio-usb-video-bar-pakistan |
+| Poly Studio V52 | HP Poly | A09D4AA | 198122095216 | Rs. 125,000 | Next-gen 20MP 4K USB video bar with DirectorAI perimeter framing for medium rooms | https://avlive.com.pk/product/poly-studio-v52-pakistan |
+| Poly Studio X32 | HP Poly | A3SV5AA | 198122320011 | Rs. 125,000 | All-in-one 4K video bar with native Zoom and Microsoft Teams for huddle rooms | https://avlive.com.pk/product/poly-studio-x32-pakistan |
+| Poly Studio X50 | HP Poly | 2200-85970-001 | 610807891673 | Rs. 125,000 | Radically simple all-in-one 4K dual-display video bar for medium boardrooms | https://avlive.com.pk/product/poly-studio-x50-pakistan |
+| Poly Studio X52 | HP Poly | 7200-87620-001 | 197029653413 | Rs. 125,000 | All-in-one 20MP 4K UltraHD video bar with 95-degree FOV and Poly DirectorAI | https://avlive.com.pk/product/poly-studio-x52-pakistan |
+| Poly Studio X72 | HP Poly | A4LZ8AA | 198122720149 | Rs. 125,000 | Dual-lens 4K 20MP flagship all-in-one video conferencing bar for large conference rooms (Poly X70 / X72 Series) | https://avlive.com.pk/product/poly-studio-x72-pakistan |
+| Poly Voyager Focus UC | HP Poly | 202652-101 | 017229147768 | Rs. 125,000 | Stereo Bluetooth ANC wireless headset with charging stand and smart sensor technology | https://avlive.com.pk/product/poly-voyager-focus-uc-pakistan |
+| Polycom Vvx 250 | Polycom | 2200-48820-025 | 610807864257 | Rs. 125,000 | 4-line Gigabit color display IP desk phone with Poly HD Voice and Acoustic Clarity | https://avlive.com.pk/product/polycom-vvx-250-pakistan |
+| Sony Bravia Projector 7 | Sony | VPL-XW5000ES | 027242925007 | Rs. 125,000 | Native 4K SXRD laser projector with X1 Ultimate processor for executive screening rooms | https://avlive.com.pk/product/sony-bravia-projector-7-pakistan |
+| Uniview Ipc3612sr3 Vf | Uniview | UNV-IPC3612SR3-VF | 694126403618 | Rs. 125,000 | 2MP varifocal IR dome network security camera with Ultra 265 compression | https://avlive.com.pk/product/uniview-ipc3612sr3-vf-pakistan |
+| Viewsonic Lsd400w | ViewSonic | VS-LSD400W | 766907040012 | Rs. 125,000 | High-brightness 3rd-gen laser projector for corporate conference rooms and halls | https://avlive.com.pk/product/viewsonic-lsd400w-pakistan |
+| Viewsonic X1 4K Pro | ViewSonic | VS-X1-4K-PRO | 766907014006 | Rs. 125,000 | 4K HDR high-refresh LED smart projector with Harman Kardon speakers for esports & events | https://avlive.com.pk/product/viewsonic-x1-4k-pro-pakistan |
+| Google Meet Hardware License | Google | GOOGLE-MEET-LIC | 840046099008 | Rs. 125,000 | Official annual Google Meet Hardware Room License with cloud device management | https://avlive.com.pk/product/google-meet-hardware-license-pakistan |
+| Yealink Bh70 Headset | Yealink | BH70-DUAL-UC | 841885120878 | Rs. 125,000 | 3-mic AI noise-canceling dual wireless Bluetooth headset with 35-hour talk time | https://avlive.com.pk/product/yealink-bh70-headset-pakistan |
+| Yealink SIP T46s | Yealink | SIP-T46S | 841885102949 | Rs. 125,000 | 16-line executive Gigabit IP phone with 4.3-inch high-resolution color display | https://avlive.com.pk/product/yealink-sip-t46s-pakistan |
+
+## 6. Machine-Readable Feeds & Sitemaps
+- **XML Sitemap**: https://avlive.com.pk/sitemap.xml
+- **Concise LLM Index**: https://avlive.com.pk/llms.txt
+- **Full LLM Catalog**: https://avlive.com.pk/llms-full.txt
+- **Google Merchant Center 40-Column TSV Feed**: https://avlive.com.pk/feed/google-merchant.tsv

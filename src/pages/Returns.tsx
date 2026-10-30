@@ -11,6 +11,32 @@ export function Returns() {
         title="Return & Refund Policy | AV Live Communications" 
         description="Transparent 30-day return policy and standard manufacturer warranty procedures on enterprise AV hardware and video conferencing equipment."
         url="https://avlive.com.pk/returns"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebPage',
+              '@id': 'https://avlive.com.pk/returns#webpage',
+              name: 'Return & Refund Policy — AV Live Communications Pakistan',
+              url: 'https://avlive.com.pk/returns',
+              mainEntity: {
+                '@type': 'MerchantReturnPolicy',
+                applicableCountry: 'PK',
+                returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                merchantReturnDays: 30,
+                returnMethod: 'https://schema.org/ReturnByMail',
+                returnFees: 'https://schema.org/FreeReturn'
+              }
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Return Policy', item: 'https://avlive.com.pk/returns' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

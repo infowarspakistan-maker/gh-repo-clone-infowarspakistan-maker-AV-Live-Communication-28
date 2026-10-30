@@ -10,6 +10,27 @@ export function Reseller() {
         title="Authorized Reseller & Channel Partner Program | AV Live Pakistan" 
         description="Join Pakistan's leading AV distribution network. Tier-1 margins, dedicated technical training, partner deal registration, and authorized brand access."
         url="https://avlive.com.pk/programs/reseller-program"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/programs/reseller-program#service',
+              name: 'Authorized B2B Partner & IT Reseller Program in Pakistan',
+              serviceType: 'Wholesale Pro-AV & Unified Communications Channel Program',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: 'PK',
+              url: 'https://avlive.com.pk/programs/reseller-program'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Reseller Program', item: 'https://avlive.com.pk/programs/reseller-program' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

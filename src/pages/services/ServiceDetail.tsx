@@ -183,6 +183,49 @@ export function ServiceDetail() {
         {/* Content */}
         <div className="w-full min-w-0 space-y-12">
           <div className="bg-white rounded-[3rem] p-6 sm:p-12 border border-gray-100 shadow-sm w-full overflow-hidden">
+            {/* Answer-First Turnkey Engineering Summary */}
+            <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-6 mb-8">
+              <span className="block text-[11px] font-black uppercase tracking-widest text-[#00B4D8] mb-2">
+                Answer-First Service Overview
+              </span>
+              <p className="text-sm sm:text-base font-bold text-[#1A2B4C] leading-relaxed">
+                <strong>{service.title}</strong> by AV Live Communications delivers turnkey engineering, certified hardware staging, and on-site execution across <strong>Lahore, Karachi, Islamabad, and nationwide Pakistan</strong>—backed by a 15-minute consultation SLA, 24-hour custom Bill of Materials (BoM) proposals, and official FBR GST/NTN compliance.
+              </p>
+            </div>
+
+            {/* Semantic HTML Service Architecture & SLA Matrix */}
+            <div className="mb-10 overflow-x-auto rounded-2xl border border-gray-200">
+              <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                <caption className="bg-[#1A2B4C] text-white font-black text-left px-5 py-3 text-xs uppercase tracking-wider">
+                  {service.title} — Turnkey Deliverables &amp; SLA Specifications
+                </caption>
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
+                    <th className="py-3 px-4">Deployment Dimension</th>
+                    <th className="py-3 px-4">AV Live Enterprise Standard</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  <tr>
+                    <td className="py-3 px-4 font-black text-[#1A2B4C]">Service Classification</td>
+                    <td className="py-3 px-4 font-medium text-gray-600">{service.serviceType || service.category || 'Turnkey Pro-AV & Event Production'}</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-black text-[#1A2B4C]">Primary Regional Hubs</td>
+                    <td className="py-3 px-4 font-medium text-gray-600">Lahore (Johar Town), Karachi (Clifton), Islamabad (Blue Area) &amp; Nationwide</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-black text-[#1A2B4C]">Core Hardware Ecosystem</td>
+                    <td className="py-3 px-4 font-medium text-gray-600">HP Poly (Polycom Group 500 &amp; Studio X72), Logitech Rally, Cisco, Bosch, P2.5 SMD LED &amp; 3D Hologram</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-black text-[#1A2B4C]">Quotation &amp; Support SLA</td>
+                    <td className="py-3 px-4 font-bold text-emerald-600">15-Min Engineering Response • 24-Hr Custom BoQ • FBR Tax Invoice</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
             {service.detailedContent ? (
                <div className="prose prose-lg max-w-none break-words prose-headings:font-black prose-headings:text-[#1A2B4C] prose-a:text-[#00B4D8] prose-img:rounded-3xl prose-p:text-gray-600 prose-p:leading-relaxed prose-strong:text-[#1A2B4C] marker:text-[#00B4D8] [&_*]:break-words" dangerouslySetInnerHTML={{ __html: formatContent(service.detailedContent) }} />
             ) : (
@@ -192,6 +235,18 @@ export function ServiceDetail() {
                   <p className="text-sm uppercase tracking-widest mt-2">Check back later for more information about {service.title}.</p>
                </div>
             )}
+
+            <div className="mt-10 pt-8 border-t border-gray-100 flex flex-wrap gap-3">
+              <Link to="/category/video-conferencing" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+                Explore Video Conferencing Hardware →
+              </Link>
+              <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+                Boardroom BoM &amp; PKR Price Guide →
+              </Link>
+              <Link to="/blog/hybrid-events-101-av-integration-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+                Hybrid Event Production Guide →
+              </Link>
+            </div>
           </div>
 
           {serviceFaqs.length > 0 && (

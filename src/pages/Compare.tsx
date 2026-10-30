@@ -29,6 +29,28 @@ export function Compare() {
         title="Side-by-Side Equipment Comparison Matrix | AV Live Pakistan" 
         description="Compare specifications, features, audio pickup range, and pricing across leading video conferencing bars, IP phones, and enterprise hardware."
         url="https://avlive.com.pk/compare"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebApplication',
+              '@id': 'https://avlive.com.pk/compare#app',
+              name: 'AV Live Enterprise Hardware Side-by-Side Comparison Matrix',
+              url: 'https://avlive.com.pk/compare',
+              applicationCategory: 'BusinessApplication',
+              operatingSystem: 'All',
+              description: 'Compare technical specifications, camera optics, microphone pickup range, and warranty across Poly, Cisco, Logitech, and Yealink hardware.',
+              offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' }
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Compare Hardware', item: 'https://avlive.com.pk/compare' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

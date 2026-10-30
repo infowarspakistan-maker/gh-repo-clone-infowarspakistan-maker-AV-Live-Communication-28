@@ -9,6 +9,24 @@ export function PrivacyPolicy() {
         title="Privacy & Data Protection Policy | AV Live Communications" 
         description="Learn how AV Live Communications protects customer data, quote submissions, transaction records, and corporate account privacy."
         url="https://avlive.com.pk/privacy-policy"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebPage',
+              '@id': 'https://avlive.com.pk/privacy-policy#webpage',
+              name: 'Privacy & Data Protection Policy — AV Live Communications',
+              url: 'https://avlive.com.pk/privacy-policy'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Privacy Policy', item: 'https://avlive.com.pk/privacy-policy' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">

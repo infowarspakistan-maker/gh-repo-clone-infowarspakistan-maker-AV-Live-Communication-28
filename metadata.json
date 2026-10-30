@@ -1,6 +1,6 @@
 {
   "name": "AV Live Communications",
-  "description": "B2B solution ecosystem for professional AV equipment, smart collaboration, and event management.",
+  "description": "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

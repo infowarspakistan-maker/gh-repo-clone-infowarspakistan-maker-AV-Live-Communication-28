@@ -13,6 +13,25 @@ export function BuyersGuides() {
         url="https://avlive.com.pk/guides"
         image="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=1200"
         imageAlt="AV Live Enterprise Equipment Buyers Guides"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'CollectionPage',
+              '@id': 'https://avlive.com.pk/guides#collection',
+              name: "Enterprise AV & VoIP Buyer's Guides in Pakistan",
+              url: 'https://avlive.com.pk/guides',
+              description: 'Comprehensive procurement guides for boardroom video bars, IP-PBX phone systems, PoE security cameras, and commercial projectors in Pakistan.'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: "Buyer's Guides", item: 'https://avlive.com.pk/guides' }
+              ]
+            }
+          ]
+        }}
       />
       {/* Hero Section */}
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">

@@ -10,6 +10,25 @@ export function Promotions() {
         title="Promotions & Limited-Time Deals on AV Hardware | AV Live Pakistan" 
         description="Exclusive corporate discounts, bundle packages, and seasonal promotional pricing on video conferencing systems and IP phones."
         url="https://avlive.com.pk/programs/promotions"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'CollectionPage',
+              '@id': 'https://avlive.com.pk/programs/promotions#collection',
+              name: 'Enterprise AV & Video Conferencing Hardware Promotions in Pakistan',
+              url: 'https://avlive.com.pk/programs/promotions',
+              description: 'Active bundle discounts, trade-in rebates, and corporate promotions on Poly, Logitech, Cisco, and Yealink hardware.'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Promotions', item: 'https://avlive.com.pk/programs/promotions' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

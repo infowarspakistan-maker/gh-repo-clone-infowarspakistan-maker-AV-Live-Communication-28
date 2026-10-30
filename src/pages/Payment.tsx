@@ -10,6 +10,25 @@ export function Payment() {
         title="Corporate Payment Methods & Escrow Options | AV Live Pakistan" 
         description="Secure enterprise B2B payment methods: Corporate Pay Orders, IBFT / Online Bank Transfer, Letter of Credit (LC), and Cash on Delivery in Pakistan."
         url="https://avlive.com.pk/payment"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebPage',
+              '@id': 'https://avlive.com.pk/payment#webpage',
+              name: 'Corporate Payment Methods & FBR GST Invoicing — AV Live Pakistan',
+              url: 'https://avlive.com.pk/payment',
+              description: 'Secure enterprise B2B payment methods including Corporate Pay Orders, IBFT Bank Transfer, Letter of Credit (LC), and FBR GST tax invoicing.'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Payment Methods', item: 'https://avlive.com.pk/payment' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

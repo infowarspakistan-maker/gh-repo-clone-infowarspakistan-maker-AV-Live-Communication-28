@@ -10,6 +10,25 @@ export function Shipping() {
         title="Nationwide Shipping & Delivery Policy | AV Live Pakistan" 
         description="Fast, insured nationwide shipping across Karachi, Lahore, Islamabad, Faisalabad, Peshawar, and Quetta for fragile commercial AV equipment."
         url="https://avlive.com.pk/shipping"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebPage',
+              '@id': 'https://avlive.com.pk/shipping#webpage',
+              name: 'Nationwide Shipping & Delivery Policy — AV Live Pakistan',
+              url: 'https://avlive.com.pk/shipping',
+              description: 'Same-day dispatch in Lahore and 1-5 business day insured express delivery across Karachi, Islamabad, and all of Pakistan.'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Shipping Policy', item: 'https://avlive.com.pk/shipping' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

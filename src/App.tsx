@@ -909,6 +909,7 @@ export default function App() {
             </Route>
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:postSlug" element={<Blog />} />
           <Route path="/guides" element={<BuyersGuides />} />
           <Route path="/about" element={<About />} />
           <Route path="/reviews" element={<Reviews />} />

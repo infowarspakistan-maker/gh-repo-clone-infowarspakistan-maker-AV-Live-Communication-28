@@ -87,7 +87,28 @@ export function Quote() {
       <SEO 
         title="Request a Custom Enterprise AV Quote | AV Live Pakistan" 
         description="Request official pricing and architecture designs for corporate video conferencing, boardroom automation, IP-PBX systems, and LED display installations."
-        url="https://avlive.com.pk/quote"
+        url="https://avlive.com.pk/programs/quote"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/programs/quote#service',
+              name: 'B2B Enterprise AV Hardware & Project Quotation Desk',
+              serviceType: 'Corporate Volume Procurement & Tender BOQ Desk',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: 'PK',
+              url: 'https://avlive.com.pk/programs/quote'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Request a Quote', item: 'https://avlive.com.pk/programs/quote' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

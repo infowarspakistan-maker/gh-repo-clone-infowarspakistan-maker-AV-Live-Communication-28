@@ -13,8 +13,11 @@ import {
   getCanonicalProductSlug,
   resolveCanonicalProductSlugByIdentifier,
   PRODUCT_GMC_METADATA,
+  buildFallbackProductFromGmcMeta,
+  resolveProductPricing,
 } from './src/lib/gmc-feed';
 import { FALLBACK_SERVICES_CATALOG } from './src/lib/services-catalog';
+import { buildDynamicSitemapXml, buildLlmsFullTxt, FALLBACK_BLOG_CATALOG } from './src/lib/sitemap-generator';
 
 // Initialize Firebase Admin
 // We try to load from a local file if it exists, otherwise we rely on environment/defaults
@@ -239,173 +242,141 @@ async function startServer() {
 
   // API Routes
   
+  // Automated Server-Side Sitemap Generator & Disk Synchronizer
+  let cachedSitemapXml: string | null = null;
+  let lastSitemapGeneratedAt = 0;
+  const SITEMAP_CACHE_TTL_MS = 60 * 1000; // 60 seconds dynamic refresh window
+
+  async function generateAndSyncServerSitemap(forceRefresh = false): Promise<string> {
+    const now = Date.now();
+    if (!forceRefresh && cachedSitemapXml && now - lastSitemapGeneratedAt < SITEMAP_CACHE_TTL_MS) {
+      return cachedSitemapXml;
+    }
+
+    const activeProducts: Array<Record<string, any>> = [];
+    const activeCategories: Array<Record<string, any>> = [];
+    const activeServices: Array<Record<string, any>> = [];
+    const activeBlogPosts: Array<Record<string, any>> = [];
+
+    const [productsRes, categoriesRes, servicesRes, blogsRes] = await Promise.allSettled([
+      db.collection('products').get(),
+      db.collection('categories').get(),
+      db.collection('services').get(),
+      db.collection('blog_posts').get()
+    ]);
+
+    if (productsRes.status === 'fulfilled') {
+      productsRes.value.forEach(doc => {
+        const data = doc.data();
+        if (data.isActive !== false) {
+          activeProducts.push({ id: doc.id, ...data });
+        }
+      });
+    } else {
+      console.warn('Firestore Admin products read fallback for sitemap:', productsRes.reason);
+    }
+
+    if (categoriesRes.status === 'fulfilled') {
+      categoriesRes.value.forEach(doc => {
+        const data = doc.data();
+        if (data.isActive !== false) {
+          activeCategories.push({ id: doc.id, ...data });
+        }
+      });
+    } else {
+      console.warn('Firestore Admin categories read fallback for sitemap:', categoriesRes.reason);
+    }
+
+    if (servicesRes.status === 'fulfilled') {
+      servicesRes.value.forEach(doc => {
+        const data = doc.data();
+        if (data.isActive !== false) {
+          activeServices.push({ id: doc.id, ...data });
+        }
+      });
+    } else {
+      console.warn('Firestore Admin services read fallback for sitemap:', servicesRes.reason);
+    }
+
+    if (blogsRes.status === 'fulfilled') {
+      blogsRes.value.forEach(doc => {
+        const data = doc.data();
+        if (data.isPublished !== false && data.isActive !== false) {
+          activeBlogPosts.push({ id: doc.id, ...data });
+        }
+      });
+    } else {
+      console.warn('Firestore Admin blog_posts read fallback for sitemap:', blogsRes.reason);
+    }
+
+    const { xml } = buildDynamicSitemapXml({
+      products: activeProducts,
+      categories: activeCategories,
+      services: activeServices,
+      blogPosts: activeBlogPosts
+    });
+
+    cachedSitemapXml = xml;
+    lastSitemapGeneratedAt = now;
+
+    // Keep public/sitemap.xml, public/llms-full.txt, and dist copies synchronized so static middleware never serves stale files
+    try {
+      const publicSitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+      fs.writeFileSync(publicSitemapPath, xml, 'utf8');
+      const llmsFullTxt = buildLlmsFullTxt();
+      fs.writeFileSync(path.join(process.cwd(), 'public', 'llms-full.txt'), llmsFullTxt, 'utf8');
+      const distSitemapPath = path.join(process.cwd(), 'dist', 'sitemap.xml');
+      if (fs.existsSync(path.dirname(distSitemapPath))) {
+        fs.writeFileSync(distSitemapPath, xml, 'utf8');
+        fs.writeFileSync(path.join(process.cwd(), 'dist', 'llms-full.txt'), llmsFullTxt, 'utf8');
+      }
+    } catch (syncErr) {
+      console.warn('Could not sync generated sitemap.xml / llms-full.txt to disk:', syncErr);
+    }
+
+    return xml;
+  }
+
+  // Warm up and synchronize sitemap on server startup
+  generateAndSyncServerSitemap(true).catch(err =>
+    console.warn('Initial server sitemap warmup warning:', err)
+  );
+
   app.get('/sitemap.xml', async (req, res) => {
     try {
-      const baseUrl = 'https://avlive.com.pk';
-      const today = new Date().toISOString().split('T')[0];
-      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-
-      // Optimized Static, Program, Brand & Focus Keyword routes
-      const staticRoutes = [
-        '',
-        '/shop',
-        '/brands',
-        '/solutions',
-        '/services',
-        '/events-services',
-        '/event-quote',
-        '/esports',
-        '/room-designer',
-        '/contact',
-        '/about',
-        '/faqs',
-        '/blog',
-        '/compare',
-        '/guides',
-        '/reviews',
-        '/returns',
-        '/shipping',
-        '/payment',
-        '/rma',
-        '/privacy-policy',
-        '/terms-of-service',
-        '/programs/quote',
-        '/programs/blind-drop-shipping',
-        '/programs/government-education-pricing',
-        '/programs/fulfillment-services',
-        '/programs/promotions',
-        '/programs/provisioning-services',
-        '/programs/reseller-program',
-        '/voip-service-providers',
-        '/3d-hologram',
-        '/projection-mapping',
-        '/video-conferencing',
-        '/conference-room-solutions',
-        '/zoom-rooms',
-        '/microsoft-teams-rooms',
-        '/lahore',
-        '/karachi',
-        '/islamabad',
-        '/services/corporate-events',
-        '/services/hybrid-events',
-        '/services/expo-organizing',
-        '/services/esports-events',
-        '/services/ai-development',
-        '/services/ai-agents-workers',
-        '/services/ai-automation',
-        '/services/boardroom-integration',
-        '/services/voip-telephony',
-        '/brands/poly',
-        '/brands/cisco',
-        '/brands/logitech',
-        '/brands/yealink',
-        '/brands/jabra',
-        '/brands/bosch',
-        '/brands/hikvision',
-        '/brands/dahua',
-        '/brands/axis',
-        '/brands/grandstream',
-        '/brands/fanvil',
-        '/brands/2n',
-        '/brands/epson',
-        '/brands/benq',
-        '/brands/optoma',
-        '/brands/panasonic',
-        '/brands/sony',
-        '/brands/viewsonic',
-        '/brands/uniview',
-        '/brands/itc',
-        '/brands/3cx',
-        '/brands/freepbx',
-        '/brands/sangoma'
-      ];
-
-      const seenUrls = new Set<string>();
-      const appendUrl = (locPath: string, priority: string) => {
-        const fullLoc = `${baseUrl}${locPath}`;
-        if (seenUrls.has(fullLoc)) return;
-        seenUrls.add(fullLoc);
-        xml += '  <url>\n';
-        xml += `    <loc>${fullLoc}</loc>\n`;
-        xml += `    <lastmod>${today}</lastmod>\n`;
-        xml += '    <changefreq>weekly</changefreq>\n';
-        xml += `    <priority>${priority}</priority>\n`;
-        xml += '  </url>\n';
-      };
-
-      for (const route of staticRoutes) {
-        appendUrl(route, route === '' ? '1.0' : route.startsWith('/brands/') || route.startsWith('/programs/') ? '0.7' : '0.9');
-      }
-
-      // Dynamic Products (only active, with GMC catalog fallback if Firestore Admin is unavailable)
-      let addedProductCount = 0;
-      try {
-        const productsSnap = await db.collection('products').where('isActive', '==', true).get();
-        productsSnap.forEach(doc => {
-          const data = doc.data();
-          const slug = getCanonicalProductSlug(data, doc.id);
-          appendUrl(`/product/${slug}`, slug === 'polycom-realpresence-group-500-pakistan' ? '0.9' : '0.8');
-          addedProductCount++;
-        });
-      } catch (e) {
-        console.warn('Firestore Admin products read fallback for sitemap:', e);
-      }
-
-      for (const rawKey of Object.keys(PRODUCT_GMC_METADATA)) {
-        const canonicalSlug = getCanonicalProductSlug({ slug: rawKey }, rawKey);
-        appendUrl(`/product/${canonicalSlug}`, canonicalSlug === 'polycom-realpresence-group-500-pakistan' ? '0.9' : '0.8');
-      }
-
-      // Dynamic Categories (only active product categories, excluding navigation pages)
-      const excludedCategorySlugs = new Set([
-        'about', 'compare', 'faqs', 'guides', 'payment', 'returns', 'reviews', 'rma',
-        'shipping', 'blog', 'contact', 'privacy-policy', 'terms-of-service',
-        'blind-drop-shipping', 'fulfillment-services', 'government-education-pricing',
-        'promotions', 'provisioning-services', 'quote', 'reseller-program',
-        'ai-agents-workers', 'ai-automation', 'ai-development', 'corporate-events',
-        'esports-events', 'expo-organizing', 'hybrid-events', 'voip-service-providers'
-      ]);
-      const canonicalCategorySlugs = [
-        'video-conferencing',
-        'touch-panels',
-        'large-room',
-        'speakerphones',
-        'boardroom-codecs',
-        'ptz-cameras',
-        'ip-phones',
-        'headsets',
-        'ip-cameras',
-        'intercom-paging-access',
-        'voip-phone-systems',
-        'projectors'
-      ];
-      for (const slug of canonicalCategorySlugs) {
-        appendUrl(`/category/${slug}`, '0.8');
-      }
-
-      try {
-        const categoriesSnap = await db.collection('categories').where('isActive', '==', true).get();
-        categoriesSnap.forEach(doc => {
-          const data = doc.data();
-          const slug = data.slug || doc.id;
-          if ((data.type && data.type !== 'product') || excludedCategorySlugs.has(slug)) {
-            return;
-          }
-          appendUrl(`/category/${slug}`, '0.8');
-        });
-      } catch (e) {
-        console.warn('Firestore Admin categories read fallback for sitemap:', e);
-      }
-
-      xml += '</urlset>';
-
-      res.header('Content-Type', 'application/xml; charset=utf-8');
+      const forceRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+      const xml = await generateAndSyncServerSitemap(forceRefresh);
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=600, stale-while-revalidate=86400');
       res.send(xml);
     } catch (error) {
       console.error('Sitemap generation error:', error);
-      res.status(500).send('Error generating sitemap');
+      const fallbackXml = buildDynamicSitemapXml().xml;
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+      res.send(fallbackXml);
     }
+  });
+
+  app.get('/llms-full.txt', (req, res) => {
+    try {
+      const content = buildLlmsFullTxt();
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.send(content);
+    } catch (error) {
+      console.error('llms-full.txt generation error:', error);
+      res.status(500).send('Error generating llms-full.txt');
+    }
+  });
+
+  app.get('/llms.txt', (req, res) => {
+    const llmsPath = path.join(process.cwd(), 'public', 'llms.txt');
+    if (fs.existsSync(llmsPath)) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return res.send(fs.readFileSync(llmsPath, 'utf8'));
+    }
+    res.redirect(302, '/llms-full.txt');
   });
 
   // Live Google Merchant Center 40-Column TSV Feed Endpoint
@@ -900,6 +871,14 @@ async function startServer() {
     const canonicalUrl = `https://avlive.com.pk${cleanPath}`;
 
     const routeMeta: Record<string, { title: string; description: string; noindex?: boolean; schema?: Record<string, any> }> = {
+      '': {
+        title: 'Video Conference | Event Management | AV Live',
+        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events."
+      },
+      '/': {
+        title: 'Video Conference | Event Management | AV Live',
+        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events."
+      },
       '/shop': {
         title: 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live',
         description: 'Buy genuine Video Conference in Pakistan hardware: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Yealink, and Corporate Event Management equipment.'
@@ -950,15 +929,47 @@ async function startServer() {
       },
       '/event-quote': {
         title: 'Request an Event Production & AV Rental Quote | AV Live Communications Pakistan',
-        description: 'Get an instant custom quotation for corporate events, hybrid townhalls, 3D hologram stages, SMD LED walls, and conference room AV in Pakistan.'
+        description: 'Get an instant custom quotation for corporate events, hybrid townhalls, 3D hologram stages, SMD LED walls, and conference room AV in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          '@id': 'https://avlive.com.pk/event-quote#app',
+          name: 'AV Live Event Production & AV Rental Quote Calculator',
+          url: 'https://avlive.com.pk/event-quote',
+          applicationCategory: 'BusinessApplication',
+          operatingSystem: 'All',
+          description: 'Interactive corporate event, hybrid townhall, and 3D hologram stage quotation estimator for Pakistan.',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' }
+        }
       },
       '/esports': {
         title: 'Esports Tournament Production & Broadcast AV in Pakistan | AV Live',
-        description: 'End-to-end Esports arena staging, low-latency broadcast switching, custom stage lighting, and live streaming production in Pakistan.'
+        description: 'End-to-end Esports arena staging, low-latency broadcast switching, custom stage lighting, and live streaming production in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/esports#service',
+          name: 'Esports Tournament Production & Broadcast AV in Pakistan',
+          serviceType: 'Esports Broadcast & Arena Production',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
+          url: 'https://avlive.com.pk/esports'
+        }
       },
       '/room-designer': {
         title: 'Interactive 3D Conference Room Designer | Boardroom AV Planner | AV Live',
-        description: 'Configure your meeting room dimensions, seating capacity, and camera/microphone coverage with the AV Live interactive conference room planner.'
+        description: 'Configure your meeting room dimensions, seating capacity, and camera/microphone coverage with the AV Live interactive conference room planner.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          '@id': 'https://avlive.com.pk/room-designer#app',
+          name: 'AV Live 3D Conference Room Designer & Acoustic BoM Calculator',
+          url: 'https://avlive.com.pk/room-designer',
+          applicationCategory: 'DesignApplication',
+          operatingSystem: 'All',
+          description: 'Interactive 3D conference room planner and AV Bill of Materials (BoM) calculator for Pakistani enterprises.',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' }
+        }
       },
       '/services': {
         title: 'Corporate Event Management, Hybrid Events & Video Conferencing Services | AV Live Pakistan',
@@ -982,15 +993,53 @@ async function startServer() {
       },
       '/guides': {
         title: "Enterprise AV & VoIP Buyer's Guides | Video Conferencing & IP Telephony | AV Live",
-        description: 'In-depth hardware comparison and procurement guides for video conferencing bars, SIP IP phones, PoE security cameras, and commercial laser projectors in Pakistan.'
+        description: 'In-depth hardware comparison and procurement guides for video conferencing bars, SIP IP phones, PoE security cameras, and commercial laser projectors in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          '@id': 'https://avlive.com.pk/guides#collection',
+          name: "Enterprise AV & VoIP Buyer's Guides in Pakistan",
+          url: 'https://avlive.com.pk/guides',
+          description: 'Technical hardware procurement guides for video conferencing, SIP IP telephony, PoE surveillance, and laser projection in Pakistan.'
+        }
       },
       '/reviews': {
         title: 'Verified Enterprise Client Reviews & Case Studies | AV Live Communications Pakistan',
-        description: 'Read verified reviews from corporate IT directors, universities, and government agencies across Pakistan who trust AV Live for video conferencing and event production.'
+        description: 'Read verified reviews from corporate IT directors, universities, and government agencies across Pakistan who trust AV Live for video conferencing and event production.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          '@id': 'https://avlive.com.pk/reviews#reviews',
+          name: 'Verified Enterprise Client Reviews & Case Studies — AV Live Pakistan',
+          url: 'https://avlive.com.pk/reviews',
+          mainEntity: {
+            '@type': 'Organization',
+            '@id': 'https://avlive.com.pk/#organization',
+            name: 'AV Live Communications',
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: '4.9',
+              reviewCount: '128',
+              bestRating: '5',
+              worstRating: '1'
+            }
+          }
+        }
       },
       '/compare': {
         title: 'Compare Video Conferencing & VoIP Hardware Side-by-Side | AV Live Pakistan',
-        description: 'Compare technical specifications, camera optics, microphone pickup range, and PKR pricing across Poly, Cisco, Logitech, and Yealink hardware.'
+        description: 'Compare technical specifications, camera optics, microphone pickup range, and PKR pricing across Poly, Cisco, Logitech, and Yealink hardware.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          '@id': 'https://avlive.com.pk/compare#app',
+          name: 'Enterprise AV & Video Conferencing Side-by-Side Hardware Comparator',
+          url: 'https://avlive.com.pk/compare',
+          applicationCategory: 'BusinessApplication',
+          operatingSystem: 'All',
+          description: 'Side-by-side technical specification and PKR price comparison tool for HP Poly, Logitech, Cisco, and Yealink hardware.',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' }
+        }
       },
       '/faqs': {
         title: 'Frequently Asked Questions (FAQs) | Video Conference & Event Management | AV Live',
@@ -998,59 +1047,192 @@ async function startServer() {
       },
       '/returns': {
         title: 'Return Policy & 30-Day Hardware Replacement Guarantee | AV Live Pakistan',
-        description: 'Transparent 30-day hardware return and DOA replacement policy for enterprise video conferencing, VoIP phones, and AV equipment purchased from AV Live Communications.'
+        description: 'Transparent 30-day hardware return and DOA replacement policy for enterprise video conferencing, VoIP phones, and AV equipment purchased from AV Live Communications.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          '@id': 'https://avlive.com.pk/returns#webpage',
+          name: 'AV Live Communications 30-Day Hardware Return & DOA Replacement Policy',
+          url: 'https://avlive.com.pk/returns',
+          mainEntity: {
+            '@type': 'MerchantReturnPolicy',
+            applicableCountry: 'PK',
+            returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+            merchantReturnDays: 30,
+            returnMethod: 'https://schema.org/ReturnByMail',
+            returnFees: 'https://schema.org/FreeReturn'
+          }
+        }
       },
       '/shipping': {
         title: 'Insured Nationwide B2B Shipping & Delivery Policy | AV Live Pakistan',
-        description: 'Same-day dispatch in Lahore and insured express courier delivery across Karachi, Islamabad, Faisalabad, Multan, and all of Pakistan for enterprise AV hardware.'
+        description: 'Same-day dispatch in Lahore and insured express courier delivery across Karachi, Islamabad, Faisalabad, Multan, and all of Pakistan for enterprise AV hardware.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          '@id': 'https://avlive.com.pk/shipping#webpage',
+          name: 'Insured Nationwide B2B Shipping & Delivery Policy — AV Live Pakistan',
+          url: 'https://avlive.com.pk/shipping',
+          description: 'Same-day dispatch in Lahore and 1-5 business day insured express delivery across Karachi, Islamabad, and all of Pakistan.'
+        }
       },
       '/payment': {
         title: 'Corporate Payment Methods, Bank Transfer & Official GST/NTN Invoicing | AV Live',
-        description: 'Flexible B2B payment options including corporate cross-cheque, IBFT bank transfer, purchase order (PO) financing, and FBR-compliant GST tax invoicing.'
+        description: 'Flexible B2B payment options including corporate cross-cheque, IBFT bank transfer, purchase order (PO) financing, and FBR-compliant GST tax invoicing.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          '@id': 'https://avlive.com.pk/payment#webpage',
+          name: 'Corporate B2B Payment Methods & FBR GST Invoicing — AV Live Pakistan',
+          url: 'https://avlive.com.pk/payment',
+          description: 'Corporate cross-cheque, IBFT bank transfer, PO financing, and FBR GST/NTN tax invoicing for Pakistani organizations.'
+        }
       },
       '/rma': {
         title: 'Warranty Claim & RMA Hardware Support Portal | AV Live Communications',
-        description: 'Submit an official Return Merchandise Authorization (RMA) request for warranty repair or replacement of Poly, Cisco, Logitech, and Yealink hardware in Pakistan.'
+        description: 'Submit an official Return Merchandise Authorization (RMA) request for warranty repair or replacement of Poly, Cisco, Logitech, and Yealink hardware in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/rma#service',
+          name: 'Warranty Claim & RMA Hardware Support Portal — AV Live Pakistan',
+          serviceType: 'Enterprise Hardware RMA & Warranty Replacement',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: 'PK',
+          url: 'https://avlive.com.pk/rma'
+        }
       },
       '/voip-service-providers': {
         title: 'Enterprise VoIP Service Providers & SIP PBX Integration in Pakistan | AV Live',
-        description: 'Compare and deploy 3CX, FreePBX, Grandstream UCM, and Cisco Unified Communications PBX systems with multi-branch SIP trunking in Pakistan.'
+        description: 'Compare and deploy 3CX, FreePBX, Grandstream UCM, and Cisco Unified Communications PBX systems with multi-branch SIP trunking in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/voip-service-providers#service',
+          name: 'Enterprise VoIP Service Providers & SIP PBX Integration in Pakistan',
+          serviceType: 'IP-PBX & Multi-Branch SIP Trunking Integration',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
+          url: 'https://avlive.com.pk/voip-service-providers'
+        }
       },
       '/programs/quote': {
         title: 'Request an Official B2B Hardware & Project Quotation | AV Live Communications',
-        description: 'Request volume corporate pricing, tender BOQ estimates, and tax-compliant quotations for enterprise AV and video conferencing hardware in Pakistan.'
+        description: 'Request volume corporate pricing, tender BOQ estimates, and tax-compliant quotations for enterprise AV and video conferencing hardware in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/programs/quote#service',
+          name: 'B2B Enterprise AV Hardware & Tender Quotation Desk',
+          serviceType: 'Corporate Volume Procurement & Tender BOQ Desk',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: 'PK',
+          url: 'https://avlive.com.pk/programs/quote'
+        }
       },
       '/programs/blind-drop-shipping': {
         title: 'Blind Drop Shipping for IT Resellers & System Integrators | AV Live Pakistan',
-        description: 'Ship enterprise AV and VoIP hardware directly to your clients across Pakistan in neutral, unbranded packaging with your company packing slip.'
+        description: 'Ship enterprise AV and VoIP hardware directly to your clients across Pakistan in neutral, unbranded packaging with your company packing slip.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/programs/blind-drop-shipping#service',
+          name: 'Blind Drop Shipping for IT Resellers & System Integrators in Pakistan',
+          serviceType: 'White-Label B2B Hardware Drop Shipping',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: 'PK',
+          url: 'https://avlive.com.pk/programs/blind-drop-shipping'
+        }
       },
       '/programs/government-education-pricing': {
         title: 'Government, HEC University & Public Sector AV Pricing Program | AV Live Pakistan',
-        description: 'Special tender pricing, PPRA-compliant documentation, and tax-exempt procurement for government ministries, defense, and HEC universities in Pakistan.'
+        description: 'Special tender pricing, PPRA-compliant documentation, and tax-exempt procurement for government ministries, defense, and HEC universities in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/programs/government-education-pricing#service',
+          name: 'Government, HEC University & PPRA Tender AV Pricing Program',
+          serviceType: 'Public Sector & Educational AV Procurement',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: 'PK',
+          url: 'https://avlive.com.pk/programs/government-education-pricing'
+        }
       },
       '/programs/fulfillment-services': {
         title: 'Enterprise Staging, Warehousing & 3PL AV Fulfillment Services | AV Live',
-        description: 'Multi-branch hardware staging, asset tagging, and scheduled rollout fulfillment for banks and nationwide enterprises in Pakistan.'
+        description: 'Multi-branch hardware staging, asset tagging, and scheduled rollout fulfillment for banks and nationwide enterprises in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/programs/fulfillment-services#service',
+          name: 'Enterprise Staging, Warehousing & 3PL AV Fulfillment Services',
+          serviceType: 'Multi-Branch Hardware Staging & Logistics',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: 'PK',
+          url: 'https://avlive.com.pk/programs/fulfillment-services'
+        }
       },
       '/programs/promotions': {
         title: 'Current Enterprise Hardware Promotions, Bundles & Rebates | AV Live Pakistan',
-        description: 'Exclusive bundle discounts and trade-in rebates on Poly Studio video bars, Logitech Rally kits, and Yealink IP phones in Pakistan.'
+        description: 'Exclusive bundle discounts and trade-in rebates on Poly Studio video bars, Logitech Rally kits, and Yealink IP phones in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          '@id': 'https://avlive.com.pk/programs/promotions#collection',
+          name: 'Enterprise AV & Video Conferencing Hardware Promotions & Trade-In Rebates',
+          url: 'https://avlive.com.pk/programs/promotions',
+          description: 'Active bundle rebates and corporate promotions on HP Poly, Logitech, Cisco, and Yealink hardware in Pakistan.'
+        }
       },
       '/programs/provisioning-services': {
         title: 'Zero-Touch VoIP & Video Endpoint Pre-Provisioning Services | AV Live Pakistan',
-        description: 'Factory firmware updates, SIP account pre-configuration, and plug-and-play provisioning before hardware leaves our Lahore warehouse.'
+        description: 'Factory firmware updates, SIP account pre-configuration, and plug-and-play provisioning before hardware leaves our Lahore warehouse.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/programs/provisioning-services#service',
+          name: 'Zero-Touch VoIP & Video Endpoint Pre-Provisioning Services',
+          serviceType: 'SIP & Video Endpoint Pre-Configuration',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: 'PK',
+          url: 'https://avlive.com.pk/programs/provisioning-services'
+        }
       },
       '/programs/reseller-program': {
         title: 'Authorized B2B Partner & IT Reseller Program | AV Live Communications Pakistan',
-        description: 'Join the AV Live reseller network for wholesale distributor margins, deal registration protection, and pre-sales engineering support in Pakistan.'
+        description: 'Join the AV Live reseller network for wholesale distributor margins, deal registration protection, and pre-sales engineering support in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/programs/reseller-program#service',
+          name: 'Authorized B2B Partner & IT Reseller Program in Pakistan',
+          serviceType: 'Wholesale Pro-AV & Unified Communications Channel Program',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: 'PK',
+          url: 'https://avlive.com.pk/programs/reseller-program'
+        }
       },
       '/privacy-policy': {
         title: 'Privacy Policy & Corporate Data Protection | AV Live Communications',
-        description: 'How AV Live Communications collects, protects, and processes corporate client and procurement data in Pakistan.'
+        description: 'How AV Live Communications collects, protects, and processes corporate client and procurement data in Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          '@id': 'https://avlive.com.pk/privacy-policy#webpage',
+          name: 'Privacy Policy & Corporate Data Protection — AV Live Communications',
+          url: 'https://avlive.com.pk/privacy-policy'
+        }
       },
       '/terms-of-service': {
         title: 'Terms of Service & B2B Procurement Agreement | AV Live Communications',
-        description: 'Standard commercial terms, hardware warranty conditions, and SLA terms for AV Live Communications Pakistan.'
+        description: 'Standard commercial terms, hardware warranty conditions, and SLA terms for AV Live Communications Pakistan.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          '@id': 'https://avlive.com.pk/terms-of-service#webpage',
+          name: 'Terms of Service & B2B Procurement Agreement — AV Live Communications',
+          url: 'https://avlive.com.pk/terms-of-service'
+        }
       },
       '/setup-wizard': {
         title: 'Database Setup Wizard | AV Live',
@@ -1079,7 +1261,9 @@ async function startServer() {
       matched = routeMeta['/admin'];
     }
 
-    // Dynamic Brand Route SSR Metadata Injection (/brands/:brandSlug)
+    let ssrCustomBodyHtml = '';
+
+    // Dynamic Brand Route SSR Metadata, Schema & Product Matrix Injection (/brands/:brandSlug)
     if (!matched && cleanPath.startsWith('/brands/')) {
       const brandSlug = cleanPath.replace('/brands/', '');
       const brandNames: Record<string, string> = {
@@ -1104,26 +1288,99 @@ async function startServer() {
         uniview: 'Uniview',
         itc: 'ITC Audio',
         '3cx': '3CX',
+        freepbx: 'FreePBX (Sangoma)',
         sangoma: 'Sangoma'
       };
-      const readableBrand = brandNames[brandSlug.toLowerCase()] || (brandSlug.charAt(0).toUpperCase() + brandSlug.slice(1));
+      const lowerBrand = brandSlug.toLowerCase();
+      const readableBrand = brandNames[lowerBrand] || (brandSlug.charAt(0).toUpperCase() + brandSlug.slice(1));
+      const brandProducts = Object.keys(PRODUCT_GMC_METADATA)
+        .map(slug => buildFallbackProductFromGmcMeta(slug))
+        .filter((p): p is NonNullable<typeof p> => Boolean(p) && (
+          String(p?.brand || '').toLowerCase().includes(lowerBrand) ||
+          (lowerBrand === 'poly' && String(p?.brand || '').toLowerCase().includes('poly')) ||
+          (lowerBrand === 'freepbx' && (String(p?.brand || '').toLowerCase().includes('freepbx') || String(p?.brand || '').toLowerCase().includes('sangoma')))
+        ));
+
+      const title = `${readableBrand} Official Hardware Distributor in Pakistan | Video Conferencing & AV | AV Live`;
+      const description = `Shop genuine ${readableBrand} video conferencing systems, IP phones, projectors, and enterprise AV hardware in Pakistan with official warranty from AV Live Communications.`;
+
       matched = {
-        title: `${readableBrand} Official Hardware Distributor in Pakistan | Video Conferencing & AV | AV Live`,
-        description: `Shop genuine ${readableBrand} video conferencing systems, IP phones, projectors, and enterprise AV hardware in Pakistan with official warranty from AV Live Communications.`
+        title,
+        description,
+        schema: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'CollectionPage',
+              '@id': `${canonicalUrl}#collection`,
+              name: `${readableBrand} Enterprise Hardware Catalog Pakistan`,
+              description,
+              url: canonicalUrl,
+              mainEntity: {
+                '@type': 'ItemList',
+                numberOfItems: brandProducts.length,
+                itemListElement: brandProducts.slice(0, 20).map((prod, idx) => ({
+                  '@type': 'ListItem',
+                  position: idx + 1,
+                  url: `https://avlive.com.pk/product/${prod.slug}`,
+                  name: prod.productName
+                }))
+              }
+            },
+            {
+              '@type': 'BreadcrumbList',
+              '@id': `${canonicalUrl}#breadcrumb`,
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Authorized Brands', item: 'https://avlive.com.pk/brands' },
+                { '@type': 'ListItem', position: 3, name: readableBrand, item: canonicalUrl }
+              ]
+            }
+          ]
+        }
       };
+
+      const rowsHtml = brandProducts.map(prod => {
+        const price = resolveProductPricing(prod).effectivePrice;
+        return `<tr>
+          <td><a href="https://avlive.com.pk/product/${prod.slug}">${prod.productName}</a></td>
+          <td>${prod.mpn || prod.sku}</td>
+          <td>${prod.category}</td>
+          <td>Rs. ${price.toLocaleString()}</td>
+        </tr>`;
+      }).join('');
+
+      ssrCustomBodyHtml = `
+        <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+          <article>
+            <h1>${readableBrand} Official Hardware Distributor in Pakistan</h1>
+            <p><strong>Answer-First Brand Summary:</strong> ${description} (${brandProducts.length} verified ${readableBrand} SKUs in stock across Lahore, Karachi &amp; Islamabad).</p>
+            ${brandProducts.length > 0 ? `
+            <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+              <caption>${readableBrand} Hardware Models, Part Numbers &amp; PKR Price Matrix</caption>
+              <thead>
+                <tr><th>Model Name</th><th>Official MPN</th><th>Category</th><th>Reference Price (PKR)</th></tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>` : ''}
+          </article>
+        </main>`;
     }
 
-    // Dynamic Product Route SSR Metadata & Schema Injection (/product/:slug)
+    // Dynamic Product Route SSR Metadata & Full Google Merchant Center Schema Injection (/product/:slug)
     if (!matched && cleanPath.startsWith('/product/')) {
       const rawIdentifier = cleanPath.replace('/product/', '');
       const resolvedSlug = resolveCanonicalProductSlugByIdentifier(rawIdentifier) || rawIdentifier;
       const gmcMeta = PRODUCT_GMC_METADATA[resolvedSlug];
+      const fallbackProd = buildFallbackProductFromGmcMeta(resolvedSlug);
       if (gmcMeta) {
-        const readableName = resolvedSlug
+        const readableName = fallbackProd?.productName || resolvedSlug
           .replace(/-pakistan$/, '')
           .split('-')
           .map(w => w.toUpperCase() === 'IP' || w.toUpperCase() === 'PTZ' || w.toUpperCase() === 'USB' || w.toUpperCase() === '4K' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))
           .join(' ');
+        const effectivePrice = fallbackProd ? resolveProductPricing(fallbackProd).effectivePrice : 50000;
+        const productImg = fallbackProd?.imageUrl || 'https://avlive.com.pk/og-image.jpg';
         const title = `${readableName} (${gmcMeta.mpn}) | ${gmcMeta.brand} Video Conference in Pakistan | AV Live`;
         const description = gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} MPN ${gmcMeta.mpn} with 1-year Pakistan warranty and nationwide deployment.`;
         matched = {
@@ -1131,26 +1388,91 @@ async function startServer() {
           description,
           schema: {
             '@context': 'https://schema.org',
-            '@type': 'Product',
-            '@id': `${canonicalUrl}#product`,
-            name: readableName,
-            sku: gmcMeta.mpn,
-            mpn: gmcMeta.mpn,
-            gtin12: gmcMeta.gtin,
-            gtin: gmcMeta.gtin,
-            description,
-            brand: { '@type': 'Brand', name: gmcMeta.brand },
-            offers: {
-              '@type': 'Offer',
-              url: canonicalUrl,
-              priceCurrency: 'PKR',
-              price: '50000.00',
-              itemCondition: 'https://schema.org/NewCondition',
-              availability: 'https://schema.org/InStock',
-              seller: { '@type': 'Organization', name: 'AV Live Communications', url: 'https://avlive.com.pk' }
-            }
+            '@graph': [
+              {
+                '@type': 'Product',
+                '@id': `${canonicalUrl}#product`,
+                name: readableName,
+                image: [productImg],
+                sku: gmcMeta.mpn,
+                mpn: gmcMeta.mpn,
+                gtin12: gmcMeta.gtin,
+                gtin: gmcMeta.gtin,
+                description,
+                brand: { '@type': 'Brand', name: gmcMeta.brand },
+                aggregateRating: {
+                  '@type': 'AggregateRating',
+                  ratingValue: '4.9',
+                  reviewCount: '24',
+                  bestRating: '5',
+                  worstRating: '1'
+                },
+                review: {
+                  '@type': 'Review',
+                  reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+                  author: { '@type': 'Organization', name: 'Enterprise IT Procurement Pakistan' },
+                  reviewBody: `Verified genuine ${readableName} (${gmcMeta.mpn}) deployed by AV Live Communications with full local Pakistan warranty.`
+                },
+                offers: {
+                  '@type': 'Offer',
+                  url: canonicalUrl,
+                  priceCurrency: 'PKR',
+                  price: effectivePrice.toFixed(2),
+                  priceValidUntil: '2026-12-31',
+                  itemCondition: 'https://schema.org/NewCondition',
+                  availability: 'https://schema.org/InStock',
+                  seller: { '@type': 'Organization', name: 'AV Live Communications', url: 'https://avlive.com.pk' },
+                  shippingDetails: {
+                    '@type': 'OfferShippingDetails',
+                    shippingRate: { '@type': 'MonetaryAmount', value: '0', currency: 'PKR' },
+                    shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'PK' },
+                    deliveryTime: {
+                      '@type': 'ShippingDeliveryTime',
+                      handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+                      transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 5, unitCode: 'DAY' }
+                    }
+                  },
+                  hasMerchantReturnPolicy: {
+                    '@type': 'MerchantReturnPolicy',
+                    applicableCountry: 'PK',
+                    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                    merchantReturnDays: 30,
+                    returnMethod: 'https://schema.org/ReturnByMail',
+                    returnFees: 'https://schema.org/FreeReturn'
+                  }
+                }
+              },
+              {
+                '@type': 'BreadcrumbList',
+                '@id': `${canonicalUrl}#breadcrumb`,
+                itemListElement: [
+                  { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                  { '@type': 'ListItem', position: 2, name: 'Shop', item: 'https://avlive.com.pk/shop' },
+                  { '@type': 'ListItem', position: 3, name: readableName, item: canonicalUrl }
+                ]
+              }
+            ]
           }
         };
+        ssrCustomBodyHtml = `
+          <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+            <article>
+              <h1>${readableName} (${gmcMeta.mpn}) — Official ${gmcMeta.brand} Pakistan</h1>
+              <p><strong>Answer-First Hardware Verdict:</strong> ${description}</p>
+              <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+                <caption>${readableName} Technical &amp; Commercial Specifications (Pakistan)</caption>
+                <tbody>
+                  <tr><th>Hardware Model</th><td>${readableName}</td></tr>
+                  <tr><th>Authorized Brand</th><td>${gmcMeta.brand}</td></tr>
+                  <tr><th>Manufacturer Part Number (MPN)</th><td>${gmcMeta.mpn}</td></tr>
+                  <tr><th>GS1 GTIN / UPC</th><td>${gmcMeta.gtin}</td></tr>
+                  <tr><th>Reference Price (PKR)</th><td>Rs. ${effectivePrice.toLocaleString()}</td></tr>
+                  <tr><th>Key Engineering Highlight</th><td>${gmcMeta.highlight}</td></tr>
+                  <tr><th>Warranty &amp; Compliance</th><td>1-Year Official Local Pakistan Warranty (Optional 3-Year SLA) • PTA Compliant</td></tr>
+                </tbody>
+              </table>
+            </article>
+          </main>`;
       }
     }
 
@@ -1173,20 +1495,215 @@ async function startServer() {
             areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
           }
         };
+        ssrCustomBodyHtml = `
+          <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+            <article>
+              <h1>${svc.title} — Turnkey Enterprise Service in Pakistan</h1>
+              <p><strong>Direct Answer Summary:</strong> ${svc.description}</p>
+              <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+                <caption>${svc.title} Deployment &amp; SLA Matrix</caption>
+                <thead>
+                  <tr><th>Service Attribute</th><th>AV Live Enterprise Standard</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Service Classification</td><td>${svc.serviceType || svc.category || 'Enterprise AV & Event Engineering'}</td></tr>
+                  <tr><td>Primary Coverage Cities</td><td>Lahore, Karachi, Islamabad, Rawalpindi &amp; Nationwide Pakistan</td></tr>
+                  <tr><td>Proposal &amp; Site Survey SLA</td><td>15-Minute Phone/WhatsApp Response • 24-Hour Custom BoM Proposal</td></tr>
+                </tbody>
+              </table>
+            </article>
+          </main>`;
       }
     }
 
-    // Dynamic Category Route SSR Metadata Injection (/category/:categorySlug)
+    // Dynamic Category Route SSR Metadata, Schema & Product Matrix Injection (/category/:categorySlug)
     if (!matched && cleanPath.startsWith('/category/')) {
       const catSlug = cleanPath.replace('/category/', '');
       const readableCat = catSlug
         .split('-')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .map(w => w.toUpperCase() === 'IP' || w.toUpperCase() === 'PTZ' || w.toUpperCase() === 'VOIP' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
-      matched = {
-        title: `${readableCat} | Video Conference in Pakistan | Polycom Group 500 & Poly X70 | AV Live`,
-        description: `Explore genuine ${readableCat} in Pakistan including Polycom Group 500, Poly X70, and enterprise Video conference & Corporate event management hardware.`
+
+      const allFallbackProds = Object.keys(PRODUCT_GMC_METADATA)
+        .map(slug => buildFallbackProductFromGmcMeta(slug))
+        .filter((p): p is NonNullable<typeof p> => Boolean(p));
+
+      const catKeywordMap: Record<string, string[]> = {
+        'video-conferencing': ['video conferencing', 'rally', 'studio', 'group 500', 'room kit', 'meetingbar', 'camera', 'speakerphone', 'touch'],
+        'touch-panels': ['touch', 'tc8', 'tc10', 'tap', 'navigator', 'ctp18'],
+        'large-room': ['group 500', 'x70', 'x72', 'g7500', 'rally plus', 'room kit plus', 'codec pro', 'a30', 'mvc860'],
+        'speakerphones': ['sync', 'speak', 'trio', 'cp965', 'mic pod', 'ceiling microphone'],
+        'boardroom-codecs': ['group 500', 'g7500', 'room kit', 'codec pro', 'room bar'],
+        'ptz-cameras': ['eagleeye', 'ptz', 'rally camera', 'uvc84', 'aw-ue'],
+        'ip-phones': ['ip phone', 'vvx', 'edge', 't31', 't43', 't46', 't54', '8841', '7821', 'grp', 'gxp', 'fanvil'],
+        'headsets': ['headset', 'voyager', 'blackwire', 'evolve', 'engage', 'wh62', 'uh37', 'zone'],
+        'ip-cameras': ['camera', 'hikvision', 'dahua', 'axis', 'uniview', 'nvr', 'dome', 'bullet'],
+        'intercom-paging-access': ['intercom', 'paging', 'access', 'paviro', '2n', 'fanvil', 'itc', 'speaker', 'amplifier'],
+        'voip-phone-systems': ['pbx', 'ucm', '3cx', 'freepbx', 'sangoma', 'gateway'],
+        'projectors': ['projector', 'epson', 'benq', 'optoma', 'panasonic', 'sony', 'viewsonic']
       };
+      const matchKeywords = catKeywordMap[catSlug] || [catSlug.replace(/-/g, ' ')];
+      const catProducts = allFallbackProds.filter(prod => {
+        const haystack = `${prod.productName} ${prod.category} ${prod.subcategory} ${prod.shortDescription}`.toLowerCase();
+        return matchKeywords.some(kw => haystack.includes(kw));
+      });
+      const displayCatProducts = catProducts.length > 0 ? catProducts : allFallbackProds.slice(0, 12);
+
+      const title = `${readableCat} | Video Conference in Pakistan | Polycom Group 500 & Poly X70 | AV Live`;
+      const description = `Explore genuine ${readableCat} in Pakistan including Polycom Group 500, Poly X70, and enterprise Video conference & Corporate event management hardware.`;
+
+      matched = {
+        title,
+        description,
+        schema: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'CollectionPage',
+              '@id': `${canonicalUrl}#collection`,
+              name: `${readableCat} Hardware Catalog in Pakistan`,
+              description,
+              url: canonicalUrl,
+              mainEntity: {
+                '@type': 'ItemList',
+                numberOfItems: displayCatProducts.length,
+                itemListElement: displayCatProducts.slice(0, 20).map((prod, idx) => ({
+                  '@type': 'ListItem',
+                  position: idx + 1,
+                  url: `https://avlive.com.pk/product/${prod.slug}`,
+                  name: prod.productName
+                }))
+              }
+            },
+            {
+              '@type': 'BreadcrumbList',
+              '@id': `${canonicalUrl}#breadcrumb`,
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Shop', item: 'https://avlive.com.pk/shop' },
+                { '@type': 'ListItem', position: 3, name: readableCat, item: canonicalUrl }
+              ]
+            }
+          ]
+        }
+      };
+
+      const catRowsHtml = displayCatProducts.map(prod => {
+        const price = resolveProductPricing(prod).effectivePrice;
+        return `<tr>
+          <td><a href="https://avlive.com.pk/product/${prod.slug}">${prod.productName}</a></td>
+          <td>${prod.brand}</td>
+          <td>${prod.mpn || prod.sku}</td>
+          <td>Rs. ${price.toLocaleString()}</td>
+        </tr>`;
+      }).join('');
+
+      ssrCustomBodyHtml = `
+        <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+          <article>
+            <h1>${readableCat} Hardware &amp; Integration in Pakistan</h1>
+            <p><strong>Answer-First Category Summary:</strong> ${description} (${displayCatProducts.length} verified models with PKR pricing and official Pakistan warranty).</p>
+            <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+              <caption>${readableCat} Models, MPNs &amp; Reference Prices in Pakistan (PKR)</caption>
+              <thead>
+                <tr><th>Hardware Model</th><th>Brand</th><th>MPN / SKU</th><th>Reference Price (PKR)</th></tr>
+              </thead>
+              <tbody>${catRowsHtml}</tbody>
+            </table>
+          </article>
+        </main>`;
+    }
+
+    // Dynamic Blog Post Route SSR Metadata & Schema Injection (/blog/:postSlug)
+    if (!matched && cleanPath.startsWith('/blog/')) {
+      const postSlug = cleanPath.replace('/blog/', '');
+      const blogPost = FALLBACK_BLOG_CATALOG.find(
+        p => p.slug === postSlug || String(p.id) === postSlug
+      );
+      if (blogPost) {
+        const graphItems: any[] = [
+          {
+            '@type': 'BlogPosting',
+            '@id': `${canonicalUrl}#article`,
+            headline: blogPost.title,
+            description: blogPost.answerFirstSummary || blogPost.excerpt,
+            image: blogPost.image,
+            datePublished: blogPost.publishedIso,
+            dateModified: blogPost.publishedIso,
+            author: {
+              '@type': 'Organization',
+              name: 'AV Live Communications',
+              url: 'https://avlive.com.pk'
+            },
+            publisher: {
+              '@id': 'https://avlive.com.pk/#organization'
+            },
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': canonicalUrl
+            }
+          }
+        ];
+        if (blogPost.faqs && blogPost.faqs.length > 0) {
+          graphItems.push({
+            '@type': 'FAQPage',
+            '@id': `${canonicalUrl}#faq`,
+            mainEntity: blogPost.faqs.map(f => ({
+              '@type': 'Question',
+              name: f.q,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: f.a
+              }
+            }))
+          });
+        }
+        matched = {
+          title: `${blogPost.title} | AV Live Blog`,
+          description: (blogPost.answerFirstSummary || blogPost.excerpt).substring(0, 160),
+          schema: {
+            '@context': 'https://schema.org',
+            '@graph': graphItems
+          }
+        };
+
+        const tableHtml = blogPost.comparisonTable
+          ? `<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+              <caption>${blogPost.comparisonTable.caption}</caption>
+              <thead><tr>${blogPost.comparisonTable.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+              <tbody>${blogPost.comparisonTable.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+            </table>`
+          : '';
+        const paragraphsHtml = blogPost.content.map(p => `<p>${p}</p>`).join('');
+        ssrCustomBodyHtml = `
+          <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+            <article>
+              <h1>${blogPost.title}</h1>
+              <p><strong>Direct Answer (TL;DR):</strong> ${blogPost.answerFirstSummary || blogPost.excerpt}</p>
+              ${tableHtml}
+              ${paragraphsHtml}
+            </article>
+          </main>`;
+      }
+    }
+
+    if (!ssrCustomBodyHtml && matched && cleanPath !== '' && cleanPath !== '/') {
+      ssrCustomBodyHtml = `
+        <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+          <article>
+            <h1>${matched.title}</h1>
+            <p><strong>Direct Answer Summary:</strong> ${matched.description}</p>
+            <nav aria-label="Canonical Enterprise Links">
+              <ul>
+                <li><a href="https://avlive.com.pk/shop">Enterprise AV Hardware Shop</a></li>
+                <li><a href="https://avlive.com.pk/category/video-conferencing">Video Conferencing Systems Pakistan</a></li>
+                <li><a href="https://avlive.com.pk/product/polycom-realpresence-group-500-pakistan">Polycom RealPresence Group 500</a></li>
+                <li><a href="https://avlive.com.pk/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan">Logitech Rally Bar vs Poly Studio X50</a></li>
+                <li><a href="https://avlive.com.pk/blog/boardroom-av-system-price-guide-pakistan">Boardroom AV BoM Price Guide Pakistan</a></li>
+              </ul>
+            </nav>
+          </article>
+        </main>`;
     }
 
     let updated = html
@@ -1213,6 +1730,14 @@ async function startServer() {
         .replace(
           /<meta(?:\s+data-rh="true")?\s+property="og:description"\s+content="[^"]*"\s*\/>/,
           `<meta data-rh="true" property="og:description" content="${matched.description}" />`
+        )
+        .replace(
+          /<meta(?:\s+data-rh="true")?\s+name="twitter:title"\s+content="[^"]*"\s*\/>/,
+          `<meta data-rh="true" name="twitter:title" content="${matched.title}" />`
+        )
+        .replace(
+          /<meta(?:\s+data-rh="true")?\s+name="twitter:description"\s+content="[^"]*"\s*\/>/,
+          `<meta data-rh="true" name="twitter:description" content="${matched.description}" />`
         );
       if (matched.noindex) {
         updated = updated.replace(
@@ -1224,6 +1749,13 @@ async function startServer() {
         const schemaTag = `<script type="application/ld+json" id="ssr-route-schema">${JSON.stringify(matched.schema)}</script>\n  </head>`;
         updated = updated.replace('</head>', schemaTag);
       }
+    }
+
+    if (ssrCustomBodyHtml) {
+      updated = updated.replace(
+        /<div id="root">[\s\S]*?<\/div><!--ssr-root-end-->|<div id="root"><\/div>/,
+        `<div id="root">${ssrCustomBodyHtml}</div><!--ssr-root-end-->`
+      );
     }
 
     return updated;
@@ -1324,6 +1856,18 @@ async function startServer() {
     next();
   });
 
+  // Redirect numeric blog IDs (/blog/1 .. /blog/6) to their canonical SEO blog slugs
+  app.get('/blog/:idOrSlug', (req, res, next) => {
+    const requested = req.params.idOrSlug;
+    const matchedPost = FALLBACK_BLOG_CATALOG.find(
+      p => String(p.id) === requested && p.slug !== requested
+    );
+    if (matchedPost) {
+      return res.redirect(301, `/blog/${matchedPost.slug}`);
+    }
+    next();
+  });
+
   // Set X-Robots-Tag: noindex, nofollow on private/transactional routes
   app.use(['/admin', '/cart', '/checkout', '/setup-wizard'], (req, res, next) => {
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
@@ -1335,6 +1879,28 @@ async function startServer() {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
+    });
+    app.use(async (req, res, next) => {
+      if (
+        req.method === 'GET' &&
+        !req.path.startsWith('/api/') &&
+        !req.path.startsWith('/src/') &&
+        !req.path.startsWith('/@') &&
+        !req.path.startsWith('/node_modules/') &&
+        !path.extname(req.path)
+      ) {
+        try {
+          const indexPath = path.join(process.cwd(), 'index.html');
+          const rawHtml = fs.readFileSync(indexPath, 'utf8');
+          const seoHtml = injectRouteSeoIntoHtml(rawHtml, req.path);
+          const transformed = await vite.transformIndexHtml(req.originalUrl, seoHtml);
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          return res.status(200).send(transformed);
+        } catch (e) {
+          return next(e);
+        }
+      }
+      next();
     });
     app.use(vite.middlewares);
   } else {

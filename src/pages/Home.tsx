@@ -20,8 +20,8 @@ import { getCanonicalProductSlug } from "../lib/gmc-feed";
 const DEFAULT_HERO_SLIDES = [
   {
     id: 'slide-1',
-    title: 'Seamless Unified Communications',
-    subtitle: 'Empowering enterprise workspaces with industry-leading VoIP and video hardware.',
+    title: 'Video Conference | Event Management | AV Live',
+    subtitle: 'Pakistan’s premier Video Conference & Event Management company — certified Poly, Logitech & Cisco boardroom systems and immersive 3D hologram corporate events.',
     ctaText: 'Explore Catalog',
     ctaLink: '/shop',
     imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=1920&q=80',
@@ -322,12 +322,12 @@ export function Home() {
   return (
     <div className="flex-1 w-full bg-[#f8f9fa]">
       <SEO 
-        title="Video Conference in Pakistan | Polycom Group 500 & Poly X70 | Corporate Event Management & Hologram Display | AV Live"
-        description="Pakistan's #1 authority for Video Conference in Pakistan, Polycom Group 500, Poly X70, Corporate event management, hybrid events, and 3D Hologram Display solutions in Lahore, Karachi, and Islamabad."
-        keywords="Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, Event management company Pakistan, 3D hologram events Pakistan, Projection mapping Pakistan, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, AV Live"
+        title="Video Conference | Event Management | AV Live"
+        description="AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events."
+        keywords="Video Conference, Event Management, AV Live, Video Conference in Pakistan, Event Management Company Pakistan, Polycom Group 500, Poly X70, Logitech Rally Bar, Corporate Event Management, 3D Hologram Display, Hybrid Events"
         url="https://avlive.com.pk"
         image={settings?.ogImage || "https://avlive.com.pk/og-image.jpg"}
-        imageAlt="AV Live - Video Conference in Pakistan, Polycom Group 500, Poly X70 & Corporate Event Management"
+        imageAlt="Video Conference | Event Management | AV Live"
         schema={{
           "@context": "https://schema.org",
           "@graph": [

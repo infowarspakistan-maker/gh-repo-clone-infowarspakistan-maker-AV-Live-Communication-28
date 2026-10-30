@@ -10,6 +10,27 @@ export function VoipService() {
         title="Enterprise VoIP & SIP Trunking Solutions | AV Live Pakistan" 
         description="Reliable business VoIP phone lines, SIP trunking, cloud PBX integration, and international calling minutes configured for Pakistani enterprises."
         url="https://avlive.com.pk/voip-service-providers"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/voip-service-providers#service',
+              name: 'Enterprise VoIP & SIP Trunking Solutions in Pakistan',
+              serviceType: 'IP-PBX & Multi-Branch SIP Trunking Integration',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
+              url: 'https://avlive.com.pk/voip-service-providers'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'VoIP Service Providers', item: 'https://avlive.com.pk/voip-service-providers' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

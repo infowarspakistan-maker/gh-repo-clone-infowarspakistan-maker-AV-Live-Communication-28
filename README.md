@@ -1,89 +1,95 @@
-# AV Live Communications
+# AV Live Communications — Platform & Canonical SEO Blueprint (`avlive.com.pk`)
 
-Welcome to the AV Live Communications source code repository. This is a full-stack e-commerce and corporate services platform built with React, Vite, Tailwind CSS, and Firebase.
+Welcome to the **AV Live Communications** source code repository and platform blueprint. This is a full-stack enterprise Pro-AV e-commerce, unified communications (Poly, Cisco, Logitech, Yealink), and corporate event engineering platform built with React 19, Vite, Express SSR metadata/body injection, Tailwind CSS v4, and Firebase Firestore.
 
-## Features
+---
 
-- **E-commerce Storefront**: Browse products by category, apply filters (price, brand), and sort by newest arrivals, popularity, and price.
-- **Custom Quote Requests**: Specialized B2B quote request system for corporate clients.
-- **Service Pages**: Information on corporate events, hybrid events, esports organizing, and AI development.
-- **Interactive Room Designer**: A tool for clients to design their meeting rooms and calculate AV requirements.
-- **Admin Dashboard**:
-  - Content Management (Homepage, About, Services)
-  - Product & Inventory Management
-  - Order & RMA (Return Merchandise Authorization) Management
-  - Staff and Customer Management
-- **Firebase Integration**: Utilizes Firestore for database storage, Firebase Authentication for user/admin login, and Firebase Storage for media.
-- **SEO Optimized**: Automated sitemap generation on build for better search engine indexing.
+## 1. Platform Architecture & Crawler Endpoints
 
-## Technology Stack
+| Endpoint / File | Purpose | Live Count / Status |
+| :--- | :--- | :--- |
+| **`/sitemap.xml`** (`public/sitemap.xml`) | Dynamic XML 1.0 Sitemap synced from Firestore + synchronous fallback catalogs | **152 Canonical URLs** (62 Static/Brand/Geo, 53 Products, 12 Categories, 9 Services, 16 Blogs) |
+| **`/llms.txt`** (`public/llms.txt`) | Concise AI Search (ChatGPT, Perplexity, Claude, Gemini) index & entity directory | Active (HTTP 200 `text/plain`) |
+| **`/llms-full.txt`** (`public/llms-full.txt`) | Complete 30KB+ Markdown corpus of all 53 SKUs (MPNs, GTINs, PKR prices), BoM tables & guides | Active (HTTP 200 `text/plain`) |
+| **`/api/gmc-feed.xml`** | Google Merchant Center RSS 2.0 XML Product Feed (`g:id`, `g:mpn`, `g:gtin`, `g:price` in PKR) | **53 Verified Hardware SKUs** |
+| **`/api/gmc-feed.tsv`** | Google Merchant Center Tab-Separated Values (TSV) Feed for Google Sheets scheduled fetch | **53 Verified Hardware SKUs** |
+| **`/robots.txt`** (`public/robots.txt`) | Explicit `Allow: /` for `Googlebot`, `Google-Extended`, `GPTBot`, `OAI-SearchBot`, `PerplexityBot`, `ClaudeBot` | Active (Blocks `/admin/`, `/cart`, `/checkout`, and `?*=` query duplicates) |
 
-- **Frontend**: React 19, React Router DOM, Tailwind CSS v4, Motion (Framer Motion)
-- **Backend/Database**: Firebase (Firestore, Auth, Storage), Firebase Admin SDK
-- **Build Tool**: Vite, ESBuild
-- **Language**: TypeScript
+---
 
-## Getting Started
+## 2. Canonical Route Blueprint (152 Indexable URLs)
 
-### Prerequisites
+### A. Core Commercial, Geo & Solution Hubs (62 URLs)
+- **Storefront & Discovery**: `/`, `/shop`, `/brands`, `/solutions`, `/services`, `/events-services`, `/event-quote`, `/esports`, `/room-designer`, `/compare`, `/guides`, `/reviews`, `/blog`, `/faqs`, `/contact`, `/about`
+- **High-Intent Commercial Pillar Pages**: `/video-conferencing`, `/conference-room-solutions`, `/zoom-rooms`, `/microsoft-teams-rooms`, `/3d-hologram`, `/projection-mapping`, `/voip-service-providers`
+- **Regional Local SEO Hubs**: `/lahore`, `/karachi`, `/islamabad`
+- **B2B Procurement Programs (`/programs/*`)**: `/programs/quote`, `/programs/blind-drop-shipping`, `/programs/government-education-pricing`, `/programs/fulfillment-services`, `/programs/promotions`, `/programs/provisioning-services`, `/programs/reseller-program`
+- **Trust & Policy Pages**: `/returns`, `/shipping`, `/payment`, `/rma`, `/privacy-policy`, `/terms-of-service`
+- **23 Authorized Brand Pages (`/brands/:brandSlug`)**:
+  `/brands/poly`, `/brands/cisco`, `/brands/logitech`, `/brands/yealink`, `/brands/jabra`, `/brands/bosch`, `/brands/hikvision`, `/brands/dahua`, `/brands/axis`, `/brands/grandstream`, `/brands/fanvil`, `/brands/2n`, `/brands/epson`, `/brands/benq`, `/brands/optoma`, `/brands/panasonic`, `/brands/sony`, `/brands/viewsonic`, `/brands/uniview`, `/brands/itc`, `/brands/3cx`, `/brands/freepbx`, `/brands/sangoma`
 
-Ensure you have [Node.js](https://nodejs.org/) installed on your machine.
+### B. Canonical Hardware Categories (12 URLs — `/category/:slug`)
+- `/category/video-conferencing`
+- `/category/touch-panels`
+- `/category/large-room`
+- `/category/speakerphones`
+- `/category/boardroom-codecs`
+- `/category/ptz-cameras`
+- `/category/ip-phones`
+- `/category/headsets`
+- `/category/ip-cameras`
+- `/category/intercom-paging-access`
+- `/category/voip-phone-systems`
+- `/category/projectors`
 
-### Installation
+### C. Turnkey Integration & Event Services (9 URLs — `/services/:serviceSlug`)
+- `/services/boardroom-integration`, `/services/voip-telephony`, `/services/corporate-events`, `/services/hybrid-events`, `/services/esports-events`, `/services/expo-organizing`, `/services/ai-automation`, `/services/ai-development`, `/services/ai-agents-workers`
 
-1. **Clone the repository** (if applicable) and navigate to the project directory.
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-3. **Firebase Configuration**:
-   Ensure you have the `firebase-applet-config.json` file in the root directory. This file securely connects the web application to your Firestore database.
+### D. Bottom-of-Funnel (BoFu) Engineering & Comparison Blog Guides (16 URLs — `/blog/:postSlug`)
+- **Brand vs. Brand Comparisons**:
+  - `/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan`
+  - `/blog/yealink-vs-cisco-video-conferencing-pakistan`
+  - `/blog/shure-bosch-ceiling-microphones-vs-table-mics-pakistan`
+  - `/blog/ip-phones-vs-softphones-pakistan`
+- **Room-Size & Industry Vertical Guides**:
+  - `/blog/boardroom-av-system-price-guide-pakistan`
+  - `/blog/banking-healthcare-university-av-solutions-pakistan`
+  - `/blog/future-of-video-conferencing-pakistan-2026`
+  - `/blog/secure-voip-pbx-network-pakistan`
+  - `/blog/pa-intercom-system-schools-hospitals-pakistan`
+  - `/blog/hybrid-corporate-events-3d-hologram-pakistan`
+  - Plus 6 legacy ID aliases (`/blog/1`–`/blog/6`) preserved for backward compatibility.
 
-### Running the Development Server
+### E. Verified Enterprise Hardware Products (53 URLs — `/product/:slug`)
+- All 53 hardware SKUs defined in `PRODUCT_GMC_METADATA` (`src/lib/gmc-feed.ts`) resolve via canonical `-pakistan` slugs (e.g., `/product/polycom-realpresence-group-500-pakistan`, `/product/poly-studio-x72-pakistan`, `/product/logitech-rally-bar-pakistan`), with 301 server redirects from raw MPNs or legacy Firestore IDs.
 
-To start the local development server:
+---
+
+## 3. First-Wave SSR & AI Search Architecture (`server.ts`)
+
+1. **`injectRouteSeoIntoHtml(html, reqPath)`**:
+   - Injects route-specific `<title data-rh="true">`, `<meta name="description">`, `<link rel="canonical" href="https://avlive.com.pk/...">`, and `@graph` JSON-LD (`Product`, `CollectionPage` + `ItemList`, `Service`, `BlogPosting` + `FAQPage`, `WebApplication`, `MerchantReturnPolicy`) on the initial HTTP response.
+   - Injects semantic HTML `<main class="ssr-seo-snapshot">` inside `<div id="root">...</div><!--ssr-root-end-->` containing `<h1>`, Answer-First engineering verdicts, and native `<table>` matrices with `<a href="/product/...">` links so Googlebot and non-JS AI crawlers parse complete data before React hydration.
+2. **Zero Loading-Spinner Soft 404s**:
+   - `Shop.tsx`, `Category.tsx`, `ProductDetails.tsx`, `ServiceDetail.tsx`, and `Blog.tsx` initialize synchronously from `PRODUCT_GMC_METADATA`, `FALLBACK_PRODUCT_CATEGORIES`, `FALLBACK_SERVICES_CATALOG`, and `FALLBACK_BLOG_CATALOG`.
+
+---
+
+## 4. Developer & AI Agent Commands
 
 ```bash
+# Start full-stack development server (port 3000 with SSR SEO injection)
 npm run dev
-```
 
-This will launch the application on `http://localhost:3000`.
+# Regenerate public/sitemap.xml (152 URLs) and public/llms-full.txt
+npx tsx scripts/generate-sitemap.ts
 
-### Building for Production
+# Type-check codebase
+npm run lint
 
-To create a production-ready build:
-
-```bash
+# Build production bundle (client + server + sitemap + llms-full.txt)
 npm run build
 ```
-This script generates the optimized static files in the `dist` folder, compiles the server, and automatically generates a fresh `sitemap.xml` file from your active database inventory.
 
-To start the production server:
-```bash
-npm run start
-```
+> **Governance Reminder**: Always review `AGENTS.md` and `seo-policy.md` before modifying routes, products, categories, or metadata.
 
-## Website Guide
-
-### For Customers
-- **Browsing**: Navigate to the **Shop** section to view available AV products. Use the sidebar to filter by category or price, and the top dropdown to sort.
-- **Quote Requests**: If you are a B2B client looking for bulk pricing or custom solutions, use the **Request Custom Quote** feature to get in touch with sales.
-- **Support**: Check the FAQs, or initiate an RMA if you need to return a defective product.
-
-### For Administrators
-To access the admin panel, navigate to `/admin/login` and log in with your authorized admin credentials.
-
-- **Dashboard (`/admin/overview`)**: View high-level metrics, recent orders, and stock alerts.
-- **Products & Inventory (`/admin/products-all`, `/admin/products-inventory`)**: Add new products, update prices, and monitor stock thresholds.
-- **Categories (`/admin/categories`)**: Create and organize product categories.
-- **Orders (`/admin/orders-new`)**: Process incoming orders and update their fulfillment status.
-- **Content Management (`/admin/homepage-editor`, etc.)**: Modify the text and imagery used on the public-facing pages (Homepage, About, Services, etc.) directly from the admin panel.
-
-## Useful Scripts
-
-- **`npm run seed`**: Populates the database with initial admin settings and test data. Run this if setting up a fresh Firestore instance.
-- **`npm run lint`**: Checks the TypeScript codebase for any type or syntax errors.
-
-## Deployment
-
-The application is configured to run in containerized environments. The server automatically binds to port `3000`. Ensure that environment variables (if any) are properly set in your production hosting platform.

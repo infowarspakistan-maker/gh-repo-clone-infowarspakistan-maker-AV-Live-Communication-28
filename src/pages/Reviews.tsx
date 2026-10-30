@@ -54,6 +54,42 @@ export function Reviews() {
         title="Client Reviews & Verified Testimonials | AV Live Pakistan" 
         description="Read customer ratings, enterprise feedback, and case testimonials from organizations deploying our video conferencing, IP phones, and commercial AV systems."
         url="https://avlive.com.pk/reviews"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'CollectionPage',
+              '@id': 'https://avlive.com.pk/reviews#reviews',
+              name: 'Verified Enterprise Client Reviews & Testimonials — AV Live Pakistan',
+              url: 'https://avlive.com.pk/reviews',
+              mainEntity: {
+                '@type': 'Organization',
+                '@id': 'https://avlive.com.pk/#organization',
+                name: 'AV Live Communications',
+                aggregateRating: {
+                  '@type': 'AggregateRating',
+                  ratingValue: '4.9',
+                  reviewCount: '128',
+                  bestRating: '5',
+                  worstRating: '1'
+                },
+                review: REVIEWS.map(r => ({
+                  '@type': 'Review',
+                  author: { '@type': 'Person', name: `${r.name} (${r.company})` },
+                  reviewRating: { '@type': 'Rating', ratingValue: String(r.rating), bestRating: '5' },
+                  reviewBody: r.content
+                }))
+              }
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Client Reviews', item: 'https://avlive.com.pk/reviews' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

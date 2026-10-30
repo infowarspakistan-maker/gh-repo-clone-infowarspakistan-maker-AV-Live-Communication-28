@@ -83,6 +83,28 @@ export function RoomDesigner() {
         url="https://avlive.com.pk/room-designer"
         image="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1200"
         imageAlt="Interactive SMD Video Wall Room Designer"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebApplication',
+              '@id': 'https://avlive.com.pk/room-designer#app',
+              name: 'AV Live 3D Conference Room & SMD LED Wall Calculator',
+              url: 'https://avlive.com.pk/room-designer',
+              applicationCategory: 'DesignApplication',
+              operatingSystem: 'All',
+              description: 'Interactive LED SMD video wall and conference room configurator with instant PDF quotation export.',
+              offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' }
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Room Designer', item: 'https://avlive.com.pk/room-designer' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         

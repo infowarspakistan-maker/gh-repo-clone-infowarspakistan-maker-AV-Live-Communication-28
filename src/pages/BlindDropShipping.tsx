@@ -10,6 +10,27 @@ export function BlindDropShipping() {
         title="Blind Drop Shipping for B2B Partners & Resellers | AV Live Pakistan" 
         description="Confidential unbranded blind drop shipping for AV resellers, IT integrators, and e-commerce partners across all cities in Pakistan."
         url="https://avlive.com.pk/programs/blind-drop-shipping"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/programs/blind-drop-shipping#service',
+              name: 'Blind Drop Shipping for B2B Partners & Resellers in Pakistan',
+              serviceType: 'White-Label B2B Hardware Drop Shipping',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: 'PK',
+              url: 'https://avlive.com.pk/programs/blind-drop-shipping'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Blind Drop Shipping', item: 'https://avlive.com.pk/programs/blind-drop-shipping' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

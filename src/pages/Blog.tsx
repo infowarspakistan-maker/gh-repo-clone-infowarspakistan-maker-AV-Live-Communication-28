@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, ArrowRight, Mail, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, ArrowLeft, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, Navigate } from 'react-router-dom';
 import { SEO } from '../components/SEO';
 import { subscribeToBlogPosts } from '../lib/firebase/firestore-helpers';
+import { FALLBACK_BLOG_CATALOG, BlogCatalogEntry } from '../lib/sitemap-generator';
 
 const CATEGORIES = [
   'All',
@@ -15,86 +16,245 @@ const CATEGORIES = [
   'Company News'
 ];
 
-const BLOG_POSTS = [
-  {
-    id: 1,
-    title: 'The Future of Video Conferencing in Pakistan: Trends to Watch in 2026',
-    date: 'July 2026',
-    category: 'Video Conferencing',
-    readTime: '6 min read',
-    excerpt: 'As Pakistan embraces digital transformation, video conferencing has become core infrastructure for organizations. From AI-driven meeting experiences to secure local platforms like "KALAAM", the landscape is evolving rapidly. At AV Live, we\'re at the forefront, delivering solutions from Cisco Webex and Polycom that "just work" without requiring technical expertise. In this post, we explore the top trends shaping hybrid work and secure communications in Pakistan.',
-    image: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=800'
-  },
-  {
-    id: 2,
-    title: 'IP Phones vs. Softphones: Which Is Right for Your Business?',
-    date: 'June 2026',
-    category: 'IP Phones & VoIP',
-    readTime: '5 min read',
-    excerpt: 'Choosing between a physical IP phone and a software-based softphone depends on your team\'s workflow, security needs, and budget. Desk IP phones remain essential for small businesses in 2026, offering reliability, superior audio quality, and dedicated features. We break down the pros and cons of each, helping you make the right decision for your organization.',
-    image: 'https://images.unsplash.com/photo-1563690325150-10aa17ff983e?auto=format&fit=crop&q=80&w=800'
-  },
-  {
-    id: 3,
-    title: 'How to Choose the Right Video Conferencing Equipment for Your Meeting Rooms',
-    date: 'June 2026',
-    category: 'Video Conferencing',
-    readTime: '7 min read',
-    excerpt: 'The best video conferencing equipment depends less on the camera alone and more on room size, audio coverage, display use, and meeting workflow. In this comprehensive guide, we walk you through the four things to check first: audio pickup, camera framing, display clarity, and connection simplicity. Whether you need a 4-person huddle room or a 14-person boardroom, AV Live has the solution.',
-    image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&q=80&w=800'
-  },
-  {
-    id: 4,
-    title: 'Understanding Public Address Systems: Components Every Facility Needs',
-    date: 'May 2026',
-    category: 'AV Integration',
-    readTime: '5 min read',
-    excerpt: 'A modern public address system in 2026 consists of five tightly integrated components. From microphones and amplifiers to speakers and network infrastructure, every element plays a critical role. We explain how IP-based PA systems are transforming communication in factories, schools, and commercial buildings across Pakistan.',
-    image: 'https://images.unsplash.com/photo-1520166012956-add9ba0ee3f4?auto=format&fit=crop&q=80&w=800'
-  },
-  {
-    id: 5,
-    title: 'Hybrid Events 101: How to Engage Both In-Person and Virtual Audiences',
-    date: 'May 2026',
-    category: 'Events & Expo',
-    readTime: '6 min read',
-    excerpt: 'Hybrid events are here to stay. Combining live audiences with remote participants requires robust AV infrastructure, seamless streaming, and interactive tools. At AV Live, we specialize in end-to-end hybrid event solutions, from SMD displays and PA systems to live streaming and audience engagement platforms.',
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800'
-  },
-  {
-    id: 6,
-    title: 'AV Live Communications: 15 Years of Unifying People and Ideas',
-    date: 'April 2026',
-    category: 'Company News',
-    readTime: '4 min read',
-    excerpt: 'Founded in 2010, AV Live has grown from a visionary startup to a trusted leader in Pakistan\'s AV industry. With offices in Lahore and Karachi, a team of dedicated professionals, and partnerships with global brands like Polycom and Cisco, we continue to deliver award-winning solutions that drive business innovation and profitability.',
-    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&q=80&w=800'
-  }
-];
+export type FallbackBlogPost = BlogCatalogEntry;
+export const FALLBACK_BLOG_POSTS: FallbackBlogPost[] = FALLBACK_BLOG_CATALOG;
 
 export function Blog() {
+  const { postSlug } = useParams<{ postSlug?: string }>();
   const [activeCategory, setActiveCategory] = useState('All');
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<FallbackBlogPost[]>(FALLBACK_BLOG_POSTS);
 
   useEffect(() => {
     const unsubscribe = subscribeToBlogPosts((firebasePosts) => {
       if (firebasePosts && firebasePosts.length > 0) {
-        const mapped = firebasePosts.map(p => ({
-          id: p.id || p.slug,
-          title: p.title,
-          category: p.category,
-          excerpt: p.excerpt,
-          image: p.image || p.featuredImage || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&q=80',
-          readTime: '5 min read',
-          date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'July 2026'
-        }));
-        setPosts(mapped);
+        const mapped: FallbackBlogPost[] = firebasePosts
+          .filter(p => p.isPublished !== false)
+          .map(p => ({
+            id: p.id || p.slug,
+            slug: p.slug || String(p.id),
+            title: p.title,
+            category: p.category || 'Industry Trends',
+            excerpt: p.excerpt || '',
+            content: Array.isArray(p.content)
+              ? p.content
+              : typeof p.content === 'string' && p.content.trim()
+              ? p.content.split('\n\n')
+              : [p.excerpt || ''],
+            image: p.image || p.featuredImage || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&q=80',
+            readTime: '5 min read',
+            publishedIso: p.publishedAt ? new Date(p.publishedAt).toISOString().split('T')[0] : '2026-07-15',
+            date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'July 2026'
+          }));
+        const existingSlugs = new Set(mapped.map(m => m.slug));
+        const merged = [...mapped, ...FALLBACK_BLOG_POSTS.filter(fb => !existingSlugs.has(fb.slug))];
+        setPosts(merged);
       } else {
-        setPosts(BLOG_POSTS);
+        setPosts(FALLBACK_BLOG_POSTS);
       }
     });
     return () => unsubscribe();
   }, []);
+
+  if (postSlug) {
+    const matchedPost = posts.find(
+      p => p.slug === postSlug || String(p.id) === postSlug
+    );
+
+    if (matchedPost && String(matchedPost.id) === postSlug && matchedPost.slug !== postSlug) {
+      return <Navigate to={`/blog/${matchedPost.slug}`} replace />;
+    }
+
+    if (matchedPost) {
+      const canonicalUrl = `https://avlive.com.pk/blog/${matchedPost.slug}`;
+      const schemaGraph: any[] = [
+        {
+          '@type': 'BlogPosting',
+          '@id': `${canonicalUrl}#article`,
+          headline: matchedPost.title,
+          description: matchedPost.answerFirstSummary || matchedPost.excerpt,
+          image: matchedPost.image,
+          datePublished: matchedPost.publishedIso,
+          dateModified: matchedPost.publishedIso,
+          author: {
+            '@type': 'Organization',
+            name: 'AV Live Communications',
+            url: 'https://avlive.com.pk'
+          },
+          publisher: {
+            '@id': 'https://avlive.com.pk/#organization'
+          },
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': canonicalUrl
+          }
+        }
+      ];
+
+      if (matchedPost.faqs && matchedPost.faqs.length > 0) {
+        schemaGraph.push({
+          '@type': 'FAQPage',
+          '@id': `${canonicalUrl}#faq`,
+          mainEntity: matchedPost.faqs.map(f => ({
+            '@type': 'Question',
+            name: f.q,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: f.a
+            }
+          }))
+        });
+      }
+
+      return (
+        <div className="bg-[#F8F9FA] min-h-screen pb-16">
+          <SEO
+            title={`${matchedPost.title} | AV Live Blog`}
+            description={(matchedPost.answerFirstSummary || matchedPost.excerpt).substring(0, 160)}
+            url={canonicalUrl}
+            type="article"
+            image={matchedPost.image}
+            imageAlt={matchedPost.title}
+            schema={{
+              '@context': 'https://schema.org',
+              '@graph': schemaGraph
+            }}
+          />
+          <div className="bg-[#1A2B4C] text-white py-16">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <Link to="/blog" className="inline-flex items-center gap-2 text-[#00B4D8] font-bold text-sm mb-6 hover:text-white transition-colors">
+                <ArrowLeft size={16} /> Back to All Articles
+              </Link>
+              <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-[#00B4D8] mb-4">
+                <span>{matchedPost.category}</span>
+                <span>•</span>
+                <span>{matchedPost.date}</span>
+                <span>•</span>
+                <span>{matchedPost.readTime}</span>
+              </div>
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
+                {matchedPost.title}
+              </h1>
+            </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+            <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-lg p-6 sm:p-12">
+              {/* Answer-First AEO Direct Verdict Block */}
+              <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-6 mb-8">
+                <span className="block text-[11px] font-black uppercase tracking-widest text-[#00B4D8] mb-2">
+                  Direct Engineering Verdict (TL;DR)
+                </span>
+                <p className="text-base sm:text-lg font-bold text-[#1A2B4C] leading-relaxed">
+                  {matchedPost.answerFirstSummary || matchedPost.excerpt}
+                </p>
+              </div>
+
+              <img
+                src={matchedPost.image}
+                alt={matchedPost.title}
+                className="w-full h-72 sm:h-96 object-cover rounded-2xl mb-8"
+              />
+
+              {/* Semantic HTML Comparison & Specification Matrix */}
+              {matchedPost.comparisonTable && (
+                <div className="mb-10 overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
+                  <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                    <caption className="bg-[#1A2B4C] text-white font-black text-left px-5 py-3.5 text-xs uppercase tracking-wider">
+                      {matchedPost.comparisonTable.caption}
+                    </caption>
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
+                        {matchedPost.comparisonTable.headers.map((header, hIdx) => (
+                          <th key={hIdx} className="py-3.5 px-4">
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {matchedPost.comparisonTable.rows.map((row, rIdx) => (
+                        <tr key={rIdx} className="hover:bg-gray-50/80 transition-colors">
+                          {row.map((cell, cIdx) => (
+                            <td
+                              key={cIdx}
+                              className={`py-3.5 px-4 ${
+                                cIdx === 0 ? 'font-black text-[#1A2B4C]' : 'font-medium text-gray-600'
+                              }`}
+                            >
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <div className="space-y-5 text-gray-600 leading-relaxed">
+                {matchedPost.content.map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))}
+              </div>
+
+              {/* Article FAQ Section for AEO & Featured Snippets */}
+              {matchedPost.faqs && matchedPost.faqs.length > 0 && (
+                <div className="mt-10 pt-8 border-t border-gray-100">
+                  <h2 className="text-2xl font-black text-[#1A2B4C] mb-6">
+                    Frequently Asked Questions
+                  </h2>
+                  <div className="space-y-4">
+                    {matchedPost.faqs.map((faq, fIdx) => (
+                      <div key={fIdx} className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                        <h3 className="font-black text-sm sm:text-base text-[#1A2B4C] mb-2">
+                          {faq.q}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-medium">
+                          {faq.a}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Topical Cluster Internal Links */}
+              {matchedPost.relatedLinks && matchedPost.relatedLinks.length > 0 && (
+                <div className="mt-10 pt-8 border-t border-gray-100">
+                  <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-4">
+                    Related Enterprise Hardware &amp; Solutions
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {matchedPost.relatedLinks.map((item, lIdx) => (
+                      <Link
+                        key={lIdx}
+                        to={item.path}
+                        className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 hover:border-[#00B4D8] hover:bg-[#00B4D8]/5 transition-all group"
+                      >
+                        <span className="font-bold text-sm text-[#1A2B4C] group-hover:text-[#00B4D8]">
+                          {item.label}
+                        </span>
+                        <ArrowRight size={16} className="text-gray-400 group-hover:text-[#00B4D8] group-hover:translate-x-1 transition-all" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-10 pt-8 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                <Link to="/shop" className="bg-[#1A2B4C] text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-[#00B4D8] transition-colors">
+                  Explore Enterprise Hardware
+                </Link>
+                <Link to="/contact" className="text-[#00B4D8] font-bold text-sm hover:text-[#1A2B4C] transition-colors inline-flex items-center gap-2">
+                  Schedule an AV Consultation <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
 
   const filteredPosts = activeCategory === 'All' 
     ? posts 
@@ -163,7 +323,7 @@ export function Blog() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map((post, i) => (
             <motion.article 
-              key={post.id}
+              key={post.slug || post.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
@@ -183,14 +343,14 @@ export function Blog() {
                 </div>
                 
                 <h2 className="text-xl font-black text-[#1A2B4C] mb-4 group-hover:text-[#00B4D8] transition-colors line-clamp-2 leading-snug">
-                  <Link to={`/blog/${post.id}`}>{post.title}</Link>
+                  <Link to={`/blog/${post.slug}`}>{post.title}</Link>
                 </h2>
                 
                 <p className="text-gray-500 text-sm leading-relaxed mb-8 flex-1 line-clamp-4">
                   {post.excerpt}
                 </p>
                 
-                <Link to={`/blog/${post.id}`} className="inline-flex items-center gap-2 text-[#00B4D8] font-bold text-sm hover:text-[#1A2B4C] transition-colors mt-auto w-max">
+                <Link to={`/blog/${post.slug}`} className="inline-flex items-center gap-2 text-[#00B4D8] font-bold text-sm hover:text-[#1A2B4C] transition-colors mt-auto w-max">
                   Read More <ArrowRight size={16} />
                 </Link>
               </div>
@@ -239,3 +399,4 @@ export function Blog() {
     </div>
   );
 }
+

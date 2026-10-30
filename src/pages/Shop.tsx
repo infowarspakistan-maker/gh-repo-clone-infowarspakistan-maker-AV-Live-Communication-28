@@ -17,18 +17,36 @@ import {
 import { Link, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { subscribeToProducts, subscribeToCategories, Product, Category } from '../lib/firebase/firestore-helpers';
-import { getCanonicalProductSlug, resolveProductPricing } from '../lib/gmc-feed';
+import {
+  getCanonicalProductSlug,
+  resolveProductPricing,
+  PRODUCT_GMC_METADATA,
+  buildFallbackProductFromGmcMeta,
+} from '../lib/gmc-feed';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+
+const INITIAL_FALLBACK_SHOP_PRODUCTS: Product[] = (() => {
+  const seen = new Set<string>();
+  const list: Product[] = [];
+  for (const rawKey of Object.keys(PRODUCT_GMC_METADATA)) {
+    const slug = getCanonicalProductSlug({ slug: rawKey }, rawKey);
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    const prod = buildFallbackProductFromGmcMeta(slug) as Product | null;
+    if (prod) list.push(prod);
+  }
+  return list;
+})();
 
 export function Shop() {
   const { addToCart } = useCart();
   const { brandSlug } = useParams<{ brandSlug?: string }>();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(INITIAL_FALLBACK_SHOP_PRODUCTS);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [expandedParents, setExpandedParents] = useState<{[key: string]: boolean}>({});
@@ -74,7 +92,9 @@ export function Shop() {
     });
 
     const unsubscribeProducts = subscribeToProducts((data) => {
-      setProducts(data);
+      if (data && data.length > 0) {
+        setProducts(data);
+      }
       setLoading(false);
     }, { isActive: true });
 
@@ -1066,7 +1086,7 @@ export function Shop() {
                      <Zap size={16} /> Add to Cart
                    </button>
                    <Link
-                     to={`/product/${quickViewProduct.id}`}
+                     to={`/product/${getCanonicalProductSlug(quickViewProduct, quickViewProduct.id)}`}
                      className="w-14 h-14 bg-gray-50 text-[#1A2B4C] rounded-2xl flex items-center justify-center hover:bg-gray-100 transition-colors border border-gray-200"
                    >
                      <ArrowRight size={20} />
@@ -1077,6 +1097,58 @@ export function Shop() {
           </motion.div>
         </div>
       )}
+
+      {/* Answer-First Brand & Enterprise Catalog Summary Table for Google & AI Answer Engines */}
+      <section className="mt-16 bg-white rounded-[2.5rem] p-8 sm:p-10 border border-gray-100 shadow-sm space-y-6">
+        <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-5">
+          <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
+            Answer-First Procurement Summary
+          </span>
+          <p className="text-sm sm:text-base font-bold text-[#1A2B4C] leading-relaxed">
+            {activeSingleBrandName
+              ? `AV Live Communications is Pakistan's authorized enterprise partner for ${activeSingleBrandName}, supplying ${sortedAndFilteredProducts.length} genuine ${activeSingleBrandName} hardware models with official MPN/GTIN verification, FBR GST tax invoicing, and turnkey installation in Lahore, Karachi, and Islamabad.`
+              : `AV Live Communications stocks ${sortedAndFilteredProducts.length}+ genuine enterprise video conferencing, VoIP telephony, and pro-AV hardware modules in Pakistan—backed by official 1-to-3 year warranties and nationwide engineering support.`}
+          </p>
+        </div>
+
+        {sortedAndFilteredProducts.length > 0 && (
+          <div className="overflow-x-auto rounded-2xl border border-gray-200">
+            <table className="w-full text-left border-collapse text-xs sm:text-sm">
+              <caption className="bg-[#1A2B4C] text-white font-black text-left px-5 py-3 text-xs uppercase tracking-wider">
+                {activeSingleBrandName ? `${activeSingleBrandName} Official Pakistan Hardware & Price Matrix` : 'Featured Enterprise AV Hardware & Reference Price Matrix (PKR)'}
+              </caption>
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
+                  <th className="py-3 px-4">Hardware Model</th>
+                  <th className="py-3 px-4">Brand</th>
+                  <th className="py-3 px-4">Part Number (SKU/MPN)</th>
+                  <th className="py-3 px-4">Reference Price (PKR)</th>
+                  <th className="py-3 px-4">Pakistan Warranty</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {sortedAndFilteredProducts.slice(0, 10).map((prod) => {
+                  const slug = getCanonicalProductSlug(prod);
+                  const { effectivePrice } = resolveProductPricing(prod);
+                  return (
+                    <tr key={prod.id || slug} className="hover:bg-gray-50/80 transition-colors">
+                      <td className="py-3 px-4 font-black text-[#1A2B4C]">
+                        <Link to={`/product/${slug}`} className="hover:text-[#00B4D8] transition-colors">
+                          {prod.productName}
+                        </Link>
+                      </td>
+                      <td className="py-3 px-4 font-bold text-gray-600">{prod.brand}</td>
+                      <td className="py-3 px-4 font-mono text-xs text-gray-500">{prod.sku || prod.mpn || 'Official OEM'}</td>
+                      <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. {effectivePrice.toLocaleString()}</td>
+                      <td className="py-3 px-4 font-bold text-emerald-600">1-Year Official Local Warranty</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       </div>
     </div>

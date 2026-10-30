@@ -16,6 +16,27 @@ export function Esports() {
         url="https://avlive.com.pk/esports"
         image="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1920&q=80"
         imageAlt="AV Live Esports Tournament Production Pakistan"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/esports#service',
+              name: 'Esports Tournament AV Production & Streaming Infrastructure in Pakistan',
+              serviceType: 'Esports Broadcast & Arena Production',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
+              url: 'https://avlive.com.pk/esports'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Esports Production', item: 'https://avlive.com.pk/esports' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="relative h-[400px] overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 z-0">

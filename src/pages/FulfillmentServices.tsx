@@ -10,6 +10,27 @@ export function FulfillmentServices() {
         title="AV Hardware Warehousing & Fulfillment Services | AV Live Pakistan" 
         description="Enterprise warehousing, inventory stocking, serialized tracking, and nationwide logistics fulfillment for enterprise AV technology distributors."
         url="https://avlive.com.pk/programs/fulfillment-services"
+        schema={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/programs/fulfillment-services#service',
+              name: 'Enterprise AV Warehousing & 3PL Fulfillment Services in Pakistan',
+              serviceType: 'Multi-Branch Hardware Staging & Logistics',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: 'PK',
+              url: 'https://avlive.com.pk/programs/fulfillment-services'
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://avlive.com.pk' },
+                { '@type': 'ListItem', position: 2, name: 'Fulfillment Services', item: 'https://avlive.com.pk/programs/fulfillment-services' }
+              ]
+            }
+          ]
+        }}
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
