@@ -9,7 +9,7 @@ export function VoipService() {
       <SEO 
         title="Enterprise VoIP & SIP Trunking Solutions | AV Live Pakistan" 
         description="Reliable business VoIP phone lines, SIP trunking, cloud PBX integration, and international calling minutes configured for Pakistani enterprises."
-        url="https://avlive.com.pk/voip-service"
+        url="https://avlive.com.pk/voip-service-providers"
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

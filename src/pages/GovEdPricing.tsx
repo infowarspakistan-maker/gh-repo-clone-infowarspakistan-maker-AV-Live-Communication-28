@@ -9,7 +9,7 @@ export function GovEdPricing() {
       <SEO 
         title="Government & Education Institutional AV Pricing | AV Live Pakistan" 
         description="Special institutional discounting, tender compliance, and subsidized pricing on professional AV and video conferencing for universities, schools, and government departments."
-        url="https://avlive.com.pk/gov-ed-pricing"
+        url="https://avlive.com.pk/programs/government-education-pricing"
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

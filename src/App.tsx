@@ -1,8 +1,9 @@
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import { Menu, ShoppingCart, User, X, MapPin, Phone, Search, ChevronDown, ArrowUp, Check, ArrowRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 import { subscribeToProducts, subscribeToCategories } from './lib/firebase/firestore-helpers';
+import { getCanonicalProductSlug } from './lib/gmc-feed';
 import { getCartCount } from './lib/cart';
 import { Home } from './pages/Home';
 
@@ -414,7 +415,7 @@ function Navbar() {
                           {searchSuggestions.map((product) => (
                             <Link 
                               key={product.id} 
-                              to={`/product/${product.slug || product.id}`}
+                              to={`/product/${getCanonicalProductSlug(product, product.id)}`}
                               className="flex items-center gap-4 p-4 hover:bg-gray-50/80 transition-colors group"
                               onClick={() => setShowSuggestions(false)}
                             >
@@ -486,7 +487,7 @@ function Navbar() {
                             {products.slice(0, 3).map((p) => (
                               <Link
                                 key={p.id}
-                                to={`/product/${p.slug || p.id}`}
+                                to={`/product/${getCanonicalProductSlug(p, p.id)}`}
                                 onClick={() => setShowSuggestions(false)}
                                 className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-50 text-xs font-bold text-gray-600 hover:text-[#1A2B4C] transition-all"
                               >
@@ -848,6 +849,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/setup-wizard" element={<SetupWizard />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/brands" element={<Shop />} />
+            <Route path="/brands/:brandSlug" element={<Shop />} />
             <Route path="/product/:productId" element={<ProductDetails />} />
             <Route path="/category/:categorySlug" element={<Category />} />
             <Route path="/solutions" element={<Solutions />} />
@@ -928,8 +931,25 @@ export default function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
 
-          {/* Fallback keyword landing page for unhandled top-level dynamic SEO slugs */}
+          {/* Client-side canonical redirects for legacy / shorthand URLs */}
+          <Route path="/quote" element={<Navigate to="/programs/quote" replace />} />
+          <Route path="/blind-drop-shipping" element={<Navigate to="/programs/blind-drop-shipping" replace />} />
+          <Route path="/gov-ed-pricing" element={<Navigate to="/programs/government-education-pricing" replace />} />
+          <Route path="/government-education-pricing" element={<Navigate to="/programs/government-education-pricing" replace />} />
+          <Route path="/fulfillment-services" element={<Navigate to="/programs/fulfillment-services" replace />} />
+          <Route path="/promotions" element={<Navigate to="/programs/promotions" replace />} />
+          <Route path="/provisioning" element={<Navigate to="/programs/provisioning-services" replace />} />
+          <Route path="/provisioning-services" element={<Navigate to="/programs/provisioning-services" replace />} />
+          <Route path="/reseller" element={<Navigate to="/programs/reseller-program" replace />} />
+          <Route path="/reseller-program" element={<Navigate to="/programs/reseller-program" replace />} />
+          <Route path="/buyers-guides" element={<Navigate to="/guides" replace />} />
+          <Route path="/voip-service" element={<Navigate to="/voip-service-providers" replace />} />
+          <Route path="/products/compare" element={<Navigate to="/compare" replace />} />
+          <Route path="/tools/room-designer" element={<Navigate to="/room-designer" replace />} />
+
+          {/* Fallback keyword landing page for unhandled top-level dynamic SEO slugs & 404 routes */}
           <Route path="/:keywordSlug" element={<KeywordLandingPage />} />
+          <Route path="*" element={<KeywordLandingPage />} />
 
         </Routes>
       </React.Suspense>

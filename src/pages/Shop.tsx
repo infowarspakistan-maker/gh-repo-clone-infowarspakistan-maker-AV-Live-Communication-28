@@ -14,7 +14,7 @@ import {
   Check,
   Eye, ArrowRight, Star, Heart,
 } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { subscribeToProducts, subscribeToCategories, Product, Category } from '../lib/firebase/firestore-helpers';
 import { getCanonicalProductSlug, resolveProductPricing } from '../lib/gmc-feed';
@@ -23,6 +23,8 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export function Shop() {
   const { addToCart } = useCart();
+  const { brandSlug } = useParams<{ brandSlug?: string }>();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -32,13 +34,18 @@ export function Shop() {
   const [expandedParents, setExpandedParents] = useState<{[key: string]: boolean}>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Sync parameters from URL
+  // Sync parameters from URL (/brands/:brandSlug or ?brand=...)
   const searchQuery = searchParams.get('q') || '';
   const selectedCategory = searchParams.get('category') || null;
   const selectedBrands = useMemo(() => {
     const brandParam = searchParams.get('brand');
-    return brandParam ? brandParam.split(',').map(b => b.trim().toLowerCase()) : [];
-  }, [searchParams]);
+    const fromQuery = brandParam ? brandParam.split(',').map(b => b.trim().toLowerCase()).filter(Boolean) : [];
+    if (brandSlug) {
+      const cleanRouteBrand = brandSlug.trim().toLowerCase();
+      return Array.from(new Set([cleanRouteBrand, ...fromQuery]));
+    }
+    return fromQuery;
+  }, [searchParams, brandSlug]);
   const minPrice = searchParams.get('min_price') || '';
   const maxPrice = searchParams.get('max_price') || '';
   const sortOption = searchParams.get('sort') || 'featured';
@@ -201,9 +208,18 @@ export function Shop() {
       );
     }
 
-    // Filter by brand selection
+    // Filter by brand selection (including brand aliases like poly <-> hp poly / polycom)
     if (selectedBrands.length > 0) {
-      result = result.filter(p => p.brand && selectedBrands.includes(p.brand.toLowerCase()));
+      result = result.filter(p => {
+        if (!p.brand) return false;
+        const pBrand = p.brand.toLowerCase();
+        return selectedBrands.some(sb =>
+          pBrand === sb ||
+          pBrand.includes(sb) ||
+          (sb === 'poly' && (pBrand.includes('poly') || pBrand.includes('plantronics'))) ||
+          (sb === 'polycom' && pBrand.includes('poly'))
+        );
+      });
     }
 
     // Filter by min price
@@ -297,31 +313,48 @@ export function Shop() {
     searchQuery || minPrice || maxPrice || (sortOption && sortOption !== 'featured') || selectedBrands.length > 1
   );
 
-  const activeSingleBrandName =
-    selectedBrands.length === 1
-      ? availableBrands.find((b) => b.normalized === selectedBrands[0])?.name ||
-        selectedBrands[0].toUpperCase()
+  const activeSingleBrandSlug = brandSlug
+    ? brandSlug.toLowerCase()
+    : selectedBrands.length === 1
+      ? selectedBrands[0].toLowerCase()
       : null;
+
+  const activeSingleBrandName = activeSingleBrandSlug
+    ? availableBrands.find((b) => b.normalized === activeSingleBrandSlug || b.normalized.includes(activeSingleBrandSlug))?.name ||
+      activeSingleBrandSlug.charAt(0).toUpperCase() + activeSingleBrandSlug.slice(1)
+    : null;
+
+  const isBrandsIndexPage = location.pathname === '/brands';
+
+  const canonicalShopUrl = activeSingleBrandSlug
+    ? `https://avlive.com.pk/brands/${encodeURIComponent(activeSingleBrandSlug)}`
+    : isBrandsIndexPage
+      ? 'https://avlive.com.pk/brands'
+      : 'https://avlive.com.pk/shop';
 
   const shopSeoTitle = activeSingleBrandName
     ? `${activeSingleBrandName} Video Conferencing & AV Hardware in Pakistan | Official Dealer | AV Live`
-    : selectedCategoryName
-      ? `${selectedCategoryName} | Video Conference in Pakistan & Enterprise AV Shop | AV Live`
-      : 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live';
+    : isBrandsIndexPage
+      ? 'Authorized Enterprise AV & Video Conferencing Brands in Pakistan | AV Live'
+      : selectedCategoryName
+        ? `${selectedCategoryName} | Video Conference in Pakistan & Enterprise AV Shop | AV Live`
+        : 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live';
 
   const shopSeoDescription = activeSingleBrandName
-    ? `Buy genuine ${activeSingleBrandName} video conferencing, IP phones, and professional AV hardware in Pakistan with official warranty and nationwide delivery.`
-    : "Browse Pakistan's largest inventory of Video Conference in Pakistan hardware, Polycom Group 500, Poly Studio X70, Cisco & Yealink IP telephony, and Corporate Event Management gear.";
+    ? `Buy genuine ${activeSingleBrandName} video conferencing, IP phones, projectors, and professional AV hardware in Pakistan with official warranty and nationwide delivery.`
+    : isBrandsIndexPage
+      ? 'Explore official enterprise AV and video conferencing brands in Pakistan: Polycom, HP Poly, Logitech, Cisco, Yealink, Epson, Dahua, Bosch, Jabra, and more.'
+      : "Browse Pakistan's largest inventory of Video Conference in Pakistan hardware, Polycom Group 500, Poly Studio X70, Cisco & Yealink IP telephony, and Corporate Event Management gear.";
 
   const shopSchema = {
     '@context': 'https://schema.org',
     '@graph': [
       {
         '@type': 'CollectionPage',
-        '@id': 'https://avlive.com.pk/shop#collection',
+        '@id': `${canonicalShopUrl}#collection`,
         name: shopSeoTitle,
         description: shopSeoDescription,
-        url: 'https://avlive.com.pk/shop',
+        url: canonicalShopUrl,
         isPartOf: { '@id': 'https://avlive.com.pk/#website' },
         mainEntity: {
           '@type': 'ItemList',
@@ -359,14 +392,22 @@ export function Shop() {
         title={shopSeoTitle}
         description={shopSeoDescription}
         keywords="Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, AV hardware shop Pakistan"
-        url="https://avlive.com.pk/shop"
+        url={canonicalShopUrl}
         image="https://avlive.com.pk/og-image.jpg"
         imageAlt="AV Live Communications - Professional AV Equipment Catalog"
         noindex={shouldNoIndexFaceted}
         schema={shopSchema}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Breadcrumbs items={[{ label: 'Shop' }]} />
+        <Breadcrumbs
+          items={
+            activeSingleBrandName
+              ? [{ label: 'Brands', path: '/brands' }, { label: activeSingleBrandName }]
+              : isBrandsIndexPage
+                ? [{ label: 'Brands' }]
+                : [{ label: 'Shop' }]
+          }
+        />
         
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-8 border-b border-gray-200">

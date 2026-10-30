@@ -9,7 +9,7 @@ export function FulfillmentServices() {
       <SEO 
         title="AV Hardware Warehousing & Fulfillment Services | AV Live Pakistan" 
         description="Enterprise warehousing, inventory stocking, serialized tracking, and nationwide logistics fulfillment for enterprise AV technology distributors."
-        url="https://avlive.com.pk/fulfillment-services"
+        url="https://avlive.com.pk/programs/fulfillment-services"
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

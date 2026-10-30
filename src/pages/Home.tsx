@@ -15,6 +15,7 @@ import { TopBrands, brands } from '../components/TopBrands';
 
 import { StructuredData } from "../components/StructuredData";
 import { FALLBACK_SERVICES_CATALOG } from "../lib/services-catalog";
+import { getCanonicalProductSlug } from "../lib/gmc-feed";
 
 const DEFAULT_HERO_SLIDES = [
   {
@@ -98,10 +99,10 @@ const DEFAULT_INITIAL_PRODUCTS: Product[] = [
     isFeatured: true,
   },
   {
-    id: 'poly-studio-x72-all-in-one-video-bar-pakistan',
-    slug: 'poly-studio-x72-all-in-one-video-bar-pakistan',
+    id: 'poly-studio-x72-pakistan',
+    slug: 'poly-studio-x72-pakistan',
     productName: 'Poly Studio X70 / X72 All-in-One 4K Video Bar',
-    sku: 'STUDIO-X72',
+    sku: 'A4LZ8AA',
     brand: 'Poly',
     regularPrice: 2300000,
     salePrice: 2000000,
@@ -136,8 +137,8 @@ const DEFAULT_INITIAL_PRODUCTS: Product[] = [
     isFeatured: true,
   },
   {
-    id: 'cisco-room-kit-plus-video-conferencing-system-pakistan',
-    slug: 'cisco-room-kit-plus-video-conferencing-system-pakistan',
+    id: 'cisco-room-kit-plus-pakistan',
+    slug: 'cisco-room-kit-plus-pakistan',
     productName: 'Cisco Room Kit Plus Video Conferencing System',
     sku: 'CS-KITPLPTZ4K-K9',
     brand: 'Cisco',
@@ -155,10 +156,10 @@ const DEFAULT_INITIAL_PRODUCTS: Product[] = [
     isFeatured: true,
   },
   {
-    id: 'poly-studio-x52-all-in-one-video-bar-pakistan',
-    slug: 'poly-studio-x52-all-in-one-video-bar-pakistan',
+    id: 'poly-studio-x52-pakistan',
+    slug: 'poly-studio-x52-pakistan',
     productName: 'Poly Studio X52 All-in-One Video Bar',
-    sku: 'STUDIO-X52',
+    sku: '7200-87620-001',
     brand: 'Poly',
     regularPrice: 1610000,
     salePrice: 1400000,
@@ -174,9 +175,9 @@ const DEFAULT_INITIAL_PRODUCTS: Product[] = [
     isFeatured: true,
   },
   {
-    id: 'poly-studio-usb-pakistan',
-    slug: 'poly-studio-usb-pakistan',
-    productName: 'Poly Studio USB',
+    id: 'poly-studio-usb-video-bar-pakistan',
+    slug: 'poly-studio-usb-video-bar-pakistan',
+    productName: 'Poly Studio USB Video Bar',
     sku: '7200-85830-012',
     brand: 'Poly',
     regularPrice: 212750,
@@ -667,7 +668,7 @@ export function Home() {
                   <div key={p.id} className="bg-white rounded-3xl p-6 border border-gray-100 hover:shadow-xl transition-all">
                     <img src={p.images?.[0]} alt={p.productName} className="w-full h-48 object-cover rounded-2xl mb-6" />
                     <h3 className="text-lg font-bold text-[#1A2B4C] mb-2">{p.productName}</h3>
-                    <Link to={`/product/${p.id}`} className="text-[#00B4D8] font-bold text-sm">View Product</Link>
+                    <Link to={`/product/${getCanonicalProductSlug(p, p.id)}`} className="text-[#00B4D8] font-bold text-sm">View Product</Link>
                   </div>
                 ))}
               </div>
@@ -691,7 +692,7 @@ export function Home() {
         </div>
         <div className="flex whitespace-nowrap animate-marquee hover:pause w-max items-center gap-16 px-8 ml-64">
           {Array(4).fill(brands).flat().map((brand, idx) => (
-             <Link to={`/shop?brand=${brand.id}`} key={`${brand.id}-${idx}`} aria-label={`Browse ${brand.name || brand.id} hardware`} className="inline-flex items-center gap-4 group opacity-50 hover:opacity-100 transition-opacity grayscale hover:grayscale-0">
+             <Link to={`/brands/${brand.id}`} key={`${brand.id}-${idx}`} aria-label={`Browse ${brand.name || brand.id} hardware`} className="inline-flex items-center gap-4 group opacity-50 hover:opacity-100 transition-opacity grayscale hover:grayscale-0">
                <div className="w-32 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                  {brand.logo}
                </div>
@@ -752,7 +753,7 @@ export function Home() {
           >
             {featuredCarouselProducts.length > 0 ? featuredCarouselProducts.map((prod) => (
                <Link 
-                to={`/product/${prod.slug || prod.id}`} 
+                to={`/product/${getCanonicalProductSlug(prod, prod.id)}`} 
                 key={prod.id} 
                 onMouseEnter={() => setHoveredProductId(prod.id || null)}
                 onMouseLeave={() => setHoveredProductId(null)}
@@ -887,14 +888,14 @@ export function Home() {
                          {/* Left Column (2 items) */}
                          <div className="col-span-1 flex flex-col gap-4 h-full">
                             {chunk[0] && (
-                               <Link to={`/product/${chunk[0].id}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                               <Link to={`/product/${getCanonicalProductSlug(chunk[0], chunk[0].id)}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                                   {chunk[0].images?.[0] && <img loading="lazy" src={chunk[0].images[0]} alt={chunk[0].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />}
                                   <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{chunk[0].productName}</h3>
                                   <p className="text-[#00B4D8] font-black mt-2">Rs. {chunk[0].salePrice > 0 ? (chunk[0].salePrice ?? 0).toLocaleString() : (chunk[0].regularPrice ?? 0).toLocaleString()}</p>
                                </Link>
                             )}
                             {chunk[1] && (
-                               <Link to={`/product/${chunk[1].id}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                               <Link to={`/product/${getCanonicalProductSlug(chunk[1], chunk[1].id)}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                                   {chunk[1].images?.[0] && <img loading="lazy" src={chunk[1].images[0]} alt={chunk[1].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />}
                                   <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{chunk[1].productName}</h3>
                                   <p className="text-[#00B4D8] font-black mt-2">Rs. {chunk[1].salePrice > 0 ? (chunk[1].salePrice ?? 0).toLocaleString() : (chunk[1].regularPrice ?? 0).toLocaleString()}</p>
@@ -905,7 +906,7 @@ export function Home() {
                          {/* Middle Column (1 large item) */}
                          <div className="col-span-1 md:col-span-2 h-full">
                             {chunk[2] && (
-                               <Link to={`/product/${chunk[2].id}`} className="w-full h-full min-h-[350px] md:min-h-0 bg-transparent border-0 rounded-[2.5rem] p-10 group flex flex-col items-center justify-center relative overflow-hidden text-center">
+                               <Link to={`/product/${getCanonicalProductSlug(chunk[2], chunk[2].id)}`} className="w-full h-full min-h-[350px] md:min-h-0 bg-transparent border-0 rounded-[2.5rem] p-10 group flex flex-col items-center justify-center relative overflow-hidden text-center">
                                   {chunk[2].images?.[0] && <img loading="lazy" src={chunk[2].images[0]} alt={chunk[2].productName} className="w-full h-48 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700 relative z-20 mb-8" />}
                                   <div className="relative z-20">
                                      <span className="text-[#00B4D8] font-black uppercase tracking-widest text-xs mb-2 block">Featured</span>
@@ -920,14 +921,14 @@ export function Home() {
                          {/* Right Column (2 items) */}
                          <div className="col-span-1 flex flex-col gap-4 h-full">
                             {chunk[3] && (
-                               <Link to={`/product/${chunk[3].id}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                               <Link to={`/product/${getCanonicalProductSlug(chunk[3], chunk[3].id)}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                                   {chunk[3].images?.[0] && <img loading="lazy" src={chunk[3].images[0]} alt={chunk[3].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />}
                                   <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{chunk[3].productName}</h3>
                                   <p className="text-[#00B4D8] font-black mt-2">Rs. {chunk[3].salePrice > 0 ? (chunk[3].salePrice ?? 0).toLocaleString() : (chunk[3].regularPrice ?? 0).toLocaleString()}</p>
                                </Link>
                             )}
                             {chunk[4] && (
-                               <Link to={`/product/${chunk[4].id}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                               <Link to={`/product/${getCanonicalProductSlug(chunk[4], chunk[4].id)}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                                   {chunk[4].images?.[0] && <img loading="lazy" src={chunk[4].images[0]} alt={chunk[4].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />}
                                   <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{chunk[4].productName}</h3>
                                   <p className="text-[#00B4D8] font-black mt-2">Rs. {chunk[4].salePrice > 0 ? (chunk[4].salePrice ?? 0).toLocaleString() : (chunk[4].regularPrice ?? 0).toLocaleString()}</p>

@@ -59,7 +59,7 @@ export function Quote() {
         <SEO 
           title="Quote Request Transmitted | AV Live Communications" 
           description="Your quote request has been received. Our AV solution architects will contact you within 24 hours."
-          url="https://avlive.com.pk/quote"
+          url="https://avlive.com.pk/programs/quote"
         />
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}

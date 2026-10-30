@@ -25,6 +25,12 @@ import {
 } from 'firebase/storage';
 import { db, storage, auth } from './client';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  SEO_SLUG_TO_PRODUCT_ID,
+  resolveCanonicalProductSlugByIdentifier,
+  buildFallbackProductFromGmcMeta,
+  getCanonicalProductSlug,
+} from '../gmc-feed';
 
 async function getAuthHeader() {
   const token = await auth.currentUser?.getIdToken();
@@ -775,34 +781,73 @@ export interface StockHistoryEntry {
 }
 
 export async function getProduct(idOrSlug: string): Promise<Product | null> {
-  const mappedId =
-    idOrSlug === 'polycom-realpresence-group-500-pakistan'
-      ? 'T1XLMubVYmFzeIfC7V9B'
-      : idOrSlug;
+  const canonicalSlug = resolveCanonicalProductSlugByIdentifier(idOrSlug) || idOrSlug;
+  const mappedId = SEO_SLUG_TO_PRODUCT_ID[canonicalSlug] || SEO_SLUG_TO_PRODUCT_ID[idOrSlug] || canonicalSlug;
 
-  const docSnap = await getDoc(doc(db, 'products', mappedId));
-  if (docSnap.exists()) {
-    const data = docSnap.data() as Product;
-    return {
-      id: docSnap.id,
-      ...data,
-      slug:
-        docSnap.id === 'T1XLMubVYmFzeIfC7V9B'
-          ? 'polycom-realpresence-group-500-pakistan'
-          : data.slug || docSnap.id,
-    };
+  try {
+    const docSnap = await getDoc(doc(db, 'products', mappedId));
+    if (docSnap.exists()) {
+      const data = docSnap.data() as Product;
+      return {
+        id: docSnap.id,
+        ...data,
+        slug: getCanonicalProductSlug({ ...data, id: docSnap.id }, docSnap.id),
+      };
+    }
+
+    if (mappedId !== idOrSlug) {
+      const rawSnap = await getDoc(doc(db, 'products', idOrSlug));
+      if (rawSnap.exists()) {
+        const data = rawSnap.data() as Product;
+        return {
+          id: rawSnap.id,
+          ...data,
+          slug: getCanonicalProductSlug({ ...data, id: rawSnap.id }, rawSnap.id),
+        };
+      }
+    }
+
+    // Fallback 1: query by slug field in Firestore
+    const slugQuery = query(
+      collection(db, 'products'),
+      where('slug', '==', canonicalSlug),
+      firestoreLimit(1)
+    );
+    const slugSnap = await getDocs(slugQuery);
+    if (!slugSnap.empty) {
+      const firstDoc = slugSnap.docs[0];
+      const data = firstDoc.data() as Product;
+      return {
+        id: firstDoc.id,
+        ...data,
+        slug: getCanonicalProductSlug({ ...data, id: firstDoc.id }, firstDoc.id),
+      };
+    }
+
+    // Fallback 2: query by sku field in Firestore (e.g., /product/9137161U)
+    const skuQuery = query(
+      collection(db, 'products'),
+      where('sku', '==', idOrSlug),
+      firestoreLimit(1)
+    );
+    const skuSnap = await getDocs(skuQuery);
+    if (!skuSnap.empty) {
+      const firstDoc = skuSnap.docs[0];
+      const data = firstDoc.data() as Product;
+      return {
+        id: firstDoc.id,
+        ...data,
+        slug: getCanonicalProductSlug({ ...data, id: firstDoc.id }, firstDoc.id),
+      };
+    }
+  } catch (err) {
+    console.warn('Firestore getProduct lookup warning, using GMC catalog fallback:', err);
   }
 
-  // Fallback: query by slug field in Firestore
-  const slugQuery = query(
-    collection(db, 'products'),
-    where('slug', '==', idOrSlug),
-    firestoreLimit(1)
-  );
-  const slugSnap = await getDocs(slugQuery);
-  if (!slugSnap.empty) {
-    const firstDoc = slugSnap.docs[0];
-    return { id: firstDoc.id, ...(firstDoc.data() as Product) };
+  // Fallback 3: synthesize from verified PRODUCT_GMC_METADATA so canonical product URLs never 404
+  const fallback = buildFallbackProductFromGmcMeta(canonicalSlug);
+  if (fallback) {
+    return fallback as Product;
   }
 
   return null;

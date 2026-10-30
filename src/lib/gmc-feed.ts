@@ -519,6 +519,16 @@ export const PRODUCT_GMC_METADATA: Record<
     defaultSpecs:
       'License Type:Annual Google Meet Hardware Room Subscription;Features:One-touch meeting join, 24/7 Google Admin device monitoring, firmware updates;Compatibility:Logitech, Poly, Asus, and Series One Google Meet kits;Region:Authorized Pakistan enterprise provisioning by AV Live',
   },
+  'google-meet-hardware-license-pakistan': {
+    gtin: computeUpc12('84004609900'),
+    mpn: 'GOOGLE-MEET-LIC',
+    brand: 'Google',
+    highlight: 'Official annual Google Meet Hardware Room License with cloud device management',
+    defaultSpecs:
+      'License Type:Annual Google Meet Hardware Room Subscription;Features:One-touch meeting join, 24/7 Google Admin device monitoring, firmware updates;Compatibility:Logitech, Poly, Asus, and Series One Google Meet kits;Region:Authorized Pakistan enterprise provisioning by AV Live',
+    defaultDescription:
+      'Official Google Meet Hardware Annual Room License in Pakistan. Enables cloud device management, one-touch calendar meeting join, and automatic security updates for enterprise conference rooms.',
+  },
   'yealink-bh70-headset-pakistan': {
     gtin: computeUpc12('84188512087'),
     mpn: 'BH70-DUAL-UC',
@@ -617,6 +627,10 @@ export function formatGmcProductDetail(rawSpecs?: string | null, defaultSpecs?: 
 export const PRODUCT_ID_TO_SEO_SLUG: Record<string, string> = {
   T1XLMubVYmFzeIfC7V9B: 'polycom-realpresence-group-500-pakistan',
   wMbGVClqbDS2LFrv5HyX: 'google-meet-hardware-license-pakistan',
+  'poly-studio-x72-all-in-one-video-bar-pakistan': 'poly-studio-x72-pakistan',
+  'cisco-room-kit-plus-video-conferencing-system-pakistan': 'cisco-room-kit-plus-pakistan',
+  'poly-studio-x52-all-in-one-video-bar-pakistan': 'poly-studio-x52-pakistan',
+  'poly-studio-usb-pakistan': 'poly-studio-usb-video-bar-pakistan',
 };
 
 export const SEO_SLUG_TO_PRODUCT_ID: Record<string, string> = {
@@ -625,17 +639,100 @@ export const SEO_SLUG_TO_PRODUCT_ID: Record<string, string> = {
 };
 
 /**
+ * Resolves any product identifier (Firestore ID, MPN/SKU like "9137161U", legacy slug, or canonical slug)
+ * to its canonical SEO slug if known.
+ */
+export function resolveCanonicalProductSlugByIdentifier(idOrSlugOrMpn?: string | null): string | null {
+  if (!idOrSlugOrMpn) return null;
+  const trimmed = idOrSlugOrMpn.trim();
+  if (!trimmed) return null;
+
+  if (PRODUCT_ID_TO_SEO_SLUG[trimmed]) {
+    return PRODUCT_ID_TO_SEO_SLUG[trimmed];
+  }
+  const lower = trimmed.toLowerCase();
+  if (PRODUCT_ID_TO_SEO_SLUG[lower]) {
+    return PRODUCT_ID_TO_SEO_SLUG[lower];
+  }
+  if (PRODUCT_GMC_METADATA[lower] && !PRODUCT_ID_TO_SEO_SLUG[lower]) {
+    return lower;
+  }
+
+  // Match by MPN / SKU (case-insensitive)
+  for (const [slugKey, meta] of Object.entries(PRODUCT_GMC_METADATA)) {
+    if (PRODUCT_ID_TO_SEO_SLUG[slugKey]) continue;
+    if (meta.mpn.toLowerCase() === lower || meta.gtin === trimmed) {
+      return slugKey;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Synthesizes a complete fallback Product object from PRODUCT_GMC_METADATA so canonical product URLs
+ * never return a 404 / noindex page even if Firestore lacks a matching slug field.
+ */
+export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string, any> | null {
+  const canonicalSlug = resolveCanonicalProductSlugByIdentifier(slugOrId) || slugOrId;
+  const meta = PRODUCT_GMC_METADATA[canonicalSlug];
+  if (!meta) return null;
+
+  const readableName = canonicalSlug
+    .replace(/-pakistan$/, '')
+    .split('-')
+    .map((w) =>
+      ['ip', 'ptz', 'usb', '4k', 'uhd', 'uc', 'pbx', 'sip', 'poe', '2n', '3cx', 'itc'].includes(w.toLowerCase())
+        ? w.toUpperCase()
+        : w.charAt(0).toUpperCase() + w.slice(1)
+    )
+    .join(' ');
+
+  return {
+    id: SEO_SLUG_TO_PRODUCT_ID[canonicalSlug] || canonicalSlug,
+    slug: canonicalSlug,
+    productName: readableName,
+    sku: meta.mpn,
+    mpn: meta.mpn,
+    gtin: meta.gtin,
+    brand: meta.brand,
+    regularPrice: 145000,
+    salePrice: 125000,
+    stockQuantity: 10,
+    lowStockThreshold: 2,
+    images: ['https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80'],
+    categoryIds: ['cat-video'],
+    categorySlugs: ['video-conferencing'],
+    shortDescription: meta.highlight,
+    description:
+      meta.defaultDescription ||
+      `${meta.highlight}. Genuine ${meta.brand} enterprise hardware (MPN: ${meta.mpn}, GTIN: ${meta.gtin}) supplied and integrated across Lahore, Karachi, and Islamabad by AV Live Communications.`,
+    specifications:
+      meta.defaultSpecs ||
+      `Manufacturer:${meta.brand};Part Number (MPN):${meta.mpn};GTIN / UPC:${meta.gtin};Warranty:1-Year Official Pakistan Warranty`,
+    variations: [],
+    isActive: true,
+    isFeatured: false,
+  };
+}
+
+/**
  * Returns the canonical SEO-friendly slug for any product object or ID.
  */
 export function getCanonicalProductSlug(product?: Record<string, any> | null, fallbackId?: string): string {
   const rawSlug = sanitizeTsvText(product?.slug);
   const rawId = sanitizeTsvText(product?.id || fallbackId);
-  if (rawId && PRODUCT_ID_TO_SEO_SLUG[rawId]) {
-    return PRODUCT_ID_TO_SEO_SLUG[rawId];
-  }
-  if (rawSlug && PRODUCT_ID_TO_SEO_SLUG[rawSlug]) {
-    return PRODUCT_ID_TO_SEO_SLUG[rawSlug];
-  }
+  const rawSku = sanitizeTsvText(product?.mpn || product?.sku);
+
+  const byId = resolveCanonicalProductSlugByIdentifier(rawId);
+  if (byId) return byId;
+
+  const bySlug = resolveCanonicalProductSlugByIdentifier(rawSlug);
+  if (bySlug) return bySlug;
+
+  const bySku = resolveCanonicalProductSlugByIdentifier(rawSku);
+  if (bySku) return bySku;
+
   return rawSlug || rawId || 'hardware';
 }
 

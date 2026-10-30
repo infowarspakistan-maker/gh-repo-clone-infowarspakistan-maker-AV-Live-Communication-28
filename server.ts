@@ -11,6 +11,7 @@ import {
   generateGmcTsv,
   generateGmcSheetMatrix,
   getCanonicalProductSlug,
+  resolveCanonicalProductSlugByIdentifier,
   PRODUCT_GMC_METADATA,
 } from './src/lib/gmc-feed';
 import { FALLBACK_SERVICES_CATALOG } from './src/lib/services-catalog';
@@ -245,14 +246,17 @@ async function startServer() {
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-      // Optimized Static & Focus Keyword routes
+      // Optimized Static, Program, Brand & Focus Keyword routes
       const staticRoutes = [
         '',
         '/shop',
+        '/brands',
         '/solutions',
         '/services',
         '/events-services',
         '/event-quote',
+        '/esports',
+        '/room-designer',
         '/contact',
         '/about',
         '/faqs',
@@ -260,6 +264,19 @@ async function startServer() {
         '/compare',
         '/guides',
         '/reviews',
+        '/returns',
+        '/shipping',
+        '/payment',
+        '/rma',
+        '/privacy-policy',
+        '/terms-of-service',
+        '/programs/quote',
+        '/programs/blind-drop-shipping',
+        '/programs/government-education-pricing',
+        '/programs/fulfillment-services',
+        '/programs/promotions',
+        '/programs/provisioning-services',
+        '/programs/reseller-program',
         '/voip-service-providers',
         '/3d-hologram',
         '/projection-mapping',
@@ -276,33 +293,68 @@ async function startServer() {
         '/services/esports-events',
         '/services/ai-development',
         '/services/ai-agents-workers',
-        '/services/ai-automation'
+        '/services/ai-automation',
+        '/services/boardroom-integration',
+        '/services/voip-telephony',
+        '/brands/poly',
+        '/brands/cisco',
+        '/brands/logitech',
+        '/brands/yealink',
+        '/brands/jabra',
+        '/brands/bosch',
+        '/brands/hikvision',
+        '/brands/dahua',
+        '/brands/axis',
+        '/brands/grandstream',
+        '/brands/fanvil',
+        '/brands/2n',
+        '/brands/epson',
+        '/brands/benq',
+        '/brands/optoma',
+        '/brands/panasonic',
+        '/brands/sony',
+        '/brands/viewsonic',
+        '/brands/uniview',
+        '/brands/itc',
+        '/brands/3cx',
+        '/brands/freepbx',
+        '/brands/sangoma'
       ];
 
-      for (const route of staticRoutes) {
+      const seenUrls = new Set<string>();
+      const appendUrl = (locPath: string, priority: string) => {
+        const fullLoc = `${baseUrl}${locPath}`;
+        if (seenUrls.has(fullLoc)) return;
+        seenUrls.add(fullLoc);
         xml += '  <url>\n';
-        xml += `    <loc>${baseUrl}${route}</loc>\n`;
+        xml += `    <loc>${fullLoc}</loc>\n`;
         xml += `    <lastmod>${today}</lastmod>\n`;
         xml += '    <changefreq>weekly</changefreq>\n';
-        xml += `    <priority>${route === '' ? '1.0' : '0.9'}</priority>\n`;
+        xml += `    <priority>${priority}</priority>\n`;
         xml += '  </url>\n';
+      };
+
+      for (const route of staticRoutes) {
+        appendUrl(route, route === '' ? '1.0' : route.startsWith('/brands/') || route.startsWith('/programs/') ? '0.7' : '0.9');
       }
 
-      // Dynamic Products (only active)
+      // Dynamic Products (only active, with GMC catalog fallback if Firestore Admin is unavailable)
+      let addedProductCount = 0;
       try {
         const productsSnap = await db.collection('products').where('isActive', '==', true).get();
         productsSnap.forEach(doc => {
           const data = doc.data();
           const slug = getCanonicalProductSlug(data, doc.id);
-          xml += '  <url>\n';
-          xml += `    <loc>${baseUrl}/product/${slug}</loc>\n`;
-          xml += `    <lastmod>${today}</lastmod>\n`;
-          xml += '    <changefreq>weekly</changefreq>\n';
-          xml += `    <priority>${slug === 'polycom-realpresence-group-500-pakistan' ? '0.9' : '0.8'}</priority>\n`;
-          xml += '  </url>\n';
+          appendUrl(`/product/${slug}`, slug === 'polycom-realpresence-group-500-pakistan' ? '0.9' : '0.8');
+          addedProductCount++;
         });
       } catch (e) {
-        console.error('Error fetching products for sitemap:', e);
+        console.warn('Firestore Admin products read fallback for sitemap:', e);
+      }
+
+      for (const rawKey of Object.keys(PRODUCT_GMC_METADATA)) {
+        const canonicalSlug = getCanonicalProductSlug({ slug: rawKey }, rawKey);
+        appendUrl(`/product/${canonicalSlug}`, canonicalSlug === 'polycom-realpresence-group-500-pakistan' ? '0.9' : '0.8');
       }
 
       // Dynamic Categories (only active product categories, excluding navigation pages)
@@ -314,6 +366,24 @@ async function startServer() {
         'ai-agents-workers', 'ai-automation', 'ai-development', 'corporate-events',
         'esports-events', 'expo-organizing', 'hybrid-events', 'voip-service-providers'
       ]);
+      const canonicalCategorySlugs = [
+        'video-conferencing',
+        'touch-panels',
+        'large-room',
+        'speakerphones',
+        'boardroom-codecs',
+        'ptz-cameras',
+        'ip-phones',
+        'headsets',
+        'ip-cameras',
+        'intercom-paging-access',
+        'voip-phone-systems',
+        'projectors'
+      ];
+      for (const slug of canonicalCategorySlugs) {
+        appendUrl(`/category/${slug}`, '0.8');
+      }
+
       try {
         const categoriesSnap = await db.collection('categories').where('isActive', '==', true).get();
         categoriesSnap.forEach(doc => {
@@ -322,20 +392,15 @@ async function startServer() {
           if ((data.type && data.type !== 'product') || excludedCategorySlugs.has(slug)) {
             return;
           }
-          xml += '  <url>\n';
-          xml += `    <loc>${baseUrl}/category/${slug}</loc>\n`;
-          xml += `    <lastmod>${today}</lastmod>\n`;
-          xml += '    <changefreq>weekly</changefreq>\n';
-          xml += '    <priority>0.8</priority>\n';
-          xml += '  </url>\n';
+          appendUrl(`/category/${slug}`, '0.8');
         });
       } catch (e) {
-        console.error('Error fetching categories for sitemap:', e);
+        console.warn('Firestore Admin categories read fallback for sitemap:', e);
       }
 
       xml += '</urlset>';
 
-      res.header('Content-Type', 'application/xml');
+      res.header('Content-Type', 'application/xml; charset=utf-8');
       res.send(xml);
     } catch (error) {
       console.error('Sitemap generation error:', error);
@@ -839,9 +904,25 @@ async function startServer() {
         title: 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live',
         description: 'Buy genuine Video Conference in Pakistan hardware: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Yealink, and Corporate Event Management equipment.'
       },
+      '/brands': {
+        title: 'Authorized Enterprise AV & Video Conferencing Brands in Pakistan | Poly, Cisco, Logitech | AV Live',
+        description: 'Browse official enterprise hardware by authorized brand partner in Pakistan: HP Poly, Cisco, Logitech, Yealink, Jabra, Bosch, Hikvision, Dahua, Axis, Epson, and Panasonic.'
+      },
       '/video-conferencing': {
         title: 'Video Conferencing in Pakistan | Polycom Group 500, Poly X70, Zoom & Teams | AV Live',
         description: 'Enterprise video conferencing in Pakistan. Official integration of Polycom Group 500, Poly X70, Logitech Rally, Zoom Rooms & Microsoft Teams Rooms across Lahore, Karachi & Islamabad.'
+      },
+      '/conference-room-solutions': {
+        title: 'Conference Room Solutions in Pakistan | Boardroom AV, Poly X70 & Cisco Room Kit | AV Live',
+        description: 'Turnkey conference room solutions in Pakistan. Acoustic treatment, 4K PTZ cameras, beamforming ceiling microphones, and touch control panels for modern boardrooms.'
+      },
+      '/zoom-rooms': {
+        title: 'Zoom Rooms Hardware & Integration in Pakistan | Poly, Logitech & Yealink | AV Live',
+        description: 'Certified Zoom Rooms hardware deployment in Pakistan. One-touch wireless sharing, multi-camera speaker tracking, and pro-AV installation in Lahore, Karachi & Islamabad.'
+      },
+      '/microsoft-teams-rooms': {
+        title: 'Microsoft Teams Rooms (MTR) Solutions in Pakistan | Certified AV Integrator | AV Live',
+        description: 'Deploy Microsoft Teams Rooms (MTR) in Pakistan with certified HP Poly, Logitech Rally, Cisco, and Yealink video bars. Complete boardroom design and SLA support.'
       },
       '/3d-hologram': {
         title: '3D Hologram Events Pakistan | Holographic Stage Displays & HoloGauze | AV Live',
@@ -851,9 +932,33 @@ async function startServer() {
         title: '3D Projection Mapping Pakistan | Architectural & Stage Mapping | AV Live',
         description: 'Immersive 3D projection mapping in Pakistan for corporate galas, building facades, and hybrid events using 20,000+ ANSI lumen laser projectors.'
       },
+      '/lahore': {
+        title: 'AV Live Lahore | Video Conferencing, Corporate Events & 3D Hologram in Lahore',
+        description: 'AV Live Communications head office in Johar Town, Lahore. Enterprise video conferencing hardware, SMD LED walls, 3D hologram stages, and corporate event production.'
+      },
+      '/karachi': {
+        title: 'Video Conferencing & Corporate Event Production in Karachi | AV Live Pakistan',
+        description: 'Enterprise AV integration, Poly & Logitech video conferencing systems, expo fabrication, and hybrid corporate event management across Karachi.'
+      },
+      '/islamabad': {
+        title: 'Government & Enterprise Video Conferencing & Event AV in Islamabad | AV Live',
+        description: 'Secure boardroom video conferencing, Bosch digital conference microphones, and diplomatic/corporate event production in Islamabad and Rawalpindi.'
+      },
       '/events-services': {
         title: 'Event Production, AV Equipment Rental & Corporate Event Management | Hybrid Events & Hologram Display | AV Live Pakistan',
         description: 'Book turnkey Corporate event management, SMD LED screen rental, 3D Hologram Display stages, line-array PA systems, and hybrid event Video Conference in Pakistan across Lahore, Karachi & Islamabad.'
+      },
+      '/event-quote': {
+        title: 'Request an Event Production & AV Rental Quote | AV Live Communications Pakistan',
+        description: 'Get an instant custom quotation for corporate events, hybrid townhalls, 3D hologram stages, SMD LED walls, and conference room AV in Pakistan.'
+      },
+      '/esports': {
+        title: 'Esports Tournament Production & Broadcast AV in Pakistan | AV Live',
+        description: 'End-to-end Esports arena staging, low-latency broadcast switching, custom stage lighting, and live streaming production in Pakistan.'
+      },
+      '/room-designer': {
+        title: 'Interactive 3D Conference Room Designer | Boardroom AV Planner | AV Live',
+        description: 'Configure your meeting room dimensions, seating capacity, and camera/microphone coverage with the AV Live interactive conference room planner.'
       },
       '/services': {
         title: 'Corporate Event Management, Hybrid Events & Video Conferencing Services | AV Live Pakistan',
@@ -863,9 +968,94 @@ async function startServer() {
         title: 'Video Conference in Pakistan, Hybrid Event & 3D Hologram Solutions | Polycom Group 500 & Poly X70 | AV Live',
         description: 'Explore turnkey solutions for Video Conference in Pakistan (Polycom Group 500, Poly X70), smart boardrooms, Corporate event management, hybrid event broadcasting, and 3D Hologram Displays.'
       },
+      '/about': {
+        title: 'About AV Live Communications | Enterprise Pro-AV & Event Engineering in Pakistan',
+        description: 'Learn how AV Live Communications delivers enterprise video conferencing, unified communications, 3D hologram production, and corporate event engineering across Pakistan.'
+      },
+      '/contact': {
+        title: 'Contact AV Live Communications | Lahore Head Office & Nationwide AV Support',
+        description: 'Contact our Pro-AV engineers in Johar Town, Lahore at 0321-4256263 or info@avlive.com.pk for hardware procurement, boardroom integration, and event production.'
+      },
+      '/blog': {
+        title: 'Enterprise AV, Video Conferencing & Hybrid Event Insights Blog | AV Live Pakistan',
+        description: 'Technical guides, boardroom design blueprints, and industry insights on video conferencing, VoIP telephony, and live event technology in Pakistan.'
+      },
+      '/guides': {
+        title: "Enterprise AV & VoIP Buyer's Guides | Video Conferencing & IP Telephony | AV Live",
+        description: 'In-depth hardware comparison and procurement guides for video conferencing bars, SIP IP phones, PoE security cameras, and commercial laser projectors in Pakistan.'
+      },
+      '/reviews': {
+        title: 'Verified Enterprise Client Reviews & Case Studies | AV Live Communications Pakistan',
+        description: 'Read verified reviews from corporate IT directors, universities, and government agencies across Pakistan who trust AV Live for video conferencing and event production.'
+      },
+      '/compare': {
+        title: 'Compare Video Conferencing & VoIP Hardware Side-by-Side | AV Live Pakistan',
+        description: 'Compare technical specifications, camera optics, microphone pickup range, and PKR pricing across Poly, Cisco, Logitech, and Yealink hardware.'
+      },
       '/faqs': {
         title: 'Frequently Asked Questions (FAQs) | Video Conference & Event Management | AV Live',
         description: 'Answers to common questions about Video Conference in Pakistan, Polycom Group 500, Poly X70, Corporate Event Management, 3D Hologram displays, and nationwide delivery.'
+      },
+      '/returns': {
+        title: 'Return Policy & 30-Day Hardware Replacement Guarantee | AV Live Pakistan',
+        description: 'Transparent 30-day hardware return and DOA replacement policy for enterprise video conferencing, VoIP phones, and AV equipment purchased from AV Live Communications.'
+      },
+      '/shipping': {
+        title: 'Insured Nationwide B2B Shipping & Delivery Policy | AV Live Pakistan',
+        description: 'Same-day dispatch in Lahore and insured express courier delivery across Karachi, Islamabad, Faisalabad, Multan, and all of Pakistan for enterprise AV hardware.'
+      },
+      '/payment': {
+        title: 'Corporate Payment Methods, Bank Transfer & Official GST/NTN Invoicing | AV Live',
+        description: 'Flexible B2B payment options including corporate cross-cheque, IBFT bank transfer, purchase order (PO) financing, and FBR-compliant GST tax invoicing.'
+      },
+      '/rma': {
+        title: 'Warranty Claim & RMA Hardware Support Portal | AV Live Communications',
+        description: 'Submit an official Return Merchandise Authorization (RMA) request for warranty repair or replacement of Poly, Cisco, Logitech, and Yealink hardware in Pakistan.'
+      },
+      '/voip-service-providers': {
+        title: 'Enterprise VoIP Service Providers & SIP PBX Integration in Pakistan | AV Live',
+        description: 'Compare and deploy 3CX, FreePBX, Grandstream UCM, and Cisco Unified Communications PBX systems with multi-branch SIP trunking in Pakistan.'
+      },
+      '/programs/quote': {
+        title: 'Request an Official B2B Hardware & Project Quotation | AV Live Communications',
+        description: 'Request volume corporate pricing, tender BOQ estimates, and tax-compliant quotations for enterprise AV and video conferencing hardware in Pakistan.'
+      },
+      '/programs/blind-drop-shipping': {
+        title: 'Blind Drop Shipping for IT Resellers & System Integrators | AV Live Pakistan',
+        description: 'Ship enterprise AV and VoIP hardware directly to your clients across Pakistan in neutral, unbranded packaging with your company packing slip.'
+      },
+      '/programs/government-education-pricing': {
+        title: 'Government, HEC University & Public Sector AV Pricing Program | AV Live Pakistan',
+        description: 'Special tender pricing, PPRA-compliant documentation, and tax-exempt procurement for government ministries, defense, and HEC universities in Pakistan.'
+      },
+      '/programs/fulfillment-services': {
+        title: 'Enterprise Staging, Warehousing & 3PL AV Fulfillment Services | AV Live',
+        description: 'Multi-branch hardware staging, asset tagging, and scheduled rollout fulfillment for banks and nationwide enterprises in Pakistan.'
+      },
+      '/programs/promotions': {
+        title: 'Current Enterprise Hardware Promotions, Bundles & Rebates | AV Live Pakistan',
+        description: 'Exclusive bundle discounts and trade-in rebates on Poly Studio video bars, Logitech Rally kits, and Yealink IP phones in Pakistan.'
+      },
+      '/programs/provisioning-services': {
+        title: 'Zero-Touch VoIP & Video Endpoint Pre-Provisioning Services | AV Live Pakistan',
+        description: 'Factory firmware updates, SIP account pre-configuration, and plug-and-play provisioning before hardware leaves our Lahore warehouse.'
+      },
+      '/programs/reseller-program': {
+        title: 'Authorized B2B Partner & IT Reseller Program | AV Live Communications Pakistan',
+        description: 'Join the AV Live reseller network for wholesale distributor margins, deal registration protection, and pre-sales engineering support in Pakistan.'
+      },
+      '/privacy-policy': {
+        title: 'Privacy Policy & Corporate Data Protection | AV Live Communications',
+        description: 'How AV Live Communications collects, protects, and processes corporate client and procurement data in Pakistan.'
+      },
+      '/terms-of-service': {
+        title: 'Terms of Service & B2B Procurement Agreement | AV Live Communications',
+        description: 'Standard commercial terms, hardware warranty conditions, and SLA terms for AV Live Communications Pakistan.'
+      },
+      '/setup-wizard': {
+        title: 'Database Setup Wizard | AV Live',
+        description: 'Internal setup utility.',
+        noindex: true
       },
       '/cart': {
         title: 'Project Staging Cart | AV Live Communications',
@@ -885,13 +1075,51 @@ async function startServer() {
     };
 
     let matched = routeMeta[cleanPath];
+    if (!matched && cleanPath.startsWith('/admin/')) {
+      matched = routeMeta['/admin'];
+    }
+
+    // Dynamic Brand Route SSR Metadata Injection (/brands/:brandSlug)
+    if (!matched && cleanPath.startsWith('/brands/')) {
+      const brandSlug = cleanPath.replace('/brands/', '');
+      const brandNames: Record<string, string> = {
+        poly: 'HP Poly (Polycom)',
+        cisco: 'Cisco',
+        logitech: 'Logitech',
+        yealink: 'Yealink',
+        jabra: 'Jabra',
+        bosch: 'Bosch',
+        hikvision: 'Hikvision',
+        dahua: 'Dahua',
+        axis: 'Axis Communications',
+        grandstream: 'Grandstream',
+        fanvil: 'Fanvil',
+        '2n': '2N Telekomunikace',
+        epson: 'Epson',
+        benq: 'BenQ',
+        optoma: 'Optoma',
+        panasonic: 'Panasonic',
+        sony: 'Sony',
+        viewsonic: 'ViewSonic',
+        uniview: 'Uniview',
+        itc: 'ITC Audio',
+        '3cx': '3CX',
+        sangoma: 'Sangoma'
+      };
+      const readableBrand = brandNames[brandSlug.toLowerCase()] || (brandSlug.charAt(0).toUpperCase() + brandSlug.slice(1));
+      matched = {
+        title: `${readableBrand} Official Hardware Distributor in Pakistan | Video Conferencing & AV | AV Live`,
+        description: `Shop genuine ${readableBrand} video conferencing systems, IP phones, projectors, and enterprise AV hardware in Pakistan with official warranty from AV Live Communications.`
+      };
+    }
 
     // Dynamic Product Route SSR Metadata & Schema Injection (/product/:slug)
     if (!matched && cleanPath.startsWith('/product/')) {
-      const slug = cleanPath.replace('/product/', '');
-      const gmcMeta = PRODUCT_GMC_METADATA[slug];
+      const rawIdentifier = cleanPath.replace('/product/', '');
+      const resolvedSlug = resolveCanonicalProductSlugByIdentifier(rawIdentifier) || rawIdentifier;
+      const gmcMeta = PRODUCT_GMC_METADATA[resolvedSlug];
       if (gmcMeta) {
-        const readableName = slug
+        const readableName = resolvedSlug
           .replace(/-pakistan$/, '')
           .split('-')
           .map(w => w.toUpperCase() === 'IP' || w.toUpperCase() === 'PTZ' || w.toUpperCase() === 'USB' || w.toUpperCase() === '4K' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))
@@ -962,19 +1190,34 @@ async function startServer() {
     }
 
     let updated = html
-      .replace(/<link rel="canonical" href="https:\/\/avlive\.com\.pk" \/>/, `<link rel="canonical" href="${canonicalUrl}" />`)
-      .replace(/<meta property="og:url" content="https:\/\/avlive\.com\.pk" \/>/, `<meta property="og:url" content="${canonicalUrl}" />`);
+      .replace(
+        /<link(?:\s+data-rh="true")?\s+rel="canonical"\s+href="https:\/\/avlive\.com\.pk"\s*\/>/,
+        `<link data-rh="true" rel="canonical" href="${canonicalUrl}" />`
+      )
+      .replace(
+        /<meta(?:\s+data-rh="true")?\s+property="og:url"\s+content="https:\/\/avlive\.com\.pk"\s*\/>/,
+        `<meta data-rh="true" property="og:url" content="${canonicalUrl}" />`
+      );
 
     if (matched) {
       updated = updated
-        .replace(/<title>[\s\S]*?<\/title>/, `<title>${matched.title}</title>`)
-        .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${matched.description}" />`)
-        .replace(/<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${matched.title}" />`)
-        .replace(/<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${matched.description}" />`);
+        .replace(/<title(?:\s+data-rh="true")?>[\s\S]*?<\/title>/, `<title data-rh="true">${matched.title}</title>`)
+        .replace(
+          /<meta(?:\s+data-rh="true")?\s+name="description"\s+content="[^"]*"\s*\/>/,
+          `<meta data-rh="true" name="description" content="${matched.description}" />`
+        )
+        .replace(
+          /<meta(?:\s+data-rh="true")?\s+property="og:title"\s+content="[^"]*"\s*\/>/,
+          `<meta data-rh="true" property="og:title" content="${matched.title}" />`
+        )
+        .replace(
+          /<meta(?:\s+data-rh="true")?\s+property="og:description"\s+content="[^"]*"\s*\/>/,
+          `<meta data-rh="true" property="og:description" content="${matched.description}" />`
+        );
       if (matched.noindex) {
         updated = updated.replace(
-          /<meta name="robots" content="[^"]*" \/>/,
-          '<meta name="robots" content="noindex, nofollow" />'
+          /<meta(?:\s+data-rh="true")?\s+name="robots"\s+content="[^"]*"\s*\/>/,
+          '<meta data-rh="true" name="robots" content="noindex, nofollow" />'
         );
       }
       if (matched.schema) {
@@ -986,15 +1229,106 @@ async function startServer() {
     return updated;
   }
 
-  // Legacy & Raw Firestore ID redirects so Googlebot receives clean 301s to canonical SEO slugs
-  app.get('/voip-service', (req, res) => res.redirect(301, '/voip-service-providers'));
-  app.get('/products/compare', (req, res) => res.redirect(301, '/compare'));
-  app.get('/product/T1XLMubVYmFzeIfC7V9B', (req, res) =>
-    res.redirect(301, '/product/polycom-realpresence-group-500-pakistan')
-  );
-  app.get('/product/wMbGVClqbDS2LFrv5HyX', (req, res) =>
-    res.redirect(301, '/product/google-meet-hardware-license-pakistan')
-  );
+  // Legacy, Query-Param Brand, Non-Product Category & Raw Firestore ID / MPN 301 Redirects
+  const legacyDirectRedirects: Record<string, string> = {
+    '/tools/room-designer': '/room-designer',
+    '/voip-service': '/voip-service-providers',
+    '/products/compare': '/compare',
+    '/quote': '/programs/quote',
+    '/blind-drop-shipping': '/programs/blind-drop-shipping',
+    '/gov-ed-pricing': '/programs/government-education-pricing',
+    '/government-education-pricing': '/programs/government-education-pricing',
+    '/fulfillment-services': '/programs/fulfillment-services',
+    '/promotions': '/programs/promotions',
+    '/provisioning': '/programs/provisioning-services',
+    '/provisioning-services': '/programs/provisioning-services',
+    '/reseller': '/programs/reseller-program',
+    '/reseller-program': '/programs/reseller-program',
+    '/buyers-guides': '/guides',
+    '/category/about': '/about',
+    '/category/compare': '/compare',
+    '/category/faqs': '/faqs',
+    '/category/guides': '/guides',
+    '/category/payment': '/payment',
+    '/category/returns': '/returns',
+    '/category/reviews': '/reviews',
+    '/category/rma': '/rma',
+    '/category/shipping': '/shipping',
+    '/category/blog': '/blog',
+    '/category/contact': '/contact',
+    '/category/privacy-policy': '/privacy-policy',
+    '/category/terms-of-service': '/terms-of-service',
+    '/category/blind-drop-shipping': '/programs/blind-drop-shipping',
+    '/category/fulfillment-services': '/programs/fulfillment-services',
+    '/category/government-education-pricing': '/programs/government-education-pricing',
+    '/category/promotions': '/programs/promotions',
+    '/category/provisioning-services': '/programs/provisioning-services',
+    '/category/quote': '/programs/quote',
+    '/category/reseller-program': '/programs/reseller-program',
+    '/category/voip-service-providers': '/voip-service-providers',
+    '/category/corporate-events': '/services/corporate-events',
+    '/category/hybrid-events': '/services/hybrid-events',
+    '/category/expo-organizing': '/services/expo-organizing',
+    '/category/esports-events': '/services/esports-events',
+    '/category/ai-development': '/services/ai-development',
+    '/category/ai-agents-workers': '/services/ai-agents-workers',
+    '/category/ai-automation': '/services/ai-automation',
+  };
+
+  for (const [fromPath, toPath] of Object.entries(legacyDirectRedirects)) {
+    app.get(fromPath, (req, res) => res.redirect(301, toPath));
+  }
+
+  // Redirect /shop?brand=logitech -> /brands/logitech for clean indexable brand landing URLs
+  app.get('/shop', (req, res, next) => {
+    const brandParam = typeof req.query.brand === 'string' ? req.query.brand.trim() : '';
+    const otherKeys = Object.keys(req.query).filter(k => k !== 'brand');
+    if (brandParam && !brandParam.includes(',') && otherKeys.length === 0) {
+      const slug = brandParam.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const normalizedBrandSlug = slug === 'polycom' || slug === 'hp-poly' ? 'poly' : slug;
+      return res.redirect(301, `/brands/${normalizedBrandSlug}`);
+    }
+    next();
+  });
+
+  // Redirect /category/:slug?sub=:sub -> /category/:sub so query-parameterized subcategories resolve to clean canonical paths
+  app.get('/category/:categorySlug', (req, res, next) => {
+    const subParam = typeof req.query.sub === 'string' ? req.query.sub.trim().toLowerCase() : '';
+    if (subParam) {
+      const cleanSub = subParam.replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '');
+      return res.redirect(301, `/category/${cleanSub || req.params.categorySlug}`);
+    }
+    next();
+  });
+
+  // Redirect legacy /products/:slug -> /category/:slug or /product/:canonicalSlug
+  app.get('/products/:legacySlug', (req, res) => {
+    const slug = req.params.legacySlug;
+    if (slug === 'compare') {
+      return res.redirect(301, '/compare');
+    }
+    const resolvedProductSlug = resolveCanonicalProductSlugByIdentifier(slug);
+    if (resolvedProductSlug) {
+      return res.redirect(301, `/product/${resolvedProductSlug}`);
+    }
+    return res.redirect(301, `/category/${slug.toLowerCase()}`);
+  });
+
+  // Redirect raw Firestore IDs, MPNs (e.g., /product/9137161U), or legacy slugs to canonical product SEO slugs
+  app.get('/product/:idOrSlug', (req, res, next) => {
+    const requested = req.params.idOrSlug;
+    const canonicalSlug = resolveCanonicalProductSlugByIdentifier(requested);
+    if (canonicalSlug && canonicalSlug !== requested) {
+      return res.redirect(301, `/product/${canonicalSlug}`);
+    }
+    next();
+  });
+
+  // Set X-Robots-Tag: noindex, nofollow on private/transactional routes
+  app.use(['/admin', '/cart', '/checkout', '/setup-wizard'], (req, res, next) => {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    next();
+  });
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {

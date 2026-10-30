@@ -9,7 +9,7 @@ export function Provisioning() {
       <SEO 
         title="Zero-Touch Hardware Provisioning & Staging | AV Live Pakistan" 
         description="Zero-touch provisioning, firmware flashing, customized PBX config, and automated device enrollment for enterprise IP communications equipment."
-        url="https://avlive.com.pk/provisioning"
+        url="https://avlive.com.pk/programs/provisioning-services"
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

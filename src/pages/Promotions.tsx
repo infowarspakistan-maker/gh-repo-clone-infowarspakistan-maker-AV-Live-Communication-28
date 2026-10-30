@@ -9,7 +9,7 @@ export function Promotions() {
       <SEO 
         title="Promotions & Limited-Time Deals on AV Hardware | AV Live Pakistan" 
         description="Exclusive corporate discounts, bundle packages, and seasonal promotional pricing on video conferencing systems and IP phones."
-        url="https://avlive.com.pk/promotions"
+        url="https://avlive.com.pk/programs/promotions"
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

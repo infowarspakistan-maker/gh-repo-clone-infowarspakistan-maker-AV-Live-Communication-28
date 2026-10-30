@@ -10,7 +10,7 @@ export function BuyersGuides() {
       <SEO 
         title="Enterprise AV & Video Conferencing Buyers Guides | AV Live Pakistan"
         description="Comprehensive procurement guides for choosing the best boardroom video bars, IP-PBX phone systems, acoustic ceiling mics, and interactive flat panels in Pakistan."
-        url="https://avlive.com.pk/buyers-guides"
+        url="https://avlive.com.pk/guides"
         image="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=1200"
         imageAlt="AV Live Enterprise Equipment Buyers Guides"
       />

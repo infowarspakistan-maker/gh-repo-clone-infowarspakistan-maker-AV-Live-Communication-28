@@ -3,48 +3,194 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight, Box, Settings, Mic, Video, ShieldCheck, Speaker, Loader2, Zap, LayoutGrid, Layers, Heart } from 'lucide-react';
 import { subscribeToCategories, subscribeToProducts, Product, Category as CategoryType } from '../lib/firebase/firestore-helpers';
-import { getCanonicalProductSlug, resolveProductPricing } from '../lib/gmc-feed';
+import {
+  getCanonicalProductSlug,
+  resolveProductPricing,
+  PRODUCT_GMC_METADATA,
+  buildFallbackProductFromGmcMeta,
+} from '../lib/gmc-feed';
 import { addToCart } from '../lib/cart';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 
-const FALLBACK_PRODUCT_CATEGORIES: Record<string, { name: string; description: string }> = {
+const FALLBACK_PRODUCT_CATEGORIES: Record<
+  string,
+  { name: string; description: string; productSlugs: string[] }
+> = {
   'video-conferencing': {
     name: 'Video Conferencing Systems',
     description:
       'Enterprise Video Conference in Pakistan hardware including Polycom RealPresence Group 500, Poly Studio X70, Logitech Rally Bar, Cisco Room Kits, and Zoom/Teams boardroom solutions.',
+    productSlugs: [
+      'polycom-realpresence-group-500-pakistan',
+      'poly-studio-x72-pakistan',
+      'logitech-rally-bar-pakistan',
+      'cisco-room-kit-plus-pakistan',
+      'poly-studio-x52-pakistan',
+      'poly-studio-usb-video-bar-pakistan',
+      'poly-studio-x50-pakistan',
+      'logitech-rally-bar-mini-pakistan',
+    ],
+  },
+  'touch-panels': {
+    name: 'Boardroom Touch Panels & Room Controllers',
+    description:
+      'Dedicated touch-screen room controllers, scheduling panels, and AV automation consoles for Zoom Rooms, Microsoft Teams Rooms, Cisco Webex, and Poly Studio boardrooms in Pakistan.',
+    productSlugs: [
+      'cisco-room-bar-pakistan',
+      'cisco-room-kit-plus-pakistan',
+      'poly-studio-x72-pakistan',
+      'logitech-rally-bar-pakistan',
+      'horion-k6a-bundle-special-offer',
+      'google-meet-hardware-license-pakistan',
+    ],
+  },
+  'large-room': {
+    name: 'Large Boardroom Video Conferencing Systems',
+    description:
+      'High-capacity dual-camera and PTZ codec systems including Polycom RealPresence Group 500, Poly Studio X70, and Cisco Room Kit Plus for 12–40 seat executive boardrooms in Pakistan.',
+    productSlugs: [
+      'polycom-realpresence-group-500-pakistan',
+      'poly-studio-x72-pakistan',
+      'cisco-room-kit-plus-pakistan',
+      'cisco-room-kit-pro-pakistan',
+      'poly-g7500-pakistan',
+      'logitech-rally-bar-pakistan',
+    ],
+  },
+  speakerphones: {
+    name: 'Conference Room Speakerphones & Microphone Arrays',
+    description:
+      '360-degree beamforming conference phones, expansion microphones, and ceiling audio pickup systems from Poly, Jabra, and Yealink in Pakistan.',
+    productSlugs: [
+      'poly-studio-usb-video-bar-pakistan',
+      'poly-studio-v52-pakistan',
+      'jabra-evolve2-65-pakistan',
+      'yealink-sip-t46s-pakistan',
+    ],
+  },
+  'boardroom-codecs': {
+    name: 'Enterprise H.323 / SIP Boardroom Codecs',
+    description:
+      'Hardware telepresence codecs including Polycom RealPresence Group 500 (7200-64550-001), Poly G7500, and Cisco Room Kit Pro/Plus for standards-based multipoint video conferencing in Pakistan.',
+    productSlugs: [
+      'polycom-realpresence-group-500-pakistan',
+      'poly-g7500-pakistan',
+      'cisco-room-kit-pro-pakistan',
+      'cisco-room-kit-plus-pakistan',
+      'cisco-room-kit-eq-pakistan',
+    ],
+  },
+  'ptz-cameras': {
+    name: '4K Optical PTZ Conferencing & Broadcast Cameras',
+    description:
+      'Motorized 12x–25x optical zoom PTZ cameras including Polycom EagleEye IV, Logitech Rally PTZ, and Hikvision DarkFighter PTZ systems for boardrooms and hybrid events in Pakistan.',
+    productSlugs: [
+      'polycom-realpresence-group-500-pakistan',
+      'logitech-rally-bar-pakistan',
+      'hikvision-ptz-camera-pakistan',
+      'poly-studio-x72-pakistan',
+    ],
   },
   'ip-phones': {
     name: 'Enterprise IP Phones',
     description:
       'Executive SIP & VoIP desk phones from Cisco, Yealink, Polycom VVX, Grandstream, and Fanvil with PoE and HD voice for Pakistani enterprises.',
+    productSlugs: [
+      'cisco-8841-ip-phone-pakistan',
+      'polycom-vvx-250-pakistan',
+      'yealink-sip-t46s-pakistan',
+      'grandstream-gxp2170-pakistan',
+      'fanvil-x4-ip-phone-pakistan',
+    ],
   },
   'voip-phone-systems': {
     name: 'VoIP Phone Systems & IP PBX',
     description:
       'Scalable IP PBX appliances and unified communications licensing from 3CX, Grandstream UCM, Cisco CUCM, and FreePBX.',
+    productSlugs: [
+      '3cx-pro-8-sc-pakistan',
+      'freepbx-enterprise-pakistan',
+      'cisco-cucm-license-pakistan',
+      'grandstream-ucm6308-pakistan',
+      'grandstream-ucm6304-pakistan',
+    ],
   },
   projectors: {
     name: 'Commercial Laser & 4K Projectors',
     description:
       'High-lumen 4K UHD and laser installation projectors from Panasonic, BenQ, Epson, Sony, Optoma, and ViewSonic for auditoriums and 3D projection mapping in Pakistan.',
+    productSlugs: [
+      'panasonic-pt-rq45k-pakistan',
+      'panasonic-pt-vmz82-pakistan',
+      'epson-lifestudio-flex-plus-pakistan',
+      'benq-tk705i-pakistan',
+      'benq-w4100i-pakistan',
+      'sony-bravia-projector-7-pakistan',
+      'optoma-gt4000uhd-pakistan',
+      'viewsonic-lsd400w-pakistan',
+    ],
   },
   headsets: {
     name: 'Professional UC & Call Center Headsets',
     description:
       'Active noise-cancelling (ANC) wireless and USB headsets from Jabra Evolve, HP Poly Voyager/Blackwire, and Yealink for hybrid work and contact centers.',
+    productSlugs: [
+      'jabra-evolve2-65-pakistan',
+      'jabra-evolve-75-pakistan',
+      'poly-voyager-focus-uc-pakistan',
+      'poly-blackwire-c3220-pakistan',
+      'yealink-bh70-headset-pakistan',
+    ],
   },
   'ip-cameras': {
     name: 'IP Security & PTZ Cameras',
     description:
       'NDAA-compliant network surveillance, Starlight WDR domes, and optical PTZ cameras from Axis, Hikvision, Dahua, and Uniview.',
+    productSlugs: [
+      'axis-m3065-v-camera-pakistan',
+      'hikvision-colorvu-camera-pakistan',
+      'hikvision-ptz-camera-pakistan',
+      'dahua-n43al52-bullet-pakistan',
+      'uniview-ipc3612sr3-vf-pakistan',
+    ],
   },
   'intercom-paging-access': {
     name: 'SIP Intercom, Paging & Public Address',
     description:
       'Commercial PA amplifiers, EN 54-16 voice alarm controllers, and SIP video door intercoms from Bosch PAVIRO, 2N, Axis, and ITC.',
+    productSlugs: [
+      '2n-ip-vario-intercom-pakistan',
+      'axis-a8105-e-door-station-pakistan',
+      'bosch-paviro-pva-4cr12-pakistan',
+      'bosch-paviro-pva-2p500-pakistan',
+      'itc-va-6200ma-pakistan',
+    ],
   },
 };
+
+function getFallbackCategoryProducts(slug?: string): Product[] {
+  if (!slug) return [];
+  const catConfig = FALLBACK_PRODUCT_CATEGORIES[slug];
+  const candidateSlugs =
+    catConfig?.productSlugs ||
+    Object.keys(PRODUCT_GMC_METADATA)
+      .filter(k => k.endsWith('-pakistan'))
+      .slice(0, 6);
+
+  const built: Product[] = [];
+  for (const s of candidateSlugs) {
+    const prod = buildFallbackProductFromGmcMeta(s) as Product | null;
+    if (prod) {
+      built.push({
+        ...prod,
+        categoryIds: [slug],
+        categorySlugs: [slug],
+      });
+    }
+  }
+  return built;
+}
 
 export function Category() {
   const { categorySlug } = useParams<{ categorySlug: string }>();
@@ -87,15 +233,25 @@ export function Category() {
     ? categories.filter(c => c.parentId === currentCategory.id && c.isActive)
     : [];
 
-  const categoryProducts = currentCategory
+  const firestoreMatchedProducts = currentCategory
     ? products.filter(p => (Array.isArray(p.categorySlugs) ? p.categorySlugs : typeof p.categorySlugs === 'string' ? [p.categorySlugs] : []).includes(categorySlug!) || p.categoryIds?.includes(currentCategory.id!))
     : [];
+
+  const categoryProducts =
+    firestoreMatchedProducts.length > 0
+      ? firestoreMatchedProducts
+      : getFallbackCategoryProducts(categorySlug);
 
   const brandsIncategory = Array.from(new Set(categoryProducts.map(p => p.brand || 'Unknown'))).sort();
 
   if (loading && !currentCategory) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
+        <SEO
+          title={`${(categorySlug || 'Hardware').replace(/-/g, ' ')} | Video Conference in Pakistan | AV Live`}
+          description="Explore enterprise video conferencing, VoIP telephony, and commercial AV hardware in Pakistan from AV Live Communications."
+          url={`https://avlive.com.pk/category/${categorySlug || ''}`}
+        />
         <div className="text-center">
           <Loader2 className="animate-spin text-[#00B4D8] mx-auto mb-4" size={40} />
           <p className="text-gray-400 font-black uppercase tracking-widest text-[10px]">Filtering Infrastructure...</p>
@@ -244,7 +400,7 @@ export function Category() {
                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">Hardware Partners</h3>
                <div className="space-y-4">
                   {brandsIncategory.map(brand => (
-                    <Link key={brand} to={`/shop?brand=${brand.toString().toLowerCase()}`} className="flex items-center justify-between group">
+                    <Link key={brand} to={`/brands/${encodeURIComponent(brand.toString().toLowerCase().replace(/\s+/g, '-'))}`} className="flex items-center justify-between group">
                        <span className="text-sm font-black uppercase tracking-widest text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors">{brand}</span>
                        <div className="w-1.5 h-1.5 bg-gray-100 rounded-full group-hover:bg-[#00B4D8] transition-colors"></div>
                     </Link>

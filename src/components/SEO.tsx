@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 export interface SEOProps {
@@ -75,6 +76,29 @@ export function SEO({
   const absoluteUrl = toAbsoluteUrl(url || (typeof window !== 'undefined' ? window.location.pathname : '/'));
   const absoluteImage = toAbsoluteUrl(image, DEFAULT_IMAGE);
   const resolvedAlt = imageAlt || siteTitle;
+  const robotsContent = noindex
+    ? 'noindex, nofollow'
+    : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.title = siteTitle;
+
+    const dedupeAndSet = (selector: string, attr: string, value: string) => {
+      const nodes = document.querySelectorAll(selector);
+      if (nodes.length > 0) {
+        nodes[0].setAttribute(attr, value);
+        for (let i = 1; i < nodes.length; i++) {
+          nodes[i].remove();
+        }
+      }
+    };
+
+    dedupeAndSet('link[rel="canonical"]', 'href', absoluteUrl);
+    dedupeAndSet('meta[property="og:url"]', 'content', absoluteUrl);
+    dedupeAndSet('meta[name="description"]', 'content', description);
+    dedupeAndSet('meta[name="robots"]', 'content', robotsContent);
+  }, [siteTitle, absoluteUrl, description, robotsContent]);
 
   return (
     <Helmet htmlAttributes={{ lang: 'en', prefix: 'og: https://ogp.me/ns# fb: https://ogp.me/ns/fb#' }}>

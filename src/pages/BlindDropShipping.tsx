@@ -9,7 +9,7 @@ export function BlindDropShipping() {
       <SEO 
         title="Blind Drop Shipping for B2B Partners & Resellers | AV Live Pakistan" 
         description="Confidential unbranded blind drop shipping for AV resellers, IT integrators, and e-commerce partners across all cities in Pakistan."
-        url="https://avlive.com.pk/blind-drop-shipping"
+        url="https://avlive.com.pk/programs/blind-drop-shipping"
       />
       <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

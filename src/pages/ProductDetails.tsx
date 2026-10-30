@@ -29,17 +29,25 @@ import {
   Play
 } from 'lucide-react';
 import { getProduct, getProducts, getCategories, Product, Category } from '../lib/firebase/firestore-helpers';
-import { PRODUCT_GMC_METADATA, cleanMpn, getCanonicalProductSlug, resolveProductPricing } from '../lib/gmc-feed';
+import {
+  PRODUCT_GMC_METADATA,
+  cleanMpn,
+  getCanonicalProductSlug,
+  resolveProductPricing,
+  buildFallbackProductFromGmcMeta,
+  resolveCanonicalProductSlugByIdentifier,
+} from '../lib/gmc-feed';
 import { addToCart } from '../lib/cart';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export function ProductDetails() {
   const { productId } = useParams<{ productId: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
+  const initialFallbackProduct = (productId ? buildFallbackProductFromGmcMeta(productId) : null) as Product | null;
+  const [product, setProduct] = useState<Product | null>(initialFallbackProduct);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [productCategory, setProductCategory] = useState<Category | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialFallbackProduct);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [activeTab, setActiveTab] = useState<'overview' | 'specs' | 'in-the-box' | 'support' | 'faq' | 'compare'>('overview');
@@ -56,50 +64,89 @@ export function ProductDetails() {
   const [reviewSubmitSuccess, setReviewSubmitSuccess] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     async function fetchProduct() {
       if (!productId) return;
-      try {
+      const syncFallback = buildFallbackProductFromGmcMeta(productId) as Product | null;
+      if (syncFallback) {
+        setProduct(syncFallback);
+        setLoading(false);
+      } else {
         setLoading(true);
-        const data = await getProduct(productId);
-        setProduct(data);
-        
-        const allCategories = await getCategories();
+      }
+
+      try {
+        const [data, allCategories, allProducts] = await Promise.all([
+          getProduct(productId),
+          getCategories().catch(() => [] as Category[]),
+          getProducts().catch(() => [] as Product[]),
+        ]);
+        if (!isMounted) return;
+
+        const effectiveProduct = data || syncFallback;
+        setProduct(effectiveProduct);
+
         let cat: Category | undefined = undefined;
-        if (data && data.categoryIds && data.categoryIds.length > 0) {
-           cat = allCategories.find(c => data.categoryIds?.includes(c.id!));
-        } else if (data && data.categorySlugs && data.categorySlugs.length > 0) {
-           const slugs = Array.isArray(data.categorySlugs) ? data.categorySlugs : (typeof data.categorySlugs === 'string' ? [data.categorySlugs] : []);
-           cat = allCategories.find(c => slugs.includes(c.slug!));
+        if (effectiveProduct && effectiveProduct.categoryIds && effectiveProduct.categoryIds.length > 0) {
+          cat = allCategories.find(c => effectiveProduct.categoryIds?.includes(c.id!));
+        } else if (effectiveProduct && effectiveProduct.categorySlugs && effectiveProduct.categorySlugs.length > 0) {
+          const slugs = Array.isArray(effectiveProduct.categorySlugs)
+            ? effectiveProduct.categorySlugs
+            : typeof effectiveProduct.categorySlugs === 'string'
+            ? [effectiveProduct.categorySlugs]
+            : [];
+          cat = allCategories.find(c => slugs.includes(c.slug!));
         }
         if (cat) {
           setProductCategory(cat);
         }
 
-        const allProducts = await getProducts();
-        if (data) {
-          const dataSlugs = Array.isArray(data.categorySlugs) ? data.categorySlugs : (typeof data.categorySlugs === 'string' ? [data.categorySlugs] : []);
-          const related = allProducts.filter(p => {
-            const pSlugs = Array.isArray(p.categorySlugs) ? p.categorySlugs : (typeof p.categorySlugs === 'string' ? [p.categorySlugs] : []);
-            return p.id !== productId && 
-              p.isActive && 
-              (p.brand === data.brand || 
-               p.categoryIds?.some(c => data.categoryIds?.includes(c)) ||
-               pSlugs.some(s => dataSlugs.includes(s)))
-          }).slice(0, 4);
+        if (effectiveProduct && allProducts.length > 0) {
+          const dataSlugs = Array.isArray(effectiveProduct.categorySlugs)
+            ? effectiveProduct.categorySlugs
+            : typeof effectiveProduct.categorySlugs === 'string'
+            ? [effectiveProduct.categorySlugs]
+            : [];
+          const related = allProducts
+            .filter(p => {
+              const pSlugs = Array.isArray(p.categorySlugs)
+                ? p.categorySlugs
+                : typeof p.categorySlugs === 'string'
+                ? [p.categorySlugs]
+                : [];
+              return (
+                p.id !== productId &&
+                p.slug !== productId &&
+                p.isActive &&
+                (p.brand === effectiveProduct.brand ||
+                  p.categoryIds?.some(c => effectiveProduct.categoryIds?.includes(c)) ||
+                  pSlugs.some(s => dataSlugs.includes(s)))
+              );
+            })
+            .slice(0, 4);
           setRelatedProducts(related);
         }
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
     fetchProduct();
+    return () => {
+      isMounted = false;
+    };
   }, [productId]);
 
-  if (loading) {
+  if (loading && !product) {
+    const fallbackSlug = resolveCanonicalProductSlugByIdentifier(productId) || productId || '';
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
+        <SEO
+          title={`${fallbackSlug.replace(/-/g, ' ')} | Video Conference in Pakistan | AV Live`}
+          description="Enterprise video conferencing, VoIP telephony, and professional AV hardware in Pakistan with official warranty from AV Live Communications."
+          url={`https://avlive.com.pk/product/${fallbackSlug}`}
+        />
         <div className="text-center">
           <Loader2 className="animate-spin text-[#00B4D8] mx-auto mb-4" size={40} />
           <p className="text-gray-400 font-black uppercase tracking-[0.2em] text-[10px]">Retrieving Hardware Specs...</p>
@@ -324,7 +371,7 @@ export function ProductDetails() {
            <Breadcrumbs items={[
              { label: 'Shop', path: '/shop' },
              ...(productCategory ? [{ label: productCategory.name, path: `/category/${productCategory.slug || productCategory.id}` }] : []),
-             { label: resolvedBrand, path: `/shop?brand=${resolvedBrand.toLowerCase()}` },
+             { label: resolvedBrand, path: `/brands/${resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') === 'polycom' ? 'poly' : resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` },
              { label: product.productName }
            ]} />
            <div className="hidden md:flex items-center gap-4">

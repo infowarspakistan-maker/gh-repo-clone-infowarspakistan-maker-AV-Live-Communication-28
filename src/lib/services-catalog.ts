@@ -232,6 +232,78 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
         a: 'Yes, we design resilient n8n and webhook pipelines that route leads from your website, expos, and hybrid events directly into Google Sheets, Slack, WhatsApp, and your CRM in real time.'
       }
     ]
+  },
+  {
+    id: 'boardroom-integration',
+    slug: 'boardroom-integration',
+    title: 'Boardroom AV & Video Conferencing Integration',
+    description:
+      'Turnkey executive boardroom AV design, acoustic calibration, Polycom Group 500 & Poly Studio X70 deployment, and Zoom / Microsoft Teams Rooms integration across Pakistan.',
+    imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200&q=80',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3050/3050525.png',
+    isActive: true,
+    order: 8,
+    category: 'Video Conferencing & Pro-AV',
+    serviceType: 'Boardroom AV Integration',
+    priceRange: 'PKR 350,000 - PKR 12,000,000',
+    keywords:
+      'Boardroom integration Pakistan, Video Conference in Pakistan, Polycom Group 500, Poly X70, Zoom Rooms Pakistan, Microsoft Teams Rooms Pakistan, conference room AV setup',
+    detailedContent: `
+      <h2>Turnkey Executive Boardroom & Video Conference Integration in Pakistan</h2>
+      <p>AV Live Communications engineers and installs standards-based corporate boardrooms, training halls, and command centers across Lahore, Karachi, and Islamabad. We integrate flagship <strong>Video Conference in Pakistan</strong> codecs—including the <strong>Polycom RealPresence Group 500 (Polycom Group 500)</strong>, <strong>Poly Studio X70 (Poly X70)</strong>, Logitech Rally Bar, and Cisco Room Kit Plus—with architectural acoustics and one-touch room automation.</p>
+      <ul>
+        <li><strong>Multi-Camera & Optical PTZ Tracking:</strong> Precision speaker framing using Poly DirectorAI, EagleEye IV 12x optical zoom cameras, and Logitech RightSight 2.</li>
+        <li><strong>Beamforming Ceiling Audio & DSP Calibration:</strong> Zero-echo room acoustics powered by Poly NoiseBlockAI, Acoustic Fence, and multi-zone ceiling microphone arrays.</li>
+        <li><strong>Native Zoom Rooms & Microsoft Teams Rooms (MTR):</strong> Dedicated touch-panel controllers, wireless 4K content sharing, and H.323/SIP interoperability.</li>
+        <li><strong>4K Commercial Displays & Fine-Pitch SMD Video Walls:</strong> Dual-display boardroom configurations and seamless LED video walls with concealed table connectivity boxes.</li>
+      </ul>
+    `,
+    faqs: [
+      {
+        q: 'What hardware is recommended for a 16-to-24 seat executive boardroom in Pakistan?',
+        a: 'For large 16-to-24 seat boardrooms, we recommend either the Poly Studio X70 (Poly X70) dual-4K AI video bar with expansion microphones or the Polycom RealPresence Group 500 paired with an EagleEye IV 12x PTZ camera and ceiling microphone array.'
+      },
+      {
+        q: 'Do you provide on-site acoustic surveys and structured cabling in Lahore, Karachi, and Islamabad?',
+        a: 'Yes. Our certified Pro-AV engineering teams conduct on-site room surveys, RT60 acoustic assessments, concealed HDMI/Cat6A floor-box cabling, and complete commissioning nationwide.'
+      }
+    ]
+  },
+  {
+    id: 'voip-telephony',
+    slug: 'voip-telephony',
+    title: 'Enterprise VoIP Telephony & IP PBX Deployment',
+    description:
+      'Scalable SIP IP PBX systems, multi-branch VoIP trunking, call center queues, and PoE desk phone provisioning for 3CX, FreePBX, Grandstream UCM, and Cisco CUCM in Pakistan.',
+    imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&q=80',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3059/3059502.png',
+    isActive: true,
+    order: 9,
+    category: 'Unified Communications',
+    serviceType: 'Enterprise VoIP & IP PBX',
+    priceRange: 'PKR 150,000 - PKR 8,500,000',
+    keywords:
+      'VoIP telephony Pakistan, IP PBX installation Lahore Karachi Islamabad, 3CX Pakistan, FreePBX Enterprise, Grandstream UCM6308, Cisco CUCM, SIP phones Pakistan',
+    detailedContent: `
+      <h2>Enterprise VoIP Telephony, IP PBX & Multi-Branch Unified Communications</h2>
+      <p>Modernize your corporate voice infrastructure with encrypted SIP telephony, zero-touch IP phone provisioning, and hybrid cloud PBX architecture engineered by AV Live Communications.</p>
+      <ul>
+        <li><strong>IP PBX Appliances & Cloud Licensing:</strong> Turnkey deployment of <strong>Grandstream UCM6308</strong>, <strong>3CX PRO Enterprise</strong>, <strong>FreePBX Enterprise</strong>, and <strong>Cisco Unified Communications Manager (CUCM)</strong>.</li>
+        <li><strong>Executive & Call Center SIP Endpoints:</strong> Mass auto-provisioning of Cisco 8800 series, Poly VVX, Yealink T54W, Grandstream Carrier-Grade, and Fanvil IP phones.</li>
+        <li><strong>Multi-Site SIP Peering & PRI/FXO Gateways:</strong> Toll-free inter-branch calling between Lahore, Karachi, Islamabad, and international offices with failover PSTN trunks.</li>
+        <li><strong>SIP Intercom & PA Paging Integration:</strong> Unified door access control and emergency voice paging via 2N IP Vario, Axis, and Bosch PAVIRO systems.</li>
+      </ul>
+    `,
+    faqs: [
+      {
+        q: 'Can AV Live connect our Lahore, Karachi, and Islamabad offices onto a single unified PBX extension dial-plan?',
+        a: 'Yes. We configure encrypted TLS/SRTP SIP trunks between branch offices so employees can dial 3- or 4-digit extensions nationwide with zero inter-branch call charges.'
+      },
+      {
+        q: 'Do you support CRM integration and call recording for contact centers?',
+        a: 'Yes, our 3CX, FreePBX, and Grandstream UCM deployments include automated call recording, live queue wallboards, SLA reporting, and native CRM screen-pop integration.'
+      }
+    ]
   }
 ];
 

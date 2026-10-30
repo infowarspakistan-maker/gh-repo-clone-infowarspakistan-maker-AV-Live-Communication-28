@@ -90,6 +90,11 @@ export function ServiceDetail() {
   if (loading && !service) {
     return (
       <div className="flex-1 min-h-screen flex items-center justify-center bg-[#f8f9fa]">
+        <SEO
+          title={`${(serviceSlug || 'Service').replace(/-/g, ' ')} | AV Live Communications Pakistan`}
+          description="Enterprise AV integration, video conferencing, corporate event management, and VoIP solutions in Pakistan."
+          url={`https://avlive.com.pk/services/${serviceSlug || ''}`}
+        />
         <Loader2 className="animate-spin text-[#00B4D8]" size={40} />
       </div>
     );
