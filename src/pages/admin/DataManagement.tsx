@@ -6,6 +6,7 @@ import Papa from 'papaparse';
 import JSZip from 'jszip';
 import { useAuth } from '../../contexts/AuthContext';
 import { subscribeToGeneralSettings, GeneralSettings } from '../../lib/firebase/firestore-helpers';
+import { formatProductToGmcRow, generateGmcSheetMatrix, generateGmcTsv } from '../../lib/gmc-feed';
 import { useEffect } from 'react';
 
 interface SectionConfig {
@@ -705,32 +706,12 @@ export function DataManagement() {
     return input; // Assume it's already an ID
   };
 
-  // Helper to format product for Google Merchant Center
+  // Helper to format product for Google Merchant Center (40-Column Template)
   const formatProductForGMC = (product: any): Record<string, any> => {
-    let images = [];
-    try {
-      images = JSON.parse(product.images || '[]');
-    } catch (e) {
-      images = [];
-    }
-
-    return {
-      id: product.id || '',
-      title: product.productName || '',
-      description: product.description || '',
-      availability: 'in_stock',
-      link: `https://avlive.com.pk/product/${product.id}`,
-      image_link: images[0] || '',
-      price: product.regularPrice ? `${product.regularPrice} PKR` : '',
-      sale_price: product.salePrice ? `${product.salePrice} PKR` : '',
-      brand: product.brand || '',
-      condition: 'new',
-      adult: 'no',
-      identifier_exists: 'no'
-    };
+    return formatProductToGmcRow(product);
   };
 
-  // Sync products to Google Sheets in GMC format
+  // Sync products to Google Sheets in 40-Column GMC format
   const handleGMCSync = async (sheetId: string) => {
     try {
       setLoading('merchant_sync');
@@ -742,13 +723,7 @@ export function DataManagement() {
       const snapshot = await getDocs(collection(db, 'products'));
       const products = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       
-      const formattedData = products.map(p => {
-        const gmc = formatProductForGMC(p);
-        return Object.values(gmc);
-      });
-      
-      const headers = Object.keys(formatProductForGMC({}));
-      const values = [headers, ...formattedData];
+      const values = generateGmcSheetMatrix(products);
       
       const syncResponse = await fetch('/api/sync-sheets', {
         method: 'POST',
@@ -760,7 +735,7 @@ export function DataManagement() {
           spreadsheetId: sheetId,
           range: 'Sheet1!A1',
           values,
-          accessToken: token
+          accessToken: (user as any)?.accessToken || token
         })
       });
       
@@ -768,7 +743,7 @@ export function DataManagement() {
         const errData = await syncResponse.json();
         throw new Error(errData.error || 'Failed to sync');
       }
-      setMessage({ text: 'Successfully synced products to Google Sheets in GMC format!', type: 'success' });
+      setMessage({ text: `Successfully synced ${products.length} products (40-column GMC format) to Google Sheets!`, type: 'success' });
     } catch (err: any) {
       console.error('Error syncing to sheets:', err);
       setMessage({ text: err.message || 'Error syncing products', type: 'error' });
@@ -863,50 +838,14 @@ export function DataManagement() {
       setLoading(null);
     }
   };
-  // Export Products as TSV (GMC Format)
+  // Export Products as 40-Column TSV (Google Merchant Center Format)
   const handleExportGMC = async () => {
     try {
       setLoading('gmc_export');
       const snapshot = await getDocs(collection(db, 'products'));
       const products = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       
-      const headers = [
-        'id', 'title', 'description', 'availability', 'availability_date', 'expiration_date', 'link', 
-        'mobile_link', 'image_link', 'price', 'sale_price', 'sale_price_effective_date', 'identifier_exists', 
-        'gtin', 'mpn', 'brand', 'product_highlight', 'product_detail', 'additional_image_link', 'condition', 
-        'adult', 'color', 'size', 'size_type', 'size_system', 'gender', 'material', 'pattern', 'age_group', 
-        'multipack', 'is bundle', 'unit_pricing_measure', 'unit_pricing_base_measure', 'energy_efficiency_class', 
-        'min_energy_efficiency_class', 'max_energy_efficiency', 'item_group_id', 'video_link', 'virtual_model_link', 
-        'cost_of_goods_sold'
-      ];
-      
-      const rows = products.map((p: any) => {
-        const images = Array.isArray(p.images) ? p.images : (typeof p.images === 'string' ? JSON.parse(p.images) : []);
-        
-        // Ensure all 40 fields are present
-        const rowData = [
-          p.id || '', // 1 id
-          p.productName || '', // 2 title
-          p.description?.replace(/<[^>]*>?/gm, '') || '', // 3 description
-          'in_stock', '', '', // 4, 5, 6
-          `https://avlive.com.pk/product/${p.id}`, // 7 link
-          '', // 8 mobile_link
-          images[0] || '', // 9 image_link
-          `${p.regularPrice || 0} PKR`, // 10 price
-          p.salePrice ? `${p.salePrice} PKR` : '', // 11 sale_price
-          '', // 12 sale_price_effective_date
-          'no', '', '', // 13, 14, 15
-          p.brand || '', // 16 brand
-          '', // 17 highlight
-          p.specifications ? p.specifications : 'General:Specifications:None', // 18 detail
-          images.slice(1).join(','), // 19 additional_image_link
-          'new', 'no', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '' // 20-40
-        ];
-        
-        return rowData.join('\t');
-      });
-      
-      const tsvContent = [headers.join('\t'), ...rows].join('\n');
+      const tsvContent = generateGmcTsv(products);
       const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -915,7 +854,7 @@ export function DataManagement() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      setMessage({ text: 'GMC TSV Export Successful!', type: 'success' });
+      setMessage({ text: `Exported ${products.length} products in 40-column Google Merchant Center TSV format!`, type: 'success' });
     } catch (err: any) {
       console.error('Export error:', err);
       setMessage({ text: 'Error exporting TSV', type: 'error' });
@@ -1208,64 +1147,48 @@ export function DataManagement() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-[9px] font-black uppercase tracking-widest text-[#F26522] bg-orange-50 px-3 py-1 rounded-full">
-                External Integrations
+                40-Column GMC Feed
               </span>
+              <a
+                href="/feed/google-merchant.tsv"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#00B4D8] hover:text-[#1A2B4C] text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors"
+                title="Live scheduled fetch URL for Google Merchant Center"
+              >
+                <FileText size={12} /> Live TSV Feed
+              </a>
             </div>
             <h2 className="text-xl font-black text-[#1A2B4C] tracking-tight mb-2 group-hover:text-[#F26522] transition-colors">
-              Google Merchant Feed to Sheets
+              Google Merchant 40-Col Feed
             </h2>
-            <p className="text-gray-500 text-xs leading-relaxed mb-6 font-medium">
-              Synchronize the Google Merchant Center product feed (CSV) directly to your managed Google Sheet.
+            <p className="text-gray-500 text-xs leading-relaxed mb-4 font-medium">
+              Export all existing products with verified GTIN/UPC codes, MPNs, availability, and 3-part product_detail subattributes, or sync directly to Google Sheets.
             </p>
+            <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 mb-4 text-[10px] font-mono text-gray-600 break-all">
+              URL: https://avlive.com.pk/feed/google-merchant.tsv
+            </div>
           </div>
           <div className="space-y-3 pt-4 border-t border-gray-50">
             <button
+              onClick={handleExportGMC}
+              disabled={loading !== null}
+              className="w-full bg-emerald-600 text-white px-4 py-3 rounded-xl font-black text-xs hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loading === 'gmc_export' ? (
+                <RefreshCw size={16} className="animate-spin" />
+              ) : (
+                <>
+                  <Download size={16} />
+                  Download 40-Column TSV
+                </>
+              )}
+            </button>
+            <button
               onClick={() => {
-                const sheetId = prompt('Enter the Google Sheet ID (or URL):');
-                if (sheetId) {
-                  setLoading('merchant_sync');
-                  const syncFeed = async (sId: string) => {
-                    try {
-                      const response = await fetch('/public/assets/aistudio/Google_Merchant_Center_feed_-_Products_source_66117fee');
-                      const csvText = await response.text();
-                      const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
-                      
-                      // Filter lines 2-172 as per requirements (indices 0-170 in parsed data)
-                      const productData = parsed.data.slice(172).map((row: any) => Object.values(row));
-                      
-                      // Add headers
-                      const headers = Object.keys(parsed.data[172] as any);
-                      const values = [headers, ...productData];
-                      
-                      // @ts-ignore
-                      const token = user?.accessToken || ''; 
-                      // Replace direct call with API request
-                      const syncResponse = await fetch('/api/sync-sheets', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                          spreadsheetId: sId,
-                          range: 'Sheet1!A1',
-                          values,
-                          accessToken: token
-                        })
-                      });
-                      
-                      if (!syncResponse.ok) {
-                        const errData = await syncResponse.json();
-                        throw new Error(errData.error || 'Failed to sync');
-                      }
-                      setMessage({ text: 'Sync successful!', type: 'success' });
-                    } catch (e: any) {
-                      setMessage({ text: `Sync error: ${e.message}`, type: 'error' });
-                    } finally {
-                      setLoading(null);
-                    }
-                  };
-                  syncFeed(sheetId);
+                const sheetInput = prompt('Enter the Google Sheet ID (or URL):', settings?.googleMerchantSheetUrl || '');
+                if (sheetInput) {
+                  handleGMCSync(extractSheetId(sheetInput));
                 }
               }}
               disabled={loading !== null}
@@ -1276,7 +1199,7 @@ export function DataManagement() {
               ) : (
                 <>
                   <FileCheck size={16} />
-                  Sync Feed to Sheets
+                  Sync 40-Col Feed to Sheets
                 </>
               )}
             </button>

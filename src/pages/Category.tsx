@@ -67,11 +67,37 @@ export function Category() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16 text-[#1A2B4C]">
       <SEO 
-        title={`${currentCategory.name} | Professional AV Categories | AV Live`}
-        description={currentCategory.description || `Explore our selection of ${currentCategory.name}. High-quality commercial hardware and professional enterprise deployments in Pakistan.`}
+        title={`${currentCategory.name} | Video Conference in Pakistan | Polycom Group 500 & Poly X70 | AV Live`}
+        description={currentCategory.description || `Explore genuine ${currentCategory.name} in Pakistan including Polycom Group 500, Poly X70, and enterprise Video conference & Corporate event management hardware.`}
+        keywords={`${currentCategory.name}, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, AV Live`}
         image={currentCategory.imageUrl}
-        imageAlt={`${currentCategory.name} - Enterprise AV Solutions in Pakistan`}
+        imageAlt={`${currentCategory.name} - Video Conference in Pakistan & Enterprise AV Solutions`}
         url={`https://avlive.com.pk/category/${currentCategory.slug || currentCategory.id}`}
+        schema={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "CollectionPage",
+              "@id": `https://avlive.com.pk/category/${currentCategory.slug || currentCategory.id}`,
+              "name": `${currentCategory.name} - Video Conference in Pakistan | AV Live`,
+              "description": currentCategory.description || `Enterprise ${currentCategory.name} hardware in Pakistan.`,
+              "url": `https://avlive.com.pk/category/${currentCategory.slug || currentCategory.id}`
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": `Which ${currentCategory.name} models are recommended for Video Conference in Pakistan?`,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": `For enterprise boardrooms and hybrid events in Pakistan, our top-performing ${currentCategory.name} systems include the Polycom RealPresence Group 500 (Polycom Group 500), Poly Studio X70 (Poly X70), Yealink MeetingBar series, and Logitech Rally systems—all backed by local warranty and engineering support in Lahore, Karachi, and Islamabad.`
+                  }
+                }
+              ]
+            }
+          ]
+        }}
       />
       {/* Category Hero */}
       <div className="bg-white border-b border-gray-100 py-16 relative overflow-hidden">
@@ -221,9 +247,12 @@ export function Category() {
       </div>
       
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm">
-        <h2 className="text-2xl font-black mb-6">Expert Guide: Choosing {currentCategory.name} in Pakistan</h2>
+        <h2 className="text-2xl font-black mb-4">Expert Guide: Choosing {currentCategory.name} & Video Conference in Pakistan</h2>
+        <p className="text-gray-600 leading-relaxed mb-4">
+          When investing in <strong>{currentCategory.name.toLowerCase()}</strong> for your corporate boardroom, <strong>hybrid event</strong>, or <strong>Corporate event management</strong> infrastructure in Pakistan, selecting genuine, PTA-compliant hardware is critical. At AV Live, we supply and integrate flagship <strong>Video conference</strong> systems—including the <strong>Polycom Group 500</strong> and <strong>Poly X70</strong>—alongside commercial audio, IP telephony, and <strong>Hologram Display</strong> solutions.
+        </p>
         <p className="text-gray-600 leading-relaxed">
-          When investing in {currentCategory.name.toLowerCase()} for your corporate or commercial needs in Pakistan, it is crucial to select hardware that meets local infrastructure requirements while providing reliable performance. At AV Live, we provide PTA-compliant hardware solutions, ensuring seamless integration for your video conferencing, IP telephony, or AV infrastructure. Our technical consultants in Lahore, Karachi, and Islamabad are ready to help you navigate specifications, compatibility, and implementation for all our {currentCategory.name.toLowerCase()} products.
+          Our certified technical consultants in <strong>Lahore, Karachi, and Islamabad</strong> provide acoustic room surveys, GS1-verified hardware procurement, and turnkey onsite installation for all <strong>{currentCategory.name.toLowerCase()}</strong> deployments.
         </p>
       </section>
     </div>

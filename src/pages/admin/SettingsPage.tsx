@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { 
   GeneralSettings, 
   subscribeToGeneralSettings, 
-  updateGeneralSettings 
+  updateGeneralSettings,
+  getProducts
 } from '../../lib/firebase/firestore-helpers';
+import { generateGmcSheetMatrix } from '../../lib/gmc-feed';
 import { auth } from '../../lib/firebase/client';
 
 export function SettingsPage() {
@@ -85,8 +87,8 @@ export function SettingsPage() {
       const token = await auth.currentUser?.getIdToken();
       if (!token) throw new Error('Authentication required');
 
-      // The logic requires access to products. I should import subscribeToProducts or getProducts
-      // For simplicity, I will re-implement the fetch here.
+      const products = await getProducts();
+      const values = generateGmcSheetMatrix(products);
       
       const response = await fetch('/api/sync-sheets', {
         method: 'POST',
@@ -97,14 +99,13 @@ export function SettingsPage() {
         body: JSON.stringify({
           spreadsheetId: sheetId,
           range: 'Sheet1!A1',
+          values,
           accessToken: token
-          // Note: The /api/sync-sheets needs the products data. 
-          // I will need to refactor the API to fetch products internally or pass them.
         })
       });
       
       if (!response.ok) throw new Error('Failed to sync');
-      alert('Successfully synced products to Google Sheets in GMC format!');
+      alert(`Successfully synced ${products.length} products (40-column GMC format) to Google Sheets!`);
     } catch (err: any) {
       console.error('Error syncing:', err);
       alert(err.message || 'Error syncing products');

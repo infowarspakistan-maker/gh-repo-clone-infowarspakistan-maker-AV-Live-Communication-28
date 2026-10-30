@@ -15,6 +15,8 @@ export interface SEOProps {
   availability?: string;
   brand?: string;
   sku?: string;
+  gtin?: string;
+  mpn?: string;
   author?: string;
   publishedTime?: string;
   modifiedTime?: string;
@@ -30,18 +32,23 @@ const DEFAULT_IMAGE = 'https://avlive.com.pk/og-image.jpg';
 
 function toAbsoluteUrl(pathOrUrl?: string, defaultFallback: string = DEFAULT_DOMAIN): string {
   if (!pathOrUrl) return defaultFallback;
-  if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
-    return pathOrUrl;
+  let fullUrl = pathOrUrl;
+  if (!pathOrUrl.startsWith('http://') && !pathOrUrl.startsWith('https://')) {
+    const cleanPath = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
+    fullUrl = `${DEFAULT_DOMAIN}${cleanPath}`;
   }
-  // Ensure the path is clean and prepended with the domain
-  const cleanPath = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
-  return `${DEFAULT_DOMAIN}${cleanPath}`;
+  // Strip query parameters and trailing slash (except root domain) for strict canonical deduplication
+  const withoutQuery = fullUrl.split('?')[0].split('#')[0];
+  if (withoutQuery.length > DEFAULT_DOMAIN.length + 1 && withoutQuery.endsWith('/')) {
+    return withoutQuery.slice(0, -1);
+  }
+  return withoutQuery;
 }
 
 export function SEO({ 
-  title = 'Event Management Company Pakistan | Video Conferencing in Pakistan | 3D Hologram & Projection Mapping | AV Live', 
-  description = "Pakistan's premier event management company & video conferencing provider. 3D hologram, projection mapping, conference room AV for Zoom & MS Teams. Lahore, Karachi, Islamabad.",
-  keywords = 'Event management company Pakistan, Video conferencing in Pakistan, 3D hologram events Pakistan, Projection mapping Pakistan, Conference room AV setup, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, Event production company Lahore, Corporate event management Karachi, Event equipment rental Islamabad, AV Live',
+  title = 'Video Conference in Pakistan | Polycom Group 500 & Poly X70 | Corporate Event Management & Hologram Display | AV Live', 
+  description = "Leading provider of Video Conference in Pakistan (Polycom Group 500, Poly X70, Cisco, Logitech) & Corporate Event Management, Hybrid Event Production, and 3D Hologram Display across Lahore, Karachi & Islamabad.",
+  keywords = 'Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, Conference room AV setup, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, AV Live',
   image = DEFAULT_IMAGE,
   imageAlt,
   imageWidth = 1200,
@@ -53,6 +60,8 @@ export function SEO({
   availability,
   brand,
   sku,
+  gtin,
+  mpn,
   author = 'AV Live Communications',
   publishedTime,
   modifiedTime,
@@ -110,6 +119,8 @@ export function SEO({
           {availability && <meta property="product:availability" content={availability} />}
           {brand && <meta property="product:brand" content={brand} />}
           {sku && <meta property="product:retailer_item_id" content={sku} />}
+          {mpn && <meta property="product:mfr_part_no" content={mpn} />}
+          {gtin && <meta property="product:gtin" content={gtin} />}
           <meta property="product:condition" content="new" />
         </>
       )}

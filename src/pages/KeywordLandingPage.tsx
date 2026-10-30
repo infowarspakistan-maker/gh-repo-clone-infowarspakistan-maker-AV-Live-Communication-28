@@ -19,30 +19,30 @@ interface LandingConfig {
 
 const LANDING_CONFIGS: Record<string, LandingConfig> = {
   '3d-hologram': {
-    title: '3D Hologram Events Pakistan | Stages, Visuals & Shows | AV Live',
-    description: 'High-impact 3D hologram stage displays, holographic projections, and custom visual shows for corporate events, launches, and expos in Pakistan.',
-    keywords: '3D hologram events Pakistan, holographic stage display Lahore, 3D hologram Karachi, hologram projection Islamabad, AV Live',
-    heroHeading: '3D Hologram Stage Displays & Visual Productions in Pakistan',
-    heroSubheading: 'Captivate your audience with floating 3D visuals, holographic product reveals, and futuristic stage projection mapping designed by Pakistan’s top AV engineers.',
+    title: 'Hologram Display & 3D Hologram Events in Pakistan | Corporate Event Management | AV Live',
+    description: 'High-impact 3D Hologram Display stages, holographic projections, Corporate event management, and hybrid event visual shows in Lahore, Karachi, and Islamabad.',
+    keywords: 'Hologram Display, 3D hologram events Pakistan, Event management, Corporate event management, hybrid event, events, holographic stage display Lahore, 3D hologram Karachi, hologram projection Islamabad, AV Live',
+    heroHeading: '3D Hologram Display Stages & Corporate Event Management in Pakistan',
+    heroSubheading: 'Captivate your audience with floating 3D Hologram Display visuals, holographic product reveals, and turnkey hybrid event stage projection mapping designed by Pakistan’s top AV engineers.',
     pillar: 'Event Management',
     primaryCtaText: 'Book a Free Event or Conference Room Consultation',
     primaryCtaLink: '/event-quote',
     locationCta: 'Book a Free Demo at Our Johar Town Experience Center',
     features: [
-      'Custom 3D Content Creation & Holographic Rendering',
-      'High-Brightness Fan Holograms & Mesh Screen Holographic Projection',
-      'Turnkey Stage Truss, Lighting & Sound Integration',
-      'On-Site Sound Engineers & Video Technicians (Lahore, Karachi, Islamabad)',
-      'Proven Track Record across Corporate Expos & Product Launches'
+      'Custom 3D Hologram Display Content Creation & Holographic Rendering',
+      'High-Brightness LED Fan Holograms & Pepper’s Ghost Mesh Projection',
+      'Turnkey Corporate Event Management, Stage Truss, Lighting & Sound',
+      'Hybrid Event Broadcast Integration with Video Conference Bridges',
+      'Proven Track Record across Flagship Corporate Events & Product Launches'
     ],
     faqs: [
       {
-        question: 'How does 3D Hologram technology work for corporate events in Pakistan?',
-        answer: 'We utilize ultra-bright LED holographic fans and high-gain mesh projection displays to render transparent, floating 3D graphics and animations on stage without glasses.'
+        question: 'How does a 3D Hologram Display work for corporate events in Pakistan?',
+        answer: 'We utilize ultra-bright LED holographic fans and high-gain Pepper’s Ghost optical mesh projection displays to render transparent, floating 3D Hologram Display graphics and executive keynotes on stage without 3D glasses.'
       },
       {
-        question: 'Can 3D Holograms be deployed outdoors or in brightly lit venues?',
-        answer: 'Yes! Our high-lumen optical projection arrays and high-density LED fan arrays are calibrated for indoor auditoriums, convention centers, and covered outdoor venues.'
+        question: 'Can a Hologram Display be combined with a hybrid event and live Video conference?',
+        answer: 'Yes! Our Corporate event management engineers combine 3D Hologram Display stages with live multi-camera hybrid event broadcasting and Video conference codecs (such as Poly X70 and Polycom Group 500) across Lahore, Karachi, and Islamabad.'
       }
     ]
   },
@@ -146,26 +146,30 @@ const LANDING_CONFIGS: Record<string, LandingConfig> = {
     ]
   },
   'video-conferencing': {
-    title: 'Video Conferencing Solutions in Pakistan | Boardroom AV | AV Live',
-    description: 'Complete B2B video conferencing solutions in Pakistan. Authorized Zoom Rooms, Microsoft Teams Rooms, Cisco Webex, and Poly Studio integration.',
-    keywords: 'Video conferencing in Pakistan, conference room AV setup, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, Polycom Pakistan, AV Live',
-    heroHeading: 'Enterprise Video Conferencing Solutions in Pakistan',
-    heroSubheading: 'Connect your teams flawlessly across Lahore, Karachi, Islamabad, and international offices with certified Zoom Rooms, Microsoft Teams Rooms, and Poly/Yealink hardware.',
+    title: 'Video Conference in Pakistan | Polycom Group 500 & Poly X70 | Boardroom AV | AV Live',
+    description: 'Complete B2B Video Conference in Pakistan solutions. Official Polycom Group 500, Poly X70, Zoom Rooms, Microsoft Teams Rooms, and hybrid event integration.',
+    keywords: 'Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, hybrid event, Corporate event management, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, AV Live',
+    heroHeading: 'Enterprise Video Conference in Pakistan: Polycom Group 500 & Poly X70 Solutions',
+    heroSubheading: 'Connect your teams flawlessly across Lahore, Karachi, Islamabad, and global offices with genuine Polycom Group 500 codecs, Poly X70 4K AI video bars, Zoom Rooms, and Microsoft Teams Rooms.',
     pillar: 'Video Conferencing',
     primaryCtaText: 'Book a Free Event or Conference Room Consultation',
     primaryCtaLink: '/contact',
     locationCta: 'Call Now for a 15-Minute Response SLA',
     features: [
-      'Certified Zoom Rooms & Microsoft Teams Rooms Integration',
+      'Official Polycom Group 500 (7200-64550-001) & Poly Studio X70 (Poly X70) Stock in Pakistan',
+      'Certified Zoom Rooms, Microsoft Teams Rooms & Hybrid Event Integration',
       'AI-Powered Auto-Tracking 4K PTZ Cameras & Beamforming Ceiling Mics',
-      'Acoustic Calibration & Echo Cancellation Optimization',
-      'One-Touch Join Touch Panels & Cable-Free Screen Sharing',
-      'Turnkey Installation & After-Sales SLA Support in Pakistan'
+      'Acoustic Calibration, NoiseBlockAI & Echo Cancellation Optimization',
+      'Turnkey Installation & Nationwide SLA Support in Lahore, Karachi & Islamabad'
     ],
     faqs: [
       {
-        question: 'Which video conferencing platforms does AV Live support in Pakistan?',
-        answer: 'We support Zoom Rooms, Microsoft Teams Rooms, Cisco Webex, Google Meet, and Poly Studio Native Room Kits with full local warranty and support.'
+        question: 'Which hardware is best for Video Conference in Pakistan: Polycom Group 500 or Poly X70?',
+        answer: 'The Polycom RealPresence Group 500 (Polycom Group 500) is ideal for standards-based SIP/H.323 boardrooms requiring a 12x optical PTZ EagleEye IV camera and dual-display codec. The Poly Studio X70 (Poly X70) is best for large Zoom Rooms and Microsoft Teams Rooms needing dual 4K 20MP AI cameras and all-in-one cloud collaboration.'
+      },
+      {
+        question: 'Which Video conference platforms does AV Live support in Pakistan?',
+        answer: 'We support Zoom Rooms, Microsoft Teams Rooms, Cisco Webex, Google Meet, and native H.323/SIP telepresence on Polycom Group 500 and Poly X70 systems with full local warranty and engineering support.'
       }
     ]
   },

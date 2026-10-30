@@ -8,9 +8,11 @@ import firebaseConfig from '../../../firebase-applet-config.json';
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-}, (firebaseConfig as any).firestoreDatabaseId);
+export const db = initializeFirestore(
+  app,
+  { experimentalForceLongPolling: true },
+  (firebaseConfig as any).firestoreDatabaseId
+);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 

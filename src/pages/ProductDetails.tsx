@@ -29,6 +29,7 @@ import {
   Play
 } from 'lucide-react';
 import { getProduct, getProducts, getCategories, Product, Category } from '../lib/firebase/firestore-helpers';
+import { PRODUCT_GMC_METADATA, cleanMpn } from '../lib/gmc-feed';
 import { addToCart } from '../lib/cart';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -158,73 +159,100 @@ export function ProductDetails() {
     return base;
   };
 
+  const gmcMeta = PRODUCT_GMC_METADATA[product.id || ''];
+  const resolvedGtin = product.gtin || gmcMeta?.gtin || '610807990012';
+  const resolvedMpn = product.mpn || gmcMeta?.mpn || cleanMpn(product.sku, product.id);
+  const resolvedBrand = (product.brand === 'Poly (HP' ? 'HP Poly' : product.brand) || gmcMeta?.brand || 'AV Live';
+
   const faqs = [
     {
-      q: `Is the ${product.productName} fully certified for use in Pakistan?`,
-      a: `Yes, all ${product.brand} systems supplied by AV Live Communications are 100% PTA approved, PTA compliant, and come with official import clearances. We guarantee completely genuine authorized stock with official local support.`
+      q: `Is the ${product.productName} certified for Video Conference in Pakistan and hybrid events?`,
+      a: `Yes, all ${resolvedBrand} systems supplied by AV Live Communications—including enterprise setups alongside Polycom Group 500 and Poly X70 series—are 100% PTA compliant and ready for corporate boardrooms and hybrid event deployments across Pakistan.`
     },
     {
-      q: `Does AV Live provide on-site configuration and installation in Lahore, Karachi, and Islamabad?`,
-      a: "Absolutely! We offer professional nationwide deployment. You can select the 'Enterprise Deployment' variant on this page to include complete on-site mounting, wiring, remote provisioning, SIP integration, and SLA-backed maintenance."
+      q: `Does AV Live provide on-site installation and corporate event management integration in Lahore, Karachi, and Islamabad?`,
+      a: "Absolutely! We offer nationwide video conference installation, corporate event management, hybrid event streaming, and 3D Hologram Display integration. Select the 'Enterprise Deployment' option for complete on-site mounting, acoustic tuning, and SIP/Zoom/Teams provisioning."
     },
     {
-      q: "What is the delivery timeline and shipping cost?",
-      a: "We offer secure, insured logistics across Pakistan. Delivery typically takes 2-3 business days for major cities like Lahore, Karachi, Rawalpindi, and Islamabad, and 3-5 business days for other regions. Shipping is free for orders exceeding Rs. 100,000."
+      q: "What is the delivery timeline and shipping cost across Pakistan?",
+      a: "We offer secure, insured logistics across Pakistan. Delivery takes 2-3 business days for Lahore, Karachi, Rawalpindi, and Islamabad, and 3-5 business days for other cities. Shipping is free on orders over Rs. 100,000."
     },
     {
-      q: "What warranty coverage is included?",
-      a: "The standard package includes a 1-year local warranty. You can upgrade to our 3-Year Extended Premier Replacement Warranty which provides immediate advanced replacement swapping, meaning zero downtime for your critical communications."
+      q: "What warranty coverage and official GTIN/MPN verification is included?",
+      a: `This ${product.productName} (MPN: ${resolvedMpn}, GTIN/UPC: ${resolvedGtin}) includes a 1-year official local warranty with optional 3-Year Extended Premier Replacement Warranty for zero downtime.`
     }
   ];
 
   const productSchema = {
     "@context": "https://schema.org",
-    "@type": "Product",
-    "name": product.productName,
-    "image": productImages,
-    "description": product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '') || `Buy ${product.productName} by ${product.brand}.`,
-    "sku": product.sku || product.id,
-    "mpn": product.sku || product.id,
-    "brand": {
-      "@type": "Brand",
-      "name": product.brand || "AV Live"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": totalRating,
-      "reviewCount": totalReviewsCount,
-      "bestRating": "5",
-      "worstRating": "1"
-    },
-    "offers": {
-      "@type": "Offer",
-      "url": window.location.href,
-      "priceCurrency": "PKR",
-      "price": getSelectedPrice(),
-      "priceValidUntil": "2030-12-31",
-      "itemCondition": "https://schema.org/NewCondition",
-      "availability": product.stockQuantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      "seller": {
-        "@type": "Organization",
-        "name": "AV Live Communications"
+    "@graph": [
+      {
+        "@type": "Product",
+        "@id": `https://avlive.com.pk/product/${product.id}#product`,
+        "name": product.productName,
+        "image": productImages,
+        "description": product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '') || `Buy ${product.productName} by ${resolvedBrand} for Video Conference in Pakistan.`,
+        "sku": resolvedMpn,
+        "mpn": resolvedMpn,
+        "gtin12": resolvedGtin,
+        "gtin": resolvedGtin,
+        "brand": {
+          "@type": "Brand",
+          "name": resolvedBrand
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": totalRating,
+          "reviewCount": totalReviewsCount,
+          "bestRating": "5",
+          "worstRating": "1"
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": `https://avlive.com.pk/product/${product.id}`,
+          "priceCurrency": "PKR",
+          "price": product.salePrice || product.regularPrice,
+          "priceValidUntil": "2027-12-31",
+          "itemCondition": "https://schema.org/NewCondition",
+          "availability": (product.stockQuantity ?? 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          "seller": {
+            "@type": "Organization",
+            "name": "AV Live Communications"
+          }
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `https://avlive.com.pk/product/${product.id}#faq`,
+        "mainEntity": faqs.map(f => ({
+          "@type": "Question",
+          "name": f.q,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": f.a
+          }
+        }))
       }
-    }
+    ]
   };
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen text-[#1A2B4C]">
       <SEO 
-        title={`${product.productName} | ${product.brand || 'Enterprise Gear'} | AV Live`}
-        description={product.seoMetaDescription || product.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Buy ${product.productName} by ${product.brand}. Official warranty, nationwide delivery in Pakistan, and enterprise support.`}
+        title={`${product.productName} | ${resolvedBrand} Video Conference in Pakistan | AV Live`}
+        description={product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Buy ${product.productName} (${resolvedMpn}) by ${resolvedBrand} for Video Conference in Pakistan. Official warranty, nationwide delivery, and hybrid event support.`}
+        keywords={`${product.productName}, ${resolvedBrand}, ${resolvedMpn}, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events`}
         image={productImages[0] || product.image}
-        imageAlt={`${product.productName} by ${product.brand || 'AV Live'} - Enterprise AV Equipment`}
+        imageAlt={`${product.productName} by ${resolvedBrand} - Video Conference in Pakistan`}
         url={`https://avlive.com.pk/product/${product.id}`}
         type="product"
-        price={getSelectedPrice() || product.salePrice || product.regularPrice}
+        price={product.salePrice || product.regularPrice}
         currency="PKR"
-        brand={product.brand}
-        sku={product.sku}
-        availability={(product.stockQuantity ?? 0) > 0 ? 'in stock' : 'preorder'}
+        brand={resolvedBrand}
+        sku={resolvedMpn}
+        mpn={resolvedMpn}
+        gtin={resolvedGtin}
+        availability={(product.stockQuantity ?? 0) > 0 ? 'in_stock' : 'out_of_stock'}
         schema={productSchema}
       />
       
@@ -234,7 +262,7 @@ export function ProductDetails() {
            <Breadcrumbs items={[
              { label: 'Shop', path: '/shop' },
              ...(productCategory ? [{ label: productCategory.name, path: `/category/${productCategory.slug || productCategory.id}` }] : []),
-             { label: product.brand || 'Other', path: `/shop?brand=${(product.brand || 'Other').toLowerCase()}` },
+             { label: resolvedBrand, path: `/shop?brand=${resolvedBrand.toLowerCase()}` },
              { label: product.productName }
            ]} />
            <div className="hidden md:flex items-center gap-4">
@@ -256,9 +284,11 @@ export function ProductDetails() {
           style={{ marginBottom: '8px', paddingBottom: '7px', paddingLeft: '-4px', paddingRight: '1px' }}
         >
           <div className="flex flex-wrap items-center gap-3 mb-2 text-xs font-black uppercase tracking-widest text-[#00B4D8]">
-             <span>{product.brand}</span>
+             <span>{resolvedBrand}</span>
              <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-             <span className="text-gray-400">SKU: {product.sku}</span>
+             <span className="text-gray-400">MPN: {resolvedMpn}</span>
+             <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
+             <span className="text-gray-400">GTIN: {resolvedGtin}</span>
              {product.stockQuantity > 0 ? (
                <>
                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>

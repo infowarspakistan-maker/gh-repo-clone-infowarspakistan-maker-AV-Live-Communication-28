@@ -11,11 +11,56 @@ export function Services() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen py-12 text-[#1A2B4C]">
       <SEO 
-        title="Event Management & Commercial AV Rental Services | AV Live Pakistan"
-        description="Book certified AV engineers for corporate summits, hybrid meetings, and esports tournaments. SMD screens, high-fidelity sound, and broadcast cameras."
+        title="Corporate Event Management, Hybrid Events & Hologram Display Services | Video Conference in Pakistan | AV Live"
+        description="Pakistan's premier Corporate event management, hybrid event broadcasting, 3D Hologram Display stages, and Video Conference in Pakistan engineering services across Lahore, Karachi, and Islamabad."
+        keywords="Event management, Corporate event management, hybrid event, Hologram Display, events, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, 3D hologram events Pakistan, Projection mapping Pakistan, AV Live"
         url="https://avlive.com.pk/services"
         image="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=1200"
-        imageAlt="AV Live Event Management and Pro AV Services"
+        imageAlt="AV Live Corporate Event Management, Hybrid Event & Hologram Display Services"
+        schema={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Service",
+              "@id": "https://avlive.com.pk/services#service",
+              "name": "Corporate Event Management, Hybrid Events & Hologram Display Production",
+              "serviceType": ["Event management", "Corporate event management", "hybrid event", "Hologram Display", "Video Conference in Pakistan"],
+              "provider": { "@id": "https://avlive.com.pk/#organization" },
+              "areaServed": ["Lahore", "Karachi", "Islamabad", "Pakistan"],
+              "description": "End-to-end Corporate event management, hybrid event broadcasting, 3D Hologram Display stages, SMD LED walls, and enterprise Video conference integration using Polycom Group 500 and Poly X70."
+            },
+            {
+              "@type": "FAQPage",
+              "@id": "https://avlive.com.pk/services#faq",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "What is included in AV Live's Corporate event management and hybrid event packages?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Our turnkey Corporate event management and hybrid event packages include stage trussing, fine-pitch SMD LED walls, 3D Hologram Display units, line-array PA sound systems, multi-camera SDI broadcast production, and two-way Video conference integration via Poly X70 and Polycom Group 500 codecs."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can AV Live deploy a 3D Hologram Display for corporate events in Lahore, Karachi, and Islamabad?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. We engineer and deploy custom 3D Hologram Display stages, holographic LED fan matrices, and Pepper's Ghost optical projection stages for executive keynotes, product reveals, and corporate events across Lahore, Karachi, and Islamabad."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do you connect live events with remote Video conference participants?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "We bridge our live event broadcast switchers directly with enterprise Video conference hardware such as the Polycom Group 500 and Poly Studio X70 (Poly X70), enabling zero-echo bidirectional audio and 4K video with Zoom, Microsoft Teams, and Webex participants."
+                  }
+                }
+              ]
+            }
+          ]
+        }}
       />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: 'Services' }]} />
@@ -196,23 +241,39 @@ export function Services() {
       </div>
 
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm">
-        <h2 className="text-3xl font-black mb-6">Why Choose AV Live for Event Management in Pakistan?</h2>
+        <h2 className="text-3xl font-black mb-6">Why Choose AV Live for Corporate Event Management, Hybrid Events & Hologram Displays in Pakistan?</h2>
         <p className="text-gray-600 leading-relaxed mb-4">
-          AV Live Communications is Pakistan's premier event management and professional audio-visual services company. We specialize in high-impact corporate solutions, including <strong>3D hologram production</strong>, immersive <strong>projection mapping</strong>, and comprehensive <strong>AV rental</strong> for corporate summits, hybrid meetings, and large-scale events.
+          AV Live Communications is Pakistan's premier <strong>Event management</strong> and <strong>Corporate event management</strong> engineering partner. We specialize in high-impact corporate <strong>events</strong>, including custom <strong>Hologram Display</strong> stages, immersive 3D projection mapping, and broadcast-grade <strong>hybrid event</strong> production.
         </p>
         <p className="text-gray-600 leading-relaxed mb-4">
-          Our certified engineering teams provide end-to-end support across <strong>Lahore, Karachi, and Islamabad</strong>. Whether you need an e-Sports arena setup, conference room AV integration, or a world-class hybrid event experience, AV Live delivers unmatched technical precision and reliability.
+          Our certified engineering teams provide end-to-end support across <strong>Lahore, Karachi, and Islamabad</strong>. Whether you need a multi-camera <strong>hybrid event</strong> bridged with <strong>Video Conference in Pakistan</strong> hardware like the <strong>Polycom Group 500</strong> and <strong>Poly X70</strong>, or a futuristic <strong>Hologram Display</strong> product reveal, AV Live delivers unmatched technical precision.
         </p>
         <p className="text-gray-600 leading-relaxed">
-          <strong>Our core services include:</strong>
+          <strong>Our core event and AV engineering services include:</strong>
         </p>
-        <ul className="list-disc list-inside text-gray-600 leading-relaxed mt-2 space-y-1">
-          <li>Corporate Event Production & Management</li>
-          <li>Projection Mapping & 3D Hologram Technologies</li>
-          <li>Hybrid Event & Video Conferencing Integration</li>
-          <li>Esports Tournament Infrastructure</li>
-          <li>Professional AV Equipment Rental (SMD, Lighting, Sound)</li>
+        <ul className="list-disc list-inside text-gray-600 leading-relaxed mt-2 space-y-1 mb-10">
+          <li><strong>Corporate Event Management</strong> & Turnkey Stage Production</li>
+          <li><strong>Hologram Display</strong> Stages, 3D Holographic Fans & Architectural Projection Mapping</li>
+          <li><strong>Hybrid Event</strong> Broadcasting & <strong>Video Conference</strong> Integration (<strong>Polycom Group 500</strong>, <strong>Poly X70</strong>, Zoom & Teams)</li>
+          <li>Esports Tournament Arena Infrastructure & High-Refresh Broadcast Switching</li>
+          <li>Professional AV Equipment Rental (Fine-Pitch SMD LED Walls, Line Array Sound, Intelligent Lighting)</li>
         </ul>
+
+        <div className="border-t border-gray-100 pt-8 space-y-6">
+          <h3 className="text-2xl font-black text-[#1A2B4C]">Frequently Asked Questions (Event Management & Video Conference)</h3>
+          <div className="bg-[#F8F9FA] p-6 rounded-2xl border border-gray-100">
+            <h4 className="font-bold text-[#1A2B4C] mb-2">What is included in AV Live's Corporate event management and hybrid event packages?</h4>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Our turnkey <strong>Corporate event management</strong> and <strong>hybrid event</strong> packages include stage trussing, fine-pitch SMD LED walls, <strong>Hologram Display</strong> units, line-array PA sound systems, multi-camera SDI broadcast production, and two-way <strong>Video conference</strong> integration via <strong>Poly X70</strong> and <strong>Polycom Group 500</strong> codecs.
+            </p>
+          </div>
+          <div className="bg-[#F8F9FA] p-6 rounded-2xl border border-gray-100">
+            <h4 className="font-bold text-[#1A2B4C] mb-2">Can AV Live deploy a 3D Hologram Display for corporate events in Lahore, Karachi, and Islamabad?</h4>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Yes. We engineer and deploy custom 3D <strong>Hologram Display</strong> stages, holographic LED fan matrices, and Pepper's Ghost optical projection stages for executive keynotes, product launches, and flagship <strong>events</strong> across Lahore, Karachi, and Islamabad.
+            </p>
+          </div>
+        </div>
       </section>
 
       <DeepQueryModal 

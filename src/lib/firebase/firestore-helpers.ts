@@ -87,6 +87,8 @@ export interface Product {
   slug?: string;
   productName: string;
   sku: string;
+  gtin?: string;
+  mpn?: string;
   shortDescription: string;
   description: string;
   regularPrice: number;
@@ -94,6 +96,7 @@ export interface Product {
   stockQuantity: number;
   lowStockThreshold: number;
   images: string[];
+  image?: string;
   categoryIds: string[];
   categorySlugs: string[];
   brand: string;
@@ -112,19 +115,37 @@ export function subscribeToProducts(
   callback: (products: Product[]) => void,
   filter?: { isActive?: boolean; categoryId?: string }
 ): Unsubscribe {
-  let q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+  const q = query(collection(db, 'products'));
 
-  if (filter?.isActive !== undefined) {
-    q = query(q, where('isActive', '==', filter.isActive));
-  }
-
-  return onSnapshot(q, (snapshot) => {
-    const products: Product[] = [];
-    snapshot.forEach((doc) => {
-      products.push({ id: doc.id, ...doc.data() } as Product);
-    });
-    callback(products);
-  });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      let products: Product[] = [];
+      snapshot.forEach((docSnap) => {
+        products.push({ id: docSnap.id, ...docSnap.data() } as Product);
+      });
+      if (filter?.isActive !== undefined) {
+        products = products.filter((p) => Boolean(p.isActive) === filter.isActive);
+      }
+      if (filter?.categoryId) {
+        products = products.filter(
+          (p) =>
+            p.categoryIds?.includes(filter.categoryId!) ||
+            p.categorySlugs?.includes(filter.categoryId!)
+        );
+      }
+      products.sort((a, b) => {
+        const timeA = typeof a.createdAt?.toMillis === 'function' ? a.createdAt.toMillis() : 0;
+        const timeB = typeof b.createdAt?.toMillis === 'function' ? b.createdAt.toMillis() : 0;
+        return timeB - timeA;
+      });
+      callback(products);
+    },
+    (error) => {
+      console.error('Error subscribing to products:', error);
+      callback([]);
+    }
+  );
 }
 
 async function uploadBase64ImagesInHtml(html: string, productId: string): Promise<string> {

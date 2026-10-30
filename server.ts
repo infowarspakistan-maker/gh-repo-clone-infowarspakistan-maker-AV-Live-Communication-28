@@ -7,6 +7,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import fs from 'fs';
 import { updateSheetData } from './server-utils/sheets';
+import { generateGmcTsv, generateGmcSheetMatrix } from './src/lib/gmc-feed';
 
 // Initialize Firebase Admin
 // We try to load from a local file if it exists, otherwise we rely on environment/defaults
@@ -237,7 +238,7 @@ async function startServer() {
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-      // Optimized Static routes (only core indexable pages)
+      // Optimized Static & Focus Keyword routes
       const staticRoutes = [
         '',
         '/shop',
@@ -245,7 +246,16 @@ async function startServer() {
         '/services',
         '/contact',
         '/about',
-        '/blog'
+        '/blog',
+        '/3d-hologram',
+        '/projection-mapping',
+        '/video-conferencing',
+        '/conference-room-solutions',
+        '/zoom-rooms',
+        '/microsoft-teams-rooms',
+        '/lahore',
+        '/karachi',
+        '/islamabad'
       ];
 
       for (const route of staticRoutes) {
@@ -292,6 +302,40 @@ async function startServer() {
     } catch (error) {
       console.error('Sitemap generation error:', error);
       res.status(500).send('Error generating sitemap');
+    }
+  });
+
+  // Live Google Merchant Center 40-Column TSV Feed Endpoint
+  app.get(['/feed/google-merchant.tsv', '/api/gmc-feed.tsv'], async (req, res) => {
+    try {
+      let productList: Record<string, any>[] = [];
+      try {
+        const productsSnap = await db.collection('products').get();
+        productList = productsSnap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter((p: any) => p.isActive !== false);
+      } catch (dbErr) {
+        console.warn('Firestore Admin read fallback for GMC feed:', dbErr);
+      }
+
+      if (productList.length > 0) {
+        const tsv = generateGmcTsv(productList);
+        res.setHeader('Content-Type', 'text/tab-separated-values; charset=utf-8');
+        res.setHeader('Content-Disposition', 'inline; filename="google_merchant_feed.tsv"');
+        return res.send(tsv);
+      }
+
+      const staticFeedPath = path.join(process.cwd(), 'public', 'google_merchant_feed.tsv');
+      if (fs.existsSync(staticFeedPath)) {
+        res.setHeader('Content-Type', 'text/tab-separated-values; charset=utf-8');
+        res.setHeader('Content-Disposition', 'inline; filename="google_merchant_feed.tsv"');
+        return res.send(fs.readFileSync(staticFeedPath, 'utf8'));
+      }
+
+      res.status(404).send('Feed not found');
+    } catch (error) {
+      console.error('Error generating GMC TSV feed:', error);
+      res.status(500).send('Error generating GMC TSV feed');
     }
   });
   // --- n8n Workflow Automation Helper ---
@@ -609,8 +653,13 @@ async function startServer() {
   // Sheet Syncing Endpoint
   app.post('/api/sync-sheets', verifyAdmin, async (req, res) => {
     try {
-      const { spreadsheetId, range, values, accessToken } = req.body;
-      await updateSheetData(spreadsheetId, range, values, accessToken);
+      let { spreadsheetId, range, values, accessToken } = req.body;
+      if (!values || !Array.isArray(values) || values.length === 0) {
+        const productsSnap = await db.collection('products').get();
+        const productList = productsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        values = generateGmcSheetMatrix(productList);
+      }
+      await updateSheetData(spreadsheetId, range || 'Sheet1!A1', values, accessToken);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

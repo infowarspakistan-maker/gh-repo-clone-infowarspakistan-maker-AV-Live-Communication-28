@@ -145,12 +145,12 @@ export function Home() {
   return (
     <div className="flex-1 w-full bg-[#f8f9fa]">
       <SEO 
-        title="Event Management Company Pakistan | Video Conferencing in Pakistan | 3D Hologram & Projection Mapping | AV Live"
-        description="Pakistan's premier event management company & video conferencing provider. 3D hologram, projection mapping, conference room AV for Zoom & MS Teams. Lahore, Karachi, Islamabad."
-        keywords="Event management company Pakistan, Video conferencing in Pakistan, 3D hologram events Pakistan, Projection mapping Pakistan, Conference room AV setup, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, Event production company Lahore, Corporate event management Karachi, Event equipment rental Islamabad, AV Live"
+        title="Video Conference in Pakistan | Polycom Group 500 & Poly X70 | Corporate Event Management & Hologram Display | AV Live"
+        description="Pakistan's #1 authority for Video Conference in Pakistan, Polycom Group 500, Poly X70, Corporate event management, hybrid events, and 3D Hologram Display solutions in Lahore, Karachi, and Islamabad."
+        keywords="Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, Event management company Pakistan, 3D hologram events Pakistan, Projection mapping Pakistan, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, AV Live"
         url="https://avlive.com.pk"
         image={settings?.ogImage || "https://avlive.com.pk/og-image.jpg"}
-        imageAlt="AV Live - Event Management Company & Video Conferencing Pakistan"
+        imageAlt="AV Live - Video Conference in Pakistan, Polycom Group 500, Poly X70 & Corporate Event Management"
         schema={{
           "@context": "https://schema.org",
           "@graph": [
@@ -161,7 +161,7 @@ export function Home() {
               "legalName": "AV Live Communications (Pvt) Ltd",
               "url": "https://avlive.com.pk",
               "logo": "https://avlive.com.pk/logo.png",
-              "description": settings?.tagline || "Pakistan's premier enterprise audio-visual solutions, corporate boardroom integration, and IP telephony hardware supplier.",
+              "description": settings?.tagline || "Pakistan's premier enterprise Video Conference in Pakistan, Polycom Group 500, Poly X70, Corporate event management, hybrid event, and 3D Hologram Display provider.",
               "areaServed": [
                 { "@type": "Country", "name": "Pakistan" },
                 { "@type": "City", "name": "Lahore" },
@@ -169,10 +169,16 @@ export function Home() {
                 { "@type": "City", "name": "Islamabad" }
               ],
               "knowsAbout": [
-                "Audio Visual Integration",
-                "Video Conferencing Equipment",
+                "Video Conference in Pakistan",
+                "Video conference",
+                "Polycom Group 500",
+                "Poly X70",
+                "Event management",
+                "Corporate event management",
+                "hybrid event",
+                "Hologram Display",
+                "events",
                 "Cisco TelePresence",
-                "Polycom RealPresence",
                 "Yealink MeetingBar",
                 "Logitech Room Solutions",
                 "IP PBX & VoIP Telephony"
@@ -278,10 +284,26 @@ export function Home() {
               "mainEntity": [
                 {
                   "@type": "Question",
-                  "name": "How much does a corporate video conferencing setup cost in Pakistan?",
+                  "name": "What is the best Video Conference in Pakistan solution for large boardrooms?",
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "A standard huddle room video conferencing setup in Pakistan starts from PKR 250,000 to PKR 450,000. Enterprise-grade corporate boardrooms with automated PTZ tracking cameras, ceiling microphone arrays, and interactive displays range from PKR 850,000 to PKR 3,500,000."
+                    "text": "For large corporate boardrooms in Pakistan, the Poly Studio X70 (Poly X70) and Polycom RealPresence Group 500 (Polycom Group 500) are the industry standards. The Poly X70 delivers dual 4K 20MP sensors with Poly DirectorAI speaker framing and native Zoom/Microsoft Teams Rooms support, while the Polycom Group 500 provides dual-display 1080p60 H.323/SIP interoperability for enterprise and government networks across Lahore, Karachi, and Islamabad."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What is the difference between Polycom Group 500 and Poly X70 for video conference rooms?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The Polycom Group 500 (SKU 7200-64550-001) is a modular H.323/SIP codec paired with the EagleEye IV 12x optical PTZ camera, ideal for standards-based multipoint telepresence. The Poly Studio X70 (Poly X70) is an all-in-one 4K AI video bar with native cloud app support for Zoom Rooms and Microsoft Teams Rooms, NoiseBlockAI, and Acoustic Fence technology."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How does AV Live handle Corporate event management, hybrid events, and Hologram Display production in Pakistan?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "AV Live provides turnkey Corporate event management and hybrid event production across Lahore, Karachi, and Islamabad. Our engineering teams deploy 3D Hologram Display stages, architectural projection mapping, SMD LED walls, line-array concert sound, and multi-camera broadcast streaming that connects live stage events directly with remote Zoom, Webex, and Microsoft Teams audiences."
                   }
                 },
                 {
@@ -289,15 +311,7 @@ export function Home() {
                   "name": "Does AV Live provide onsite installation and warranty support across Pakistan?",
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. AV Live Communications provides certified engineering teams for onsite structural installation, audio calibration, and AMC nationwide across Lahore, Karachi, Islamabad, Rawalpindi, Faisalabad, and Multan."
-                  }
-                },
-                {
-                  "@type": "Question",
-                  "name": "Which video conferencing brands are officially available through AV Live in Pakistan?",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "AV Live supplies official, PTA-compliant solutions from global tier-1 manufacturers including Poly (Polycom), Cisco Webex, Logitech For Business, Yealink, Neat, Crestron, Shure, and Grandstream."
+                    "text": "Yes. AV Live Communications provides certified engineering teams for onsite structural installation, acoustic calibration, and AMC nationwide across Lahore, Karachi, Islamabad, Rawalpindi, Faisalabad, and Multan."
                   }
                 }
               ]
@@ -860,6 +874,94 @@ export function Home() {
           </div>
         </div>
       </motion.div>
+
+      {/* Answer Engine Optimization (AEO) Knowledge & FAQ Section */}
+      <section className="bg-white py-20 border-t border-gray-100">
+        <div className="max-w-[1400px] mx-auto px-8">
+          <div className="max-w-3xl mb-14">
+            <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.3em] mb-3 block">
+              Enterprise AV & Event Intelligence
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-[#1A2B4C] tracking-tight mb-4">
+              Video Conference in Pakistan, Corporate Event Management & 3D Hologram Solutions
+            </h2>
+            <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+              Direct engineering answers on deploying enterprise <strong>Video conference</strong> systems—including the flagship <strong>Polycom Group 500</strong> and <strong>Poly X70</strong>—alongside turnkey <strong>Corporate event management</strong>, <strong>hybrid event</strong> broadcasting, and <strong>Hologram Display</strong> stages across Pakistan.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <article className="bg-[#F8F9FA] rounded-3xl p-8 border border-gray-100">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full">
+                Video Conference in Pakistan
+              </span>
+              <h3 className="text-xl font-black text-[#1A2B4C] mt-4 mb-3">
+                What is the best Video Conference in Pakistan solution for executive boardrooms?
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                For medium-to-large corporate boardrooms and training halls in Pakistan, AV Live recommends the <strong>Poly Studio X70 (Poly X70)</strong> and the <strong>Polycom RealPresence Group 500 (Polycom Group 500)</strong>. Both systems deliver ultra-low latency 4K/1080p60 video, NoiseBlockAI acoustic filtering, and full compatibility with Zoom Rooms, Microsoft Teams Rooms, and standards-based SIP/H.323 networks.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link to="/category/video-conferencing" className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider flex items-center gap-1">
+                  Explore Video Conference Hardware <ArrowRight size={14} />
+                </Link>
+              </div>
+            </article>
+
+            <article className="bg-[#F8F9FA] rounded-3xl p-8 border border-gray-100">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full">
+                Polycom Group 500 vs. Poly X70
+              </span>
+              <h3 className="text-xl font-black text-[#1A2B4C] mt-4 mb-3">
+                How do Polycom Group 500 and Poly X70 compare for enterprise meetings?
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                The <strong>Polycom Group 500</strong> (MPN 7200-64550-001) features a dedicated rack-mountable codec with an EagleEye IV 12x optical zoom PTZ camera, making it ideal for multi-display rooms and hardware MCU networks. The <strong>Poly X70</strong> is a modern all-in-one AI video bar with dual 4K 20MP sensors, Poly DirectorAI automatic speaker framing, and native cloud apps for Zoom and Microsoft Teams without an external PC.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link to="/video-conferencing" className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider flex items-center gap-1">
+                  Compare Boardroom Systems <ArrowRight size={14} />
+                </Link>
+              </div>
+            </article>
+
+            <article className="bg-[#F8F9FA] rounded-3xl p-8 border border-gray-100">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full">
+                Corporate Event Management & Hybrid Events
+              </span>
+              <h3 className="text-xl font-black text-[#1A2B4C] mt-4 mb-3">
+                How does AV Live execute Corporate event management and hybrid events?
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                AV Live combines full-scale <strong>Event management</strong> and <strong>Corporate event management</strong> with broadcast-grade <strong>hybrid event</strong> engineering. We integrate SMD LED video walls, line-array PA sound, multi-camera SDI switching, and bidirectional <strong>Video conference</strong> bridges so remote executives and international keynote speakers interact live with in-person audiences in Lahore, Karachi, and Islamabad.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link to="/services" className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider flex items-center gap-1">
+                  Book Corporate Event Production <ArrowRight size={14} />
+                </Link>
+              </div>
+            </article>
+
+            <article className="bg-[#F8F9FA] rounded-3xl p-8 border border-gray-100">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full">
+                3D Hologram Display & Events
+              </span>
+              <h3 className="text-xl font-black text-[#1A2B4C] mt-4 mb-3">
+                Where can we rent or install a 3D Hologram Display for events in Pakistan?
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                AV Live engineers custom <strong>Hologram Display</strong> stages, 3D holographic fan arrays, and high-lumen optical Pepper's Ghost mesh projections for product launches, expos, and flagship corporate <strong>events</strong> across Pakistan. Our creative studio builds bespoke 3D holographic animations and handles complete on-site rigging and lighting synchronization.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link to="/3d-hologram" className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider flex items-center gap-1">
+                  View Hologram Display Solutions <ArrowRight size={14} />
+                </Link>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <TopBrands />
     </div>
   );
