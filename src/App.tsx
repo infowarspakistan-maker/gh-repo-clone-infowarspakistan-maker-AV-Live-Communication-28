@@ -5,9 +5,8 @@ import React from 'react';
 import { subscribeToProducts, subscribeToCategories } from './lib/firebase/firestore-helpers';
 import { getCanonicalProductSlug } from './lib/gmc-feed';
 import { getCartCount } from './lib/cart';
-import { Home } from './pages/Home';
-
-// Lazy-loaded subpages and admin panels
+// Lazy-loaded primary, subpages, and admin panels for optimal Core Web Vitals & route code-splitting
+const Home = React.lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const Shop = React.lazy(() => import('./pages/Shop').then(m => ({ default: m.Shop })));
 const Solutions = React.lazy(() => import('./pages/Solutions').then(m => ({ default: m.Solutions })));
 const Services = React.lazy(() => import('./pages/Services').then(m => ({ default: m.Services })));
@@ -568,12 +567,14 @@ function Navbar() {
             {/* SERVICES */}
             <div className="h-14 flex items-center group relative">
               <Link to="/services" className="h-14 flex items-center border-b-[3px] border-transparent group-hover:border-[#00B4D8] group-hover:text-[#00B4D8] transition-colors">SERVICES</Link>
-              <div className="absolute top-14 left-0 w-[300px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6">
-                <ul className="space-y-4 text-[14px] text-gray-600 font-medium capitalize tracking-normal">
-                  <li><Link to="/services/corporate-events" className="hover:text-[#00B4D8] transition-colors block">Corporate Events</Link></li>
-                  <li><Link to="/services/hybrid-events" className="hover:text-[#00B4D8] transition-colors block">Hybrid Events</Link></li>
-                  <li><Link to="/services/expo-organizing" className="hover:text-[#00B4D8] transition-colors block">Expo Organizing</Link></li>
-                  <li><Link to="/esports" className="hover:text-[#00B4D8] transition-colors block">Esports Events</Link></li>
+              <div className="absolute top-14 left-0 w-[320px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6">
+                <ul className="space-y-3.5 text-[13px] text-gray-700 font-bold capitalize tracking-normal">
+                  <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors block">Corporate Event Management</Link></li>
+                  <li><Link to="/live-streaming-services" className="hover:text-[#00B4D8] transition-colors block">Live Streaming Services</Link></li>
+                  <li><Link to="/av-equipment-rental" className="hover:text-[#00B4D8] transition-colors block">AV Equipment Rental</Link></li>
+                  <li><Link to="/services/hybrid-events" className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Hybrid Event Production</Link></li>
+                  <li><Link to="/services/expo-organizing" className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Expo Organizing</Link></li>
+                  <li><Link to="/esports" className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Esports Events</Link></li>
                 </ul>
               </div>
             </div>
@@ -581,28 +582,37 @@ function Navbar() {
             {/* VIDEO CONFERENCE - Placed in the Center */}
             <div className="h-14 flex items-center group relative">
               <Link to="/category/video-conferencing" className="h-14 flex items-center border-b-[3px] border-transparent group-hover:border-[#00B4D8] group-hover:text-[#00B4D8] transition-colors">VIDEO CONFERENCE</Link>
-              <div className="absolute top-14 left-1/2 -translate-x-1/2 w-[520px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6 grid grid-cols-2 gap-6">
-                <div>
-                  <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">Meeting Room Systems</div>
-                  <ul className="space-y-2.5 text-[13px] text-gray-600 font-semibold capitalize tracking-normal">
-                    <li><Link to="/product/cisco-room-kit-plus-pakistan" className="hover:text-[#00B4D8] transition-colors block">Cisco Room Kit Plus</Link></li>
-                    <li><Link to="/product/cisco-room-bar-pakistan" className="hover:text-[#00B4D8] transition-colors block">Cisco Room Bar</Link></li>
-                    <li><Link to="/product/poly-studio-x52-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio X52</Link></li>
-                    <li><Link to="/product/poly-studio-x50-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio X50</Link></li>
-                  </ul>
+              <div className="absolute top-14 left-1/2 -translate-x-1/2 w-[540px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6">
+                <div className="mb-4 pb-3 border-b border-gray-100 bg-blue-50/50 p-3 rounded-xl">
+                  <Link to="/video-conferencing-solutions" className="font-black text-xs text-[#1A2B4C] hover:text-[#00B4D8] flex items-center justify-between uppercase tracking-wider">
+                    <span>Enterprise Video Conferencing Solutions</span>
+                    <ArrowRight size={14} />
+                  </Link>
+                  <p className="text-[11px] text-gray-500 font-medium mt-1">Authorized Polycom, Cisco &amp; Logitech boardroom integration across Lahore, Karachi &amp; Islamabad.</p>
                 </div>
-                <div>
-                  <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">All-in-One USB Bars</div>
-                  <ul className="space-y-2.5 text-[13px] text-gray-600 font-semibold capitalize tracking-normal">
-                    <li><Link to="/product/logitech-rally-bar-pakistan" className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar</Link></li>
-                    <li><Link to="/product/logitech-rally-bar-mini-pakistan" className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar Mini</Link></li>
-                    <li><Link to="/product/poly-studio-usb-video-bar-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio USB Bar</Link></li>
-                    <li>
-                      <Link to="/category/video-conferencing" className="text-[#00B4D8] hover:text-[#1A2B4C] transition-colors block font-bold text-xs mt-3.5 flex items-center gap-1">
-                        View All Hardware <ArrowRight size={12} />
-                      </Link>
-                    </li>
-                  </ul>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">Meeting Room Systems</div>
+                    <ul className="space-y-2.5 text-[13px] text-gray-600 font-semibold capitalize tracking-normal">
+                      <li><Link to="/product/cisco-room-kit-plus-pakistan" className="hover:text-[#00B4D8] transition-colors block">Cisco Room Kit Plus</Link></li>
+                      <li><Link to="/product/cisco-room-bar-pakistan" className="hover:text-[#00B4D8] transition-colors block">Cisco Room Bar</Link></li>
+                      <li><Link to="/product/poly-studio-x52-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio X52</Link></li>
+                      <li><Link to="/product/poly-studio-x50-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio X50</Link></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">All-in-One USB Bars</div>
+                    <ul className="space-y-2.5 text-[13px] text-gray-600 font-semibold capitalize tracking-normal">
+                      <li><Link to="/product/logitech-rally-bar-pakistan" className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar</Link></li>
+                      <li><Link to="/product/logitech-rally-bar-mini-pakistan" className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar Mini</Link></li>
+                      <li><Link to="/product/poly-studio-usb-video-bar-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio USB Bar</Link></li>
+                      <li>
+                        <Link to="/category/video-conferencing" className="text-[#00B4D8] hover:text-[#1A2B4C] transition-colors block font-bold text-xs mt-3.5 flex items-center gap-1">
+                          View All Hardware <ArrowRight size={12} />
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -697,8 +707,11 @@ function Navbar() {
               );
             })}
 
-            <div className="px-2 font-black text-gray-400 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1 mt-6">Services</div>
-            <Link to="/services/corporate-events" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Corporate Events</Link>
+            <div className="px-2 font-black text-gray-400 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1 mt-6">Services &amp; Solutions</div>
+            <Link to="/corporate-event-management" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Corporate Event Management</Link>
+            <Link to="/live-streaming-services" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Live Streaming Services</Link>
+            <Link to="/av-equipment-rental" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>AV Equipment Rental</Link>
+            <Link to="/video-conferencing-solutions" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Video Conferencing Solutions</Link>
             <Link to="/services/hybrid-events" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Hybrid Events</Link>
             <Link to="/services/expo-organizing" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Expo Organizing</Link>
             <Link to="/esports" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Esports Events</Link>
@@ -866,6 +879,10 @@ export default function App() {
             <Route path="/karachi" element={<KeywordLandingPage />} />
             <Route path="/islamabad" element={<KeywordLandingPage />} />
             <Route path="/video-conferencing" element={<KeywordLandingPage />} />
+            <Route path="/video-conferencing-solutions" element={<KeywordLandingPage />} />
+            <Route path="/corporate-event-management" element={<KeywordLandingPage />} />
+            <Route path="/live-streaming-services" element={<KeywordLandingPage />} />
+            <Route path="/av-equipment-rental" element={<KeywordLandingPage />} />
             <Route path="/conference-room-solutions" element={<KeywordLandingPage />} />
             <Route path="/zoom-rooms" element={<KeywordLandingPage />} />
             <Route path="/microsoft-teams-rooms" element={<KeywordLandingPage />} />
@@ -947,6 +964,21 @@ export default function App() {
           <Route path="/voip-service" element={<Navigate to="/voip-service-providers" replace />} />
           <Route path="/products/compare" element={<Navigate to="/compare" replace />} />
           <Route path="/tools/room-designer" element={<Navigate to="/room-designer" replace />} />
+          <Route path="/category/about" element={<Navigate to="/about" replace />} />
+          <Route path="/category/compare" element={<Navigate to="/compare" replace />} />
+          <Route path="/category/faqs" element={<Navigate to="/faqs" replace />} />
+          <Route path="/category/guides" element={<Navigate to="/guides" replace />} />
+          <Route path="/category/payment" element={<Navigate to="/payment" replace />} />
+          <Route path="/category/returns" element={<Navigate to="/returns" replace />} />
+          <Route path="/category/reviews" element={<Navigate to="/reviews" replace />} />
+          <Route path="/category/rma" element={<Navigate to="/rma" replace />} />
+          <Route path="/category/shipping" element={<Navigate to="/shipping" replace />} />
+          <Route path="/category/blog" element={<Navigate to="/blog" replace />} />
+          <Route path="/category/contact" element={<Navigate to="/contact" replace />} />
+          <Route path="/category/privacy-policy" element={<Navigate to="/privacy-policy" replace />} />
+          <Route path="/category/terms-of-service" element={<Navigate to="/terms-of-service" replace />} />
+          <Route path="/corporate-event-management-pakistan" element={<Navigate to="/corporate-event-management" replace />} />
+          <Route path="/video-conference-in-pakistan" element={<KeywordLandingPage />} />
 
           {/* Fallback keyword landing page for unhandled top-level dynamic SEO slugs & 404 routes */}
           <Route path="/:keywordSlug" element={<KeywordLandingPage />} />

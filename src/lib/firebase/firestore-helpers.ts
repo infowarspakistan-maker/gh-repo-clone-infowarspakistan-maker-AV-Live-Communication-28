@@ -30,6 +30,7 @@ import {
   resolveCanonicalProductSlugByIdentifier,
   buildFallbackProductFromGmcMeta,
   getCanonicalProductSlug,
+  PRODUCT_GMC_METADATA,
 } from '../gmc-feed';
 
 async function getAuthHeader() {
@@ -117,6 +118,17 @@ export interface Product {
   updatedAt?: Timestamp;
 }
 
+export function deduplicateProducts(products: Product[]): Product[] {
+  const map = new Map<string, Product>();
+  for (const p of products) {
+    const key = p.id || p.slug || p.sku || p.productName;
+    if (!map.has(key)) {
+      map.set(key, p);
+    }
+  }
+  return Array.from(map.values());
+}
+
 export function subscribeToProducts(
   callback: (products: Product[]) => void,
   filter?: { isActive?: boolean; categoryId?: string }
@@ -130,6 +142,10 @@ export function subscribeToProducts(
       snapshot.forEach((docSnap) => {
         products.push({ id: docSnap.id, ...docSnap.data() } as Product);
       });
+      if (products.length === 0) {
+        products = Object.keys(PRODUCT_GMC_METADATA).map(slug => buildFallbackProductFromGmcMeta(slug)).filter(Boolean) as Product[];
+      }
+      products = deduplicateProducts(products);
       if (filter?.isActive !== undefined) {
         products = products.filter((p) => Boolean(p.isActive) === filter.isActive);
       }
@@ -148,8 +164,19 @@ export function subscribeToProducts(
       callback(products);
     },
     (error) => {
-      console.error('Error subscribing to products:', error);
-      callback([]);
+      console.warn('Firestore quota exceeded or error in subscribeToProducts, falling back to static GMC products:', error?.message);
+      let products = Object.keys(PRODUCT_GMC_METADATA).map(slug => buildFallbackProductFromGmcMeta(slug)).filter(Boolean) as Product[];
+      if (filter?.isActive !== undefined) {
+        products = products.filter((p) => Boolean(p.isActive) === filter.isActive);
+      }
+      if (filter?.categoryId) {
+        products = products.filter(
+          (p) =>
+            p.categoryIds?.includes(filter.categoryId!) ||
+            p.categorySlugs?.includes(filter.categoryId!)
+        );
+      }
+      callback(products);
     }
   );
 }
@@ -341,6 +368,9 @@ export function subscribeToCategories(
       categories.push({ id: doc.id, ...doc.data() } as Category);
     });
     callback(categories);
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToCategories:', error?.message);
+    callback([]);
   });
 }
 
@@ -531,6 +561,9 @@ export function subscribeToOrders(
       orders.push({ id: doc.id, ...doc.data() } as Order);
     });
     callback(orders);
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToOrders:', error?.message);
+    callback([]);
   });
 }
 
@@ -709,6 +742,9 @@ export function subscribeToRMARequests(
       requests.push({ id: doc.id, ...doc.data() } as RMARequest);
     });
     callback(requests);
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToRMARequests:', error?.message);
+    callback([]);
   });
 }
 
@@ -854,12 +890,19 @@ export async function getProduct(idOrSlug: string): Promise<Product | null> {
 }
 
 export async function getProducts(): Promise<Product[]> {
-  const snapshot = await getDocs(collection(db, 'products'));
-  const products: Product[] = [];
-  snapshot.forEach((doc) => {
-    products.push({ id: doc.id, ...doc.data() } as Product);
-  });
-  return products;
+  let products: Product[] = [];
+  try {
+    const snapshot = await getDocs(collection(db, 'products'));
+    snapshot.forEach((doc) => {
+      products.push({ id: doc.id, ...doc.data() } as Product);
+    });
+  } catch (err) {
+    console.warn('Firestore quota exceeded in getProducts, falling back to GMC catalog:', err);
+  }
+  if (products.length === 0) {
+    products = Object.keys(PRODUCT_GMC_METADATA).map(slug => buildFallbackProductFromGmcMeta(slug)).filter(Boolean) as Product[];
+  }
+  return deduplicateProducts(products);
 }
 
 export async function addStockHistory(
@@ -1049,6 +1092,9 @@ export function subscribeToHomepage(
     } else {
       callback(null);
     }
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToHomepage:', error?.message);
+    callback(null);
   });
 }
 
@@ -1274,6 +1320,9 @@ export function subscribeToUsers(
       users.push({ ...doc.data() } as UserProfile);
     });
     callback(users);
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToUsers:', error?.message);
+    callback([]);
   });
 }
 
@@ -1442,6 +1491,9 @@ export function subscribeToGeneralSettings(
     } else {
       callback(null);
     }
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToGeneralSettings:', error?.message);
+    callback(null);
   });
 }
 
@@ -1524,6 +1576,9 @@ export function subscribeToAbout(
     } else {
       callback(null);
     }
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToAbout:', error?.message);
+    callback(null);
   });
 }
 
@@ -1584,6 +1639,9 @@ export function subscribeToContact(
     } else {
       callback(null);
     }
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToContact:', error?.message);
+    callback(null);
   });
 }
 
@@ -1632,6 +1690,9 @@ export function subscribeToServicesPage(
     } else {
       callback(null);
     }
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToServicesPage:', error?.message);
+    callback(null);
   });
 }
 
@@ -1674,6 +1735,9 @@ export function subscribeToServices(
       services.push({ id: doc.id, ...doc.data() } as Service);
     });
     callback(services);
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToServices:', error?.message);
+    callback([]);
   });
 }
 
@@ -1724,6 +1788,9 @@ export function subscribeToPageContent(
     } else {
       callback(null);
     }
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToPageContent:', error?.message);
+    callback(null);
   });
 }
 
@@ -1769,5 +1836,8 @@ export function subscribeToBlogPosts(callback: (posts: BlogPost[]) => void): Uns
       posts.push({ id: doc.id, ...doc.data() } as BlogPost);
     });
     callback(posts);
+  }, (error) => {
+    console.warn('Firestore quota exceeded or error in subscribeToBlogPosts:', error?.message);
+    callback([]);
   });
 }

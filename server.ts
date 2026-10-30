@@ -5,6 +5,8 @@ import { createServer as createViteServer } from 'vite';
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { initializeApp as initializeClientApp, getApps as getClientApps } from 'firebase/app';
+import { getFirestore as getClientFirestore, collection as clientCollection, getDocs as clientGetDocs } from 'firebase/firestore';
 import fs from 'fs';
 import { updateSheetData } from './server-utils/sheets';
 import {
@@ -17,7 +19,12 @@ import {
   resolveProductPricing,
 } from './src/lib/gmc-feed';
 import { FALLBACK_SERVICES_CATALOG } from './src/lib/services-catalog';
-import { buildDynamicSitemapXml, buildLlmsFullTxt, FALLBACK_BLOG_CATALOG } from './src/lib/sitemap-generator';
+import {
+  buildDynamicSitemapXml,
+  buildLlmsFullTxt,
+  FALLBACK_BLOG_CATALOG,
+  resolveCanonicalBlogSlug,
+} from './src/lib/sitemap-generator';
 
 // Initialize Firebase Admin
 // We try to load from a local file if it exists, otherwise we rely on environment/defaults
@@ -58,6 +65,37 @@ if (fs.existsSync(serviceAccountPath)) {
 
 const auth = getAuth();
 const db = databaseId ? getFirestore(getApps()[0], databaseId) : getFirestore();
+
+// Initialize Firebase Web Client SDK as reliable fallback for public collections when Admin IAM lacks datastore.viewer
+let clientDb: ReturnType<typeof getClientFirestore> | null = null;
+try {
+  if (fs.existsSync(configPath)) {
+    const clientConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    const clientApp = getClientApps().length > 0 ? getClientApps()[0] : initializeClientApp(clientConfig, 'server-public-client');
+    clientDb = clientConfig.firestoreDatabaseId
+      ? getClientFirestore(clientApp, clientConfig.firestoreDatabaseId)
+      : getClientFirestore(clientApp);
+  }
+} catch (clientInitErr) {
+  console.warn('Firebase Web Client SDK fallback init warning:', clientInitErr);
+}
+
+async function fetchCollectionWithClientFallback(colName: string): Promise<Array<Record<string, any>>> {
+  if (clientDb) {
+    try {
+      const snap = await clientGetDocs(clientCollection(clientDb, colName));
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (clientErr) {
+      // Fall back to Admin SDK if client fails
+    }
+  }
+  try {
+    const adminSnap = await db.collection(colName).get();
+    return adminSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch {
+    return [];
+  }
+}
 
 async function startServer() {
   const app = express();
@@ -259,54 +297,42 @@ async function startServer() {
     const activeBlogPosts: Array<Record<string, any>> = [];
 
     const [productsRes, categoriesRes, servicesRes, blogsRes] = await Promise.allSettled([
-      db.collection('products').get(),
-      db.collection('categories').get(),
-      db.collection('services').get(),
-      db.collection('blog_posts').get()
+      fetchCollectionWithClientFallback('products'),
+      fetchCollectionWithClientFallback('categories'),
+      fetchCollectionWithClientFallback('services'),
+      fetchCollectionWithClientFallback('blog_posts')
     ]);
 
     if (productsRes.status === 'fulfilled') {
-      productsRes.value.forEach(doc => {
-        const data = doc.data();
+      productsRes.value.forEach(data => {
         if (data.isActive !== false) {
-          activeProducts.push({ id: doc.id, ...data });
+          activeProducts.push(data);
         }
       });
-    } else {
-      console.warn('Firestore Admin products read fallback for sitemap:', productsRes.reason);
     }
 
     if (categoriesRes.status === 'fulfilled') {
-      categoriesRes.value.forEach(doc => {
-        const data = doc.data();
+      categoriesRes.value.forEach(data => {
         if (data.isActive !== false) {
-          activeCategories.push({ id: doc.id, ...data });
+          activeCategories.push(data);
         }
       });
-    } else {
-      console.warn('Firestore Admin categories read fallback for sitemap:', categoriesRes.reason);
     }
 
     if (servicesRes.status === 'fulfilled') {
-      servicesRes.value.forEach(doc => {
-        const data = doc.data();
+      servicesRes.value.forEach(data => {
         if (data.isActive !== false) {
-          activeServices.push({ id: doc.id, ...data });
+          activeServices.push(data);
         }
       });
-    } else {
-      console.warn('Firestore Admin services read fallback for sitemap:', servicesRes.reason);
     }
 
     if (blogsRes.status === 'fulfilled') {
-      blogsRes.value.forEach(doc => {
-        const data = doc.data();
+      blogsRes.value.forEach(data => {
         if (data.isPublished !== false && data.isActive !== false) {
-          activeBlogPosts.push({ id: doc.id, ...data });
+          activeBlogPosts.push(data);
         }
       });
-    } else {
-      console.warn('Firestore Admin blog_posts read fallback for sitemap:', blogsRes.reason);
     }
 
     const { xml } = buildDynamicSitemapXml({
@@ -384,12 +410,10 @@ async function startServer() {
     try {
       let productList: Record<string, any>[] = [];
       try {
-        const productsSnap = await db.collection('products').get();
-        productList = productsSnap.docs
-          .map(d => ({ id: d.id, ...d.data() }))
-          .filter((p: any) => p.isActive !== false);
+        const docs = await fetchCollectionWithClientFallback('products');
+        productList = docs.filter((p: any) => p.isActive !== false);
       } catch (dbErr) {
-        console.warn('Firestore Admin read fallback for GMC feed:', dbErr);
+        console.warn('Firestore read fallback for GMC feed:', dbErr);
       }
 
       if (productList.length > 0) {
@@ -891,6 +915,134 @@ async function startServer() {
         title: 'Video Conferencing in Pakistan | Polycom Group 500, Poly X70, Zoom & Teams | AV Live',
         description: 'Enterprise video conferencing in Pakistan. Official integration of Polycom Group 500, Poly X70, Logitech Rally, Zoom Rooms & Microsoft Teams Rooms across Lahore, Karachi & Islamabad.'
       },
+      '/video-conferencing-solutions': {
+        title: 'Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad | Poly, Cisco & Logitech | AV Live',
+        description: 'Authorized Polycom video conferencing distributors in Lahore, Cisco Room Kit installation in Karachi, Boardroom AV integration in Islamabad & Interactive Flat Panels. 15-Min SLA: 0321 425 6263 / 0339 0000 921.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/video-conferencing-solutions#service',
+              name: 'Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad',
+              serviceType: 'Boardroom AV Integration, Huddle Room Kits & Interactive Flat Panels',
+              description: 'Turnkey enterprise video conferencing solutions deploying Cisco, HP Poly (Polycom), Yealink, Logitech, Horion, and Grandstream across Lahore, Karachi, and Islamabad with a 15-minute technical SLA.',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
+            },
+            {
+              '@type': 'FAQPage',
+              '@id': 'https://avlive.com.pk/video-conferencing-solutions#faq',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'What is the cost of a 30-person executive boardroom AV setup in Pakistan?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'In Pakistan, a turnkey 16-to-30 person executive boardroom AV setup costs between Rs. 1,450,000 and Rs. 3,200,000+ depending on whether you select Polycom RealPresence Group 500, HP Poly Studio X72, or Cisco Room Kit Plus, paired with dual 75"-85" 4K displays or a Horion Interactive Flat Panel, expansion or ceiling microphone arrays, and concealed table connectivity.'
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      '/corporate-event-management': {
+        title: 'Corporate Event Management & Hybrid Live Streaming in Lahore, Karachi & Islamabad | AV Live',
+        description: 'Corporate hybrid event live streaming in Lahore, SMD LED screen rental for corporate events, 3D hologram display stages in Pakistan & multi-camera event broadcasting in Karachi. Call 0321 425 6263 or 0339 0000 921.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/corporate-event-management#service',
+              name: 'Corporate Event Management, Hybrid Broadcasting & 3D Hologram Stages in Pakistan',
+              serviceType: 'Corporate Event Production, SMD LED Screen Rental & Multi-Camera Broadcasting',
+              description: 'Turnkey corporate hybrid event live streaming in Lahore, SMD LED screen rental, 3D hologram display stages in Pakistan, and multi-camera event broadcasting in Karachi and Islamabad with on-site standby engineers.',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
+            },
+            {
+              '@type': 'FAQPage',
+              '@id': 'https://avlive.com.pk/corporate-event-management#faq',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'What does corporate hybrid event live streaming and SMD LED screen rental cost in Lahore and Karachi?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Corporate hybrid event live streaming with multi-camera HD/4K SDI switching in Lahore or Karachi starts from Rs. 150,000–Rs. 350,000, while full-stage P2.5/P2.9 SMD LED screen rental, concert line-array sound, and 3D hologram stage production scales from Rs. 450,000 to Rs. 2,500,000+ based on screen square footage and venue duration.'
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      '/live-streaming-services': {
+        title: 'Live Streaming Services for Events in Lahore | AV Live',
+        description: 'Secure professional live stream setups and corporate webcast services in Pakistan. AV Live offers multi-camera event broadcasting with zero-downtime guarantees.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/live-streaming-services#service',
+              name: 'Professional Live Streaming Services for Events in Lahore',
+              serviceType: 'Multi-Camera Event Broadcasting & Corporate Webcast Services',
+              description: 'Secure professional live stream setups and corporate webcast services in Pakistan with multi-camera event broadcasting and zero-downtime guarantees.',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
+            },
+            {
+              '@type': 'FAQPage',
+              '@id': 'https://avlive.com.pk/live-streaming-services#faq',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'What platforms do you stream to?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'We can push your live feed to any destination you require, including custom secure corporate portals, YouTube, Facebook Live, LinkedIn Live, Zoom, Microsoft Teams, or custom virtual event platforms.'
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      '/av-equipment-rental': {
+        title: 'Enterprise AV Equipment & SMD LED Screen Rental in Lahore | AV Live',
+        description: 'Rent premium AV equipment for corporate events in Pakistan. AV Live provides cutting-edge SMD LED screen rentals, 3D hologram stage setups, and PA systems with on-site engineering support.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/av-equipment-rental#service',
+              name: 'Enterprise AV Equipment & SMD LED Screen Rental in Lahore',
+              serviceType: 'AV Equipment Rental, SMD LED Screens & 3D Hologram Stages',
+              description: 'Rent premium AV equipment for corporate events in Pakistan. AV Live provides cutting-edge SMD LED screen rentals, 3D hologram stage setups, and PA systems with on-site engineering support.',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
+            },
+            {
+              '@type': 'FAQPage',
+              '@id': 'https://avlive.com.pk/av-equipment-rental#faq',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'Do you provide AV equipment rentals outside of Lahore?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Yes. While our technical headquarters are based in Lahore, we actively deploy LED screens, holograms, and AV teams for major corporate events in Karachi, Islamabad, and across Pakistan.'
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
       '/conference-room-solutions': {
         title: 'Conference Room Solutions in Pakistan | Boardroom AV, Poly X70 & Cisco Room Kit | AV Live',
         description: 'Turnkey conference room solutions in Pakistan. Acoustic treatment, 4K PTZ cameras, beamforming ceiling microphones, and touch control panels for modern boardrooms.'
@@ -978,6 +1130,20 @@ async function startServer() {
       '/solutions': {
         title: 'Video Conference in Pakistan, Hybrid Event & 3D Hologram Solutions | Polycom Group 500 & Poly X70 | AV Live',
         description: 'Explore turnkey solutions for Video Conference in Pakistan (Polycom Group 500, Poly X70), smart boardrooms, Corporate event management, hybrid event broadcasting, and 3D Hologram Displays.'
+      },
+      '/video-conference-in-pakistan': {
+        title: 'Video Conference in Pakistan | Polycom Group 500 & Poly X70 | Boardroom AV | AV Live',
+        description: 'Complete B2B Video Conference in Pakistan solutions. Official Polycom Group 500, Poly X70, Zoom Rooms, Microsoft Teams Rooms, and hybrid event integration.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': 'https://avlive.com.pk/video-conference-in-pakistan#service',
+          name: 'Enterprise Video Conference in Pakistan: Polycom Group 500 & Poly X70 Solutions',
+          serviceType: 'Enterprise Video Conferencing & Boardroom Integration',
+          provider: { '@id': 'https://avlive.com.pk/#organization' },
+          areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
+          url: 'https://avlive.com.pk/video-conference-in-pakistan'
+        }
       },
       '/about': {
         title: 'About AV Live Communications | Enterprise Pro-AV & Event Engineering in Pakistan',
@@ -1478,28 +1644,57 @@ async function startServer() {
 
     // Dynamic Service Detail Route SSR Metadata & Schema Injection (/services/:serviceSlug)
     if (!matched && cleanPath.startsWith('/services/')) {
-      const serviceSlug = cleanPath.replace('/services/', '');
-      const svc = FALLBACK_SERVICES_CATALOG.find(s => s.slug === serviceSlug);
+      const rawServiceSlug = cleanPath.replace('/services/', '');
+      const serviceSlugAliases: Record<string, string> = {
+        'video-conferencing-solutions': 'boardroom-integration',
+        'corporate-event-management': 'corporate-events'
+      };
+      const resolvedServiceSlug = serviceSlugAliases[rawServiceSlug] || rawServiceSlug;
+      const svc = FALLBACK_SERVICES_CATALOG.find(s => s.slug === resolvedServiceSlug);
       if (svc) {
+        const faqEntities = (svc.faqs || []).map(f => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: f.a
+          }
+        }));
         matched = {
-          title: `${svc.title} | AV Live Communications Pakistan`,
+          title: `${svc.localizedH1 || svc.title} | AV Live Communications Pakistan`,
           description: svc.description,
           schema: {
             '@context': 'https://schema.org',
-            '@type': 'Service',
-            '@id': `${canonicalUrl}#service`,
-            name: svc.title,
-            description: svc.description,
-            url: canonicalUrl,
-            provider: { '@id': 'https://avlive.com.pk/#organization' },
-            areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
+            '@graph': [
+              {
+                '@type': 'Service',
+                '@id': `${canonicalUrl}#service`,
+                name: svc.localizedH1 || svc.title,
+                serviceType: svc.serviceType || svc.category || 'Enterprise AV & Event Engineering',
+                description: svc.description,
+                url: canonicalUrl,
+                provider: { '@id': 'https://avlive.com.pk/#organization' },
+                areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
+              },
+              ...(faqEntities.length > 0
+                ? [
+                    {
+                      '@type': 'FAQPage',
+                      '@id': `${canonicalUrl}#faq`,
+                      mainEntity: faqEntities
+                    }
+                  ]
+                : [])
+            ]
           }
         };
         ssrCustomBodyHtml = `
           <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
             <article>
-              <h1>${svc.title} — Turnkey Enterprise Service in Pakistan</h1>
+              <h1>${svc.localizedH1 || `${svc.title} — Turnkey Enterprise Service in Pakistan`}</h1>
               <p><strong>Direct Answer Summary:</strong> ${svc.description}</p>
+              <p><strong>Authorized Hardware Ecosystem:</strong> Cisco, HP Poly (Polycom), Yealink, Logitech, Horion, and Grandstream — Engineered by AV Live Certified Pro-AV &amp; Broadcast Specialists.</p>
+              <p><strong>The AV Live Advantage:</strong> Guaranteed 15-Minute Technical SLA Response • Zero-Downtime Redundant Architecture • On-Site Standby Engineers in Johar Town &amp; DHA (Lahore), Clifton (Karachi), and Blue Area (Islamabad). Direct Hotlines: <a href="tel:+923214256263">0321 425 6263</a> | <a href="tel:+923390000921">0339 0000 921</a>.</p>
               <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
                 <caption>${svc.title} Deployment &amp; SLA Matrix</caption>
                 <thead>
@@ -1507,8 +1702,9 @@ async function startServer() {
                 </thead>
                 <tbody>
                   <tr><td>Service Classification</td><td>${svc.serviceType || svc.category || 'Enterprise AV & Event Engineering'}</td></tr>
-                  <tr><td>Primary Coverage Cities</td><td>Lahore, Karachi, Islamabad, Rawalpindi &amp; Nationwide Pakistan</td></tr>
-                  <tr><td>Proposal &amp; Site Survey SLA</td><td>15-Minute Phone/WhatsApp Response • 24-Hour Custom BoM Proposal</td></tr>
+                  <tr><td>Primary Coverage Cities</td><td>Lahore (Johar Town, DHA, Gulberg), Karachi (Clifton, I.I. Chundrigar), Islamabad (Blue Area, Red Zone)</td></tr>
+                  <tr><td>Proposal &amp; Technical SLA</td><td>Guaranteed 15-Minute Response • Zero-Downtime Redundancy • On-Site Standby Engineers</td></tr>
+                  <tr><td>24/7 Enterprise Hotlines</td><td>0321 425 6263 / 0339 0000 921 (Request a 15-Minute Quote)</td></tr>
                 </tbody>
               </table>
             </article>
@@ -1617,8 +1813,9 @@ async function startServer() {
     // Dynamic Blog Post Route SSR Metadata & Schema Injection (/blog/:postSlug)
     if (!matched && cleanPath.startsWith('/blog/')) {
       const postSlug = cleanPath.replace('/blog/', '');
+      const canonicalBlogSlug = resolveCanonicalBlogSlug(postSlug) || postSlug;
       const blogPost = FALLBACK_BLOG_CATALOG.find(
-        p => p.slug === postSlug || String(p.id) === postSlug
+        p => p.slug === canonicalBlogSlug || p.slug === postSlug || String(p.id) === postSlug
       );
       if (blogPost) {
         const graphItems: any[] = [
@@ -1693,13 +1890,35 @@ async function startServer() {
           <article>
             <h1>${matched.title}</h1>
             <p><strong>Direct Answer Summary:</strong> ${matched.description}</p>
-            <nav aria-label="Canonical Enterprise Links">
+            <nav aria-label="Primary Product Categories">
+              <h2>Primary Product Categories</h2>
               <ul>
-                <li><a href="https://avlive.com.pk/shop">Enterprise AV Hardware Shop</a></li>
-                <li><a href="https://avlive.com.pk/category/video-conferencing">Video Conferencing Systems Pakistan</a></li>
-                <li><a href="https://avlive.com.pk/product/polycom-realpresence-group-500-pakistan">Polycom RealPresence Group 500</a></li>
-                <li><a href="https://avlive.com.pk/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan">Logitech Rally Bar vs Poly Studio X50</a></li>
-                <li><a href="https://avlive.com.pk/blog/boardroom-av-system-price-guide-pakistan">Boardroom AV BoM Price Guide Pakistan</a></li>
+                <li><a href="https://avlive.com.pk/category/video-conferencing">Video Conferencing Systems</a></li>
+                <li><a href="https://avlive.com.pk/category/touch-panels">Boardroom Touch Panels &amp; Room Controllers</a></li>
+                <li><a href="https://avlive.com.pk/category/large-room">Large Boardroom Video Conferencing Systems</a></li>
+                <li><a href="https://avlive.com.pk/category/speakerphones">Conference Room Speakerphones &amp; Mic Arrays</a></li>
+                <li><a href="https://avlive.com.pk/category/boardroom-codecs">Enterprise H.323 / SIP Boardroom Codecs</a></li>
+                <li><a href="https://avlive.com.pk/category/ptz-cameras">4K Optical PTZ Conferencing Cameras</a></li>
+                <li><a href="https://avlive.com.pk/category/ip-phones">Enterprise IP Phones</a></li>
+                <li><a href="https://avlive.com.pk/category/voip-phone-systems">VoIP Phone Systems &amp; IP PBX</a></li>
+                <li><a href="https://avlive.com.pk/category/projectors">Commercial Laser &amp; 4K Projectors</a></li>
+                <li><a href="https://avlive.com.pk/category/headsets">Professional UC &amp; Call Center Headsets</a></li>
+                <li><a href="https://avlive.com.pk/category/ip-cameras">IP Security &amp; PTZ Cameras</a></li>
+                <li><a href="https://avlive.com.pk/category/intercom-paging-access">SIP Intercom, Paging &amp; Public Address</a></li>
+              </ul>
+            </nav>
+            <nav aria-label="Primary Enterprise Services">
+              <h2>Primary Enterprise Services</h2>
+              <ul>
+                <li><a href="https://avlive.com.pk/services/corporate-events">Corporate Event Management</a></li>
+                <li><a href="https://avlive.com.pk/services/hybrid-events">Hybrid Event Production</a></li>
+                <li><a href="https://avlive.com.pk/services/boardroom-integration">Boardroom AV &amp; Video Conferencing Integration</a></li>
+                <li><a href="https://avlive.com.pk/services/voip-telephony">Enterprise VoIP Telephony &amp; IP PBX Deployment</a></li>
+                <li><a href="https://avlive.com.pk/services/expo-organizing">Expo Organizing &amp; 3D Hologram Pavilions</a></li>
+                <li><a href="https://avlive.com.pk/services/esports-events">e-Sports Tournament Arena &amp; Broadcast Production</a></li>
+                <li><a href="https://avlive.com.pk/services/ai-development">Enterprise AI Development</a></li>
+                <li><a href="https://avlive.com.pk/services/ai-agents-workers">Autonomous AI Agents &amp; Digital Workers</a></li>
+                <li><a href="https://avlive.com.pk/services/ai-automation">Enterprise Workflow &amp; n8n Automation</a></li>
               </ul>
             </nav>
           </article>
@@ -1805,6 +2024,7 @@ async function startServer() {
     '/category/ai-development': '/services/ai-development',
     '/category/ai-agents-workers': '/services/ai-agents-workers',
     '/category/ai-automation': '/services/ai-automation',
+    '/corporate-event-management-pakistan': '/corporate-event-management',
   };
 
   for (const [fromPath, toPath] of Object.entries(legacyDirectRedirects)) {
@@ -1856,14 +2076,12 @@ async function startServer() {
     next();
   });
 
-  // Redirect numeric blog IDs (/blog/1 .. /blog/6) to their canonical SEO blog slugs
+  // Redirect numeric blog IDs (/blog/1 .. /blog/11) and legacy Firestore blog slugs to their canonical SEO blog slugs
   app.get('/blog/:idOrSlug', (req, res, next) => {
     const requested = req.params.idOrSlug;
-    const matchedPost = FALLBACK_BLOG_CATALOG.find(
-      p => String(p.id) === requested && p.slug !== requested
-    );
-    if (matchedPost) {
-      return res.redirect(301, `/blog/${matchedPost.slug}`);
+    const canonicalBlogSlug = resolveCanonicalBlogSlug(requested);
+    if (canonicalBlogSlug && canonicalBlogSlug !== requested) {
+      return res.redirect(301, `/blog/${canonicalBlogSlug}`);
     }
     next();
   });
@@ -1874,8 +2092,12 @@ async function startServer() {
     next();
   });
 
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== 'production') {
+  // Vite middleware for development; compiled dist/server.cjs or NODE_ENV=production always serves static dist/
+  const isProductionServer =
+    process.env.NODE_ENV === 'production' ||
+    Boolean(process.argv[1] && process.argv[1].endsWith('server.cjs'));
+
+  if (!isProductionServer) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',

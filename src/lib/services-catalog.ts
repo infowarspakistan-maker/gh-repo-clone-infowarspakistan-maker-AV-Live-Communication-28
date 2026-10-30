@@ -3,6 +3,9 @@ import { Service } from './firebase/firestore-helpers';
 export interface EnrichedService extends Service {
   faqs?: { q: string; a: string }[];
   keywords?: string;
+  localizedH1?: string;
+  offeringsBreakdown?: { title: string; detail: string }[];
+  caseStudies?: { hub: string; project: string; outcome: string }[];
 }
 
 export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
@@ -19,27 +22,63 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     category: 'Event Production',
     serviceType: 'Corporate event management',
     priceRange: 'PKR 150,000 - PKR 5,000,000+',
+    localizedH1: 'Corporate Event Management & Stage Production in Lahore, Karachi & Islamabad',
     keywords:
-      'Corporate event management, Event management, events, hybrid event, Hologram Display, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, corporate events Lahore Karachi Islamabad',
+      'Corporate event management, Event management, SMD LED screen rental for corporate events, 3D hologram display stages Pakistan, Corporate hybrid event live streaming Lahore, Multi-camera event broadcasting Karachi, events, hybrid event, Hologram Display, Video Conference in Pakistan',
+    offeringsBreakdown: [
+      {
+        title: 'Hybrid Event Broadcasting',
+        detail: 'Two-way broadcast bridging connecting hotel ballrooms in Lahore, Karachi, and Islamabad with global Zoom Rooms, Microsoft Teams, and Poly Studio X70 endpoints.'
+      },
+      {
+        title: '3D Hologram Display Stages',
+        detail: 'Turnkey 3D hologram display stages Pakistan-wide using HoloGauze optical mesh, Pepper’s Ghost projection, and synchronized 3D LED holographic fan walls.'
+      },
+      {
+        title: 'SMD LED Screen Rental & Multi-Camera Live Streaming',
+        detail: 'Fine-pitch P2.5 SMD LED screen rental for corporate events paired with 4K SDI multi-camera event broadcasting and digital line-array PA sound.'
+      }
+    ],
+    caseStudies: [
+      {
+        hub: 'Johar Town & Gulberg, Lahore',
+        project: '500-Executive Annual Banking Summit & 3D Hologram Keynote',
+        outcome: 'Deployed a 24ft P2.5 curved SMD LED stage, 3D hologram display stage reveal, and zero-downtime hybrid Zoom broadcast with 2 standby engineers.'
+      },
+      {
+        hub: 'Clifton & DHA, Karachi',
+        project: 'Multinational Pharmaceutical Launch & Multi-Camera Broadcast',
+        outcome: 'Executed 4-camera SDI live switching, digital wireless gooseneck arrays, and simultaneous Karachi-to-Dubai executive telepresence.'
+      },
+      {
+        hub: 'Blue Area, Islamabad',
+        project: 'Diplomatic & Policy Forum Turnkey AV Staging',
+        outcome: 'Delivered Bosch digital conference microphone delegation, fine-pitch SMD confidence walls, and encrypted hybrid event streaming.'
+      }
+    ],
     detailedContent: `
       <h2>Turnkey Corporate Event Management in Lahore, Karachi & Islamabad</h2>
-      <p>AV Live Communications is Pakistan's premier engineering-led <strong>Corporate event management</strong> partner. Unlike traditional event planners who outsource technical gear, we own and operate an extensive inventory of fine-pitch SMD LED walls, digital line-array audio systems, <strong>3D Hologram Display</strong> stages, and enterprise <strong>Video conference</strong> codecs including the <strong>Polycom Group 500</strong> and <strong>Poly Studio X70 (Poly X70)</strong>.</p>
+      <p>AV Live Communications is Pakistan's premier engineering-led <strong>Corporate event management</strong> partner. Unlike traditional event planners who outsource technical gear, we own and operate an extensive inventory of <strong>SMD LED screen rental for corporate events</strong>, digital line-array audio systems, <strong>3D hologram display stages Pakistan</strong>, and enterprise <strong>Video conference</strong> codecs including the <strong>Polycom Group 500</strong> and <strong>Poly Studio X70 (Poly X70)</strong>.</p>
       <h3>What Our Corporate Event Management Covers:</h3>
       <ul>
         <li><strong>Executive Keynotes & Annual General Meetings (AGMs):</strong> Complete stage design, confidence monitors, motorized podiums, and redundant wireless gooseneck microphones.</li>
-        <li><strong>Product Launches & 3D Hologram Reveals:</strong> High-impact <strong>Hologram Display</strong> stage projection, Pepper's Ghost illusions, and 20,000+ ANSI lumen laser projection mapping.</li>
-        <li><strong>Boardroom-to-Ballroom Video Conference Bridging:</strong> Seamless two-way integration between live hotel ballrooms (PC, Serena, Marriott, Expo Centre) and remote global executives via <strong>Polycom Group 500</strong> and <strong>Poly X70</strong> hardware.</li>
+        <li><strong>Product Launches & 3D Hologram Display Stages Pakistan:</strong> High-impact <strong>Hologram Display</strong> stage projection, Pepper's Ghost illusions, and 20,000+ ANSI lumen laser projection mapping.</li>
+        <li><strong>Corporate Hybrid Event Live Streaming Lahore & Multi-Camera Event Broadcasting Karachi:</strong> Seamless two-way integration between live hotel ballrooms (PC, Serena, Marriott, Expo Centre) and remote global executives via <strong>Polycom Group 500</strong> and <strong>Poly X70</strong> hardware.</li>
         <li><strong>Precision Acoustic & Lighting Engineering:</strong> DMX intelligent moving-head lighting rigs, digital mixing consoles, and acoustic room tuning for zero feedback.</li>
       </ul>
     `,
     faqs: [
       {
-        q: 'Which cities in Pakistan does AV Live cover for Corporate event management?',
-        a: 'We provide full-scale Corporate event management, on-site AV engineering, and stage production in Lahore, Karachi, Islamabad, Rawalpindi, Faisalabad, Multan, and Peshawar.'
+        q: 'What is included in your SMD LED screen rental for corporate events and hybrid staging?',
+        a: 'Our turnkey corporate event packages include fine-pitch P2.5 indoor SMD LED video walls, Novastar 4K processors, stage trussing, line-array PA sound, multi-camera event broadcasting, and on-site standby AV engineers in Lahore, Karachi, and Islamabad.'
       },
       {
-        q: 'Can you integrate a 3D Hologram Display or remote Video conference speaker into our corporate event?',
-        a: 'Yes. We specialize in holographic executive telepresence and 3D Hologram Display product launches, as well as bridging remote speakers via Poly X70 and Polycom Group 500 codecs into the live stage LED wall.'
+        q: 'Can you integrate a 3D hologram display stage or remote Video conference speaker into our corporate event?',
+        a: 'Yes. We specialize in 3D hologram display stages in Pakistan for product reveals and holographic keynotes, as well as bridging remote speakers via Cisco, Poly X70, and Polycom Group 500 codecs into the live stage LED wall.'
+      },
+      {
+        q: 'What is the cost of a 30-person executive boardroom AV setup or corporate townhall stage?',
+        a: 'A turnkey 30-person executive boardroom AV setup ranges from PKR 1,450,000 to PKR 3,200,000 depending on dual-display 4K interactive flat panels, optical PTZ cameras (Poly Studio X72 / Cisco Room Kit Plus), and ceiling microphone arrays. Corporate event staging starts from PKR 150,000 for single-day AV rental.'
       }
     ]
   },
@@ -56,17 +95,44 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     category: 'Hybrid & Broadcast',
     serviceType: 'hybrid event',
     priceRange: 'PKR 120,000 - PKR 3,500,000',
+    localizedH1: 'Corporate Hybrid Event Live Streaming & Multi-Camera Broadcasting in Lahore & Karachi',
     keywords:
-      'hybrid event, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Corporate event management, Event management, Hologram Display, events',
+      'Corporate hybrid event live streaming Lahore, Multi-camera event broadcasting Karachi, SMD LED screen rental for corporate events, 3D hologram display stages Pakistan, hybrid event, Video Conference in Pakistan, Polycom Group 500, Poly X70',
+    offeringsBreakdown: [
+      {
+        title: 'Corporate Hybrid Event Live Streaming Lahore',
+        detail: 'Low-latency 1080p60/4K RTMP simulcasting to Zoom Webinars, Microsoft Teams Town Halls, YouTube, and LinkedIn Live with bonded fiber/cellular failover.'
+      },
+      {
+        title: 'Multi-Camera Event Broadcasting Karachi',
+        detail: '4K optical PTZ & SDI broadcast camera chains with live lower-thirds, picture-in-picture keynote splits, and dedicated broadcast switching engineers.'
+      },
+      {
+        title: 'Two-Way Codec & Hologram Stage Bridging',
+        detail: 'Direct SDI/XLR mix-minus audio integration with Polycom Group 500, Poly Studio X70, Cisco Room Kits, and 3D hologram display stages.'
+      }
+    ],
+    caseStudies: [
+      {
+        hub: 'DHA & Johar Town, Lahore',
+        project: 'Regional FinTech Townhall & Hybrid Investor Broadcast',
+        outcome: 'Connected 350 in-room executives with 1,200 remote Zoom attendees using Poly Studio X70 codecs and zero-echo DSP mix-minus audio.'
+      },
+      {
+        hub: 'Clifton, Karachi',
+        project: 'AGM Multi-Camera Event Broadcasting for Listed Corporation',
+        outcome: 'SECP-compliant multi-camera live broadcast with real-time shareholder Q&A, dual SMD LED walls, and redundant streaming encoders.'
+      }
+    ],
     detailedContent: `
       <h2>Enterprise Hybrid Event Engineering & Multi-Camera Broadcast</h2>
-      <p>Modern corporate summits require flawless synchronization between in-person attendees and remote participants. AV Live engineers broadcast-grade <strong>hybrid event</strong> environments across Pakistan, uniting live venue production with enterprise <strong>Video Conference in Pakistan</strong> infrastructure.</p>
+      <p>Modern corporate summits require flawless synchronization between in-person attendees and remote participants. AV Live engineers broadcast-grade <strong>Corporate hybrid event live streaming Lahore</strong> and <strong>Multi-camera event broadcasting Karachi</strong>, uniting live venue production with enterprise <strong>Video Conference in Pakistan</strong> infrastructure.</p>
       <h3>Key Technical Capabilities:</h3>
       <ul>
-        <li><strong>Hardware Codec Bridging:</strong> Direct SDI/HDMI integration with <strong>Polycom RealPresence Group 500</strong>, <strong>Poly Studio X70 (Poly X70)</strong>, Zoom Rooms, and Microsoft Teams Rooms.</li>
+        <li><strong>Hardware Codec Bridging:</strong> Direct SDI/HDMI integration with <strong>Polycom RealPresence Group 500</strong>, <strong>Poly Studio X70 (Poly X70)</strong>, Cisco Room Kit, Zoom Rooms, and Microsoft Teams Rooms.</li>
         <li><strong>Multi-Camera 4K PTZ & Broadcast Switching:</strong> Optical PTZ cameras, live lower-thirds graphics, picture-in-picture presentation layouts, and multi-CDN simulcasting (YouTube, LinkedIn Live, Zoom, Teams).</li>
         <li><strong>DSP Mix-Minus Audio Routing:</strong> Dedicated digital signal processing so remote <strong>Video conference</strong> callers hear crystal-clear venue audio with zero acoustic echo or latency.</li>
-        <li><strong>Interactive Audience Q&A:</strong> Wireless catch-mics, Delegate conference microphone arrays, and real-time remote participant projection on stage SMD screens.</li>
+        <li><strong>Interactive Audience Q&A:</strong> Wireless catch-mics, Delegate conference microphone arrays, and real-time remote participant projection on <strong>SMD LED screen rental for corporate events</strong>.</li>
       </ul>
     `,
     faqs: [
@@ -246,26 +312,62 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     category: 'Video Conferencing & Pro-AV',
     serviceType: 'Boardroom AV Integration',
     priceRange: 'PKR 350,000 - PKR 12,000,000',
+    localizedH1: 'Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad',
     keywords:
-      'Boardroom integration Pakistan, Video Conference in Pakistan, Polycom Group 500, Poly X70, Zoom Rooms Pakistan, Microsoft Teams Rooms Pakistan, conference room AV setup',
+      'Polycom video conferencing distributors Lahore, Cisco Room Kit installation Karachi, Boardroom AV integration services Islamabad, Interactive flat panel displays for business Lahore, Enterprise VoIP PBX setup Pakistan, Video Conference in Pakistan, Polycom Group 500, Poly X70',
+    offeringsBreakdown: [
+      {
+        title: 'Executive Boardroom Integration (14–30+ Pax)',
+        detail: 'Turnkey Cisco Room Kit installation in Karachi, Polycom Group 500 & Poly Studio X72 deployments in Lahore, and Bosch ceiling/table microphone integration in Islamabad.'
+      },
+      {
+        title: 'Huddle Room & Medium Conference Kits (4–12 Pax)',
+        detail: 'All-in-one 4K AI video bars (Poly Studio X52, Logitech Rally Bar Mini, Yealink MeetingBar A30) with one-touch Zoom Rooms and Microsoft Teams Rooms controllers.'
+      },
+      {
+        title: 'Interactive Flat Panel Displays for Business',
+        detail: '4K commercial interactive flat panel displays (Horion, ViewSonic, BenQ) with wireless BYOD screen sharing, digital whiteboarding, and built-in 48MP conferencing arrays.'
+      }
+    ],
+    caseStudies: [
+      {
+        hub: 'Johar Town & DHA, Lahore',
+        project: '28-Seat Corporate Headquarters Boardroom Fit-Out',
+        outcome: 'Installed Poly Studio X72 dual-4K AI camera bar, 86" Horion interactive flat panel display, and concealed table mic pods with 15-minute SLA cover.'
+      },
+      {
+        hub: 'Clifton & I.I. Chundrigar Road, Karachi',
+        project: 'Commercial Bank Multi-Floor Cisco Room Kit Installation',
+        outcome: 'Commissioned 12 Cisco Room Kit Plus and Room Bar endpoints with Room Navigator touch panels and acoustic glass-wall treatment.'
+      },
+      {
+        hub: 'Blue Area & F-6, Islamabad',
+        project: 'Public Sector Command Center & 30-Person Council Room',
+        outcome: 'Integrated Polycom RealPresence Group 500 (EagleEye IV 12x PTZ) with 18 Bosch PAVIRO/CCS1000D delegate microphones and dual SMD displays.'
+      }
+    ],
     detailedContent: `
       <h2>Turnkey Executive Boardroom & Video Conference Integration in Pakistan</h2>
-      <p>AV Live Communications engineers and installs standards-based corporate boardrooms, training halls, and command centers across Lahore, Karachi, and Islamabad. We integrate flagship <strong>Video Conference in Pakistan</strong> codecs—including the <strong>Polycom RealPresence Group 500 (Polycom Group 500)</strong>, <strong>Poly Studio X70 (Poly X70)</strong>, Logitech Rally Bar, and Cisco Room Kit Plus—with architectural acoustics and one-touch room automation.</p>
+      <p>As leading <strong>Polycom video conferencing distributors Lahore</strong>, <strong>Cisco Room Kit installation Karachi</strong> specialists, and <strong>Boardroom AV integration services Islamabad</strong> engineers, AV Live Communications designs and commissions standards-based corporate boardrooms, huddle spaces, and command centers nationwide. We integrate flagship <strong>Video Conference in Pakistan</strong> codecs—including the <strong>Polycom RealPresence Group 500</strong>, <strong>Poly Studio X70 / X72</strong>, Logitech Rally Bar, Yealink, and <strong>Interactive flat panel displays for business Lahore</strong> (Horion 4K Smart Boards)—with architectural acoustics and one-touch automation.</p>
       <ul>
-        <li><strong>Multi-Camera & Optical PTZ Tracking:</strong> Precision speaker framing using Poly DirectorAI, EagleEye IV 12x optical zoom cameras, and Logitech RightSight 2.</li>
+        <li><strong>Boardroom Integration & Optical PTZ Tracking:</strong> Precision speaker framing using Poly DirectorAI, EagleEye IV 12x optical zoom cameras, Cisco Room Kit Plus, and Logitech RightSight 2.</li>
+        <li><strong>Huddle Room Kits & All-in-One Video Bars:</strong> Rapid plug-and-play deployment of Poly Studio USB, Logitech Rally Bar Mini, and Yealink A20/A30 appliances.</li>
+        <li><strong>Interactive Flat Panel Displays for Business:</strong> 65", 75", 86", and 98" 4K UHD Horion and commercial interactive flat panels with zero-bonding optical touch and wireless screen casting.</li>
         <li><strong>Beamforming Ceiling Audio & DSP Calibration:</strong> Zero-echo room acoustics powered by Poly NoiseBlockAI, Acoustic Fence, and multi-zone ceiling microphone arrays.</li>
-        <li><strong>Native Zoom Rooms & Microsoft Teams Rooms (MTR):</strong> Dedicated touch-panel controllers, wireless 4K content sharing, and H.323/SIP interoperability.</li>
-        <li><strong>4K Commercial Displays & Fine-Pitch SMD Video Walls:</strong> Dual-display boardroom configurations and seamless LED video walls with concealed table connectivity boxes.</li>
       </ul>
     `,
     faqs: [
       {
-        q: 'What hardware is recommended for a 16-to-24 seat executive boardroom in Pakistan?',
-        a: 'For large 16-to-24 seat boardrooms, we recommend either the Poly Studio X70 (Poly X70) dual-4K AI video bar with expansion microphones or the Polycom RealPresence Group 500 paired with an EagleEye IV 12x PTZ camera and ceiling microphone array.'
+        q: 'What is the cost of a 30-person executive boardroom AV setup in Pakistan?',
+        a: 'A turnkey 30-person executive boardroom AV setup in Lahore, Karachi, or Islamabad typically ranges between PKR 1,450,000 and PKR 3,200,000. This includes an enterprise optical PTZ codec or AI bar (Polycom Group 500, Poly Studio X72, or Cisco Room Kit Plus), dual 75"–86" 4K Interactive Flat Panel displays (Horion), daisy-chained expansion or ceiling microphones, concealed floor-box cabling, and professional acoustic calibration.'
       },
       {
-        q: 'Do you provide on-site acoustic surveys and structured cabling in Lahore, Karachi, and Islamabad?',
-        a: 'Yes. Our certified Pro-AV engineering teams conduct on-site room surveys, RT60 acoustic assessments, concealed HDMI/Cat6A floor-box cabling, and complete commissioning nationwide.'
+        q: 'Are you authorized Polycom video conferencing distributors in Lahore with Cisco Room Kit installation in Karachi?',
+        a: 'Yes. AV Live Communications maintains ready stock at our Johar Town Lahore headquarters and deploys certified engineering teams for Poly, Cisco, Logitech, Yealink, Horion, and Grandstream installations across Lahore, Karachi (Clifton/DHA), and Islamabad (Blue Area).'
+      },
+      {
+        q: 'What is your technical support SLA for corporate boardrooms?',
+        a: 'Every AV Live boardroom installation is backed by our guaranteed 15-minute technical SLA response, zero-downtime replacement warranty, and on-site standby engineers for critical board meetings.'
       }
     ]
   },
@@ -274,7 +376,7 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     slug: 'voip-telephony',
     title: 'Enterprise VoIP Telephony & IP PBX Deployment',
     description:
-      'Scalable SIP IP PBX systems, multi-branch VoIP trunking, call center queues, and PoE desk phone provisioning for 3CX, FreePBX, Grandstream UCM, and Cisco CUCM in Pakistan.',
+      'Scalable Enterprise VoIP PBX setup Pakistan, multi-branch SIP trunking, call center queues, and PoE desk phone provisioning for 3CX, FreePBX, Grandstream UCM, and Cisco CUCM.',
     imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&q=80',
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/3059/3059502.png',
     isActive: true,
@@ -282,11 +384,38 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     category: 'Unified Communications',
     serviceType: 'Enterprise VoIP & IP PBX',
     priceRange: 'PKR 150,000 - PKR 8,500,000',
+    localizedH1: 'Enterprise VoIP PBX Setup & SIP Telephony Solutions in Pakistan',
     keywords:
-      'VoIP telephony Pakistan, IP PBX installation Lahore Karachi Islamabad, 3CX Pakistan, FreePBX Enterprise, Grandstream UCM6308, Cisco CUCM, SIP phones Pakistan',
+      'Enterprise VoIP PBX setup Pakistan, VoIP telephony Pakistan, IP PBX installation Lahore Karachi Islamabad, 3CX Pakistan, FreePBX Enterprise, Grandstream UCM6308, Cisco CUCM, SIP phones Pakistan',
+    offeringsBreakdown: [
+      {
+        title: 'Enterprise VoIP PBX Setup Pakistan',
+        detail: 'High-availability on-premise and cloud IP PBX deployments using Grandstream UCM6308, 3CX Enterprise, FreePBX, and Cisco CUCM.'
+      },
+      {
+        title: 'Zero-Touch PoE IP Phone Provisioning',
+        detail: 'Automated mass deployment of Cisco, Poly VVX/Edge, Yealink T4/T5, Grandstream, and Fanvil executive and call-center SIP desk phones.'
+      },
+      {
+        title: 'Multi-Branch SIP Trunking & Intercom Paging',
+        detail: 'Encrypted TLS/SRTP inter-branch voice peering across Lahore, Karachi, and Islamabad integrated with 2N and Bosch SIP PA paging.'
+      }
+    ],
+    caseStudies: [
+      {
+        hub: 'Gulberg & Johar Town, Lahore',
+        project: '450-Extension Multi-Branch Enterprise VoIP PBX Setup',
+        outcome: 'Migrated legacy analog PABX to Grandstream UCM6308 + Yealink PoE IP phones, reducing inter-branch telecom costs by 68%.'
+      },
+      {
+        hub: 'Clifton, Karachi',
+        project: '120-Seat BPO Contact Center 3CX & Headset Deployment',
+        outcome: 'Implemented 3CX PRO with live wallboards, CRM screen-pop, call recording, and Jabra/Poly noise-cancelling headsets.'
+      }
+    ],
     detailedContent: `
-      <h2>Enterprise VoIP Telephony, IP PBX & Multi-Branch Unified Communications</h2>
-      <p>Modernize your corporate voice infrastructure with encrypted SIP telephony, zero-touch IP phone provisioning, and hybrid cloud PBX architecture engineered by AV Live Communications.</p>
+      <h2>Enterprise VoIP PBX Setup Pakistan & Multi-Branch Unified Communications</h2>
+      <p>Modernize your corporate voice infrastructure with encrypted SIP telephony, zero-touch IP phone provisioning, and hybrid cloud PBX architecture engineered by AV Live Communications—Pakistan's trusted specialist for <strong>Enterprise VoIP PBX setup Pakistan</strong>.</p>
       <ul>
         <li><strong>IP PBX Appliances & Cloud Licensing:</strong> Turnkey deployment of <strong>Grandstream UCM6308</strong>, <strong>3CX PRO Enterprise</strong>, <strong>FreePBX Enterprise</strong>, and <strong>Cisco Unified Communications Manager (CUCM)</strong>.</li>
         <li><strong>Executive & Call Center SIP Endpoints:</strong> Mass auto-provisioning of Cisco 8800 series, Poly VVX, Yealink T54W, Grandstream Carrier-Grade, and Fanvil IP phones.</li>
@@ -296,7 +425,7 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     `,
     faqs: [
       {
-        q: 'Can AV Live connect our Lahore, Karachi, and Islamabad offices onto a single unified PBX extension dial-plan?',
+        q: 'Can AV Live connect our Lahore, Karachi, and Islamabad offices onto a single Enterprise VoIP PBX setup in Pakistan?',
         a: 'Yes. We configure encrypted TLS/SRTP SIP trunks between branch offices so employees can dial 3- or 4-digit extensions nationwide with zero inter-branch call charges.'
       },
       {

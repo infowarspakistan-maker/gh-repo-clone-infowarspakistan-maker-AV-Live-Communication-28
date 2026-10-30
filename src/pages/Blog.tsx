@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { SEO } from '../components/SEO';
 import { subscribeToBlogPosts } from '../lib/firebase/firestore-helpers';
-import { FALLBACK_BLOG_CATALOG, BlogCatalogEntry } from '../lib/sitemap-generator';
+import { FALLBACK_BLOG_CATALOG, BlogCatalogEntry, resolveCanonicalBlogSlug } from '../lib/sitemap-generator';
 
 const CATEGORIES = [
   'All',
@@ -29,22 +29,31 @@ export function Blog() {
       if (firebasePosts && firebasePosts.length > 0) {
         const mapped: FallbackBlogPost[] = firebasePosts
           .filter(p => p.isPublished !== false)
-          .map(p => ({
-            id: p.id || p.slug,
-            slug: p.slug || String(p.id),
-            title: p.title,
-            category: p.category || 'Industry Trends',
-            excerpt: p.excerpt || '',
-            content: Array.isArray(p.content)
-              ? p.content
-              : typeof p.content === 'string' && p.content.trim()
-              ? p.content.split('\n\n')
-              : [p.excerpt || ''],
-            image: p.image || p.featuredImage || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&q=80',
-            readTime: '5 min read',
-            publishedIso: p.publishedAt ? new Date(p.publishedAt).toISOString().split('T')[0] : '2026-07-15',
-            date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'July 2026'
-          }));
+          .map(p => {
+            const rawSlug = p.slug || String(p.id);
+            const canonicalSlug = resolveCanonicalBlogSlug(rawSlug) || rawSlug;
+            const fallbackEntry = FALLBACK_BLOG_POSTS.find(fb => fb.slug === canonicalSlug);
+            return {
+              id: fallbackEntry?.id || p.id || canonicalSlug,
+              slug: canonicalSlug,
+              title: p.title || fallbackEntry?.title || 'AV Live Insights',
+              category: p.category || fallbackEntry?.category || 'Industry Trends',
+              excerpt: p.excerpt || fallbackEntry?.excerpt || '',
+              answerFirstSummary: fallbackEntry?.answerFirstSummary,
+              comparisonTable: fallbackEntry?.comparisonTable,
+              faqs: fallbackEntry?.faqs,
+              relatedLinks: fallbackEntry?.relatedLinks,
+              content: Array.isArray(p.content) && p.content.length > 0
+                ? p.content
+                : typeof p.content === 'string' && p.content.trim()
+                ? p.content.split('\n\n')
+                : fallbackEntry?.content || [p.excerpt || ''],
+              image: p.image || p.featuredImage || fallbackEntry?.image || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&q=80',
+              readTime: fallbackEntry?.readTime || '5 min read',
+              publishedIso: p.publishedAt ? new Date(p.publishedAt).toISOString().split('T')[0] : (fallbackEntry?.publishedIso || '2026-07-15'),
+              date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : (fallbackEntry?.date || 'July 2026')
+            };
+          });
         const existingSlugs = new Set(mapped.map(m => m.slug));
         const merged = [...mapped, ...FALLBACK_BLOG_POSTS.filter(fb => !existingSlugs.has(fb.slug))];
         setPosts(merged);
@@ -56,11 +65,16 @@ export function Blog() {
   }, []);
 
   if (postSlug) {
+    const canonicalSlug = resolveCanonicalBlogSlug(postSlug) || postSlug;
+    if (canonicalSlug !== postSlug) {
+      return <Navigate to={`/blog/${canonicalSlug}`} replace />;
+    }
+
     const matchedPost = posts.find(
-      p => p.slug === postSlug || String(p.id) === postSlug
+      p => p.slug === canonicalSlug || String(p.id) === postSlug
     );
 
-    if (matchedPost && String(matchedPost.id) === postSlug && matchedPost.slug !== postSlug) {
+    if (matchedPost && matchedPost.slug !== postSlug) {
       return <Navigate to={`/blog/${matchedPost.slug}`} replace />;
     }
 

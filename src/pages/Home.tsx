@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Phone, Video, Headphones, ShieldCheck, Box, Mic, Loader2, Sparkles, Projector, Heart } from 'lucide-react';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Product, Service,
@@ -11,11 +11,14 @@ import {
 } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 
-import { TopBrands, brands } from '../components/TopBrands';
+import { brands } from '../components/TopBrands';
+import { optimizeGalleryImageUrl } from '../lib/image-optimize';
 
 import { StructuredData } from "../components/StructuredData";
 import { FALLBACK_SERVICES_CATALOG } from "../lib/services-catalog";
 import { getCanonicalProductSlug } from "../lib/gmc-feed";
+
+const TopBrands = React.lazy(() => import('../components/TopBrands').then(m => ({ default: m.TopBrands })));
 
 const DEFAULT_HERO_SLIDES = [
   {
@@ -655,7 +658,15 @@ export function Home() {
               <div className="grid md:grid-cols-3 gap-8">
                 {services.filter(s => s.isActive).slice(0, 3).map((s) => (
                   <div key={s.id} className="bg-gray-50 rounded-3xl p-8 border border-gray-100 hover:shadow-xl transition-all">
-                    <img src={s.imageUrl} alt={s.title} className="w-full h-48 object-cover rounded-2xl mb-6" />
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      width={480}
+                      height={240}
+                      src={optimizeGalleryImageUrl(s.imageUrl, 480, 75)}
+                      alt={s.title}
+                      className="w-full h-48 object-cover rounded-2xl mb-6"
+                    />
                     <h3 className="text-xl font-black text-[#1A2B4C] mb-4">{s.title}</h3>
                     <p className="text-gray-600 mb-6 line-clamp-3">{s.description.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ')}</p>
                     <Link to={`/services/${s.slug}`} className="text-[#00B4D8] font-bold text-sm flex items-center gap-2">Learn More <ArrowRight size={16} /></Link>
@@ -666,7 +677,15 @@ export function Home() {
               <div className="grid md:grid-cols-3 gap-8">
                 {products.filter(p => p.isFeatured).slice(0, 3).map((p) => (
                   <div key={p.id} className="bg-white rounded-3xl p-6 border border-gray-100 hover:shadow-xl transition-all">
-                    <img src={p.images?.[0]} alt={p.productName} className="w-full h-48 object-cover rounded-2xl mb-6" />
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      width={480}
+                      height={240}
+                      src={optimizeGalleryImageUrl(p.images?.[0], 480, 75)}
+                      alt={p.productName}
+                      className="w-full h-48 object-cover rounded-2xl mb-6"
+                    />
                     <h3 className="text-lg font-bold text-[#1A2B4C] mb-2">{p.productName}</h3>
                     <Link to={`/product/${getCanonicalProductSlug(p, p.id)}`} className="text-[#00B4D8] font-bold text-sm">View Product</Link>
                   </div>
@@ -763,8 +782,8 @@ export function Home() {
                   <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
                     {(() => {
                        const images = Array.isArray(prod.images) ? prod.images : (typeof prod.images === 'string' ? [prod.images] : (prod.image ? [prod.image] : []));
-                       const firstImage = images[0] || 'https://placehold.co/600x600?text=No+Image';
-                       const secondImage = images[1];
+                       const firstImage = optimizeGalleryImageUrl(images[0] || 'https://placehold.co/600x600?text=No+Image', 480, 75);
+                       const secondImage = images[1] ? optimizeGalleryImageUrl(images[1], 480, 75) : undefined;
                        const showSecondImage = hoveredProductId === prod.id && Boolean(secondImage && secondImage !== firstImage);
                        return (
                          <>
@@ -882,21 +901,27 @@ export function Home() {
                 className="flex transition-transform duration-700 ease-in-out" 
                 style={{ transform: `translateX(-${currentVideoSlide * 100}%)` }}
               >
-                {videoChunks.map((chunk, slideIdx) => (
+                {videoChunks.map((chunk, slideIdx) => {
+                   const shouldMountSlideImages = Math.abs(slideIdx - currentVideoSlide) <= 1;
+                   return (
                    <div key={slideIdx} className="w-full flex-shrink-0">
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[600px] h-auto">
                          {/* Left Column (2 items) */}
                          <div className="col-span-1 flex flex-col gap-4 h-full">
                             {chunk[0] && (
                                <Link to={`/product/${getCanonicalProductSlug(chunk[0], chunk[0].id)}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
-                                  {chunk[0].images?.[0] && <img loading="lazy" src={chunk[0].images[0]} alt={chunk[0].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />}
+                                  {shouldMountSlideImages && chunk[0].images?.[0] && (
+                                    <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(chunk[0].images[0], 420, 75)} alt={chunk[0].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />
+                                  )}
                                   <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{chunk[0].productName}</h3>
                                   <p className="text-[#00B4D8] font-black mt-2">Rs. {chunk[0].salePrice > 0 ? (chunk[0].salePrice ?? 0).toLocaleString() : (chunk[0].regularPrice ?? 0).toLocaleString()}</p>
                                </Link>
                             )}
                             {chunk[1] && (
                                <Link to={`/product/${getCanonicalProductSlug(chunk[1], chunk[1].id)}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
-                                  {chunk[1].images?.[0] && <img loading="lazy" src={chunk[1].images[0]} alt={chunk[1].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />}
+                                  {shouldMountSlideImages && chunk[1].images?.[0] && (
+                                    <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(chunk[1].images[0], 420, 75)} alt={chunk[1].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />
+                                  )}
                                   <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{chunk[1].productName}</h3>
                                   <p className="text-[#00B4D8] font-black mt-2">Rs. {chunk[1].salePrice > 0 ? (chunk[1].salePrice ?? 0).toLocaleString() : (chunk[1].regularPrice ?? 0).toLocaleString()}</p>
                                </Link>
@@ -907,7 +932,9 @@ export function Home() {
                          <div className="col-span-1 md:col-span-2 h-full">
                             {chunk[2] && (
                                <Link to={`/product/${getCanonicalProductSlug(chunk[2], chunk[2].id)}`} className="w-full h-full min-h-[350px] md:min-h-0 bg-transparent border-0 rounded-[2.5rem] p-10 group flex flex-col items-center justify-center relative overflow-hidden text-center">
-                                  {chunk[2].images?.[0] && <img loading="lazy" src={chunk[2].images[0]} alt={chunk[2].productName} className="w-full h-48 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700 relative z-20 mb-8" />}
+                                  {shouldMountSlideImages && chunk[2].images?.[0] && (
+                                    <img loading="lazy" decoding="async" width={540} height={360} src={optimizeGalleryImageUrl(chunk[2].images[0], 560, 75)} alt={chunk[2].productName} className="w-full h-48 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700 relative z-20 mb-8" />
+                                  )}
                                   <div className="relative z-20">
                                      <span className="text-[#00B4D8] font-black uppercase tracking-widest text-xs mb-2 block">Featured</span>
                                      <h3 className="text-2xl md:text-3xl font-black text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{chunk[2].productName}</h3>
@@ -922,14 +949,18 @@ export function Home() {
                          <div className="col-span-1 flex flex-col gap-4 h-full">
                             {chunk[3] && (
                                <Link to={`/product/${getCanonicalProductSlug(chunk[3], chunk[3].id)}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
-                                  {chunk[3].images?.[0] && <img loading="lazy" src={chunk[3].images[0]} alt={chunk[3].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />}
+                                  {shouldMountSlideImages && chunk[3].images?.[0] && (
+                                    <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(chunk[3].images[0], 420, 75)} alt={chunk[3].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />
+                                  )}
                                   <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{chunk[3].productName}</h3>
                                   <p className="text-[#00B4D8] font-black mt-2">Rs. {chunk[3].salePrice > 0 ? (chunk[3].salePrice ?? 0).toLocaleString() : (chunk[3].regularPrice ?? 0).toLocaleString()}</p>
                                </Link>
                             )}
                             {chunk[4] && (
                                <Link to={`/product/${getCanonicalProductSlug(chunk[4], chunk[4].id)}`} className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
-                                  {chunk[4].images?.[0] && <img loading="lazy" src={chunk[4].images[0]} alt={chunk[4].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />}
+                                  {shouldMountSlideImages && chunk[4].images?.[0] && (
+                                    <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(chunk[4].images[0], 420, 75)} alt={chunk[4].productName} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500 mb-4" />
+                                  )}
                                   <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{chunk[4].productName}</h3>
                                   <p className="text-[#00B4D8] font-black mt-2">Rs. {chunk[4].salePrice > 0 ? (chunk[4].salePrice ?? 0).toLocaleString() : (chunk[4].regularPrice ?? 0).toLocaleString()}</p>
                                </Link>
@@ -937,7 +968,8 @@ export function Home() {
                          </div>
                       </div>
                    </div>
-                ))}
+                   );
+                })}
               </div>
               
               {/* Slider Dots */}
@@ -1143,7 +1175,9 @@ export function Home() {
         </div>
       </section>
 
-      <TopBrands />
+      <React.Suspense fallback={null}>
+        <TopBrands />
+      </React.Suspense>
     </div>
   );
 }

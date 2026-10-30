@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { subscribeToCategories } from '../lib/firebase/firestore-helpers';
+import { EXCLUDED_CATEGORY_SLUGS } from '../lib/sitemap-generator';
 
 const DEFAULT_FOOTER_CATEGORIES = [
   { id: 'cat-projectors', name: 'Projectors', slug: 'projectors', isActive: true, type: 'product' },
@@ -17,7 +18,12 @@ export function Footer() {
 
   useEffect(() => {
     const unsub = subscribeToCategories((cats) => {
-      const filtered = cats.filter(c => c.isActive && ((c as any).type === 'product' || !(c as any).type || c.id.startsWith('parent-') || c.id.startsWith('child-')));
+      const filtered = cats.filter(
+        c =>
+          c.isActive &&
+          !EXCLUDED_CATEGORY_SLUGS.has(c.slug) &&
+          ((c as any).type === 'product' || c.id.startsWith('cat-') || c.id.startsWith('parent-') || c.id.startsWith('child-'))
+      );
       if (filtered.length > 0) {
         setCategories(filtered);
       }

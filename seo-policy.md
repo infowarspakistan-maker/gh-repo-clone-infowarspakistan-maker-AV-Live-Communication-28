@@ -111,23 +111,39 @@ This section tracks all completed technical SEO, Google Search Console (GSC), Go
 
 ### 1. Completed Technical SEO & GSC Indexing Resolutions
 - [x] **Self-Referencing Canonical Deduplication (`data-rh="true"`)**: Every route renders a single self-referencing `<link rel="canonical">` and strips `?` query parameters (`src/components/SEO.tsx`, `index.html`, `server.ts`).
-- [x] **Permanent 301 Redirects for Legacy & Query URLs (`server.ts`)**:
+- [x] **Permanent 301 Redirects for Legacy, Query, Non-Product Category & Firestore Alias URLs (`server.ts`, `gmc-feed.ts`, `sitemap-generator.ts`)**:
   - `?brand=<slug>` $\rightarrow$ `301` to `/brands/:slug`
   - `/category/:cat?sub=:sub` $\rightarrow$ `301` to `/category/:sub`
-  - `/products/compare` $\rightarrow$ `301` to `/compare`
-  - `/products/:cat` $\rightarrow$ `301` to `/category/:cat`
-  - `/tools/room-designer` $\rightarrow$ `301` to `/room-designer`
-  - `/product/:rawMpnOrId` $\rightarrow$ `301` to canonical `/product/:slug-pakistan`
+  - `/category/<non-product>` (all 28 non-product Firestore categories e.g. `/category/about`, `/category/compare`, `/category/corporate-events`, `/category/blind-drop-shipping`) $\rightarrow$ `301` to their canonical top-level, `/services/*`, or `/programs/*` URLs (and filtered out of `Category.tsx`, `Shop.tsx`, `Footer.tsx`, and `sitemap.xml`).
+  - `/blog/<legacyFirestoreSlugOrId>` (all 5 legacy Firestore blog slugs: `ip-phones-vs-softphones-business-guide`, `choose-right-video-conferencing-equipment`, `public-address-systems-components-guide`, `hybrid-events-engagement-guide`, `av-live-15-years-anniversary` + numeric IDs `1..11`) $\rightarrow$ `301` to their canonical SEO `/blog/:slug` (eliminating the **6 Duplicate without user-selected canonical** URLs).
+  - `/product/<firestoreVariantOrMpn>` (all 11 Firestore `-projector-pakistan` / `-camera-pakistan` / `-pa-controller-pakistan` / `-bullet-pakistan` variants + raw IDs/MPNs) $\rightarrow$ `301` to canonical `/product/:slug-pakistan`.
+- [x] **Eliminated 38 Server Error (5xx) & Admin SDK Permission Failures (`server.ts`, `package.json`)**:
+  - Added `fetchCollectionWithClientFallback()` using the Firebase Web Client SDK (`firebase/app` + `firebase/firestore`) in `server.ts` so server-side sitemap and Google Merchant Center TSV generation never fail with `7 PERMISSION_DENIED`.
+  - Enforced `NODE_ENV=production` in `package.json` `"start"` script and `isProductionServer` detection in `server.ts` so `dist/server.cjs` always serves pre-compiled `dist/` assets with zero Vite dev middleware timeouts.
 - [x] **Zero Loading-Spinner Soft 404s**: `Shop.tsx`, `Category.tsx`, `ProductDetails.tsx`, `ServiceDetail.tsx`, and `Blog.tsx` initialize synchronously with fallback hardware/service/blog catalogs on frame 1.
 - [x] **First-Wave SSR `<div id="root">` Semantic Snapshot (`index.html` & `server.ts`)**:
   - Pre-renders `<h1>`, Answer-First summaries, and semantic `<table>` matrices inside `<div id="root">...</div><!--ssr-root-end-->` for Homepage, Product pages (`/product/:slug`), Category pages (`/category/:slug`), Brand pages (`/brands/:slug`), Service pages (`/services/:slug`), and Blog guides (`/blog/:slug`).
 - [x] **Automated Dynamic Sitemap (`/sitemap.xml`)**:
-  - Serves **152 canonical URLs** (62 static/brand/geo/pillar routes, 53 products, 12 categories, 9 services, 16 blog guides) at `/sitemap.xml` with 1-hour memory cache + disk sync.
+  - Serves **149 deduplicated canonical URLs** (64 static/brand/geo/pillar routes including `/video-conferencing-solutions` & `/corporate-event-management`, 53 products, 12 hardware categories, 9 services, 11 canonical blog guides) at `/sitemap.xml` with memory cache + disk sync.
 - [x] **AI Search Crawler Readiness (`/llms.txt`, `/llms-full.txt` & `robots.txt`)**:
   - Explicit `Allow: /` rules for `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `ClaudeBot`, `Google-Extended`, and `Applebot-Extended`.
   - Complete 30KB+ Markdown hardware/pricing/BoM corpus served at `/llms-full.txt`.
+- [x] **Core Web Vitals, Code-Splitting & Gallery Image Optimization (`Home.tsx`, `Shop.tsx`, `image-optimize.ts`, `App.tsx`)**:
+  - Lazy-loaded `Home` route (`App.tsx`) and below-the-fold `TopBrands` component (`Home.tsx`).
+  - Added `optimizeGalleryImageUrl()` (`w=480&q=75` WebP/AVIF sizing), `decoding="async"`, explicit `width`/`height`, and native `loading="lazy"` across `Home` and `Shop` galleries (reserving `loading="eager"` + `fetchPriority="high"` for the first 2 LCP cards).
+  - Unmounted hidden secondary hover images (`hoveredProductId`) and added 16-item progressive viewport batching (`IntersectionObserver`) on `Shop.tsx` while keeping all 53 products in the `ItemList` JSON-LD and bottom Answer-First HTML table.
+  - Restricted `Home.tsx` 15-item Video Conferencing gallery to mount images only for the active and adjacent slide (`Math.abs(slideIdx - currentVideoSlide) <= 1`).
+- [x] **7-Part High-Converting Enterprise Service Page Blueprint & Local BoFu Keywords (`ServiceDetail.tsx`, `KeywordLandingPage.tsx`, `services-catalog.ts`, `server.ts`)**:
+  - **Localized Hero Section**: H1 with service + target city (Lahore, Karachi, Islamabad) + **"Request a 15-Minute Quote"** CTA.
+  - **Trust & Authority Bar**: Partner logos/links for **Cisco, Poly, Yealink, Logitech, Horion, and Grandstream** + Certified Engineering Team badge.
+  - **The "AV Live" Advantage**: Guaranteed 15-minute technical SLA response, zero-downtime guarantee, and on-site standby engineers.
+  - **Service Breakdown**: Boardroom integration, huddle room kits, interactive flat panels, hybrid event broadcasting, 3D hologram stages, SMD LED screen rental, and multi-camera live streaming.
+  - **Localized Proof (Case Studies)**: Real-world deployments in **Johar Town & DHA (Lahore)**, **Clifton (Karachi)**, and **Blue Area (Islamabad)**.
+  - **FAQ & Schema Markup**: Commercial FAQs (including 30-person executive boardroom AV cost) wrapped in `FAQPage` JSON-LD.
+  - **Clear Contact Footers**: Primary hotlines **`0321 425 6263`** and **`0339 0000 921`** alongside an integrated 15-minute quote form.
+  - **Target Local BoFu Keywords Integrated**: `"Polycom video conferencing distributors Lahore"`, `"Cisco Room Kit installation Karachi"`, `"Enterprise VoIP PBX setup Pakistan"`, `"Boardroom AV integration services Islamabad"`, `"Interactive flat panel displays for business Lahore"`, `"Corporate hybrid event live streaming Lahore"`, `"SMD LED screen rental for corporate events"`, `"3D hologram display stages Pakistan"`, `"Multi-camera event broadcasting Karachi"`.
 
-### 2. 100% Public Page JSON-LD Structured Data Coverage Matrix (36/36 Public Views)
+### 2. 100% Public Page JSON-LD Structured Data Coverage Matrix (38/38 Public Views)
 
 | Route Group | React View(s) | JSON-LD `@type` Schema | SSR Parity (`server.ts`) |
 | :--- | :--- | :--- | :--- |
@@ -135,7 +151,7 @@ This section tracks all completed technical SEO, Google Search Console (GSC), Go
 | **Product Detail (`/product/:slug`)** | `ProductDetails.tsx` | `Product` (`mpn`, `gtin`, `Offer`, `OfferShippingDetails`, `MerchantReturnPolicy`, `AggregateRating`, `Review`) + `BreadcrumbList` | Yes (Full GMC schema + SSR `<table>`) |
 | **Category Pages (`/category/:slug`)** | `Category.tsx` | `CollectionPage` + `ItemList` + `BreadcrumbList` | Yes (Dynamic `ItemList` + SSR `<table>`) |
 | **Brand Pages (`/brands/:slug`)** | `Shop.tsx` | `CollectionPage` + `ItemList` + `BreadcrumbList` | Yes (Dynamic `ItemList` + SSR `<table>`) |
-| **Service Detail (`/services/:slug`)** | `ServiceDetail.tsx` | `Service` + `BreadcrumbList` | Yes (`Service` + SSR SLA `<table>`) |
+| **Service Detail & Pillars (`/services/:slug`, `/video-conferencing-solutions`, `/corporate-event-management`)** | `ServiceDetail.tsx`, `KeywordLandingPage.tsx` | `Service` + `FAQPage` + `BreadcrumbList` | Yes (`Service` + `FAQPage` + SSR SLA `<table>`) |
 | **BoFu Blog Guides (`/blog/:slug`)** | `Blog.tsx` | `BlogPosting` + `FAQPage` + `BreadcrumbList` | Yes (`@graph` + SSR comparison `<table>`) |
 | **Interactive Tools (`/room-designer`, `/compare`, `/event-quote`)** | `RoomDesigner.tsx`, `Compare.tsx`, `EventQuote.tsx` | `WebApplication` + `BreadcrumbList` | Yes |
 | **B2B Programs (`/programs/*`, `/esports`, `/voip-service-providers`)** | `Quote.tsx`, `BlindDropShipping.tsx`, `GovEdPricing.tsx`, `FulfillmentServices.tsx`, `Promotions.tsx`, `Provisioning.tsx`, `Reseller.tsx`, `Esports.tsx`, `VoipService.tsx` | `Service` / `CollectionPage` + `BreadcrumbList` | Yes |
@@ -149,4 +165,6 @@ This section tracks all completed technical SEO, Google Search Console (GSC), Go
 3. `/blog/boardroom-av-system-price-guide-pakistan` — *6-to-30 Person Boardroom AV System BoM & Price Guide in Pakistan (2026 PKR Reference)*
 4. `/blog/banking-healthcare-university-av-solutions-pakistan` — *Enterprise AV Architecture for Banks, Hospitals & HEC Universities in Pakistan*
 5. `/blog/shure-bosch-ceiling-microphones-vs-table-mics-pakistan` — *Ceiling Microphone Arrays vs. Table Microphones: Acoustic Guide for Pakistani Boardrooms*
+6. `/video-conferencing-solutions` & `/services/boardroom-integration` — *Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad (Poly, Cisco, Yealink, Logitech, Horion, Grandstream)*
+7. `/corporate-event-management` & `/services/corporate-events` — *Corporate Event Management, Hybrid Live Streaming, SMD LED Screen Rental & 3D Hologram Stages in Pakistan*
 

@@ -29,20 +29,27 @@ export function Overview() {
       });
       setRecentOrders(orders);
       setStats(prev => ({ ...prev, ordersCount: snapshot.size }));
+    }, (error) => {
+      console.warn('Firestore quota error in Overview orders subscription:', error?.message);
     });
 
     // Fetch total products and users
     const fetchCounts = async () => {
-      const productSnap = await getDocs(collection(db, 'products'));
-      const userSnap = await getDocs(collection(db, 'users'));
-      const quoteSnap = await getDocs(collection(db, 'event_quotes'));
-      setStats(prev => ({ 
-        ...prev, 
-        products: productSnap.size,
-        customers: userSnap.size,
-        quotes: quoteSnap.size
-      }));
-      setLoading(false);
+      try {
+        const productSnap = await getDocs(collection(db, 'products'));
+        const userSnap = await getDocs(collection(db, 'users'));
+        const quoteSnap = await getDocs(collection(db, 'event_quotes'));
+        setStats(prev => ({ 
+          ...prev, 
+          products: productSnap.size,
+          customers: userSnap.size,
+          quotes: quoteSnap.size
+        }));
+      } catch (err) {
+        console.warn('Firestore quota error in Overview fetchCounts:', err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchCounts();

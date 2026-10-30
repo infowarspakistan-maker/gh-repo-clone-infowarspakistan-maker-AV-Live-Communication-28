@@ -465,6 +465,10 @@ export const STATIC_CORE_ROUTES: string[] = [
   '/3d-hologram',
   '/projection-mapping',
   '/video-conferencing',
+  '/video-conferencing-solutions',
+  '/corporate-event-management',
+  '/live-streaming-services',
+  '/av-equipment-rental',
   '/conference-room-solutions',
   '/zoom-rooms',
   '/microsoft-teams-rooms',
@@ -504,43 +508,122 @@ export const CANONICAL_CATEGORY_SLUGS: string[] = [
   'boardroom-codecs',
   'ptz-cameras',
   'ip-phones',
+  'voip-phone-systems',
+  'projectors',
   'headsets',
   'ip-cameras',
-  'intercom-paging-access',
-  'voip-phone-systems',
-  'projectors'
+  'intercom-paging-access'
 ];
 
-export const EXCLUDED_CATEGORY_SLUGS = new Set<string>([
-  'about',
-  'compare',
-  'faqs',
-  'guides',
-  'payment',
-  'returns',
-  'reviews',
-  'rma',
-  'shipping',
-  'blog',
-  'contact',
-  'privacy-policy',
-  'terms-of-service',
-  'blind-drop-shipping',
-  'fulfillment-services',
-  'government-education-pricing',
-  'promotions',
-  'provisioning-services',
-  'quote',
-  'reseller-program',
-  'ai-agents-workers',
-  'ai-automation',
-  'ai-development',
+export const PRIMARY_PRODUCT_CATEGORY_SLUGS = CANONICAL_CATEGORY_SLUGS;
+
+export const PRIMARY_SERVICE_SLUGS: string[] = [
   'corporate-events',
-  'esports-events',
-  'expo-organizing',
   'hybrid-events',
-  'voip-service-providers'
-]);
+  'boardroom-integration',
+  'voip-telephony',
+  'expo-organizing',
+  'esports-events',
+  'ai-development',
+  'ai-agents-workers',
+  'ai-automation'
+];
+
+export const PRIMARY_PILLAR_ROUTES: string[] = [
+  '',
+  '/shop',
+  '/services',
+  '/events-services',
+  '/solutions',
+  '/video-conferencing',
+  '/video-conferencing-solutions',
+  '/video-conference-in-pakistan',
+  '/corporate-event-management',
+  '/live-streaming-services',
+  '/av-equipment-rental',
+  '/conference-room-solutions',
+  '/zoom-rooms',
+  '/microsoft-teams-rooms',
+  '/3d-hologram',
+  '/projection-mapping',
+  '/esports',
+  '/voip-service-providers',
+  '/room-designer',
+  '/event-quote',
+  '/lahore',
+  '/karachi',
+  '/islamabad'
+];
+
+export const NON_PRODUCT_CATEGORY_REDIRECTS: Record<string, string> = {
+  about: '/about',
+  compare: '/compare',
+  faqs: '/faqs',
+  guides: '/guides',
+  payment: '/payment',
+  returns: '/returns',
+  reviews: '/reviews',
+  rma: '/rma',
+  shipping: '/shipping',
+  blog: '/blog',
+  contact: '/contact',
+  'privacy-policy': '/privacy-policy',
+  'terms-of-service': '/terms-of-service',
+  'blind-drop-shipping': '/programs/blind-drop-shipping',
+  'fulfillment-services': '/programs/fulfillment-services',
+  'government-education-pricing': '/programs/government-education-pricing',
+  promotions: '/programs/promotions',
+  'provisioning-services': '/programs/provisioning-services',
+  quote: '/programs/quote',
+  'reseller-program': '/programs/reseller-program',
+  'voip-service-providers': '/voip-service-providers',
+  'corporate-events': '/services/corporate-events',
+  'hybrid-events': '/services/hybrid-events',
+  'expo-organizing': '/services/expo-organizing',
+  'esports-events': '/services/esports-events',
+  'ai-development': '/services/ai-development',
+  'ai-agents-workers': '/services/ai-agents-workers',
+  'ai-automation': '/services/ai-automation',
+};
+
+export const EXCLUDED_CATEGORY_SLUGS = new Set<string>(Object.keys(NON_PRODUCT_CATEGORY_REDIRECTS));
+
+export const BLOG_LEGACY_SLUG_TO_CANONICAL: Record<string, string> = {
+  '1': 'future-of-video-conferencing-pakistan-2026',
+  '2': 'ip-phones-vs-softphones-pakistan',
+  '3': 'how-to-choose-video-conferencing-equipment',
+  '4': 'understanding-public-address-systems-pakistan',
+  '5': 'hybrid-events-101-av-integration-pakistan',
+  '6': 'av-live-communications-15-years-pakistan',
+  '7': 'logitech-rally-bar-vs-poly-studio-x50-pakistan',
+  '8': 'yealink-vs-cisco-video-conferencing-pakistan',
+  '9': 'boardroom-av-system-price-guide-pakistan',
+  '10': 'banking-healthcare-university-av-solutions-pakistan',
+  '11': 'shure-bosch-ceiling-microphones-vs-table-mics-pakistan',
+  'ip-phones-vs-softphones-business-guide': 'ip-phones-vs-softphones-pakistan',
+  'choose-right-video-conferencing-equipment': 'how-to-choose-video-conferencing-equipment',
+  'public-address-systems-components-guide': 'understanding-public-address-systems-pakistan',
+  'hybrid-events-engagement-guide': 'hybrid-events-101-av-integration-pakistan',
+  'av-live-15-years-anniversary': 'av-live-communications-15-years-pakistan',
+};
+
+export function resolveCanonicalBlogSlug(slugOrId?: string | number | null): string | null {
+  if (slugOrId === undefined || slugOrId === null) return null;
+  const raw = String(slugOrId).trim();
+  if (!raw) return null;
+  if (BLOG_LEGACY_SLUG_TO_CANONICAL[raw]) {
+    return BLOG_LEGACY_SLUG_TO_CANONICAL[raw];
+  }
+  const lower = raw.toLowerCase();
+  if (BLOG_LEGACY_SLUG_TO_CANONICAL[lower]) {
+    return BLOG_LEGACY_SLUG_TO_CANONICAL[lower];
+  }
+  const matched = FALLBACK_BLOG_CATALOG.find(
+    fb => fb.slug === lower || String(fb.id) === lower
+  );
+  if (matched) return matched.slug;
+  return lower;
+}
 
 export function escapeXml(unsafe: string): string {
   return unsafe
@@ -554,26 +637,23 @@ export function escapeXml(unsafe: string): string {
 export function formatSitemapDate(rawValue: any, fallbackIsoDate: string): string {
   if (!rawValue) return fallbackIsoDate;
   try {
+    let parsedDate: Date | null = null;
     if (typeof rawValue.toDate === 'function') {
       const d = rawValue.toDate();
-      if (d instanceof Date && !isNaN(d.getTime())) {
-        return d.toISOString().split('T')[0];
-      }
-    }
-    if (typeof rawValue._seconds === 'number') {
+      if (d instanceof Date && !isNaN(d.getTime())) parsedDate = d;
+    } else if (typeof rawValue._seconds === 'number') {
       const d = new Date(rawValue._seconds * 1000);
-      if (!isNaN(d.getTime())) {
-        return d.toISOString().split('T')[0];
-      }
+      if (!isNaN(d.getTime())) parsedDate = d;
+    } else if (rawValue instanceof Date && !isNaN(rawValue.getTime())) {
+      parsedDate = rawValue;
+    } else if (typeof rawValue === 'string' && rawValue.trim()) {
+      const d = new Date(rawValue);
+      if (!isNaN(d.getTime())) parsedDate = d;
     }
-    if (rawValue instanceof Date && !isNaN(rawValue.getTime())) {
-      return rawValue.toISOString().split('T')[0];
-    }
-    if (typeof rawValue === 'string' && rawValue.trim()) {
-      const parsed = new Date(rawValue);
-      if (!isNaN(parsed.getTime())) {
-        return parsed.toISOString().split('T')[0];
-      }
+    if (parsedDate) {
+      const iso = parsedDate.toISOString().split('T')[0];
+      // Ensure lastmod is never older than the October 2026 SSR/Schema overhaul so Googlebot recrawls updated pages
+      return iso < '2026-10-30' ? fallbackIsoDate : iso;
     }
   } catch {
     // Fall back to default date
@@ -601,8 +681,9 @@ export interface DynamicSitemapResult {
 }
 
 /**
- * Generates a valid, deduplicated XML 1.0 sitemap containing all active
- * static pages, products, categories, services, and blog posts.
+ * Generates a valid, deduplicated XML 1.0 sitemap that explicitly lists all
+ * primary product categories and enterprise services at top crawl priority,
+ * followed by active products, brand hubs, blog guides, and static pages.
  */
 export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): DynamicSitemapResult {
   const today = new Date().toISOString().split('T')[0];
@@ -647,36 +728,16 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
     return true;
   };
 
-  // 1. Core Static, Program, Brand & Commercial Keyword Routes
-  for (const route of STATIC_CORE_ROUTES) {
-    const priority =
-      route === ''
-        ? '1.0'
-        : route.startsWith('/brands/') || route.startsWith('/programs/')
-        ? '0.7'
-        : '0.9';
-    appendUrl(route, priority, 'staticPages', today, route === '' || route === '/shop' ? 'daily' : 'weekly');
+  // 1. Primary Commercial Pillar Hubs (Homepage, Shop, Services, Solutions, Geo & Solution Pillars)
+  for (const route of PRIMARY_PILLAR_ROUTES) {
+    const priority = route === '' ? '1.0' : '0.9';
+    const freq = route === '' || route === '/shop' || route === '/services' ? 'daily' : 'weekly';
+    appendUrl(route, priority, 'staticPages', today, freq);
   }
 
-  // 2. Active Services (Dynamic Firestore Services + Fallback Services Catalog)
-  if (Array.isArray(input.services)) {
-    for (const svc of input.services) {
-      if (svc.isActive === false) continue;
-      const rawSlug = String(svc.slug || svc.id || '').trim();
-      if (!rawSlug) continue;
-      const cleanSlug = rawSlug.replace(/^\/services\//, '').replace(/^\/+|\/+$/g, '');
-      const lastmod = formatSitemapDate(svc.updatedAt || svc.createdAt, today);
-      appendUrl(`/services/${cleanSlug}`, '0.9', 'services', lastmod, 'weekly');
-    }
-  }
-  for (const fallbackSvc of FALLBACK_SERVICES_CATALOG) {
-    if (fallbackSvc.isActive === false) continue;
-    appendUrl(`/services/${fallbackSvc.slug}`, '0.9', 'services', today, 'weekly');
-  }
-
-  // 3. Active Product Categories (Canonical Fallback Categories + Dynamic Firestore Categories)
-  for (const slug of CANONICAL_CATEGORY_SLUGS) {
-    appendUrl(`/category/${slug}`, '0.8', 'categories', today, 'weekly');
+  // 2. Explicit Primary Product Categories (/category/*) — Top Crawl Depth Priority (0.9)
+  for (const slug of PRIMARY_PRODUCT_CATEGORY_SLUGS) {
+    appendUrl(`/category/${slug}`, '0.9', 'categories', today, 'daily');
   }
   if (Array.isArray(input.categories)) {
     for (const cat of input.categories) {
@@ -686,11 +747,33 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
         continue;
       }
       const lastmod = formatSitemapDate(cat.updatedAt || cat.createdAt, today);
-      appendUrl(`/category/${slug}`, '0.8', 'categories', lastmod, 'weekly');
+      appendUrl(`/category/${slug}`, '0.9', 'categories', lastmod, 'daily');
     }
   }
 
-  // 4. Active Products (Dynamic Firestore Products + Verified GMC Catalog Fallback)
+  // 3. Explicit Primary Enterprise Services (/services/*) — Top Crawl Depth Priority (0.9)
+  for (const serviceSlug of PRIMARY_SERVICE_SLUGS) {
+    appendUrl(`/services/${serviceSlug}`, '0.9', 'services', today, 'weekly');
+  }
+  for (const fallbackSvc of FALLBACK_SERVICES_CATALOG) {
+    if (fallbackSvc.isActive === false) continue;
+    appendUrl(`/services/${fallbackSvc.slug}`, '0.9', 'services', today, 'weekly');
+  }
+  if (Array.isArray(input.services)) {
+    for (const svc of input.services) {
+      if (svc.isActive === false) continue;
+      const rawSlug = String(svc.slug || svc.id || '').trim();
+      if (!rawSlug) continue;
+      const cleanSlug = rawSlug.replace(/^\/services\//, '').replace(/^\/+|\/+$/g, '');
+      if (EXCLUDED_CATEGORY_SLUGS.has(cleanSlug) && !PRIMARY_SERVICE_SLUGS.includes(cleanSlug)) {
+        continue;
+      }
+      const lastmod = formatSitemapDate(svc.updatedAt || svc.createdAt, today);
+      appendUrl(`/services/${cleanSlug}`, '0.9', 'services', lastmod, 'weekly');
+    }
+  }
+
+  // 4. Active Enterprise Products (/product/*) (Dynamic Firestore Products + Verified GMC Catalog Fallback)
   if (Array.isArray(input.products)) {
     for (const prod of input.products) {
       if (prod.isActive === false) continue;
@@ -717,33 +800,45 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
     );
   }
 
-  // 5. Active Blog Posts (Dynamic Firestore Blog Posts + Fallback Blog Catalog)
+  // 5. Active Blog Buyer Guides (/blog/*) (Dynamic Firestore Blog Posts + Fallback Blog Catalog)
   if (Array.isArray(input.blogPosts)) {
     for (const post of input.blogPosts) {
       if (post.isPublished === false || post.isActive === false) continue;
       const rawSlug = String(post.slug || post.id || '').trim();
       if (!rawSlug) continue;
-      // Map numeric fallback IDs (1..6) to their canonical SEO slug if present
+      const canonicalBlogSlug = resolveCanonicalBlogSlug(rawSlug) || rawSlug;
       const matchedFallback = FALLBACK_BLOG_CATALOG.find(
-        fb => String(fb.id) === rawSlug || fb.slug === rawSlug
+        fb => fb.slug === canonicalBlogSlug || String(fb.id) === rawSlug
       );
-      const canonicalBlogSlug = matchedFallback ? matchedFallback.slug : rawSlug;
       const lastmod = formatSitemapDate(
         post.updatedAt || post.publishedAt || matchedFallback?.publishedIso,
         today
       );
-      appendUrl(`/blog/${canonicalBlogSlug}`, '0.7', 'blogs', lastmod, 'monthly');
+      appendUrl(`/blog/${canonicalBlogSlug}`, '0.8', 'blogs', lastmod, 'weekly');
     }
   }
   for (const fallbackPost of FALLBACK_BLOG_CATALOG) {
     if (fallbackPost.isPublished === false || fallbackPost.isActive === false) continue;
     appendUrl(
       `/blog/${fallbackPost.slug}`,
-      '0.7',
+      '0.8',
       'blogs',
-      fallbackPost.publishedIso || today,
-      'monthly'
+      today,
+      'weekly'
     );
+  }
+
+  // 6. Remaining Static, Brand (/brands/*), B2B Program (/programs/*) & Corporate Trust Routes
+  for (const route of STATIC_CORE_ROUTES) {
+    const priority =
+      route === ''
+        ? '1.0'
+        : route.startsWith('/brands/')
+        ? '0.8'
+        : route.startsWith('/programs/')
+        ? '0.7'
+        : '0.8';
+    appendUrl(route, priority, 'staticPages', today, 'weekly');
   }
 
   const xml = [
@@ -766,13 +861,16 @@ export function buildLlmsFullTxt(): string {
     '',
     '> Official AI & LLM Reference Catalog for AV Live Communications (https://avlive.com.pk). AV Live is Pakistan\'s premier authorized distributor and turnkey systems integrator for Video Conferencing (HP Poly / Polycom Group 500, Poly Studio X70/X72/X52, Logitech Rally Bar, Cisco Room Kits, Yealink), Enterprise VoIP & IP Telephony (3CX, FreePBX, Grandstream, Cisco, Fanvil), Commercial Laser Projectors (Panasonic, Epson, Sony, BenQ), and Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Stage Displays, and 3D Projection Mapping across Lahore, Karachi, and Islamabad.',
     '',
-    '## 1. Standardized Corporate Identity & Regional Experience Centers (NAP)',
+    '## 1. Standardized Corporate Identity, 15-Minute Technical SLA & Regional Experience Centers (NAP)',
     '- **Legal Entity**: AV Live Communications (Pvt) Ltd',
     '- **Primary Domain**: https://avlive.com.pk',
-    '- **Lahore Head Office & Experience Center**: Johar Town Block N, Lahore, Punjab, Pakistan | Phone: +92 42 3233 4782 | Mobile/WhatsApp: +92 321 425 6263 | URL: https://avlive.com.pk/lahore',
-    '- **Karachi Regional Office**: Clifton Executive Office / Shahrah-e-Faisal, Karachi, Sindh, Pakistan | Phone: +92 21 3589 0123 | URL: https://avlive.com.pk/karachi',
-    '- **Islamabad Regional Office**: Blue Area Commercial Hub, Jinnah Avenue, Islamabad, ICT, Pakistan | Phone: +92 51 2890 124 | URL: https://avlive.com.pk/islamabad',
+    '- **Primary 24/7 Enterprise Hotlines**: 0321 425 6263 | 0339 0000 921 (Guaranteed 15-Minute Quote & Technical SLA Response)',
+    '- **Authorized Hardware Partner Ecosystem**: Cisco, HP Poly (Polycom), Yealink, Logitech, Horion (Interactive Flat Panels), Grandstream, Bosch, Jabra',
+    '- **Lahore Head Office & Experience Center**: Johar Town Block N & DHA Commercial Coverage, Lahore, Punjab, Pakistan | Phone: +92 42 3233 4782 | Hotlines: 0321 425 6263 / 0339 0000 921 | URL: https://avlive.com.pk/lahore',
+    '- **Karachi Regional Office**: Clifton Executive Hub & Shahrah-e-Faisal, Karachi, Sindh, Pakistan | Phone: +92 21 3589 0123 | Hotlines: 0321 425 6263 / 0339 0000 921 | URL: https://avlive.com.pk/karachi',
+    '- **Islamabad Regional Office**: Blue Area Commercial Hub, Jinnah Avenue, Islamabad, ICT, Pakistan | Phone: +92 51 2890 124 | Hotlines: 0321 425 6263 / 0339 0000 921 | URL: https://avlive.com.pk/islamabad',
     '- **Procurement & Tender Desk**: info@avlive.com.pk | sales@avlive.com.pk | Official FBR GST/NTN Invoicing & PPRA Tender Compliance',
+    '- **High-Intent Local Specialties**: Polycom video conferencing distributors Lahore, Cisco Room Kit installation Karachi, Enterprise VoIP PBX setup Pakistan, Boardroom AV integration services Islamabad, Interactive flat panel displays for business Lahore, Corporate hybrid event live streaming Lahore, SMD LED screen rental for corporate events, 3D hologram display stages Pakistan, Multi-camera event broadcasting Karachi.',
     '',
     '## 2. Conference Room Size & Turnkey BoM Price Matrix (Pakistan 2026)',
     '| Room Tier | Seating Capacity | Recommended Video Hardware | Audio & Control Stack | Turnkey PKR Budget |',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight, Box, Settings, Mic, Video, ShieldCheck, Speaker, Loader2, Zap, LayoutGrid, Layers, Heart } from 'lucide-react';
 import { subscribeToCategories, subscribeToProducts, Product, Category as CategoryType } from '../lib/firebase/firestore-helpers';
@@ -9,6 +9,7 @@ import {
   PRODUCT_GMC_METADATA,
   buildFallbackProductFromGmcMeta,
 } from '../lib/gmc-feed';
+import { EXCLUDED_CATEGORY_SLUGS, NON_PRODUCT_CATEGORY_REDIRECTS } from '../lib/sitemap-generator';
 import { addToCart } from '../lib/cart';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -200,7 +201,13 @@ export function Category() {
 
   useEffect(() => {
     const unsubCategories = subscribeToCategories((cats) => {
-      setCategories(cats);
+      const productOnlyCats = cats.filter(
+        c =>
+          c.isActive !== false &&
+          !EXCLUDED_CATEGORY_SLUGS.has(c.slug) &&
+          (!(c as any).type || (c as any).type === 'product')
+      );
+      setCategories(productOnlyCats);
     });
 
     const unsubProducts = subscribeToProducts((prods) => {
@@ -214,9 +221,13 @@ export function Category() {
     };
   }, []);
 
+  if (categorySlug && NON_PRODUCT_CATEGORY_REDIRECTS[categorySlug]) {
+    return <Navigate to={NON_PRODUCT_CATEGORY_REDIRECTS[categorySlug]} replace />;
+  }
+
   const fallbackCat = categorySlug ? FALLBACK_PRODUCT_CATEGORIES[categorySlug] : undefined;
   const currentCategory: CategoryType | undefined =
-    categories.find(c => c.slug === categorySlug) ||
+    categories.find(c => c.slug === categorySlug && !EXCLUDED_CATEGORY_SLUGS.has(c.slug)) ||
     (fallbackCat && categorySlug
       ? {
           id: categorySlug,

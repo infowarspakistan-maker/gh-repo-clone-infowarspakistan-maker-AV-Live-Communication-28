@@ -631,6 +631,17 @@ export const PRODUCT_ID_TO_SEO_SLUG: Record<string, string> = {
   'cisco-room-kit-plus-video-conferencing-system-pakistan': 'cisco-room-kit-plus-pakistan',
   'poly-studio-x52-all-in-one-video-bar-pakistan': 'poly-studio-x52-pakistan',
   'poly-studio-usb-pakistan': 'poly-studio-usb-video-bar-pakistan',
+  'benq-tk705i-projector-pakistan': 'benq-tk705i-pakistan',
+  'benq-w4100i-projector-pakistan': 'benq-w4100i-pakistan',
+  'dahua-n43al52-bullet-camera-pakistan': 'dahua-n43al52-bullet-pakistan',
+  'itc-va-6200ma-pa-controller-pakistan': 'itc-va-6200ma-pakistan',
+  'optoma-gt4000uhd-projector-pakistan': 'optoma-gt4000uhd-pakistan',
+  'optoma-pk32-pocket-projector-pakistan': 'optoma-pk32-pocket-pakistan',
+  'panasonic-pt-rq45k-projector-pakistan': 'panasonic-pt-rq45k-pakistan',
+  'panasonic-pt-vmz82-projector-pakistan': 'panasonic-pt-vmz82-pakistan',
+  'uniview-ipc3612sr3-vf-bullet-pakistan': 'uniview-ipc3612sr3-vf-pakistan',
+  'viewsonic-lsd400w-projector-pakistan': 'viewsonic-lsd400w-pakistan',
+  'viewsonic-x1-4k-pro-projector-pakistan': 'viewsonic-x1-4k-pro-pakistan',
 };
 
 export const SEO_SLUG_TO_PRODUCT_ID: Record<string, string> = {

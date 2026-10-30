@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowRight, Loader2, Info } from 'lucide-react';
+import { ArrowRight, Loader2, Info, Phone, ShieldCheck, Clock, Award, MapPin, CheckCircle2, Sparkles } from 'lucide-react';
 import { getAllServices } from '../../lib/firebase/firestore-helpers';
 import { FALLBACK_SERVICES_CATALOG, mergeWithFallbackServices, EnrichedService } from '../../lib/services-catalog';
+import { optimizeGalleryImageUrl } from '../../lib/image-optimize';
 import { DeepQueryModal } from '../../components/DeepQueryModal';
 import { SEO } from '../../components/SEO';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
+
+const SERVICE_SLUG_ALIASES: Record<string, string> = {
+  'video-conferencing-solutions': 'boardroom-integration',
+  'corporate-event-management': 'corporate-events',
+};
 
 function formatContent(content: string) {
   if (!content) return '';
@@ -57,14 +63,18 @@ function formatContent(content: string) {
 
 export function ServiceDetail() {
   const { serviceSlug } = useParams<{ serviceSlug: string }>();
-  const initialFallback = FALLBACK_SERVICES_CATALOG.find(s => s.slug === serviceSlug) || null;
+  const resolvedSlug = SERVICE_SLUG_ALIASES[serviceSlug || ''] || serviceSlug;
+  const initialFallback = FALLBACK_SERVICES_CATALOG.find(s => s.slug === resolvedSlug) || null;
   const [service, setService] = useState<EnrichedService | null>(initialFallback);
   const [loading, setLoading] = useState(!initialFallback);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('Consult with our AV Expert');
+  const [modalTitle, setModalTitle] = useState('Request a 15-Minute Quote');
+  const [footerFormSubmitted, setFooterFormSubmitted] = useState(false);
+  const [footerForm, setFooterForm] = useState({ name: '', company: '', phone: '', city: 'Lahore', requirement: '' });
 
   useEffect(() => {
-    const matchedFallback = FALLBACK_SERVICES_CATALOG.find(s => s.slug === serviceSlug) || null;
+    const targetSlug = SERVICE_SLUG_ALIASES[serviceSlug || ''] || serviceSlug;
+    const matchedFallback = FALLBACK_SERVICES_CATALOG.find(s => s.slug === targetSlug) || null;
     if (matchedFallback) {
       setService(matchedFallback);
       setLoading(false);
@@ -76,7 +86,7 @@ export function ServiceDetail() {
       try {
         const allServices = await getAllServices();
         const merged = mergeWithFallbackServices(allServices);
-        const found = merged.find(s => s.slug === serviceSlug || s.id === serviceSlug) || null;
+        const found = merged.find(s => s.slug === targetSlug || s.id === targetSlug) || null;
         setService(found);
       } catch (e) {
         console.warn('Error fetching service details, using fallback:', e);
@@ -165,21 +175,95 @@ export function ServiceDetail() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <Breadcrumbs items={[{ label: 'Services', path: '/services' }, { label: service.title }]} />
       </div>
-      {/* Hero Section */}
-      <div className="bg-[#1A2B4C] text-white py-24 relative overflow-hidden">
+      {/* 1. Localized Hero Section with Direct 15-Minute Quote CTA */}
+      <div className="bg-[#1A2B4C] text-white py-20 md:py-24 relative overflow-hidden">
         {service.imageUrl && (
            <div className="absolute inset-0 z-0">
-             <img fetchPriority="high" src={service.imageUrl} alt={service.title} className="w-full h-full object-cover mix-blend-overlay opacity-30" />
+             <img
+               fetchPriority="high"
+               decoding="async"
+               width={1400}
+               height={600}
+               src={optimizeGalleryImageUrl(service.imageUrl, 1400, 80)}
+               alt={service.localizedH1 || service.title}
+               className="w-full h-full object-cover mix-blend-overlay opacity-30"
+             />
            </div>
         )}
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full overflow-hidden">
-          <Link to="/services" className="text-[#00B4D8] font-bold text-sm uppercase tracking-widest hover:text-white transition-colors mb-6 inline-block">← Back to Services</Link>
-          <h1 className="text-4xl md:text-6xl font-black mb-6 max-w-4xl tracking-tight leading-none break-words">{service.title}</h1>
-          <div className="text-xl md:text-2xl text-white max-w-4xl leading-relaxed font-medium prose prose-invert max-w-none break-words [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: formatContent(service.description || '') }} />
+          <Link to="/services" className="text-[#00B4D8] font-bold text-sm uppercase tracking-widest hover:text-white transition-colors mb-4 inline-block">← Back to All Services</Link>
+          <div className="inline-flex items-center gap-2 bg-[#00B4D8]/15 border border-[#00B4D8]/30 text-[#00B4D8] px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest mb-5 block w-fit">
+            <Sparkles size={14} />
+            <span>Lahore (Johar Town &amp; DHA) • Karachi (Clifton) • Islamabad (Blue Area)</span>
+          </div>
+          <h1 className="text-3xl md:text-6xl font-black mb-6 max-w-4xl tracking-tight leading-tight break-words">
+            {service.localizedH1 || service.title}
+          </h1>
+          <div className="text-lg md:text-2xl text-gray-200 max-w-4xl leading-relaxed font-medium prose prose-invert max-w-none break-words [&_*]:break-words [&_*]:whitespace-normal mb-8" dangerouslySetInnerHTML={{ __html: formatContent(service.description || '') }} />
+          <div className="flex flex-wrap items-center gap-4">
+            <button
+              onClick={() => {
+                setModalTitle('Request a 15-Minute Quote');
+                setIsQuoteModalOpen(true);
+              }}
+              className="bg-[#00B4D8] hover:bg-[#0096B4] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl flex items-center gap-3 cursor-pointer"
+            >
+              <span>Request a 15-Minute Quote</span>
+              <ArrowRight size={18} />
+            </button>
+            <a
+              href="tel:+923214256263"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/25 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2"
+            >
+              <Phone size={16} className="text-[#00B4D8]" />
+              <span>0321 425 6263</span>
+            </a>
+            <a
+              href="tel:+923390000921"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/25 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2"
+            >
+              <Phone size={16} className="text-[#F26522]" />
+              <span>0339 0000 921</span>
+            </a>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-16 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-16 w-full overflow-hidden">
+      {/* 2. Trust & Authority Bar (Partner Hardware Logos + Certified Engineering Team) */}
+      <div className="bg-white border-b border-gray-200 py-6 px-4 shadow-sm">
+        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#00B4D8]/10 text-[#00B4D8] flex items-center justify-center shrink-0">
+              <Award size={22} />
+            </div>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] block">Certified Pro-AV Engineering Team</span>
+              <span className="text-sm font-black text-[#1A2B4C]">Official Deployment Partner Across Pakistan</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+            {[
+              { name: 'Cisco', link: '/brands/cisco', tag: 'Room Kits & CUCM' },
+              { name: 'HP Poly', link: '/brands/poly', tag: 'Group 500 & Studio X' },
+              { name: 'Yealink', link: '/brands/yealink', tag: 'MTR & SIP Phones' },
+              { name: 'Logitech', link: '/brands/logitech', tag: 'Rally Bar & Tap' },
+              { name: 'Horion', link: '/category/video-conferencing', tag: '4K Interactive Flat Panels' },
+              { name: 'Grandstream', link: '/brands/grandstream', tag: 'UCM IP-PBX & VoIP' },
+            ].map((partner) => (
+              <Link
+                key={partner.name}
+                to={partner.link}
+                className="px-4 py-2 rounded-xl bg-[#F8F9FA] hover:bg-[#1A2B4C] text-[#1A2B4C] hover:text-white border border-gray-200 transition-all text-center group"
+              >
+                <span className="block text-xs font-black tracking-wider uppercase">{partner.name}</span>
+                <span className="block text-[9px] text-gray-500 group-hover:text-[#00B4D8] font-bold">{partner.tag}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12 w-full overflow-hidden">
         {/* Content */}
         <div className="w-full min-w-0 space-y-12">
           <div className="bg-white rounded-[3rem] p-6 sm:p-12 border border-gray-100 shadow-sm w-full overflow-hidden">
@@ -249,6 +333,102 @@ export function ServiceDetail() {
             </div>
           </div>
 
+          {/* 3. The "AV Live" Advantage Block */}
+          <div className="bg-[#1A2B4C] text-white rounded-[3rem] p-6 sm:p-12 shadow-xl">
+            <span className="text-[#00B4D8] text-[11px] font-black uppercase tracking-[0.3em] block mb-2">Operational Excellence</span>
+            <h2 className="text-2xl sm:text-3xl font-black mb-8">The &ldquo;AV Live&rdquo; Advantage</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <Clock className="text-[#00B4D8] mb-3" size={28} />
+                <h3 className="font-black text-base mb-2">15-Minute Technical SLA</h3>
+                <p className="text-xs text-gray-300 leading-relaxed font-medium">
+                  Guaranteed 15-minute engineering response on WhatsApp and hotline for rapid quotation, acoustic room sizing, and live triage.
+                </p>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <ShieldCheck className="text-[#00B4D8] mb-3" size={28} />
+                <h3 className="font-black text-base mb-2">Zero-Downtime Guarantee</h3>
+                <p className="text-xs text-gray-300 leading-relaxed font-medium">
+                  Redundant SDI/NDI signal paths, hot-swap codecs (Poly, Cisco, Logitech), and bonded multi-ISP streaming for mission-critical sessions.
+                </p>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <Award className="text-[#00B4D8] mb-3" size={28} />
+                <h3 className="font-black text-base mb-2">On-Site Standby Engineers</h3>
+                <p className="text-xs text-gray-300 leading-relaxed font-medium">
+                  Dedicated certified AV &amp; broadcast engineers stationed on-site across Lahore, Karachi, and Islamabad for zero-stress execution.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Service Breakdown */}
+          <div className="bg-white rounded-[3rem] p-6 sm:p-12 border border-gray-100 shadow-sm">
+            <span className="text-[#00B4D8] text-[11px] font-black uppercase tracking-[0.3em] block mb-2">Core Capabilities</span>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#1A2B4C] mb-6">Turnkey Service Breakdown</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {(service.offeringsBreakdown || [
+                {
+                  title: 'Boardroom & Huddle Room Kits',
+                  detail: 'Polycom video conferencing distributors Lahore & Cisco Room Kit installation Karachi with acoustic ceiling/table microphone arrays.'
+                },
+                {
+                  title: 'Interactive Flat Panels & Displays',
+                  detail: 'Interactive flat panel displays for business Lahore (Horion 4K smart boards) and fine-pitch SMD LED screen rental for corporate events.'
+                },
+                {
+                  title: 'Hybrid Broadcast & 3D Hologram Stages',
+                  detail: 'Corporate hybrid event live streaming Lahore, 3D hologram display stages Pakistan, and multi-camera event broadcasting Karachi.'
+                }
+              ]).map((item, idx) => (
+                <div key={idx} className="p-6 rounded-2xl bg-[#F8F9FA] border border-gray-200 flex flex-col">
+                  <div className="w-10 h-10 rounded-xl bg-[#00B4D8]/10 text-[#00B4D8] flex items-center justify-center mb-4">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <h3 className="font-black text-[#1A2B4C] text-base mb-2">{item.title}</h3>
+                  <p className="text-xs text-gray-600 leading-relaxed font-medium">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 5. Localized Proof (Case Studies in Johar Town, DHA, Clifton & Blue Area) */}
+          <div className="bg-white rounded-[3rem] p-6 sm:p-12 border border-gray-100 shadow-sm">
+            <span className="text-[#00B4D8] text-[11px] font-black uppercase tracking-[0.3em] block mb-2">Verified Regional Deployments</span>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#1A2B4C] mb-6">
+              Localized Proof: Recent Installations in Johar Town, DHA, Clifton &amp; Blue Area
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {(service.caseStudies || [
+                {
+                  hub: 'Johar Town & DHA, Lahore',
+                  project: 'Executive Boardroom & Interactive Flat Panel Integration',
+                  outcome: 'Deployed Poly Studio X72, 86" Horion interactive flat panel display, and expansion microphones with 15-minute SLA coverage.'
+                },
+                {
+                  hub: 'Clifton & Shahrah-e-Faisal, Karachi',
+                  project: 'Cisco Room Kit Installation & Multi-Camera Hybrid Townhall',
+                  outcome: 'Commissioned Cisco Room Kit Plus boardroom endpoints and 4-camera SDI hybrid event broadcasting for 600+ participants.'
+                },
+                {
+                  hub: 'Blue Area, Islamabad',
+                  project: '30-Seat Council Boardroom & VoIP PBX Integration',
+                  outcome: 'Integrated Polycom Group 500 12x PTZ optical system with Bosch digital conference mics and Grandstream UCM6308 IP PBX.'
+                }
+              ]).map((cs, idx) => (
+                <div key={idx} className="p-6 rounded-2xl border border-gray-200 bg-white hover:border-[#00B4D8] transition-all">
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full mb-3">
+                    <MapPin size={12} />
+                    <span>{cs.hub}</span>
+                  </div>
+                  <h3 className="font-black text-[#1A2B4C] text-base mb-2">{cs.project}</h3>
+                  <p className="text-xs text-gray-600 leading-relaxed font-medium">{cs.outcome}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 6. FAQ & Schema Markup Section */}
           {serviceFaqs.length > 0 && (
             <div className="bg-white rounded-[3rem] p-6 sm:p-12 border border-gray-100 shadow-sm">
               <h2 className="text-2xl font-black text-[#1A2B4C] mb-6">Frequently Asked Questions ({service.title})</h2>
@@ -262,6 +442,110 @@ export function ServiceDetail() {
               </div>
             </div>
           )}
+
+          {/* 7. Clear Contact Footer with Dual Hotlines (0321 425 6263 & 0339 0000 921) & Integrated Form */}
+          <div className="bg-white rounded-[3rem] p-6 sm:p-12 border-2 border-[#00B4D8]/30 shadow-lg">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+              <div>
+                <span className="text-[#00B4D8] text-[11px] font-black uppercase tracking-[0.3em] block mb-2">Direct Engineering Desk</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-[#1A2B4C] mb-4">
+                  Request a 15-Minute Quote or Site Survey
+                </h2>
+                <p className="text-sm text-gray-600 leading-relaxed font-medium mb-6">
+                  Speak directly with our certified Pro-AV and event staging engineers in Lahore (Johar Town), Karachi (Clifton), and Islamabad (Blue Area).
+                </p>
+                <div className="space-y-4 mb-6">
+                  <a href="tel:+923214256263" className="flex items-center gap-4 p-4 rounded-2xl bg-[#F8F9FA] border border-gray-200 hover:border-[#00B4D8] transition-all">
+                    <div className="w-12 h-12 rounded-xl bg-[#00B4D8] text-white flex items-center justify-center shrink-0">
+                      <Phone size={22} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 block">Primary Enterprise Hotline (15-Min SLA)</span>
+                      <span className="text-xl font-black text-[#1A2B4C]">0321 425 6263</span>
+                    </div>
+                  </a>
+                  <a href="tel:+923390000921" className="flex items-center gap-4 p-4 rounded-2xl bg-[#F8F9FA] border border-gray-200 hover:border-[#F26522] transition-all">
+                    <div className="w-12 h-12 rounded-xl bg-[#F26522] text-white flex items-center justify-center shrink-0">
+                      <Phone size={22} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 block">Corporate Events &amp; Staging Desk</span>
+                      <span className="text-xl font-black text-[#1A2B4C]">0339 0000 921</span>
+                    </div>
+                  </a>
+                </div>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setFooterFormSubmitted(true);
+                }}
+                className="bg-[#F8F9FA] p-6 sm:p-8 rounded-3xl border border-gray-200 space-y-4"
+              >
+                <h3 className="font-black text-lg text-[#1A2B4C]">Instant BoM &amp; Project Quote Form</h3>
+                {footerFormSubmitted ? (
+                  <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold">
+                    Thank you! Your inquiry for {service.title} has been routed to our engineering desk. An AV specialist will contact you within 15 minutes, or call us now at 0321 425 6263 / 0339 0000 921.
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        required
+                        placeholder="Your Full Name *"
+                        value={footerForm.name}
+                        onChange={(e) => setFooterForm({ ...footerForm, name: e.target.value })}
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8]"
+                      />
+                      <input
+                        type="text"
+                        required
+                        placeholder="Organization / Company *"
+                        value={footerForm.company}
+                        onChange={(e) => setFooterForm({ ...footerForm, company: e.target.value })}
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8]"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <input
+                        type="tel"
+                        required
+                        placeholder="Phone / WhatsApp Number *"
+                        value={footerForm.phone}
+                        onChange={(e) => setFooterForm({ ...footerForm, phone: e.target.value })}
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8]"
+                      />
+                      <select
+                        value={footerForm.city}
+                        onChange={(e) => setFooterForm({ ...footerForm, city: e.target.value })}
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8]"
+                      >
+                        <option value="Lahore">Lahore (Johar Town / DHA / Gulberg)</option>
+                        <option value="Karachi">Karachi (Clifton / Shahrah-e-Faisal)</option>
+                        <option value="Islamabad">Islamabad / Rawalpindi (Blue Area)</option>
+                        <option value="Other">Other City in Pakistan</option>
+                      </select>
+                    </div>
+                    <textarea
+                      rows={3}
+                      placeholder="Room capacity, hardware model (Poly / Cisco / Yealink / Horion), or event dates..."
+                      value={footerForm.requirement}
+                      onChange={(e) => setFooterForm({ ...footerForm, requirement: e.target.value })}
+                      className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8]"
+                    />
+                    <button
+                      type="submit"
+                      className="w-full bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer"
+                    >
+                      Submit 15-Minute Quote Request
+                    </button>
+                  </>
+                )}
+              </form>
+            </div>
+          </div>
         </div>
 
         {/* Sidebar */}

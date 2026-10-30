@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { motion } from 'motion/react';
 import { 
   Filter, 
@@ -23,6 +23,8 @@ import {
   PRODUCT_GMC_METADATA,
   buildFallbackProductFromGmcMeta,
 } from '../lib/gmc-feed';
+import { EXCLUDED_CATEGORY_SLUGS } from '../lib/sitemap-generator';
+import { optimizeGalleryImageUrl } from '../lib/image-optimize';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 
@@ -51,6 +53,9 @@ export function Shop() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [expandedParents, setExpandedParents] = useState<{[key: string]: boolean}>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState<number>(16);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // Sync parameters from URL (/brands/:brandSlug or ?brand=...)
   const searchQuery = searchParams.get('q') || '';
@@ -88,7 +93,13 @@ export function Shop() {
 
   useEffect(() => {
     const unsubscribeCategories = subscribeToCategories((cats) => {
-      setCategories(cats);
+      const productOnlyCats = cats.filter(
+        c =>
+          c.isActive !== false &&
+          !EXCLUDED_CATEGORY_SLUGS.has(c.slug) &&
+          (!(c as any).type || (c as any).type === 'product')
+      );
+      setCategories(productOnlyCats);
     });
 
     const unsubscribeProducts = subscribeToProducts((data) => {
@@ -291,6 +302,34 @@ export function Shop() {
     }
     return result;
   }, [products, searchQuery, selectedCategory, selectedBrands, minPrice, maxPrice, sortOption]);
+
+  // Reset progressive batching count when filters change
+  useEffect(() => {
+    setVisibleCount(16);
+  }, [searchQuery, selectedCategory, selectedBrands, minPrice, maxPrice, sortOption]);
+
+  // Progressive IntersectionObserver batch loader for smooth Core Web Vitals
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel || visibleCount >= sortedAndFilteredProducts.length) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + 16, sortedAndFilteredProducts.length));
+        }
+      },
+      { rootMargin: '320px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [visibleCount, sortedAndFilteredProducts.length]);
+
+  const visibleProducts = useMemo(
+    () => sortedAndFilteredProducts.slice(0, visibleCount),
+    [sortedAndFilteredProducts, visibleCount]
+  );
 
   const parentCategories = categories.filter(c => {
     const isProductCategory = !c.parentId && c.isActive && ((c as any).type === 'product');
@@ -801,39 +840,49 @@ export function Shop() {
               </div>
             ) : (
             <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" : "flex flex-col gap-6"}>
-              {sortedAndFilteredProducts.map((product, index) => {
+              {visibleProducts.map((product, index) => {
                 const productSlug = getCanonicalProductSlug(product);
+                const productKey = product.id || productSlug;
                 const { regularPrice: cardRegularPrice, effectivePrice: cardEffectivePrice, hasSale: cardHasSale } = resolveProductPricing(product);
+                const rawImages = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
+                const firstImage = optimizeGalleryImageUrl(rawImages[0] || 'https://placehold.co/600x600?text=No+Image', 480, 75);
+                const secondImage = rawImages[1] ? optimizeGalleryImageUrl(rawImages[1], 480, 75) : null;
+                const isEagerCard = index < 4;
+
                 return viewMode === 'grid' ? (
                   // Grid View Card
                   <motion.div 
-                    key={product.id}
+                    key={productKey}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.03 }}
+                    transition={{ delay: Math.min(index, 8) * 0.02 }}
+                    onMouseEnter={() => secondImage && setHoveredProductId(productKey)}
+                    onMouseLeave={() => secondImage && setHoveredProductId(null)}
                     className="bg-white group cursor-pointer rounded-3xl overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
                   >
                     <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
                       <Link to={`/product/${productSlug}`} className="absolute inset-0 z-0">
-                        {(() => {
-                           const images = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
-                           const firstImage = images[0] || 'https://placehold.co/600x600?text=No+Image';
-                           const secondImage = images[1] || firstImage;
-                           return (
-                             <>
-                               <img loading="lazy" 
-                                 src={firstImage} 
-                                 alt={`Professional AV equipment: ${product.productName} by ${product.brand}`} 
-                                 className="absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out group-hover:opacity-0"
-                               />
-                               <img loading="lazy" 
-                                 src={secondImage} 
-                                 alt={`Side view of ${product.productName}`} 
-                                 className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 scale-105"
-                               />
-                             </>
-                           );
-                        })()}
+                        <img
+                          loading={isEagerCard ? 'eager' : 'lazy'}
+                          fetchPriority={index < 2 ? 'high' : 'auto'}
+                          decoding="async"
+                          width={480}
+                          height={360}
+                          src={firstImage}
+                          alt={`Professional AV equipment: ${product.productName} by ${product.brand}`}
+                          className={`absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out ${secondImage ? 'group-hover:opacity-0' : ''}`}
+                        />
+                        {secondImage && hoveredProductId === productKey && (
+                          <img
+                            loading="lazy"
+                            decoding="async"
+                            width={480}
+                            height={360}
+                            src={secondImage}
+                            alt={`Alternate view of ${product.productName}`}
+                            className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 scale-105"
+                          />
+                        )}
                       </Link>
                       
                       <button 
@@ -893,7 +942,7 @@ export function Shop() {
                               id: product.id!,
                               name: product.productName,
                               price: cardEffectivePrice,
-                              image: (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || '',
+                              image: firstImage,
                               brand: product.brand
                             } as any);
                           }}
@@ -907,15 +956,19 @@ export function Shop() {
                 ) : (
                   // List View Card
                   <motion.div 
-                    key={product.id}
+                    key={productKey}
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.03 }}
+                    transition={{ delay: Math.min(index, 8) * 0.02 }}
                     className="bg-white group rounded-[2rem] overflow-hidden flex flex-col sm:flex-row border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-xl p-6 gap-6"
                   >
                     <Link to={`/product/${productSlug}`} className="w-full sm:w-48 h-48 bg-gray-50 rounded-2xl overflow-hidden relative shrink-0 block">
-                      <img loading="lazy" 
-                        src={(Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || 'https://placehold.co/600x600?text=No+Image'} 
+                      <img
+                        loading={isEagerCard ? 'eager' : 'lazy'}
+                        decoding="async"
+                        width={320}
+                        height={320}
+                        src={firstImage}
                         alt={product.productName} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
@@ -1019,6 +1072,21 @@ export function Shop() {
                 </div>
               )}
             </div>
+            )}
+
+            {visibleCount < sortedAndFilteredProducts.length && (
+              <div ref={loadMoreRef} className="mt-10 flex flex-col items-center justify-center gap-3 py-4">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  Showing {visibleProducts.length} of {sortedAndFilteredProducts.length} hardware modules
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((prev) => Math.min(prev + 16, sortedAndFilteredProducts.length))}
+                  className="bg-white border border-gray-200 hover:border-[#00B4D8] text-[#1A2B4C] hover:text-[#00B4D8] px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm cursor-pointer"
+                >
+                  Load More Hardware ({sortedAndFilteredProducts.length - visibleProducts.length} Remaining)
+                </button>
+              </div>
             )}
           </div>
         </div>
