@@ -1,88 +1,87 @@
-# Critical SEO Metadata, Title/Description Length & JSON-LD Schema Remediation Plan
+# Duplicate Content Elimination & Internal Link Graph Rebalancing Plan
 
-Eliminates the critical SEO tag and structured data warnings reported by the WebsiteCrawler audit by enforcing strict character limits (`≤ 65` characters for `<title>` and `≤ 160` characters for `<meta name="description">`), removing deprecated `<meta name="keywords">` tags, and scoping the heavy homepage JSON-LD `@graph` exclusively to the root path (`/`) while keeping clean, conflict-free per-route schemas across all 155 canonical pages.
+This plan resolves the **Duplicate Content clusters (`80.5%–100.0%` similarity)** and **dead-end leaf nodes (red `1` scores)** identified in the WebsiteCrawler Duplicate Content Report and SVG Node Graph for `avlive.com.pk`.
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The following remediation scope reflects your confirmed choices from our interactive review of the WebsiteCrawler PDF report:
+> All three architectural decisions below have been confirmed and locked in for execution upon approval:
 
-- **Confirmed Decision 1 (Focused Critical SEO Scope)**: Restrict changes strictly to critical SEO tags (`<title>`, `<meta name="description">`, OpenGraph/Twitter title & description mirrors, and JSON-LD structured data) without altering security headers or visual UI layouts.
-- **Confirmed Decision 2 (Strict Title & Description Length Budgets)**: Trim and normalize all SSR and client-side `<title>` tags to **≤ 65 characters** (eliminating the 50 *"Title length is more than 70 characters"* warnings) and all `<meta name="description">` tags to **≤ 160 characters** (eliminating the 21 *"Meta Description length is more than 200"* warnings).
-- **Confirmed Decision 3 (Homepage `@graph` Scoping & Meta Keywords Removal)**: Scope the large homepage JSON-LD `@graph` (`LocalBusiness`, homepage `FAQPage`, and `OfferCatalog`) strictly to `/` so subpages only emit their dedicated route schema (`Product`, `Service`, `CollectionPage`, or `BlogPosting`) plus a lightweight `Organization` publisher reference—eliminating the **8,990 repeated structured data warnings** and **52 `meta keywords` warnings**.
+- **Confirmed Decision 1 (Full SSR Content Differentiation)**: Replace the generic boilerplate fallback in server-side HTML rendering so every static page, category page, brand page, and product page renders unique, domain-specific prose, structured comparison/pricing tables, and technical specifications (`< 30%` pairwise text overlap across sibling routes).
+- **Confirmed Decision 2 (Contextual Mesh Linking for the SVG Node Graph)**: Eliminate dead-end leaf nodes (`1` incoming/outgoing link) by embedding semantic breadcrumb trails, parent Category/Brand hub links, and 4–6 contextually matched sibling/related SKU links inside every Product, Category, Brand, Service, and Blog SSR snapshot.
+- **Confirmed Decision 3 (`/events-services` vs. `/services` Separation)**: Retain both canonical URLs while giving `/events-services` a dedicated **AV Equipment Rental & SMD LED Stage Rate Card Table** (P2.5/P2.9 LED walls, 3D HoloGauze stages, line-array sound, and multi-camera live switching packages) and `/services` a **9-Pillar Enterprise Engineering & SLA Matrix**.
 
 ---
 
 ## 1. Overview & Core Concept
 
-- **What It Does**: Streamlines the server-side and client-side `<head>` metadata pipeline so every HTML route serves a crisp, non-truncated title (`≤ 65` chars), an actionable summary description (`≤ 160` chars), zero deprecated `<meta name="keywords">` tags, and a single self-contained JSON-LD structured data payload matched to that exact route.
-- **Target Audience / Persona**: Googlebot, Google Merchant Center validators, Answer Engine crawlers, and static HTML SEO auditors (`WebsiteCrawler.org`, Ahrefs, Semrush).
-- **Key Value**: Removes duplicate `FAQPage` / `OfferCatalog` / `LocalBusiness` schema collisions on product and service pages, prevents SERP title/description truncation, and resolves over 9,100 reported tag/schema warnings in a single pass.
+- **What It Does**:
+  1. **Eliminates Static Route Boilerplate (`84.8%–100%` Duplicate Content)**: Previously, 30+ static routes (`/events-services`, `/services`, `/shop`, `/brands`, `/lahore`, `/karachi`, `/islamabad`, `/zoom-rooms`, `/microsoft-teams-rooms`, `/3d-hologram`, `/projection-mapping`, `/programs/*`, etc.) fell back to the exact same 21-link `<nav>` list in raw SSR HTML. Each static route will now render a unique 150–250 word topical guide, route-specific HTML specification/pricing `<table>`, and targeted internal links relevant to its exact intent.
+  2. **Differentiates Product & Category SSR Snapshots**:
+     - **Product Pages (`/product/:slug`)**: Replaces repetitive table row labels with product-specific engineering prose, unique use-case deployment guidance (room size, acoustic/optical coverage, and compatible platforms), full technical specs, and a **"Compare & Compatible Hardware in `<Category>`"** contextual link cluster.
+     - **Category Pages (`/category/:slug`)**: Injects category-specific buyer guidance, acoustic/network deployment standards, price range summaries (min–max PKR across verified models), and direct links to top brands in that category.
+  3. **Rebalances the Internal Link Node Graph**: Transforms the star-shaped crawl graph (where 32+ outer nodes had only `1` link and middle nodes had `29`) into a balanced mesh graph where every page links to its parent hub and 4–6 related sibling pages.
+- **Target Audience / Persona**: Non-JS search engine crawlers (WebsiteCrawler, Bingbot, first-wave Googlebot, and AI Answer Engines) evaluating content uniqueness and internal PageRank distribution.
+- **Key Value**: Drives pairwise page similarity well below WebsiteCrawler's duplicate threshold (`< 35%` Jaccard/shingle overlap) while distributing internal link equity across all 53 hardware SKUs, 25 brands, 12 categories, and 9 services.
 
 ---
 
 ## 2. User Experience & Visual Design
 
-- **Key User & Crawler Flows**:
-  1. **Search Snippet Rendering**: When a user or crawler inspects any of the 155 canonical URLs (static hubs, 25 brands, 12 categories, 53 products, 9 services, 11 blog guides), the `<title>` fits cleanly within Google's 60–65 character desktop/mobile pixel budget and the `<meta name="description">` delivers a complete sentence under 160 characters without ellipsis cutoffs.
-  2. **Structured Data Validation**:
-     - Visiting `/` outputs the full corporate `Organization`, `LocalBusiness` (Lahore, Karachi, Islamabad branches), homepage `FAQPage`, and `OfferCatalog` `@graph`.
-     - Visiting any subpage (`/product/*`, `/services/*`, `/category/*`, `/brands/*`, `/blog/*`) strips the homepage-only `FAQPage` and `OfferCatalog` block and emits only the route's dedicated JSON-LD schema alongside a minimal `Organization` (`#organization`) node so `@id` references (`provider`, `publisher`) remain 100% valid.
-- **Visual Identity & Theme**:
-  - Preserves the existing enterprise Pro-AV visual design, typography, and layout untouched.
+- **Key User Flows**:
+  - **Search Crawler / SEO Audit Flow**: Crawlers fetching raw HTML receive a self-contained, semantically rich `<main class="ssr-seo-snapshot">` tailored to the exact URL path, complete with a `<nav aria-label="Breadcrumb">` trail, unique `<article>` copy, a route-specific `<table>`, and a `<section aria-label="Related Enterprise Solutions">` mesh link block.
+  - **Human Visitor Flow**: React hydrates seamlessly on frame 1 with zero visual layout shift, preserving the existing enterprise navy (`#1A2B4C`) and cyan (`#00B4D8`) design system.
 
 ---
 
 ## 3. Key Product Decisions & Trade-Offs
 
-- **Decision 1: Smart Word-Boundary Truncation + Concise Route Templates**
-  - *Chosen Approach*: Update static route titles/descriptions and dynamic Brand, Category, Product, Service, and Blog title/description generators to produce naturally concise copy (`≤ 65` chars for titles, `≤ 160` chars for descriptions), backed by a word-boundary clamping helper (`clampSeoTitle(str, 65)` and `clampSeoDescription(str, 160)`) in both SSR and client-side `<SEO />`.
-  - *Why*: Guarantees that even long product names or custom database descriptions never exceed crawler thresholds or break mid-word.
-  - *Alternatives Considered*: Hard character slicing (`substring(0, 65)`), which cuts words in half and looks unpolished in search results.
-- **Decision 2: Scoping the Static `@graph` to `/` While Retaining Valid `@id` References**
-  - *Chosen Approach*: Mark the homepage JSON-LD `<script type="application/ld+json" id="ssr-home-schema">` in the HTML template so the SSR injector keeps the full `@graph` on `/` and replaces it on subpages with the subpage's specific `matched.schema` (including a compact `Organization` node for `#organization` reference integrity).
-  - *Why*: Static crawlers flag pages that declare multiple unrelated `FAQPage`, `LocalBusiness`, and `OfferCatalog` blocks on product or policy URLs; scoping to `/` eliminates all 8,990 warnings while keeping Rich Results valid.
-- **Decision 3: Complete Removal of `<meta name="keywords">`**
-  - *Chosen Approach*: Remove `<meta name="keywords">` from the base HTML template, SSR replacement pipeline, and React `<SEO />` head output (while preserving the optional `keywords` prop on the TypeScript interface for backward compatibility).
-  - *Why*: Google has ignored `<meta name="keywords">` since 2009, and modern SEO auditors penalize its presence as a keyword-stuffing signal.
+- **Decision 1: Route-Specific SSR Content Generator vs. Generic Fallback Navigation**
+  - *Chosen Approach*: Build a dedicated route-content synthesis engine in the SSR HTML injector that generates unique topical paragraphs, custom HTML tables, and intent-matched link clusters for each route group (`regional`, `platform-rooms`, `event-tech`, `b2b-programs`, `trust-policies`, `catalog-hubs`, `categories`, `brands`, and `products`).
+  - *Why*: Removing the shared 21-link boilerplate `<nav>` from every static page immediately drops `/events-services` vs. `/services` similarity from `84.8%` to `< 20%` and stops inflating link counts on the same 21 URLs.
+  - *Alternatives Considered*: Canonicalizing `/events-services` to `/services`—rejected because the user confirmed keeping both URLs as distinct conversion funnels (rental rate card vs. full-service B2B engineering directory).
+
+- **Decision 2: Contextual Related-SKU & Hub Mesh Linking**
+  - *Chosen Approach*: Every `/product/:slug` SSR snapshot will link to:
+    1. Its primary `/category/:catSlug` hub and `/brands/:brandSlug` page.
+    2. Four related products in the same category or price tier (`/product/:relatedSlug`).
+    3. One relevant engineering buyer's guide (`/blog/:guideSlug`) or interactive tool (`/room-designer`, `/compare`).
+  - *Why*: Eliminates the `1`-link leaf nodes in the WebsiteCrawler SVG graph and ensures every product and brand page receives and passes internal PageRank.
 
 ---
 
 ## 4. Technical Architecture & Data Strategy *(Technical Reference)*
 
-### Architecture & Metadata Injection Flow
+### Architecture & Internal Link Graph Transformation
 
-```text
-┌───────────────────────────────────────────────────────────────────────────┐
-│                   Incoming HTTP Request (155 Canonical URLs)              │
-└─────────────────────────────────────┬─────────────────────────────────────┘
-                                      │
-                                      ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│                SSR Metadata & Schema Engine (injectRouteSeoIntoHtml)      │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │ 1. Resolve Route Metadata (Static / Brand / Category / Product /   │  │
-│  │    Service / Blog)                                                  │  │
-│  │ 2. Normalize & Clamp:                                               │  │
-│  │    • clampSeoTitle(title, 65)       -> ≤ 65 chars (word-safe)      │  │
-│  │    • clampSeoDescription(desc, 160) -> ≤ 160 chars (word-safe)     │  │
-│  │ 3. Omit <meta name="keywords">                                      │  │
-│  │ 4. Scope JSON-LD Schema:                                            │  │
-│  │    • If path === "/" -> Keep full Homepage @graph                   │  │
-│  │    • If path !== "/" -> Replace #ssr-home-schema with Route Schema  │  │
-│  │                         + compact #organization reference node      │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────┬─────────────────────────────────────┘
-                                      │
-                                      ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│                     Client-Side Hydration (<SEO /> Component)             │
-│  • Applies identical clampSeoTitle(65) & clampSeoDescription(160)         │
-│  • Renders <title>, <meta name="description">, OpenGraph & Twitter cards  │
-│  • Does not emit <meta name="keywords">                                   │
-└───────────────────────────────────────────────────────────────────────────┘
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│                   Balanced Mesh Crawl Topology (SSR HTML)                  │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│   [Homepage /] ──► [/shop] & [/brands] & [/services] & [/events-services]  │
+│         │                                                                  │
+│         ├──► [12 Category Hubs (/category/:slug)]                          │
+│         │       ├── Unique Category Buyer Guide + Min/Max PKR Summary      │
+│         │       ├── Links to Top Brands in Category (/brands/:brand)       │
+│         │       └── Links to All Category SKUs (/product/:slug)            │
+│         │                                                                  │
+│         ├──► [25 Brand Hubs (/brands/:slug)]                               │
+│         │       ├── Unique OEM Authorization & Warranty Summary            │
+│         │       ├── Links to Brand's Primary Categories (/category/:slug)  │
+│         │       └── Links to Verified Brand SKUs (/product/:slug)          │
+│         │                                                                  │
+│         ├──► [53 Product Pages (/product/:slug)]                           │
+│         │       ├── Unique Hardware Narrative + Deployment Use-Case Prose  │
+│         │       ├── Breadcrumb: Home > Shop > Category > Brand > Product   │
+│         │       └── Contextual Mesh: 4 Sibling SKUs + 1 Buyer's Guide      │
+│         │                                                                  │
+│         └──► [Static Pillars (/events-services, /lahore, /programs/*)]     │
+│                 ├── Dedicated Route Table (Rental Rate Card / SLA Matrix)  │
+│                 └── 5–6 Intent-Matched Sibling & Service Links Only        │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Data Model & State Compatibility
-- **Backward Compatibility**: The `SEOProps` interface retains `keywords?: string` as an optional prop so no existing page component calls break during TypeScript compilation, while omitting the `<meta name="keywords">` DOM element from rendered output.
-- **Verification**: After applying the metadata and schema rules, an automated audit script will verify all 155 sitemap URLs to confirm `0` titles over 65 characters, `0` descriptions over 160 characters, `0` `<meta name="keywords">` tags, and `1` clean JSON-LD schema block per page.
+### Verification Targets Before Completion
+- **Pairwise Text Similarity Check**: Run an automated shingle/Jaccard similarity audit across all URL pairs cited in `Duplicate_Content_report_80a8cd80.pdf` (`/product/grandstream-gxp2170-pakistan` vs. `/product/poly-studio-x32-pakistan`, `/category/ip-cameras` vs. `/category/speakerphones`, `/events-services` vs. `/services`, and `/product/polycom-realpresence-group-500-pakistan` vs. `/services/expo-organizing`) and verify that every pair scores **`< 30%` similarity**.
+- **Link Graph Connectivity Check**: Verify that every canonical page in `public/sitemap.xml` emits contextual breadcrumb and related-resource links without repeating a single site-wide 21-link boilerplate list.

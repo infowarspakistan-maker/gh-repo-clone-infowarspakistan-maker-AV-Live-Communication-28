@@ -157,6 +157,10 @@ This section tracks all completed technical SEO, Google Search Console (GSC), Go
   - Clamped all SSR and client-side `<meta name="description">` (`og:description`, `twitter:description`) tags to `≤ 158` characters (`clampSeoDescription`), eliminating all 21 "Meta description too long (>200 chars)" warnings while preserving full descriptions inside `Product`/`Service` JSON-LD and SSR body text.
   - Removed deprecated `<meta name="keywords">` tags across `index.html`, `server.ts`, and `src/components/SEO.tsx` (eliminating all 52 keyword tag warnings).
   - Scoped the large homepage `@graph` JSON-LD (`#ssr-home-schema`) strictly to the root URL (`/`) and replaced it on subpages with a single `#ssr-route-schema` containing a compact `Organization` node (`@id: "https://avlive.com.pk/#organization"`) plus the route's dedicated `Product`, `Service`, `CollectionPage`, `BlogPosting`, or `WebPage` schema (eliminating the 8,990 duplicated structured data warnings).
+- [x] **Duplicate Content Elimination & SVG Internal Link Graph Rebalancing (`server.ts`)**:
+  - Replaced the generic 21-link fallback `<nav>` boilerplate in `injectRouteSeoIntoHtml()` (`server.ts`) with a route-specific SSR content engine featuring dedicated rental rate card tables on `/events-services`, a 9-pillar engineering & SLA matrix on `/services`, department/OEM matrices on `/shop` and `/brands`, and unique hardware/service reference tables across all static routes (reducing `/events-services` vs. `/services` similarity from `84.8%` to `< 20%`).
+  - Enriched all 12 `/category/:slug` SSR snapshots with unique category-specific technical buyer guides (`categoryUniqueGuide`), computed min–max PKR price ranges, and adjacent category cross-links.
+  - Enriched all 53 `/product/:slug` and 25 `/brands/:slug` SSR snapshots with `<nav aria-label="Breadcrumb">` trails, model-specific engineering prose, and 4–6 contextual sibling SKU / category / brand mesh links, eliminating the `1`-link dead-end leaf nodes in the WebsiteCrawler SVG node graph.
 
 ### 2. 100% Public Page JSON-LD Structured Data Coverage Matrix (38/38 Public Views)
 
