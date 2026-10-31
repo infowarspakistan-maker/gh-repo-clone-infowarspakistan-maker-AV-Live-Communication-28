@@ -499,7 +499,9 @@ export const STATIC_CORE_ROUTES: string[] = [
   '/brands/itc',
   '/brands/3cx',
   '/brands/freepbx',
-  '/brands/sangoma'
+  '/brands/sangoma',
+  '/brands/horion',
+  '/brands/google'
 ];
 
 export const CANONICAL_CATEGORY_SLUGS: string[] = [

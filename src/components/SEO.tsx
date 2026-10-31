@@ -46,10 +46,45 @@ function toAbsoluteUrl(pathOrUrl?: string, defaultFallback: string = DEFAULT_DOM
   return withoutQuery;
 }
 
+export function clampSeoTitle(rawTitle: string, maxLen = 65): string {
+  const normalized = String(rawTitle || 'Video Conference | Event Management | AV Live')
+    .replace(/^e-Sports\b/i, 'Esports')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const capitalized = normalized.replace(/^[a-z]/, c => c.toUpperCase());
+  const withBrand = capitalized.includes('AV Live') ? capitalized : `${capitalized} | AV Live`;
+  if (withBrand.length <= maxLen) return withBrand;
+
+  const core = capitalized.replace(/\s*\|\s*AV Live(?:\s+[^\s|]+)*$/i, '').trim();
+  const suffix = ' | AV Live';
+  const budget = maxLen - suffix.length;
+  if (core.length <= budget) return `${core}${suffix}`;
+
+  const segments = core.split(/\s+[|—–-]\s+/);
+  if (segments.length > 1 && segments[0].length <= budget && segments[0].length >= 18) {
+    return `${segments[0].trim()}${suffix}`;
+  }
+
+  const sliced = core.slice(0, budget);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const cleanCore = (lastSpace > 20 ? sliced.slice(0, lastSpace) : sliced).replace(/[,:;|\-–—\s]+$/, '');
+  return `${cleanCore}${suffix}`;
+}
+
+export function clampSeoDescription(rawDesc: string, maxLen = 158): string {
+  const clean = String(rawDesc || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (clean.length <= maxLen) return clean;
+  const sliced = clean.slice(0, maxLen - 1);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const trimmed = (lastSpace > 80 ? sliced.slice(0, lastSpace) : sliced).replace(/[,:;|\-–—.\s]+$/, '');
+  return `${trimmed}.`;
+}
+
 export function SEO({ 
   title = 'Video Conference | Event Management | AV Live', 
-  description = "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events.",
-  keywords = 'Video Conference, Event Management, AV Live, Video Conference in Pakistan, Event Management Company Pakistan, Polycom Group 500, Poly X70, Logitech Rally Bar, Corporate Event Management, 3D Hologram Display, Hybrid Events',
+  description = "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV or book 3D hologram & corporate events.",
   image = DEFAULT_IMAGE,
   imageAlt,
   imageWidth = 1200,
@@ -72,7 +107,8 @@ export function SEO({
   noindex = false,
   locale = 'en_PK'
 }: SEOProps) {
-  const siteTitle = title.includes('AV Live') ? title : `${title} | AV Live`;
+  const siteTitle = clampSeoTitle(title, 65);
+  const clampedDescription = clampSeoDescription(description, 158);
   const absoluteUrl = toAbsoluteUrl(url || (typeof window !== 'undefined' ? window.location.pathname : '/'));
   const absoluteImage = toAbsoluteUrl(image, DEFAULT_IMAGE);
   const resolvedAlt = imageAlt || siteTitle;
@@ -116,20 +152,18 @@ export function SEO({
     cleanupStaticSsrTags('meta[property="og:site_name"]');
     cleanupStaticSsrTags('meta[property="og:locale"]');
     cleanupStaticSsrTags('meta[name="description"]');
-    cleanupStaticSsrTags('meta[name="keywords"]');
     cleanupStaticSsrTags('meta[name="robots"]');
     cleanupStaticSsrTags('meta[name="twitter:card"]');
     cleanupStaticSsrTags('meta[name="twitter:title"]');
     cleanupStaticSsrTags('meta[name="twitter:description"]');
     cleanupStaticSsrTags('meta[name="twitter:image"]');
-  }, [siteTitle, absoluteUrl, description, keywords, robotsContent]);
+  }, [siteTitle, absoluteUrl, clampedDescription, robotsContent]);
 
   return (
     <Helmet htmlAttributes={{ lang: 'en', prefix: 'og: https://ogp.me/ns# fb: https://ogp.me/ns/fb#' }}>
       {/* Standard metadata */}
       <title data-rh="true">{siteTitle}</title>
-      <meta data-rh="true" name="description" content={description} />
-      <meta data-rh="true" name="keywords" content={keywords} />
+      <meta data-rh="true" name="description" content={clampedDescription} />
       
       {/* Robots Directives */}
       {noindex ? (
@@ -146,7 +180,7 @@ export function SEO({
       <meta data-rh="true" property="og:type" content={type} />
       <meta data-rh="true" property="og:url" content={absoluteUrl} />
       <meta data-rh="true" property="og:title" content={siteTitle} />
-      <meta data-rh="true" property="og:description" content={description} />
+      <meta data-rh="true" property="og:description" content={clampedDescription} />
       <meta data-rh="true" property="og:image" content={absoluteImage} />
       <meta data-rh="true" property="og:image:secure_url" content={absoluteImage} />
       <meta data-rh="true" property="og:image:alt" content={resolvedAlt} />
@@ -194,7 +228,7 @@ export function SEO({
       <meta data-rh="true" name="twitter:domain" content="avlive.com.pk" />
       <meta data-rh="true" name="twitter:url" content={absoluteUrl} />
       <meta data-rh="true" name="twitter:title" content={siteTitle} />
-      <meta data-rh="true" name="twitter:description" content={description} />
+      <meta data-rh="true" name="twitter:description" content={clampedDescription} />
       <meta data-rh="true" name="twitter:image" content={absoluteImage} />
       <meta data-rh="true" name="twitter:image:alt" content={resolvedAlt} />
 

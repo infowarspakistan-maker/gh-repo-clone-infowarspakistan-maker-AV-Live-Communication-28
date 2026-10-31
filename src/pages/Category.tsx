@@ -410,12 +410,16 @@ export function Category() {
              <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">Hardware Partners</h3>
                <div className="space-y-4">
-                  {brandsIncategory.map(brand => (
-                    <Link key={brand} to={`/brands/${encodeURIComponent(brand.toString().toLowerCase().replace(/\s+/g, '-'))}`} className="flex items-center justify-between group">
-                       <span className="text-sm font-black uppercase tracking-widest text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors">{brand}</span>
-                       <div className="w-1.5 h-1.5 bg-gray-100 rounded-full group-hover:bg-[#00B4D8] transition-colors"></div>
-                    </Link>
-                  ))}
+                  {brandsIncategory.map(brand => {
+                    const rawSlug = brand.toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                    const canonicalBrandSlug = rawSlug === 'polycom' || rawSlug === 'hp-poly' ? 'poly' : rawSlug;
+                    return (
+                      <Link key={brand} to={`/brands/${encodeURIComponent(canonicalBrandSlug)}`} className="flex items-center justify-between group">
+                         <span className="text-sm font-black uppercase tracking-widest text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors">{brand}</span>
+                         <div className="w-1.5 h-1.5 bg-gray-100 rounded-full group-hover:bg-[#00B4D8] transition-colors"></div>
+                      </Link>
+                    );
+                  })}
                   {brandsIncategory.length === 0 && (
                     <p className="text-[10px] text-gray-300 font-bold uppercase tracking-widest">No Active Brands</p>
                   )}

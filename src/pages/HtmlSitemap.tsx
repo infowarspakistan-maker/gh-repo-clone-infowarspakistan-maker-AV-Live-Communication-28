@@ -78,6 +78,8 @@ const BRAND_PORTALS = [
   { slug: '3cx', name: '3CX Communications', focus: 'Enterprise Software IP PBX & Call Center Licensing' },
   { slug: 'freepbx', name: 'FreePBX / Sangoma', focus: 'Open-Standards IP Telephony & Trunk Gateways' },
   { slug: 'sangoma', name: 'Sangoma', focus: 'PBXact Appliances, Vega Gateways & SBCs' },
+  { slug: 'horion', name: 'Horion Interactive', focus: '65"–98" 4K UHD Interactive Flat Panel Smart Boards' },
+  { slug: 'google', name: 'Google Meet Hardware', focus: 'Enterprise Google Meet Room Licenses & Hardware' },
 ];
 
 const B2B_CORPORATE_LINKS = [
@@ -200,12 +202,12 @@ export function HtmlSitemap() {
                 <FileCode2 className="w-4 h-4" /> Open XML Sitemap (/sitemap.xml) <ExternalLink className="w-3.5 h-3.5" />
               </a>
               <a
-                href="/gmc-products.xml"
+                href="/feed/google-merchant.tsv"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider border border-white/15 transition-all"
               >
-                GMC Product Feed (/gmc-products.xml)
+                GMC Product Feed (/feed/google-merchant.tsv)
               </a>
             </div>
           </div>

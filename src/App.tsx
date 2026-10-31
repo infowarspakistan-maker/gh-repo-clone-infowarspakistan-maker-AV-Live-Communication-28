@@ -1053,6 +1053,8 @@ export default function App() {
           <Route path="/category/privacy-policy" element={<Navigate to="/privacy-policy" replace />} />
           <Route path="/category/terms-of-service" element={<Navigate to="/terms-of-service" replace />} />
           <Route path="/corporate-event-management-pakistan" element={<Navigate to="/corporate-event-management" replace />} />
+          <Route path="/brands/polycom" element={<Navigate to="/brands/poly" replace />} />
+          <Route path="/brands/hp-poly" element={<Navigate to="/brands/poly" replace />} />
           <Route path="/video-conference-in-pakistan" element={<KeywordLandingPage />} />
 
           {/* Fallback keyword landing page for unhandled top-level dynamic SEO slugs & 404 routes */}

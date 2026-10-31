@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan to raise Google Product Attributes (72 -> 98/100), Service Pages (81 -> 97/100), Browsing Experience (89 -> 97/100), and Sitemap/SSR parity (96 -> 99/100) across all 153 canonical URLs.",
-  "updatedAt":  "2026-10-31T10:58:12.534534861Z",
+  "summary":  "Implementation plan to resolve the critical SEO tag issues identified in the WebsiteCrawler audit: trimming all SSR and client-side page titles to <= 65 characters and meta descriptions to <= 160 characters, removing deprecated meta keywords tags, and scoping the homepage JSON-LD @graph schema strictly to the root path (\"/\") while preserving lightweight Organization reference nodes on subpages so all 8,990 structured data warnings are eliminated.",
+  "updatedAt":  "2026-10-31T17:04:00.120886784Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

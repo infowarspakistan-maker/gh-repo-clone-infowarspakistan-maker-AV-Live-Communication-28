@@ -894,48 +894,103 @@ async function startServer() {
     const cleanPath = reqPath === '/' ? '' : reqPath.replace(/\/+$/, '');
     const canonicalUrl = `https://avlive.com.pk${cleanPath}`;
 
+    const escapeHtmlText = (str: string): string =>
+      String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    const escapeHtmlAttr = (str: string): string =>
+      escapeHtmlText(str).replace(/"/g, '&quot;');
+
+    const clampSeoTitle = (rawTitle: string, maxLen = 65): string => {
+      const normalized = String(rawTitle || 'Video Conference | Event Management | AV Live')
+        .replace(/^e-Sports\b/i, 'Esports')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const capitalized = normalized.replace(/^[a-z]/, c => c.toUpperCase());
+      const withBrand = capitalized.includes('AV Live') ? capitalized : `${capitalized} | AV Live`;
+      if (withBrand.length <= maxLen) return withBrand;
+
+      const core = capitalized.replace(/\s*\|\s*AV Live(?:\s+[^\s|]+)*$/i, '').trim();
+      const suffix = ' | AV Live';
+      const budget = maxLen - suffix.length;
+      if (core.length <= budget) return `${core}${suffix}`;
+
+      const segments = core.split(/\s+[|—–-]\s+/);
+      if (segments.length > 1 && segments[0].length <= budget && segments[0].length >= 18) {
+        return `${segments[0].trim()}${suffix}`;
+      }
+
+      const sliced = core.slice(0, budget);
+      const lastSpace = sliced.lastIndexOf(' ');
+      const cleanCore = (lastSpace > 20 ? sliced.slice(0, lastSpace) : sliced).replace(/[,:;|\-–—\s]+$/, '');
+      return `${cleanCore}${suffix}`;
+    };
+
+    const clampSeoDescription = (rawDesc: string, maxLen = 158): string => {
+      const clean = String(rawDesc || '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (clean.length <= maxLen) return clean;
+      const sliced = clean.slice(0, maxLen - 1);
+      const lastSpace = sliced.lastIndexOf(' ');
+      const trimmed = (lastSpace > 80 ? sliced.slice(0, lastSpace) : sliced).replace(/[,:;|\-–—.\s]+$/, '');
+      return `${trimmed}.`;
+    };
+
     const routeMeta: Record<string, { title: string; description: string; keywords?: string; noindex?: boolean; schema?: Record<string, any> }> = {
       '': {
         title: 'Video Conference | Event Management | AV Live',
-        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events.",
-        keywords: 'Video Conference in Pakistan, Corporate Event Management, Polycom Group 500, Poly Studio X70, Logitech Rally Bar Pakistan, Cisco Room Kit Pakistan, 3D Hologram Display Pakistan, AV Live Communications'
+        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV or book 3D hologram & corporate events."
       },
       '/': {
         title: 'Video Conference | Event Management | AV Live',
-        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events.",
-        keywords: 'Video Conference in Pakistan, Corporate Event Management, Polycom Group 500, Poly Studio X70, Logitech Rally Bar Pakistan, Cisco Room Kit Pakistan, 3D Hologram Display Pakistan, AV Live Communications'
+        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV or book 3D hologram & corporate events."
       },
       '/sitemap': {
-        title: 'HTML Sitemap & Complete Enterprise AV Directory | AV Live Pakistan',
-        description: 'Browse the complete directory of 153+ verified pages on AV Live Communications (avlive.com.pk): Video Conference in Pakistan, Corporate Event Management, 53 Hardware Products, 23 Brands, and Buyer\'s Guides.',
-        keywords: 'AV Live sitemap, avlive.com.pk directory, Video Conference in Pakistan, Corporate event management Pakistan, Polycom Group 500, Poly Studio X70, Logitech Rally Bar Pakistan, Yealink Pakistan, 3D Hologram Display Pakistan',
+        title: 'HTML Sitemap & Enterprise AV Directory | AV Live',
+        description: 'Browse the complete directory of 155 verified pages on AV Live Pakistan: Video Conferencing, Event Management, 53 Products, 25 Brands & Guides.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'CollectionPage',
           '@id': 'https://avlive.com.pk/sitemap#collection',
           name: 'AV Live Communications Complete HTML Sitemap & Enterprise Hardware Directory',
           url: 'https://avlive.com.pk/sitemap',
-          description: 'Complete crawlable directory of all 153+ verified pages on avlive.com.pk including Polycom Group 500, Poly Studio X70, Cisco, Logitech, Yealink, Corporate Event Management, and 3D Hologram Displays.'
+          description: 'Complete crawlable directory of all 155 verified pages on avlive.com.pk including Polycom Group 500, Poly Studio X70, Cisco, Logitech, Yealink, Corporate Event Management, and 3D Hologram Displays.'
         }
       },
       '/shop': {
-        title: 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live',
-        description: 'Buy genuine Video Conference in Pakistan hardware: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Yealink, and Corporate Event Management equipment.',
-        keywords: 'Buy Video Conferencing Equipment Pakistan, Polycom Group 500 Price in Pakistan, Poly Studio X70 Price Pakistan, Logitech Rally Bar Price Pakistan, Yealink IP Phones Pakistan, Enterprise AV Store Lahore Karachi Islamabad'
+        title: 'Enterprise AV Shop | Poly, Logitech & Cisco | AV Live',
+        description: 'Buy genuine video conferencing hardware in Pakistan: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Cisco Room Kits & Yealink IP phones.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          '@id': 'https://avlive.com.pk/shop#collection',
+          name: 'Enterprise AV & Video Conferencing Hardware Store in Pakistan',
+          url: 'https://avlive.com.pk/shop',
+          description: 'Official enterprise hardware store for Poly, Logitech, Cisco, Yealink, Jabra, and Bosch in Pakistan.'
+        }
       },
       '/brands': {
-        title: 'Authorized Enterprise AV & Video Conferencing Brands in Pakistan | Poly, Cisco, Logitech | AV Live',
-        description: 'Browse official enterprise hardware by authorized brand partner in Pakistan: HP Poly, Cisco, Logitech, Yealink, Jabra, Bosch, Hikvision, Dahua, Axis, Epson, and Panasonic.',
-        keywords: 'HP Poly Distributor Pakistan, Logitech Video Conferencing Pakistan, Cisco Webex Partner Pakistan, Yealink Distributor Pakistan, Bosch Conference System Pakistan, Jabra Headsets Pakistan'
+        title: 'Authorized Enterprise AV Brands in Pakistan | AV Live',
+        description: 'Browse official enterprise hardware by authorized brand in Pakistan: HP Poly, Cisco, Logitech, Yealink, Jabra, Bosch, Hikvision, Dahua & Epson.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          '@id': 'https://avlive.com.pk/brands#collection',
+          name: 'Authorized Enterprise AV & Video Conferencing Brands in Pakistan',
+          url: 'https://avlive.com.pk/brands',
+          description: 'Authorized distributor catalog for 25 OEM pro-AV and unified communications brands in Pakistan.'
+        }
       },
       '/video-conferencing': {
-        title: 'Video Conferencing in Pakistan | Polycom Group 500, Poly X70, Zoom & Teams | AV Live',
-        description: 'Enterprise video conferencing in Pakistan. Official integration of Polycom Group 500, Poly X70, Logitech Rally, Zoom Rooms & Microsoft Teams Rooms across Lahore, Karachi & Islamabad.',
-        keywords: 'Video Conferencing in Pakistan, Video Conference in Pakistan, Polycom Group 500 Pakistan, Poly Studio X70 Pakistan, Zoom Rooms Pakistan, Microsoft Teams Rooms Pakistan, Boardroom Video Conferencing Lahore Karachi Islamabad'
+        title: 'Video Conferencing in Pakistan | Poly & Logitech | AV Live',
+        description: 'Enterprise video conferencing in Pakistan. Official integration of Polycom Group 500, Poly X70, Logitech Rally, Zoom & Teams Rooms nationwide.'
       },
       '/video-conferencing-solutions': {
-        title: 'Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad | Poly, Cisco & Logitech | AV Live',
-        description: 'Authorized Polycom video conferencing distributors in Lahore, Cisco Room Kit installation in Karachi, Boardroom AV integration in Islamabad & Interactive Flat Panels. 15-Min SLA: 0321 425 6263 / 0339 0000 921.',
+        title: 'Video Conferencing Solutions in Pakistan | AV Live',
+        description: 'Authorized Polycom, Cisco & Logitech boardroom video conferencing integration in Lahore, Karachi & Islamabad. 15-Min SLA: 0321 425 6263.',
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -966,8 +1021,8 @@ async function startServer() {
         }
       },
       '/corporate-event-management': {
-        title: 'Corporate Event Management & Hybrid Live Streaming in Lahore, Karachi & Islamabad | AV Live',
-        description: 'Corporate hybrid event live streaming in Lahore, SMD LED screen rental for corporate events, 3D hologram display stages in Pakistan & multi-camera event broadcasting in Karachi. Call 0321 425 6263 or 0339 0000 921.',
+        title: 'Corporate Event Management & Hybrid Events | AV Live',
+        description: 'Corporate hybrid event live streaming, SMD LED screen rental & 3D hologram stage production in Lahore, Karachi & Islamabad. Call 0321 425 6263.',
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -999,7 +1054,7 @@ async function startServer() {
       },
       '/live-streaming-services': {
         title: 'Live Streaming Services for Events in Lahore | AV Live',
-        description: 'Secure professional live stream setups and corporate webcast services in Pakistan. AV Live offers multi-camera event broadcasting with zero-downtime guarantees.',
+        description: 'Secure professional live stream setups and corporate webcast services in Pakistan. Multi-camera event broadcasting with zero-downtime guarantees.',
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -1030,8 +1085,8 @@ async function startServer() {
         }
       },
       '/av-equipment-rental': {
-        title: 'Enterprise AV Equipment & SMD LED Screen Rental in Lahore | AV Live',
-        description: 'Rent premium AV equipment for corporate events in Pakistan. AV Live provides cutting-edge SMD LED screen rentals, 3D hologram stage setups, and PA systems with on-site engineering support.',
+        title: 'AV Equipment & SMD LED Screen Rental Lahore | AV Live',
+        description: 'Rent premium AV equipment in Pakistan: P2.5 SMD LED walls, 3D hologram stages, line-array PA systems & PTZ cameras with on-site engineers.',
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -1062,44 +1117,44 @@ async function startServer() {
         }
       },
       '/conference-room-solutions': {
-        title: 'Conference Room Solutions in Pakistan | Boardroom AV, Poly X70 & Cisco Room Kit | AV Live',
-        description: 'Turnkey conference room solutions in Pakistan. Acoustic treatment, 4K PTZ cameras, beamforming ceiling microphones, and touch control panels for modern boardrooms.'
+        title: 'Conference Room AV Solutions in Pakistan | AV Live',
+        description: 'Turnkey conference room solutions in Pakistan: acoustic treatment, 4K PTZ cameras, beamforming ceiling microphones & touch control panels.'
       },
       '/zoom-rooms': {
-        title: 'Zoom Rooms Hardware & Integration in Pakistan | Poly, Logitech & Yealink | AV Live',
-        description: 'Certified Zoom Rooms hardware deployment in Pakistan. One-touch wireless sharing, multi-camera speaker tracking, and pro-AV installation in Lahore, Karachi & Islamabad.'
+        title: 'Zoom Rooms Hardware & Integration Pakistan | AV Live',
+        description: 'Certified Zoom Rooms hardware deployment in Pakistan. One-touch wireless sharing, speaker tracking & pro-AV setup in Lahore, Karachi & Islamabad.'
       },
       '/microsoft-teams-rooms': {
-        title: 'Microsoft Teams Rooms (MTR) Solutions in Pakistan | Certified AV Integrator | AV Live',
-        description: 'Deploy Microsoft Teams Rooms (MTR) in Pakistan with certified HP Poly, Logitech Rally, Cisco, and Yealink video bars. Complete boardroom design and SLA support.'
+        title: 'Microsoft Teams Rooms Solutions in Pakistan | AV Live',
+        description: 'Deploy Microsoft Teams Rooms (MTR) in Pakistan with certified HP Poly, Logitech Rally, Cisco & Yealink video bars and local SLA support.'
       },
       '/3d-hologram': {
-        title: '3D Hologram Events Pakistan | Holographic Stage Displays & HoloGauze | AV Live',
-        description: 'Book high-impact 3D hologram displays in Pakistan for corporate product launches, keynote telepresence, and hybrid events in Lahore, Karachi & Islamabad.'
+        title: '3D Hologram Events & Stage Displays Pakistan | AV Live',
+        description: 'Book high-impact 3D hologram displays in Pakistan for corporate product launches, keynote telepresence & hybrid events in Lahore & Karachi.'
       },
       '/projection-mapping': {
-        title: '3D Projection Mapping Pakistan | Architectural & Stage Mapping | AV Live',
-        description: 'Immersive 3D projection mapping in Pakistan for corporate galas, building facades, and hybrid events using 20,000+ ANSI lumen laser projectors.'
+        title: '3D Projection Mapping & Stage AV Pakistan | AV Live',
+        description: 'Immersive 3D projection mapping in Pakistan for corporate galas, building facades & hybrid events using 20,000+ ANSI lumen laser projectors.'
       },
       '/lahore': {
-        title: 'AV Live Lahore | Video Conferencing, Corporate Events & 3D Hologram in Lahore',
-        description: 'AV Live Communications head office in Johar Town, Lahore. Enterprise video conferencing hardware, SMD LED walls, 3D hologram stages, and corporate event production.'
+        title: 'Video Conferencing & Event Management Lahore | AV Live',
+        description: 'AV Live head office in Johar Town, Lahore. Enterprise video conferencing hardware, SMD LED walls, 3D hologram stages & corporate event production.'
       },
       '/karachi': {
-        title: 'Video Conferencing & Corporate Event Production in Karachi | AV Live Pakistan',
-        description: 'Enterprise AV integration, Poly & Logitech video conferencing systems, expo fabrication, and hybrid corporate event management across Karachi.'
+        title: 'Video Conferencing & Event Production Karachi | AV Live',
+        description: 'Enterprise AV integration, Poly & Logitech video conferencing systems, expo fabrication & hybrid corporate event management across Karachi.'
       },
       '/islamabad': {
-        title: 'Government & Enterprise Video Conferencing & Event AV in Islamabad | AV Live',
-        description: 'Secure boardroom video conferencing, Bosch digital conference microphones, and diplomatic/corporate event production in Islamabad and Rawalpindi.'
+        title: 'Video Conferencing & Event AV in Islamabad | AV Live',
+        description: 'Secure boardroom video conferencing, Bosch digital conference microphones & diplomatic corporate event production in Islamabad and Rawalpindi.'
       },
       '/events-services': {
-        title: 'Event Production, AV Equipment Rental & Corporate Event Management | Hybrid Events & Hologram Display | AV Live Pakistan',
-        description: 'Book turnkey Corporate event management, SMD LED screen rental, 3D Hologram Display stages, line-array PA systems, and hybrid event Video Conference in Pakistan across Lahore, Karachi & Islamabad.'
+        title: 'Event Production & AV Rental in Pakistan | AV Live',
+        description: 'Book turnkey corporate event management, SMD LED screen rental, 3D hologram stages, line-array PA systems & hybrid broadcasting in Pakistan.'
       },
       '/event-quote': {
-        title: 'Request an Event Production & AV Rental Quote | AV Live Communications Pakistan',
-        description: 'Get an instant custom quotation for corporate events, hybrid townhalls, 3D hologram stages, SMD LED walls, and conference room AV in Pakistan.',
+        title: 'Event Production & AV Rental Quote Calculator | AV Live',
+        description: 'Get an instant custom quotation for corporate events, hybrid townhalls, 3D hologram stages, SMD LED walls & boardroom AV in Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'WebApplication',
@@ -1113,8 +1168,8 @@ async function startServer() {
         }
       },
       '/esports': {
-        title: 'Esports Tournament Production & Broadcast AV in Pakistan | AV Live',
-        description: 'End-to-end Esports arena staging, low-latency broadcast switching, custom stage lighting, and live streaming production in Pakistan.',
+        title: 'Esports Tournament Production & Broadcast AV | AV Live',
+        description: 'End-to-end Esports arena staging, low-latency broadcast switching, custom stage lighting & live streaming production across Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'Service',
@@ -1127,8 +1182,8 @@ async function startServer() {
         }
       },
       '/room-designer': {
-        title: 'Interactive 3D Conference Room Designer | Boardroom AV Planner | AV Live',
-        description: 'Configure your meeting room dimensions, seating capacity, and camera/microphone coverage with the AV Live interactive conference room planner.',
+        title: '3D Conference Room Designer & AV Planner | AV Live',
+        description: 'Configure your meeting room dimensions, seating capacity & camera/microphone coverage with the AV Live interactive boardroom planner.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'WebApplication',
@@ -1142,16 +1197,16 @@ async function startServer() {
         }
       },
       '/services': {
-        title: 'Corporate Event Management, Hybrid Events & Video Conferencing Services | AV Live Pakistan',
-        description: 'Full-scale Corporate Event Management, Hybrid Event Production, 3D Hologram Displays, Video Conferencing Boardroom Integration (Polycom Group 500, Poly X70), and AI Automation in Lahore, Karachi, and Islamabad.'
+        title: 'Corporate Events & Video Conferencing Services | AV Live',
+        description: 'Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Displays, Boardroom Video Conferencing & AI Automation across Pakistan.'
       },
       '/solutions': {
-        title: 'Video Conference in Pakistan, Hybrid Event & 3D Hologram Solutions | Polycom Group 500 & Poly X70 | AV Live',
-        description: 'Explore turnkey solutions for Video Conference in Pakistan (Polycom Group 500, Poly X70), smart boardrooms, Corporate event management, hybrid event broadcasting, and 3D Hologram Displays.'
+        title: 'Video Conferencing & Hybrid Event Solutions | AV Live',
+        description: 'Explore turnkey solutions for Video Conferencing in Pakistan (Poly, Cisco, Logitech), smart boardrooms, hybrid events & 3D Hologram Displays.'
       },
       '/video-conference-in-pakistan': {
-        title: 'Video Conference in Pakistan | Polycom Group 500 & Poly X70 | Boardroom AV | AV Live',
-        description: 'Complete B2B Video Conference in Pakistan solutions. Official Polycom Group 500, Poly X70, Zoom Rooms, Microsoft Teams Rooms, and hybrid event integration.',
+        title: 'Video Conference in Pakistan | Poly & Logitech | AV Live',
+        description: 'Complete B2B Video Conference in Pakistan solutions. Official Polycom Group 500, Poly X70, Zoom Rooms, Microsoft Teams Rooms & boardroom AV.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'Service',
@@ -1164,20 +1219,20 @@ async function startServer() {
         }
       },
       '/about': {
-        title: 'About AV Live Communications | Enterprise Pro-AV & Event Engineering in Pakistan',
-        description: 'Learn how AV Live Communications delivers enterprise video conferencing, unified communications, 3D hologram production, and corporate event engineering across Pakistan.'
+        title: 'About AV Live | Pro-AV & Event Engineering Pakistan',
+        description: 'Learn how AV Live Communications delivers enterprise video conferencing, unified communications, 3D hologram stages & corporate events in Pakistan.'
       },
       '/contact': {
-        title: 'Contact AV Live Communications | Lahore Head Office & Nationwide AV Support',
-        description: 'Contact our Pro-AV engineers in Johar Town, Lahore at 0321-4256263 or info@avlive.com.pk for hardware procurement, boardroom integration, and event production.'
+        title: 'Contact AV Live | Lahore Office & Nationwide Support',
+        description: 'Contact our Pro-AV engineers in Johar Town, Lahore at 0321-4256263 or info@avlive.com.pk for hardware procurement, boardroom AV & events.'
       },
       '/blog': {
-        title: 'Enterprise AV, Video Conferencing & Hybrid Event Insights Blog | AV Live Pakistan',
-        description: 'Technical guides, boardroom design blueprints, and industry insights on video conferencing, VoIP telephony, and live event technology in Pakistan.'
+        title: 'Enterprise AV & Video Conferencing Blog | AV Live',
+        description: 'Technical guides, boardroom design blueprints & PKR pricing insights on video conferencing, VoIP telephony & live event technology in Pakistan.'
       },
       '/guides': {
-        title: "Enterprise AV & VoIP Buyer's Guides | Video Conferencing & IP Telephony | AV Live",
-        description: 'In-depth hardware comparison and procurement guides for video conferencing bars, SIP IP phones, PoE security cameras, and commercial laser projectors in Pakistan.',
+        title: "Enterprise AV & VoIP Hardware Buyer's Guides | AV Live",
+        description: 'In-depth hardware comparison and procurement guides for video conferencing bars, SIP IP phones, PoE security cameras & projectors in Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'CollectionPage',
@@ -1188,8 +1243,8 @@ async function startServer() {
         }
       },
       '/reviews': {
-        title: 'Verified Enterprise Client Reviews & Case Studies | AV Live Communications Pakistan',
-        description: 'Read verified reviews from corporate IT directors, universities, and government agencies across Pakistan who trust AV Live for video conferencing and event production.',
+        title: 'Verified Enterprise Client Reviews & Case Studies | AV Live',
+        description: 'Read verified reviews from corporate IT directors, banks & HEC universities across Pakistan who trust AV Live for boardroom AV and events.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'CollectionPage',
@@ -1211,8 +1266,8 @@ async function startServer() {
         }
       },
       '/compare': {
-        title: 'Compare Video Conferencing & VoIP Hardware Side-by-Side | AV Live Pakistan',
-        description: 'Compare technical specifications, camera optics, microphone pickup range, and PKR pricing across Poly, Cisco, Logitech, and Yealink hardware.',
+        title: 'Compare Video Conferencing & VoIP Hardware | AV Live',
+        description: 'Compare technical specifications, camera optics, microphone pickup range & PKR pricing across Poly, Cisco, Logitech and Yealink hardware.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'WebApplication',
@@ -1226,12 +1281,12 @@ async function startServer() {
         }
       },
       '/faqs': {
-        title: 'Frequently Asked Questions (FAQs) | Video Conference & Event Management | AV Live',
-        description: 'Answers to common questions about Video Conference in Pakistan, Polycom Group 500, Poly X70, Corporate Event Management, 3D Hologram displays, and nationwide delivery.'
+        title: 'FAQs | Video Conferencing & Event Management | AV Live',
+        description: 'Answers to common questions about Video Conferencing in Pakistan, Polycom Group 500, Poly X70, Corporate Event Management & nationwide delivery.'
       },
       '/returns': {
-        title: 'Return Policy & 30-Day Hardware Replacement Guarantee | AV Live Pakistan',
-        description: 'Transparent 30-day hardware return and DOA replacement policy for enterprise video conferencing, VoIP phones, and AV equipment purchased from AV Live Communications.',
+        title: '30-Day Hardware Return & Replacement Policy | AV Live',
+        description: 'Transparent 30-day hardware return and DOA replacement policy for enterprise video conferencing, VoIP phones & AV equipment at AV Live Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'WebPage',
@@ -1249,8 +1304,8 @@ async function startServer() {
         }
       },
       '/shipping': {
-        title: 'Insured Nationwide B2B Shipping & Delivery Policy | AV Live Pakistan',
-        description: 'Same-day dispatch in Lahore and insured express courier delivery across Karachi, Islamabad, Faisalabad, Multan, and all of Pakistan for enterprise AV hardware.',
+        title: 'Nationwide B2B Shipping & Delivery Policy | AV Live',
+        description: 'Same-day dispatch in Lahore and insured express courier delivery across Karachi, Islamabad, Faisalabad & all of Pakistan for enterprise AV.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'WebPage',
@@ -1261,8 +1316,8 @@ async function startServer() {
         }
       },
       '/payment': {
-        title: 'Corporate Payment Methods, Bank Transfer & Official GST/NTN Invoicing | AV Live',
-        description: 'Flexible B2B payment options including corporate cross-cheque, IBFT bank transfer, purchase order (PO) financing, and FBR-compliant GST tax invoicing.',
+        title: 'Corporate Payment Methods & FBR GST Invoicing | AV Live',
+        description: 'Flexible B2B payment options including corporate cross-cheque, IBFT bank transfer, purchase order financing & FBR-compliant GST tax invoicing.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'WebPage',
@@ -1273,8 +1328,8 @@ async function startServer() {
         }
       },
       '/rma': {
-        title: 'Warranty Claim & RMA Hardware Support Portal | AV Live Communications',
-        description: 'Submit an official Return Merchandise Authorization (RMA) request for warranty repair or replacement of Poly, Cisco, Logitech, and Yealink hardware in Pakistan.',
+        title: 'Warranty Claim & RMA Hardware Support Portal | AV Live',
+        description: 'Submit an official Return Merchandise Authorization (RMA) request for warranty repair or replacement of Poly, Cisco, Logitech & Yealink gear.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'Service',
@@ -1287,8 +1342,8 @@ async function startServer() {
         }
       },
       '/voip-service-providers': {
-        title: 'Enterprise VoIP Service Providers & SIP PBX Integration in Pakistan | AV Live',
-        description: 'Compare and deploy 3CX, FreePBX, Grandstream UCM, and Cisco Unified Communications PBX systems with multi-branch SIP trunking in Pakistan.',
+        title: 'Enterprise VoIP & SIP PBX Integration Pakistan | AV Live',
+        description: 'Compare and deploy 3CX, FreePBX, Grandstream UCM & Cisco Unified Communications PBX systems with multi-branch SIP trunking in Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'Service',
@@ -1301,8 +1356,8 @@ async function startServer() {
         }
       },
       '/programs/quote': {
-        title: 'Request an Official B2B Hardware & Project Quotation | AV Live Communications',
-        description: 'Request volume corporate pricing, tender BOQ estimates, and tax-compliant quotations for enterprise AV and video conferencing hardware in Pakistan.',
+        title: 'Request an Official B2B Hardware Quotation | AV Live',
+        description: 'Request volume corporate pricing, tender BOQ estimates & tax-compliant quotations for enterprise AV and video conferencing hardware in Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'Service',
@@ -1315,7 +1370,7 @@ async function startServer() {
         }
       },
       '/programs/blind-drop-shipping': {
-        title: 'Blind Drop Shipping for IT Resellers & System Integrators | AV Live Pakistan',
+        title: 'Blind Drop Shipping for IT Resellers Pakistan | AV Live',
         description: 'Ship enterprise AV and VoIP hardware directly to your clients across Pakistan in neutral, unbranded packaging with your company packing slip.',
         schema: {
           '@context': 'https://schema.org',
@@ -1329,8 +1384,8 @@ async function startServer() {
         }
       },
       '/programs/government-education-pricing': {
-        title: 'Government, HEC University & Public Sector AV Pricing Program | AV Live Pakistan',
-        description: 'Special tender pricing, PPRA-compliant documentation, and tax-exempt procurement for government ministries, defense, and HEC universities in Pakistan.',
+        title: 'Government & HEC University AV Pricing Program | AV Live',
+        description: 'Special tender pricing, PPRA-compliant documentation & tax-exempt procurement for government ministries, defense & HEC universities in Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'Service',
@@ -1343,8 +1398,8 @@ async function startServer() {
         }
       },
       '/programs/fulfillment-services': {
-        title: 'Enterprise Staging, Warehousing & 3PL AV Fulfillment Services | AV Live',
-        description: 'Multi-branch hardware staging, asset tagging, and scheduled rollout fulfillment for banks and nationwide enterprises in Pakistan.',
+        title: 'Enterprise Staging & 3PL AV Fulfillment | AV Live',
+        description: 'Multi-branch hardware staging, asset tagging & scheduled rollout fulfillment for banks and nationwide enterprises across Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'Service',
@@ -1357,8 +1412,8 @@ async function startServer() {
         }
       },
       '/programs/promotions': {
-        title: 'Current Enterprise Hardware Promotions, Bundles & Rebates | AV Live Pakistan',
-        description: 'Exclusive bundle discounts and trade-in rebates on Poly Studio video bars, Logitech Rally kits, and Yealink IP phones in Pakistan.',
+        title: 'Enterprise AV Promotions, Bundles & Rebates | AV Live',
+        description: 'Exclusive bundle discounts and trade-in rebates on Poly Studio video bars, Logitech Rally kits & Yealink IP phones across Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'CollectionPage',
@@ -1369,8 +1424,8 @@ async function startServer() {
         }
       },
       '/programs/provisioning-services': {
-        title: 'Zero-Touch VoIP & Video Endpoint Pre-Provisioning Services | AV Live Pakistan',
-        description: 'Factory firmware updates, SIP account pre-configuration, and plug-and-play provisioning before hardware leaves our Lahore warehouse.',
+        title: 'Zero-Touch VoIP & Video Pre-Provisioning | AV Live',
+        description: 'Factory firmware updates, SIP account pre-configuration & plug-and-play provisioning before hardware leaves our Lahore warehouse.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'Service',
@@ -1383,8 +1438,8 @@ async function startServer() {
         }
       },
       '/programs/reseller-program': {
-        title: 'Authorized B2B Partner & IT Reseller Program | AV Live Communications Pakistan',
-        description: 'Join the AV Live reseller network for wholesale distributor margins, deal registration protection, and pre-sales engineering support in Pakistan.',
+        title: 'Authorized B2B Partner & IT Reseller Program | AV Live',
+        description: 'Join the AV Live reseller network for wholesale distributor margins, deal registration protection & pre-sales engineering support in Pakistan.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'Service',
@@ -1397,7 +1452,7 @@ async function startServer() {
         }
       },
       '/privacy-policy': {
-        title: 'Privacy Policy & Corporate Data Protection | AV Live Communications',
+        title: 'Privacy Policy & Corporate Data Protection | AV Live',
         description: 'How AV Live Communications collects, protects, and processes corporate client and procurement data in Pakistan.',
         schema: {
           '@context': 'https://schema.org',
@@ -1408,7 +1463,7 @@ async function startServer() {
         }
       },
       '/terms-of-service': {
-        title: 'Terms of Service & B2B Procurement Agreement | AV Live Communications',
+        title: 'Terms of Service & B2B Procurement Agreement | AV Live',
         description: 'Standard commercial terms, hardware warranty conditions, and SLA terms for AV Live Communications Pakistan.',
         schema: {
           '@context': 'https://schema.org',
@@ -1473,7 +1528,9 @@ async function startServer() {
         itc: 'ITC Audio',
         '3cx': '3CX',
         freepbx: 'FreePBX (Sangoma)',
-        sangoma: 'Sangoma'
+        sangoma: 'Sangoma',
+        horion: 'Horion Interactive',
+        google: 'Google Meet'
       };
       const lowerBrand = brandSlug.toLowerCase();
       const readableBrand = brandNames[lowerBrand] || (brandSlug.charAt(0).toUpperCase() + brandSlug.slice(1));
@@ -1485,13 +1542,15 @@ async function startServer() {
           (lowerBrand === 'freepbx' && (String(p?.brand || '').toLowerCase().includes('freepbx') || String(p?.brand || '').toLowerCase().includes('sangoma')))
         ));
 
-      const title = `${readableBrand} Official Hardware Distributor in Pakistan | Video Conferencing & AV | AV Live`;
-      const description = `Shop genuine ${readableBrand} video conferencing systems, IP phones, projectors, and enterprise AV hardware in Pakistan with official warranty from AV Live Communications.`;
+      const title = clampSeoTitle(`${readableBrand} Distributor Pakistan | AV Hardware | AV Live`, 65);
+      const description = clampSeoDescription(
+        `Shop genuine ${readableBrand} video conferencing, IP phones & enterprise AV hardware in Pakistan with official warranty from AV Live.`,
+        158
+      );
 
       matched = {
         title,
         description,
-        keywords: `${readableBrand} Pakistan, ${readableBrand} Distributor Lahore Karachi Islamabad, ${readableBrand} Price in Pakistan, ${readableBrand} Video Conferencing Pakistan, Buy ${readableBrand} Hardware Pakistan, AV Live`,
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -1566,8 +1625,16 @@ async function startServer() {
           .join(' ');
         const effectivePrice = fallbackProd ? resolveProductPricing(fallbackProd).effectivePrice : 50000;
         const productImg = fallbackProd?.images?.[0] || fallbackProd?.imageUrl || 'https://avlive.com.pk/og-image.jpg';
-        const title = `${readableName} (${gmcMeta.mpn}) | ${gmcMeta.brand} Video Conference in Pakistan | AV Live`;
-        const description = gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} MPN ${gmcMeta.mpn} with 1-year Pakistan warranty and nationwide deployment.`;
+        const candidateWithMpn = `${readableName} (${gmcMeta.mpn}) Pakistan | AV Live`;
+        const candidateShort = `${readableName} Price in Pakistan | AV Live`;
+        const title = candidateWithMpn.length <= 65
+          ? candidateWithMpn
+          : clampSeoTitle(candidateShort.length <= 65 ? candidateShort : `${readableName} | AV Live`, 65);
+        const fullSchemaDesc = gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} MPN ${gmcMeta.mpn} with 1-year Pakistan warranty and nationwide deployment.`;
+        const description = clampSeoDescription(
+          `${readableName} (${gmcMeta.mpn}) in Pakistan: Rs. ${effectivePrice.toLocaleString()}. ${gmcMeta.highlight}. Official ${gmcMeta.brand} warranty.`,
+          158
+        );
         const specRowsHtml = (gmcMeta.defaultSpecs || '')
           .split(';')
           .map(s => s.trim())
@@ -1580,7 +1647,6 @@ async function startServer() {
         matched = {
           title,
           description,
-          keywords: `${readableName}, ${readableName} Price in Pakistan, ${gmcMeta.mpn}, ${gmcMeta.brand} Pakistan, ${fallbackProd?.category || 'Video Conferencing'} Pakistan, Buy ${readableName} Lahore Karachi Islamabad, Video Conference in Pakistan`,
           schema: {
             '@context': 'https://schema.org',
             '@graph': [
@@ -1593,7 +1659,7 @@ async function startServer() {
                 mpn: gmcMeta.mpn,
                 gtin12: gmcMeta.gtin,
                 gtin: gmcMeta.gtin,
-                description,
+                description: fullSchemaDesc,
                 brand: { '@type': 'Brand', name: gmcMeta.brand },
                 aggregateRating: {
                   '@type': 'AggregateRating',
@@ -1653,7 +1719,7 @@ async function startServer() {
           <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
             <article>
               <h1>${readableName} (${gmcMeta.mpn}) — Official ${gmcMeta.brand} Pakistan</h1>
-              <p><strong>Answer-First Hardware Verdict:</strong> ${description}</p>
+              <p><strong>Answer-First Hardware Verdict:</strong> ${fullSchemaDesc}</p>
               <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
                 <caption>${readableName} Technical &amp; Commercial Specifications (Pakistan)</caption>
                 <tbody>
@@ -1694,10 +1760,11 @@ async function startServer() {
         const pricingRowsHtml = (svc.pricingTiers || [])
           .map(t => `<tr><td>${t.tier}</td><td>${t.capacityOrScope}</td><td>${t.slaAndTurnaround}</td><td>${t.referenceInvestment}</td></tr>`)
           .join('');
+        const shortSvcTitle = clampSeoTitle(`${svc.title} in Pakistan | AV Live`, 65);
+        const shortSvcDesc = clampSeoDescription(svc.description, 158);
         matched = {
-          title: `${svc.localizedH1 || svc.title} | AV Live Communications Pakistan`,
-          description: svc.description,
-          keywords: svc.keywords || `${svc.title}, Corporate event management Pakistan, Video Conference in Pakistan, Hybrid events Lahore Karachi Islamabad, AV Live`,
+          title: shortSvcTitle,
+          description: shortSvcDesc,
           schema: {
             '@context': 'https://schema.org',
             '@graph': [
@@ -1794,13 +1861,15 @@ async function startServer() {
           });
       const displayCatProducts = catProducts.length > 0 ? catProducts : allFallbackProds.slice(0, 12);
 
-      const title = `${readableCat} | Video Conference in Pakistan | Polycom Group 500 & Poly X70 | AV Live`;
-      const description = `Explore genuine ${readableCat} in Pakistan including Polycom Group 500, Poly X70, and enterprise Video conference & Corporate event management hardware.`;
+      const title = clampSeoTitle(`${readableCat} in Pakistan | Enterprise AV | AV Live`, 65);
+      const description = clampSeoDescription(
+        `Explore genuine ${readableCat} in Pakistan: Poly, Cisco, Logitech & Yealink hardware with PKR pricing and official local warranty.`,
+        158
+      );
 
       matched = {
         title,
         description,
-        keywords: `${readableCat} Pakistan, ${readableCat} Price in Pakistan, Video Conference in Pakistan, Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Cisco Webex Pakistan, Buy ${readableCat} Lahore Karachi Islamabad`,
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -1906,9 +1975,8 @@ async function startServer() {
           });
         }
         matched = {
-          title: `${blogPost.title} | AV Live Blog`,
-          description: (blogPost.answerFirstSummary || blogPost.excerpt).substring(0, 160),
-          keywords: `${blogPost.title}, ${blogPost.category} Pakistan, Video Conference in Pakistan, Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Corporate Event Management Pakistan`,
+          title: clampSeoTitle(`${blogPost.title} | AV Live`, 65),
+          description: clampSeoDescription(blogPost.answerFirstSummary || blogPost.excerpt, 158),
           schema: {
             '@context': 'https://schema.org',
             '@graph': graphItems
@@ -1917,17 +1985,17 @@ async function startServer() {
 
         const tableHtml = blogPost.comparisonTable
           ? `<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
-              <caption>${blogPost.comparisonTable.caption}</caption>
-              <thead><tr>${blogPost.comparisonTable.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-              <tbody>${blogPost.comparisonTable.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+              <caption>${escapeHtmlText(blogPost.comparisonTable.caption)}</caption>
+              <thead><tr>${blogPost.comparisonTable.headers.map(h => `<th>${escapeHtmlText(h)}</th>`).join('')}</tr></thead>
+              <tbody>${blogPost.comparisonTable.rows.map(r => `<tr>${r.map(c => `<td>${escapeHtmlText(c)}</td>`).join('')}</tr>`).join('')}</tbody>
             </table>`
           : '';
-        const paragraphsHtml = blogPost.content.map(p => `<p>${p}</p>`).join('');
+        const paragraphsHtml = blogPost.content.map(p => `<p>${escapeHtmlText(p)}</p>`).join('');
         ssrCustomBodyHtml = `
           <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
             <article>
-              <h1>${blogPost.title}</h1>
-              <p><strong>Direct Answer (TL;DR):</strong> ${blogPost.answerFirstSummary || blogPost.excerpt}</p>
+              <h1>${escapeHtmlText(blogPost.title)}</h1>
+              <p><strong>Direct Answer (TL;DR):</strong> ${escapeHtmlText(blogPost.answerFirstSummary || blogPost.excerpt)}</p>
               ${tableHtml}
               ${paragraphsHtml}
             </article>
@@ -1939,8 +2007,8 @@ async function startServer() {
       ssrCustomBodyHtml = `
         <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
           <article>
-            <h1>${matched.title}</h1>
-            <p><strong>Direct Answer Summary:</strong> ${matched.description}</p>
+            <h1>${escapeHtmlText(matched.title.replace(/\s*\|\s*AV Live.*$/i, ''))}</h1>
+            <p><strong>Direct Answer Summary:</strong> ${escapeHtmlText(matched.description)}</p>
             <nav aria-label="Primary Product Categories">
               <h2>Primary Product Categories</h2>
               <ul>
@@ -1966,7 +2034,7 @@ async function startServer() {
                 <li><a href="https://avlive.com.pk/services/boardroom-integration">Boardroom AV &amp; Video Conferencing Integration</a></li>
                 <li><a href="https://avlive.com.pk/services/voip-telephony">Enterprise VoIP Telephony &amp; IP PBX Deployment</a></li>
                 <li><a href="https://avlive.com.pk/services/expo-organizing">Expo Organizing &amp; 3D Hologram Pavilions</a></li>
-                <li><a href="https://avlive.com.pk/services/esports-events">e-Sports Tournament Arena &amp; Broadcast Production</a></li>
+                <li><a href="https://avlive.com.pk/services/esports-events">Esports Tournament Arena &amp; Broadcast Production</a></li>
                 <li><a href="https://avlive.com.pk/services/ai-development">Enterprise AI Development</a></li>
                 <li><a href="https://avlive.com.pk/services/ai-agents-workers">Autonomous AI Agents &amp; Digital Workers</a></li>
                 <li><a href="https://avlive.com.pk/services/ai-automation">Enterprise Workflow &amp; n8n Automation</a></li>
@@ -1987,35 +2055,33 @@ async function startServer() {
       );
 
     if (matched) {
-      const resolvedKeywords =
-        matched.keywords ||
-        `${matched.title.replace(/\s*\|\s*AV Live.*$/i, '')}, Video Conference in Pakistan, Corporate Event Management, Polycom Group 500, Poly Studio X70, Logitech Rally Bar, AV Live Pakistan`;
+      const clampedTitle = clampSeoTitle(matched.title, 65);
+      const clampedDesc = clampSeoDescription(matched.description, 158);
+      const safeTitleText = escapeHtmlText(clampedTitle);
+      const safeTitleAttr = escapeHtmlAttr(clampedTitle);
+      const safeDescAttr = escapeHtmlAttr(clampedDesc);
 
       updated = updated
-        .replace(/<title(?:\s+data-rh="true")?>[\s\S]*?<\/title>/, `<title data-rh="true">${matched.title}</title>`)
+        .replace(/<title(?:\s+data-rh="true")?>[\s\S]*?<\/title>/, `<title data-rh="true">${safeTitleText}</title>`)
         .replace(
           /<meta(?:\s+data-rh="true")?\s+name="description"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" name="description" content="${matched.description}" />`
-        )
-        .replace(
-          /<meta(?:\s+data-rh="true")?\s+name="keywords"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" name="keywords" content="${resolvedKeywords.replace(/"/g, '&quot;')}" />`
+          `<meta data-rh="true" name="description" content="${safeDescAttr}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+property="og:title"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" property="og:title" content="${matched.title}" />`
+          `<meta data-rh="true" property="og:title" content="${safeTitleAttr}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+property="og:description"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" property="og:description" content="${matched.description}" />`
+          `<meta data-rh="true" property="og:description" content="${safeDescAttr}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+name="twitter:title"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" name="twitter:title" content="${matched.title}" />`
+          `<meta data-rh="true" name="twitter:title" content="${safeTitleAttr}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+name="twitter:description"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" name="twitter:description" content="${matched.description}" />`
+          `<meta data-rh="true" name="twitter:description" content="${safeDescAttr}" />`
         );
       if (matched.noindex) {
         updated = updated.replace(
@@ -2023,9 +2089,50 @@ async function startServer() {
           '<meta data-rh="true" name="robots" content="noindex, nofollow" />'
         );
       }
-      if (matched.schema) {
-        const schemaTag = `<script type="application/ld+json" id="ssr-route-schema">${JSON.stringify(matched.schema)}</script>\n  </head>`;
-        updated = updated.replace('</head>', schemaTag);
+
+      // Scope the massive homepage JSON-LD @graph strictly to "/" and replace on subpages with clean route-specific schema
+      if (cleanPath !== '' && cleanPath !== '/') {
+        if (matched.noindex) {
+          updated = updated.replace(/<script id="ssr-home-schema" type="application\/ld\+json">[\s\S]*?<\/script>/, '');
+        } else {
+          const compactOrgNode = {
+            '@type': 'Organization',
+            '@id': 'https://avlive.com.pk/#organization',
+            name: 'AV Live Communications',
+            url: 'https://avlive.com.pk',
+            logo: 'https://avlive.com.pk/logo.png',
+            telephone: '+92-321-4256263'
+          };
+          const rawRouteSchema = matched.schema || {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            '@id': `${canonicalUrl}#webpage`,
+            name: clampedTitle,
+            description: clampedDesc,
+            url: canonicalUrl,
+            isPartOf: { '@id': 'https://avlive.com.pk/#website' },
+            publisher: { '@id': 'https://avlive.com.pk/#organization' }
+          };
+          const routeGraphItems = Array.isArray(rawRouteSchema['@graph'])
+            ? rawRouteSchema['@graph']
+            : [Object.fromEntries(Object.entries(rawRouteSchema).filter(([k]) => k !== '@context'))];
+          const hasOrgInRoute = routeGraphItems.some(
+            (node: any) => node?.['@id'] === 'https://avlive.com.pk/#organization'
+          );
+          const scopedSchema = {
+            '@context': 'https://schema.org',
+            '@graph': hasOrgInRoute ? routeGraphItems : [compactOrgNode, ...routeGraphItems]
+          };
+          const scopedScriptTag = `<script id="ssr-route-schema" type="application/ld+json">${JSON.stringify(scopedSchema)}</script>`;
+          if (/<script id="ssr-home-schema" type="application\/ld\+json">[\s\S]*?<\/script>/.test(updated)) {
+            updated = updated.replace(
+              /<script id="ssr-home-schema" type="application\/ld\+json">[\s\S]*?<\/script>/,
+              scopedScriptTag
+            );
+          } else {
+            updated = updated.replace('</head>', `${scopedScriptTag}\n  </head>`);
+          }
+        }
       }
     }
 
@@ -2084,6 +2191,9 @@ async function startServer() {
     '/category/ai-agents-workers': '/services/ai-agents-workers',
     '/category/ai-automation': '/services/ai-automation',
     '/corporate-event-management-pakistan': '/corporate-event-management',
+    '/brands/polycom': '/brands/poly',
+    '/brands/hp-poly': '/brands/poly',
+    '/gmc-products.xml': '/feed/google-merchant.tsv',
   };
 
   for (const [fromPath, toPath] of Object.entries(legacyDirectRedirects)) {

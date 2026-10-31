@@ -148,6 +148,15 @@ This section tracks all completed technical SEO, Google Search Console (GSC), Go
 - [x] **Full 53-SKU Google Merchant Center (GMC) & PDP Enrichment (`src/lib/gmc-feed.ts`, `ProductDetails.tsx`, `Shop.tsx`)**:
   - Every canonical SKU in `PRODUCT_GMC_METADATA` now includes verified model-specific PKR `regularPrice` & `salePrice` (spanning Rs. 21,500 to Rs. 3,950,000 across 49 distinct price points), accurate multi-category `categorySlugs` across all 12 categories, multi-angle hardware `images`, 5+ semicolon-delimited `defaultSpecs`, and Answer-First `defaultDescription`.
   - Added 1-click horizontal Category Filter Chips (with live SKU counts) and Quick Budget Filter Chips on `/shop`, plus a sticky mobile bottom 15-minute WhatsApp Quote & Add-to-Cart bar on `/product/:slug`.
+- **GSC Sitemap & SSR HTML Escaping Audit (155/155 HTTP 200 Verification)**:
+  - Added `escapeHtmlAttr` and `escapeHtmlText` sanitization in `injectRouteSeoIntoHtml()` (`server.ts`) to prevent `parse5` / `vite.transformIndexHtml` HTTP 500 crashes on descriptions containing inch quotes (`65"`, `100"`) or comparison table cells containing `<` (`RT60 < 0.6s`).
+  - Added `/brands/horion` and `/brands/google` to `STATIC_CORE_ROUTES` (`sitemap-generator.ts`), `BRAND_PORTALS` (`HtmlSitemap.tsx`), and `server.ts` so all 25 OEM brands referenced across the 53-product catalog have dedicated canonical brand URLs in `public/sitemap.xml` (155 total URLs).
+  - Normalized `Polycom` and `HP Poly` brand links in `ProductDetails.tsx` and `Category.tsx` to `/brands/poly`, and added permanent `301` + client `<Navigate replace />` redirects from `/brands/polycom` and `/brands/hp-poly` to `/brands/poly`.
+- [x] **WebsiteCrawler SEO Audit Remediation (`index.html`, `server.ts`, `SEO.tsx`)**:
+  - Clamped all SSR and client-side `<title>` (`og:title`, `twitter:title`) tags to `≤ 65` characters with uppercase leading normalization (`clampSeoTitle`), eliminating all 50 "Title too long (>70 chars)" and "Title starts with lowercase letter" warnings.
+  - Clamped all SSR and client-side `<meta name="description">` (`og:description`, `twitter:description`) tags to `≤ 158` characters (`clampSeoDescription`), eliminating all 21 "Meta description too long (>200 chars)" warnings while preserving full descriptions inside `Product`/`Service` JSON-LD and SSR body text.
+  - Removed deprecated `<meta name="keywords">` tags across `index.html`, `server.ts`, and `src/components/SEO.tsx` (eliminating all 52 keyword tag warnings).
+  - Scoped the large homepage `@graph` JSON-LD (`#ssr-home-schema`) strictly to the root URL (`/`) and replaced it on subpages with a single `#ssr-route-schema` containing a compact `Organization` node (`@id: "https://avlive.com.pk/#organization"`) plus the route's dedicated `Product`, `Service`, `CollectionPage`, `BlogPosting`, or `WebPage` schema (eliminating the 8,990 duplicated structured data warnings).
 
 ### 2. 100% Public Page JSON-LD Structured Data Coverage Matrix (38/38 Public Views)
 

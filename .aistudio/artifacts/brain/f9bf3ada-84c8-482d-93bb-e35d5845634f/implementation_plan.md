@@ -1,36 +1,88 @@
-# Google Search, Merchant Center & UX Optimization Plan (Target: 97+/100 Across All Dimensions)
+# Critical SEO Metadata, Title/Description Length & JSON-LD Schema Remediation Plan
 
-## 1. Objective & Current Audit Baseline
+Eliminates the critical SEO tag and structured data warnings reported by the WebsiteCrawler audit by enforcing strict character limits (`≤ 65` characters for `<title>` and `≤ 160` characters for `<meta name="description">`), removing deprecated `<meta name="keywords">` tags, and scoping the heavy homepage JSON-LD `@graph` exclusively to the root path (`/`) while keeping clean, conflict-free per-route schemas across all 155 canonical pages.
 
-Our automated audit across all **153 canonical URLs**, **53 Google Merchant Center (GMC) SKUs**, and **9 enterprise service pages** identified why Google's automated quality systems score Product Attributes at **72/100** and Service Pages at **81/100**:
+## User Review & Critical Decisions
 
-| Dimension | Current Score | Target Score | Key Bottleneck Identified |
-| :--- | :---: | :---: | :--- |
-| **Product Pages & GMC Attributes** | **72 / 100** | **98 / 100** | `buildFallbackProductFromGmcMeta` assigns the same price (`PKR 125,000`), single generic image, and category (`video-conferencing`) to all 53 SKUs; 34/53 lack `defaultSpecs` and 37/53 lack `defaultDescription`. |
-| **Service Pages & Local Proof** | **81 / 100** | **97 / 100** | 7 of 9 services lack custom multi-question `FAQPage` schemas, 5 of 9 lack localized Pakistan case studies, and 0 of 9 include structured SLA / Bill-of-Materials comparison tables. |
-| **Browsing Smoothness & UX** | **89 / 100** | **97 / 100** | Category pages (`/category/ip-phones`, `/category/projectors`, `/category/ip-cameras`) show incomplete results during Firestore quota fallback because SKUs lack category mapping; PDPs lack a sticky mobile conversion bar and instant category filter chips in `/shop`. |
-| **Sitemap & SSR Parity** | **96 / 100** | **99 / 100** | `server.ts` SSR product/service HTML snapshots need to reflect per-SKU prices, categories, and service FAQs/SLA tables for first-wave Googlebot crawlers. |
+> [!IMPORTANT]
+> The following remediation scope reflects your confirmed choices from our interactive review of the WebsiteCrawler PDF report:
+
+- **Confirmed Decision 1 (Focused Critical SEO Scope)**: Restrict changes strictly to critical SEO tags (`<title>`, `<meta name="description">`, OpenGraph/Twitter title & description mirrors, and JSON-LD structured data) without altering security headers or visual UI layouts.
+- **Confirmed Decision 2 (Strict Title & Description Length Budgets)**: Trim and normalize all SSR and client-side `<title>` tags to **≤ 65 characters** (eliminating the 50 *"Title length is more than 70 characters"* warnings) and all `<meta name="description">` tags to **≤ 160 characters** (eliminating the 21 *"Meta Description length is more than 200"* warnings).
+- **Confirmed Decision 3 (Homepage `@graph` Scoping & Meta Keywords Removal)**: Scope the large homepage JSON-LD `@graph` (`LocalBusiness`, homepage `FAQPage`, and `OfferCatalog`) strictly to `/` so subpages only emit their dedicated route schema (`Product`, `Service`, `CollectionPage`, or `BlogPosting`) plus a lightweight `Organization` publisher reference—eliminating the **8,990 repeated structured data warnings** and **52 `meta keywords` warnings**.
 
 ---
 
-## 2. Planned Architecture & Content Upgrades
+## 1. Overview & Core Concept
 
-### Phase 1: Full 53-SKU Catalog & Google Merchant Center Enrichment (`src/lib/gmc-feed.ts`)
-- **Per-SKU Category & Subcategory Mapping**: Assign accurate `categorySlugs` and `categoryIds` to all 53 SKUs across all 12 categories (`video-conferencing`, `audio-systems`, `ip-phones`, `ip-cameras`, `projectors`, `interactive-displays`, `networking`, `pbx-systems`, `conference-microphones`, `headsets`, `ptz-cameras`, `video-bars`) so every `/category/:slug` and `/brands/:brandSlug` page is richly populated even when Firestore is offline.
-- **Realistic Model-Specific PKR Pricing**: Replace the uniform `PKR 145,000 / 125,000` placeholder with realistic Pakistani enterprise street pricing (`regularPrice` and `salePrice`) for each model (e.g., entry-level Yealink SIP-T31P IP phone vs. flagship Cisco Room Kit EQX / Panasonic 4K Laser Projector).
-- **Category-Appropriate High-Resolution Product Visuals**: Map curated, high-resolution product hardware imagery by hardware class and brand so product cards and galleries never show identical generic conference table photos.
-- **100% Technical Specification & Description Coverage**: Populate `defaultSpecs` (minimum 5 semicolon-delimited attribute pairs: *Manufacturer, Part Number (MPN), GTIN/UPC, Connectivity/Resolution, Room Capacity/Use Case, Warranty*) and `defaultDescription` for all 53 SKUs.
+- **What It Does**: Streamlines the server-side and client-side `<head>` metadata pipeline so every HTML route serves a crisp, non-truncated title (`≤ 65` chars), an actionable summary description (`≤ 160` chars), zero deprecated `<meta name="keywords">` tags, and a single self-contained JSON-LD structured data payload matched to that exact route.
+- **Target Audience / Persona**: Googlebot, Google Merchant Center validators, Answer Engine crawlers, and static HTML SEO auditors (`WebsiteCrawler.org`, Ahrefs, Semrush).
+- **Key Value**: Removes duplicate `FAQPage` / `OfferCatalog` / `LocalBusiness` schema collisions on product and service pages, prevents SERP title/description truncation, and resolves over 9,100 reported tag/schema warnings in a single pass.
 
-### Phase 2: All 9 Enterprise Service Pages Enrichment (`src/lib/services-catalog.ts` & `src/pages/ServiceDetail.tsx`)
-- **4-Question Custom `FAQPage` Schema per Service**: Equip all 9 services (`boardroom-integration`, `video-conferencing-setup`, `town-hall-audio`, `digital-signage`, `unified-communications`, `acoustic-treatment`, `amc-support`, `corporate-events`, `video-conferencing-rental`) with 4 high-intent Pakistan B2B FAQs and JSON-LD `FAQPage` markup.
-- **Localized Lahore, Karachi & Islamabad Case Studies**: Add verified deployment case studies (client sector, city, challenge, and measurable outcome) for the remaining 5 services so all 9 services showcase local engineering proof.
-- **Structured SLA & Deployment Tier Table**: Add `pricingTiers` / SLA comparison tables to every service page so corporate procurement teams and AI answer engines can compare turnaround times, room capacities, and warranty coverage in a semantic HTML `<table>`.
+---
 
-### Phase 3: Browsing Smoothness & Conversion UX (`src/pages/Shop.tsx`, `src/pages/ProductDetail.tsx`, `src/pages/Category.tsx`)
-- **Instant Category & Price Filter Chips in `/shop`**: Add horizontal one-click category and price-range filter pills with live SKU counts at the top of the Shop catalog for zero-reload filtering.
-- **Sticky Mobile Quote / Add-to-Cart Bar on `/product/:slug`**: Add a smooth bottom action bar on mobile viewports displaying the SKU name, verified PKR price, one-tap WhatsApp quote button, and Add-to-Cart CTA.
-- **Enhanced Specification & Compatibility Comparison Table**: Upgrade the Product Detail Page specification matrix with structured MPN, GTIN-12, PTA compliance status, warranty tier, and recommended room/deployment type.
+## 2. User Experience & Visual Design
 
-### Phase 4: SSR Parity & Sitemap Verification (`server.ts`, `scripts/generate-sitemap.ts`, `README.md`, `seo-policy.md`)
-- Update `injectRouteSeoIntoHtml()` in `server.ts` so server-rendered product and service snapshots include the new per-SKU prices, specifications, and service FAQs.
-- Regenerate `public/sitemap.xml` and `public/llms-full.txt`, update the SEO ledger, and verify the build with `lint_applet` and `compile_applet`.
+- **Key User & Crawler Flows**:
+  1. **Search Snippet Rendering**: When a user or crawler inspects any of the 155 canonical URLs (static hubs, 25 brands, 12 categories, 53 products, 9 services, 11 blog guides), the `<title>` fits cleanly within Google's 60–65 character desktop/mobile pixel budget and the `<meta name="description">` delivers a complete sentence under 160 characters without ellipsis cutoffs.
+  2. **Structured Data Validation**:
+     - Visiting `/` outputs the full corporate `Organization`, `LocalBusiness` (Lahore, Karachi, Islamabad branches), homepage `FAQPage`, and `OfferCatalog` `@graph`.
+     - Visiting any subpage (`/product/*`, `/services/*`, `/category/*`, `/brands/*`, `/blog/*`) strips the homepage-only `FAQPage` and `OfferCatalog` block and emits only the route's dedicated JSON-LD schema alongside a minimal `Organization` (`#organization`) node so `@id` references (`provider`, `publisher`) remain 100% valid.
+- **Visual Identity & Theme**:
+  - Preserves the existing enterprise Pro-AV visual design, typography, and layout untouched.
+
+---
+
+## 3. Key Product Decisions & Trade-Offs
+
+- **Decision 1: Smart Word-Boundary Truncation + Concise Route Templates**
+  - *Chosen Approach*: Update static route titles/descriptions and dynamic Brand, Category, Product, Service, and Blog title/description generators to produce naturally concise copy (`≤ 65` chars for titles, `≤ 160` chars for descriptions), backed by a word-boundary clamping helper (`clampSeoTitle(str, 65)` and `clampSeoDescription(str, 160)`) in both SSR and client-side `<SEO />`.
+  - *Why*: Guarantees that even long product names or custom database descriptions never exceed crawler thresholds or break mid-word.
+  - *Alternatives Considered*: Hard character slicing (`substring(0, 65)`), which cuts words in half and looks unpolished in search results.
+- **Decision 2: Scoping the Static `@graph` to `/` While Retaining Valid `@id` References**
+  - *Chosen Approach*: Mark the homepage JSON-LD `<script type="application/ld+json" id="ssr-home-schema">` in the HTML template so the SSR injector keeps the full `@graph` on `/` and replaces it on subpages with the subpage's specific `matched.schema` (including a compact `Organization` node for `#organization` reference integrity).
+  - *Why*: Static crawlers flag pages that declare multiple unrelated `FAQPage`, `LocalBusiness`, and `OfferCatalog` blocks on product or policy URLs; scoping to `/` eliminates all 8,990 warnings while keeping Rich Results valid.
+- **Decision 3: Complete Removal of `<meta name="keywords">`**
+  - *Chosen Approach*: Remove `<meta name="keywords">` from the base HTML template, SSR replacement pipeline, and React `<SEO />` head output (while preserving the optional `keywords` prop on the TypeScript interface for backward compatibility).
+  - *Why*: Google has ignored `<meta name="keywords">` since 2009, and modern SEO auditors penalize its presence as a keyword-stuffing signal.
+
+---
+
+## 4. Technical Architecture & Data Strategy *(Technical Reference)*
+
+### Architecture & Metadata Injection Flow
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                   Incoming HTTP Request (155 Canonical URLs)              │
+└─────────────────────────────────────┬─────────────────────────────────────┘
+                                      │
+                                      ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│                SSR Metadata & Schema Engine (injectRouteSeoIntoHtml)      │
+│  ┌─────────────────────────────────────────────────────────────────────┐  │
+│  │ 1. Resolve Route Metadata (Static / Brand / Category / Product /   │  │
+│  │    Service / Blog)                                                  │  │
+│  │ 2. Normalize & Clamp:                                               │  │
+│  │    • clampSeoTitle(title, 65)       -> ≤ 65 chars (word-safe)      │  │
+│  │    • clampSeoDescription(desc, 160) -> ≤ 160 chars (word-safe)     │  │
+│  │ 3. Omit <meta name="keywords">                                      │  │
+│  │ 4. Scope JSON-LD Schema:                                            │  │
+│  │    • If path === "/" -> Keep full Homepage @graph                   │  │
+│  │    • If path !== "/" -> Replace #ssr-home-schema with Route Schema  │  │
+│  │                         + compact #organization reference node      │  │
+│  └─────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────┬─────────────────────────────────────┘
+                                      │
+                                      ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│                     Client-Side Hydration (<SEO /> Component)             │
+│  • Applies identical clampSeoTitle(65) & clampSeoDescription(160)         │
+│  • Renders <title>, <meta name="description">, OpenGraph & Twitter cards  │
+│  • Does not emit <meta name="keywords">                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+### Data Model & State Compatibility
+- **Backward Compatibility**: The `SEOProps` interface retains `keywords?: string` as an optional prop so no existing page component calls break during TypeScript compilation, while omitting the `<meta name="keywords">` DOM element from rendered output.
+- **Verification**: After applying the metadata and schema rules, an automated audit script will verify all 155 sitemap URLs to confirm `0` titles over 65 characters, `0` descriptions over 160 characters, `0` `<meta name="keywords">` tags, and `1` clean JSON-LD schema block per page.

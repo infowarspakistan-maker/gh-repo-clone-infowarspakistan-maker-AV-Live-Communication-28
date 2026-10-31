@@ -372,7 +372,7 @@ export function ProductDetails() {
            <Breadcrumbs items={[
              { label: 'Shop', path: '/shop' },
              ...(productCategory ? [{ label: productCategory.name, path: `/category/${productCategory.slug || productCategory.id}` }] : []),
-             { label: resolvedBrand, path: `/brands/${resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') === 'polycom' ? 'poly' : resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` },
+             { label: resolvedBrand, path: `/brands/${['polycom', 'hp-poly'].includes(resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')) ? 'poly' : resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` },
              { label: product.productName }
            ]} />
            <div className="hidden md:flex items-center gap-4">
