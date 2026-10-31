@@ -1,17 +1,50 @@
-import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { Menu, ShoppingCart, User, X, MapPin, Phone, Search, ChevronDown, ArrowUp, Check, ArrowRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 import { subscribeToProducts, subscribeToCategories } from './lib/firebase/firestore-helpers';
 import { getCanonicalProductSlug } from './lib/gmc-feed';
 import { getCartCount } from './lib/cart';
-// Lazy-loaded primary, subpages, and admin panels for optimal Core Web Vitals & route code-splitting
-const Home = React.lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
-const Shop = React.lazy(() => import('./pages/Shop').then(m => ({ default: m.Shop })));
-const Solutions = React.lazy(() => import('./pages/Solutions').then(m => ({ default: m.Solutions })));
-const Services = React.lazy(() => import('./pages/Services').then(m => ({ default: m.Services })));
-const Esports = React.lazy(() => import('./pages/Esports').then(m => ({ default: m.Esports })));
-const RoomDesigner = React.lazy(() => import('./pages/RoomDesigner').then(m => ({ default: m.RoomDesigner })));
+
+// Synchronous public SEO routes for instant 0ms navigation & zero-spinner Googlebot WRS hydration
+import { Home } from './pages/Home';
+import { Shop } from './pages/Shop';
+import { Solutions } from './pages/Solutions';
+import { Services } from './pages/Services';
+import { Esports } from './pages/Esports';
+import { RoomDesigner } from './pages/RoomDesigner';
+import { ProductDetails } from './pages/ProductDetails';
+import { Category } from './pages/Category';
+import { Contact } from './pages/Contact';
+import { Blog } from './pages/Blog';
+import { BuyersGuides } from './pages/BuyersGuides';
+import { About } from './pages/About';
+import { Reviews } from './pages/Reviews';
+import { Compare } from './pages/Compare';
+import { FAQs } from './pages/FAQs';
+import { Payment } from './pages/Payment';
+import { Shipping } from './pages/Shipping';
+import { Returns } from './pages/Returns';
+import { RMA } from './pages/RMA';
+import { BlindDropShipping } from './pages/BlindDropShipping';
+import { GovEdPricing } from './pages/GovEdPricing';
+import { FulfillmentServices } from './pages/FulfillmentServices';
+import { Promotions } from './pages/Promotions';
+import { Provisioning } from './pages/Provisioning';
+import { Quote } from './pages/Quote';
+import { Reseller } from './pages/Reseller';
+import { VoipService } from './pages/VoipService';
+import { KeywordLandingPage } from './pages/KeywordLandingPage';
+import { EventQuote } from './pages/EventQuote';
+import { ServicesLanding } from './pages/services/ServicesLanding';
+import { ServiceDetail } from './pages/services/ServiceDetail';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
+import { Cart } from './pages/Cart';
+import { Checkout } from './pages/Checkout';
+import { HtmlSitemap } from './pages/HtmlSitemap';
+
+// Lazy-loaded admin panels & setup wizard
 const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout').then(m => ({ default: m.AdminLayout || m.default })));
 const Overview = React.lazy(() => import('./pages/admin/Overview').then(m => ({ default: m.Overview })));
 const HomepageEditor = React.lazy(() => import('./pages/admin/HomepageEditor').then(m => ({ default: m.HomepageEditor })));
@@ -34,31 +67,10 @@ const MediaGuide = React.lazy(() => import('./pages/admin/MediaGuide').then(m =>
 const WorkspaceHub = React.lazy(() => import('./pages/admin/WorkspaceHub').then(m => ({ default: m.WorkspaceHub })));
 const WorkflowAutomation = React.lazy(() => import('./pages/admin/WorkflowAutomation').then(m => ({ default: m.WorkflowAutomation })));
 const GoogleBusinessExport = React.lazy(() => import('./pages/admin/GoogleBusinessExport').then(m => ({ default: m.GoogleBusinessExport })));
-
-const ProductDetails = React.lazy(() => import('./pages/ProductDetails').then(m => ({ default: m.ProductDetails })));
-const Category = React.lazy(() => import('./pages/Category').then(m => ({ default: m.Category })));
-const Contact = React.lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact })));
-const Blog = React.lazy(() => import('./pages/Blog').then(m => ({ default: m.Blog })));
-const BuyersGuides = React.lazy(() => import('./pages/BuyersGuides').then(m => ({ default: m.BuyersGuides })));
-const About = React.lazy(() => import('./pages/About').then(m => ({ default: m.About })));
-const Reviews = React.lazy(() => import('./pages/Reviews').then(m => ({ default: m.Reviews })));
-const Compare = React.lazy(() => import('./pages/Compare').then(m => ({ default: m.Compare })));
-const FAQs = React.lazy(() => import('./pages/FAQs').then(m => ({ default: m.FAQs })));
-const Payment = React.lazy(() => import('./pages/Payment').then(m => ({ default: m.Payment })));
-const Shipping = React.lazy(() => import('./pages/Shipping').then(m => ({ default: m.Shipping })));
-const Returns = React.lazy(() => import('./pages/Returns').then(m => ({ default: m.Returns })));
-const RMA = React.lazy(() => import('./pages/RMA').then(m => ({ default: m.RMA })));
-const BlindDropShipping = React.lazy(() => import('./pages/BlindDropShipping').then(m => ({ default: m.BlindDropShipping })));
-const GovEdPricing = React.lazy(() => import('./pages/GovEdPricing').then(m => ({ default: m.GovEdPricing })));
-const FulfillmentServices = React.lazy(() => import('./pages/FulfillmentServices').then(m => ({ default: m.FulfillmentServices })));
-const Promotions = React.lazy(() => import('./pages/Promotions').then(m => ({ default: m.Promotions })));
-const Provisioning = React.lazy(() => import('./pages/Provisioning').then(m => ({ default: m.Provisioning })));
-const Quote = React.lazy(() => import('./pages/Quote').then(m => ({ default: m.Quote })));
-const Reseller = React.lazy(() => import('./pages/Reseller').then(m => ({ default: m.Reseller })));
-const VoipService = React.lazy(() => import('./pages/VoipService').then(m => ({ default: m.VoipService })));
 const AdminLogin = React.lazy(() => import('./pages/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
 const Unauthorized = React.lazy(() => import('./pages/admin/Unauthorized').then(m => ({ default: m.Unauthorized })));
-const KeywordLandingPage = React.lazy(() => import('./pages/KeywordLandingPage').then(m => ({ default: m.KeywordLandingPage })));
+const SetupWizard = React.lazy(() => import('./pages/SetupWizard').then(m => ({ default: m.SetupWizard })));
+
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { CartProvider, useCart } from './contexts/CartContext';
@@ -69,12 +81,18 @@ const CookieConsent = React.lazy(() => import('./components/CookieConsent').then
 const AIAssist = React.lazy(() => import('./components/AIAssist').then(m => ({ default: m.AIAssist })));
 
 const DEFAULT_NAV_CATEGORIES = [
-  { id: 'cat-projectors', name: 'Projectors', slug: 'projectors', isActive: true, parentId: null, type: 'product' },
-  { id: 'cat-voip', name: 'VoIP Phone Systems', slug: 'voip-phone-systems', isActive: true, parentId: null, type: 'product' },
-  { id: 'cat-intercom', name: 'Intercom, Paging & Access', slug: 'intercom-paging-access', isActive: true, parentId: null, type: 'product' },
   { id: 'cat-video', name: 'Video Conferencing', slug: 'video-conferencing', isActive: true, parentId: null, type: 'product' },
-  { id: 'cat-headsets', name: 'Headsets', slug: 'headsets', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-codecs', name: 'Boardroom Codecs', slug: 'boardroom-codecs', isActive: true, parentId: 'cat-video', type: 'product' },
+  { id: 'cat-large-room', name: 'Large Room Systems', slug: 'large-room', isActive: true, parentId: 'cat-video', type: 'product' },
+  { id: 'cat-ptz', name: 'PTZ Cameras', slug: 'ptz-cameras', isActive: true, parentId: 'cat-video', type: 'product' },
+  { id: 'cat-touch', name: 'Touch Panels & Displays', slug: 'touch-panels', isActive: true, parentId: 'cat-video', type: 'product' },
+  { id: 'cat-speakerphones', name: 'Speakerphones & Mics', slug: 'speakerphones', isActive: true, parentId: 'cat-video', type: 'product' },
   { id: 'cat-phones', name: 'IP Phones', slug: 'ip-phones', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-voip', name: 'VoIP Phone Systems', slug: 'voip-phone-systems', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-headsets', name: 'Headsets', slug: 'headsets', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-projectors', name: 'Projectors', slug: 'projectors', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-cameras', name: 'IP Cameras', slug: 'ip-cameras', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-intercom', name: 'Intercom, Paging & Access', slug: 'intercom-paging-access', isActive: true, parentId: null, type: 'product' },
 ];
 
 function BackToTop() {
@@ -84,7 +102,7 @@ function BackToTop() {
       if (window.scrollY > 300) setIsVisible(true);
       else setIsVisible(false);
     };
-    window.addEventListener('scroll', toggleVisibility);
+    window.addEventListener('scroll', toggleVisibility, { passive: true });
     return () => window.removeEventListener('scroll', toggleVisibility);
   }, []);
   
@@ -104,11 +122,12 @@ function BackToTop() {
 
 function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const searchRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { itemCount } = useCart();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -124,6 +143,21 @@ function Navbar() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [navCategories, setNavCategories] = useState<any[]>(DEFAULT_NAV_CATEGORIES);
   const [mobileExpandedCategory, setMobileExpandedCategory] = useState<string | null>(null);
+
+  // Immediately close all dropdowns and mobile drawers when route changes
+  useEffect(() => {
+    setActiveDropdown(null);
+    setIsOpen(false);
+    setShowSuggestions(false);
+    setShowCategoryDropdown(false);
+    setShowUserMenu(false);
+  }, [location.pathname, location.search]);
+
+  const closeAllMenus = () => {
+    setActiveDropdown(null);
+    setIsOpen(false);
+    setShowSuggestions(false);
+  };
 
   const getInitials = () => {
     const name = userProfile?.displayName || user?.displayName || userProfile?.email || user?.email || 'U';
@@ -141,18 +175,13 @@ function Navbar() {
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
     // Fetch active products and parent categories
     const unsubProducts = subscribeToProducts((data) => {
       setProducts(data);
     }, { isActive: true });
 
     const unsubCategories = subscribeToCategories((cats) => {
-      const productCats = cats.filter(c => c.isActive && ((c as any).type === 'product'));
+      const productCats = cats.filter(c => c.isActive && ((c as any).type === 'product' || !('type' in c)));
       if (productCats.length > 0) {
         setNavCategories(productCats);
         setCategories(productCats.filter(c => !c.parentId));
@@ -174,7 +203,6 @@ function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
       unsubProducts();
       unsubCategories();
       document.removeEventListener('mousedown', handleClickOutside);
@@ -228,13 +256,14 @@ function Navbar() {
     <>
       <div className="bg-[#f8f9fa] text-gray-600 px-4 md:px-8 text-[13px] flex justify-between items-center border-b border-gray-200 font-medium h-10 shrink-0">
         <div className="flex items-center gap-6">
-          <span className="flex items-center gap-1.5"><Phone size={14} className="text-[#00B4D8]" /> 0321 425 6263</span>
+          <a href="tel:+923214256263" className="flex items-center gap-1.5 hover:text-[#00B4D8] transition-colors"><Phone size={14} className="text-[#00B4D8]" /> 0321 425 6263</a>
           <span className="hidden sm:flex items-center gap-1.5"><MapPin size={14} className="text-[#00B4D8]" /> Johar Town Block N, Lahore</span>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-5">
+          <Link to="/sitemap" className="hidden md:inline hover:text-[#00B4D8] transition-colors font-semibold text-[#1A2B4C]">Site Directory</Link>
           <Link to="/contact" className="hover:text-[#00B4D8] transition-colors">Contact Us</Link>
           <Link to="/blog" className="hover:text-[#00B4D8] transition-colors">Blog</Link>
-          <Link to="/guides" className="hover:text-[#00B4D8] transition-colors">Buyer's Guides</Link>
+          <Link to="/guides" className="hidden sm:inline hover:text-[#00B4D8] transition-colors">Buyer's Guides</Link>
           {isAuthenticated ? (
             <div className="relative" ref={userMenuRef}>
               <button
@@ -306,39 +335,31 @@ function Navbar() {
         </div>
       </div>
 
-      <div className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md transition-shadow duration-200 ${isScrolled ? 'shadow-md border-b border-gray-100' : 'border-b border-gray-200'}`}>
-        
-        <div className={`max-w-[1400px] mx-auto px-4 md:px-8 flex items-center justify-between gap-4 md:gap-8 ${isScrolled ? 'h-16' : 'h-24'}`}>
+      {/* Fixed Stable Header (No layout-jumping scroll collapse) */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 flex items-center justify-between gap-4 md:gap-8 h-20">
           <div className="flex items-center gap-4 md:gap-8 flex-1">
-            <Link to="/" className={`flex flex-col justify-center shrink-0 transition-transform origin-left duration-300 ${isScrolled ? 'scale-75 md:scale-90' : 'scale-100'}`}>
+            <Link to="/" onClick={closeAllMenus} className="flex flex-col justify-center shrink-0">
               <div className="flex items-stretch">
-                <div className="bg-black text-[#f0f0f0] font-black text-3xl px-3 py-1.5 leading-none tracking-tight">AV</div>
-                <div className="text-black font-black text-[32px] leading-none ml-2 flex items-center tracking-tight">Live</div>
+                <div className="bg-black text-[#f0f0f0] font-black text-2xl md:text-3xl px-2.5 py-1 leading-none tracking-tight">AV</div>
+                <div className="text-black font-black text-2xl md:text-[30px] leading-none ml-2 flex items-center tracking-tight">Live</div>
               </div>
-              <div className="text-black font-light text-[11px] tracking-[0.45em] mt-1 ml-0.5 uppercase">Communication</div>
+              <div className="text-black font-light text-[10px] tracking-[0.42em] mt-1 ml-0.5 uppercase">Communication</div>
             </Link>
 
-            <div className={`shrink-0 transition-opacity duration-300 ${isScrolled ? 'hidden pointer-events-none opacity-0' : 'hidden lg:flex flex-col opacity-100'}`}>
-              <div className="text-[#F26522] font-black text-xl tracking-tight leading-tight">0321 425 6263</div>
-              <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">9 AM - 6 PM PKT M-S</div>
+            <div className="shrink-0 hidden lg:flex flex-col">
+              <a href="tel:+923214256263" className="text-[#F26522] font-black text-lg tracking-tight leading-tight hover:underline">0321 425 6263</a>
+              <div className="text-gray-500 text-[11px] font-medium uppercase tracking-wider">9 AM - 6 PM PKT M-S</div>
             </div>
 
-            {/* Inline Navigation Menu when scrolled */}
-            <div className={`items-center gap-6 text-[12px] font-bold text-[#1A2B4C] uppercase tracking-wider transition-opacity duration-300 ${isScrolled ? 'hidden xl:flex opacity-100' : 'hidden pointer-events-none opacity-0'}`}>
-              <Link to="/shop" className="hover:text-[#00B4D8] transition-colors">Products</Link>
-              <Link to="/services" className="hover:text-[#00B4D8] transition-colors">Services</Link>
-              <Link to="/category/video-conferencing" className="hover:text-[#00B4D8] transition-colors">Video Conference</Link>
-              <Link to="/services/ai-development" className="hover:text-[#00B4D8] transition-colors">AI Solutions</Link>
-            </div>
-
-            <div ref={searchRef} className={`flex-1 relative transition-all duration-300 ${isScrolled ? 'max-w-xs xl:max-w-md ml-auto hidden md:block' : 'max-w-2xl'}`}>
-              <form onSubmit={handleSearchSubmit} className={`flex w-full bg-gray-50/50 hover:bg-white focus-within:bg-white border border-gray-200/80 focus-within:border-[#00B4D8] focus-within:ring-4 focus-within:ring-[#00B4D8]/10 rounded-full overflow-visible transition-all duration-300 relative items-center pr-1.5 ${isScrolled ? 'h-9 shadow-none' : 'h-11 shadow-sm focus-within:shadow-md'}`}>
+            <div ref={searchRef} className="flex-1 relative max-w-2xl">
+              <form onSubmit={handleSearchSubmit} className="flex w-full bg-gray-50/70 hover:bg-white focus-within:bg-white border border-gray-200 focus-within:border-[#00B4D8] focus-within:ring-4 focus-within:ring-[#00B4D8]/10 rounded-full overflow-visible transition-all duration-200 relative items-center pr-1.5 h-11 shadow-sm">
                 {/* Custom category select */}
                 <div ref={categoryDropdownRef} className="relative h-full hidden sm:flex items-center shrink-0">
                   <button
                     type="button"
                     onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                    className="flex items-center gap-2 px-4 h-full bg-gray-100/50 hover:bg-gray-100 text-gray-700 hover:text-[#1A2B4C] font-semibold text-xs border-r border-gray-200/50 transition-colors focus:outline-none shrink-0 rounded-l-full cursor-pointer"
+                    className="flex items-center gap-2 px-4 h-full bg-gray-100/60 hover:bg-gray-100 text-gray-700 hover:text-[#1A2B4C] font-semibold text-xs border-r border-gray-200/60 transition-colors focus:outline-none shrink-0 rounded-l-full cursor-pointer"
                   >
                     <span className="max-w-[110px] truncate">
                       {selectedCategory === 'All' ? 'All Categories' : (categories.find(c => c.id === selectedCategory)?.name || 'Category')}
@@ -347,7 +368,7 @@ function Navbar() {
                   </button>
 
                   {showCategoryDropdown && (
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-1.5 z-50">
                       <div className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-50 mb-1">Filter Categories</div>
                       <button
                         type="button"
@@ -382,121 +403,87 @@ function Navbar() {
                 <input 
                   id="navbar-search"
                   type="text" 
-                  placeholder={isScrolled ? "Search..." : "Search professional AV & VoIP hardware..."}
+                  placeholder="Search professional AV & VoIP hardware..."
                   className="flex-1 px-4 py-2 bg-transparent focus:outline-none text-sm placeholder-gray-400 font-semibold text-[#1A2B4C]"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    setShowSuggestions(true);
+                    setShowSuggestions(e.target.value.trim().length > 0);
                   }}
-                  onFocus={() => setShowSuggestions(true)}
+                  onFocus={() => {
+                    if (searchQuery.trim().length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
                 />
                 <button 
                   type="submit" 
                   aria-label="Search" 
-                  className={`bg-[#1A2B4C] hover:bg-[#00B4D8] text-white rounded-full flex items-center justify-center transition-all duration-300 shrink-0 shadow-sm hover:shadow-md hover:scale-105 ${isScrolled ? 'w-7 h-7' : 'w-8.5 h-8.5'}`}
+                  className="bg-[#1A2B4C] hover:bg-[#00B4D8] text-white rounded-full flex items-center justify-center transition-all duration-200 shrink-0 shadow-sm w-8 h-8 cursor-pointer"
                 >
-                  <Search size={isScrolled ? 13 : 15} />
+                  <Search size={15} />
                 </button>
               </form>
 
               {/* Search Suggestions & Discovery Panel */}
-              {showSuggestions && (
-                <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden divide-y divide-gray-50 animate-in fade-in duration-200">
-                  {searchQuery.trim().length > 0 ? (
-                    searchSuggestions.length > 0 ? (
-                      <div>
-                        <div className="px-4 py-2 bg-gray-50/60 text-[10px] font-black uppercase tracking-widest text-[#00B4D8] flex justify-between items-center">
-                          <span>Matching Hardware</span>
-                          <span>{searchSuggestions.length} items found</span>
-                        </div>
-                        <div className="max-h-[360px] overflow-y-auto divide-y divide-gray-50">
-                          {searchSuggestions.map((product) => (
-                            <Link 
-                              key={product.id} 
-                              to={`/product/${getCanonicalProductSlug(product, product.id)}`}
-                              className="flex items-center gap-4 p-4 hover:bg-gray-50/80 transition-colors group"
-                              onClick={() => setShowSuggestions(false)}
-                            >
-                              <div className="w-11 h-11 bg-white rounded-xl border border-gray-100 overflow-hidden shrink-0 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300">
-                                <img 
-                                  src={product.images?.[0] || 'https://via.placeholder.com/48'} 
-                                  alt={product.productName} 
-                                  className="w-full h-full object-contain p-1.5" 
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-bold text-sm text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors truncate">
-                                  {product.productName}
-                                </div>
-                                <div className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mt-0.5">
-                                  {product.brand} • <span className="text-gray-300">SKU:</span> {product.sku}
-                                </div>
-                              </div>
-                              <div className="shrink-0 text-right">
-                                <div className="text-xs font-black text-[#1A2B4C]">
-                                  {product.salePrice ? `Rs. ${product.salePrice.toLocaleString()}` : 'Contact for Price'}
-                                </div>
-                                {product.stockQuantity > 0 ? (
-                                  <span className="inline-block text-[9px] font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full mt-1">In Stock</span>
-                                ) : (
-                                  <span className="inline-block text-[9px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full mt-1">Special Order</span>
-                                )}
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                        <button 
-                          onClick={handleSearchSubmit} 
-                          className="w-full text-center py-3 text-xs font-black text-[#00B4D8] hover:bg-gray-50 border-t border-gray-100 uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
-                        >
-                          View All Search Results <ArrowRight size={14} />
-                        </button>
+              {showSuggestions && searchQuery.trim().length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden divide-y divide-gray-50">
+                  {searchSuggestions.length > 0 ? (
+                    <div>
+                      <div className="px-4 py-2 bg-gray-50/60 text-[10px] font-black uppercase tracking-widest text-[#00B4D8] flex justify-between items-center">
+                        <span>Matching Hardware</span>
+                        <span>{searchSuggestions.length} items found</span>
                       </div>
-                    ) : (
-                      <div className="p-8 text-center">
-                        <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-300">
-                          <Search size={20} />
-                        </div>
-                        <div className="text-sm font-bold text-[#1A2B4C]">No Hardware Found</div>
-                        <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">We couldn't find matches for "{searchQuery}". Check spelling or try a different category.</p>
-                      </div>
-                    )
-                  ) : (
-                    /* Suggestions state when empty and input is focused */
-                    <div className="p-5">
-                      <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3">Trending Categories</div>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {categories.slice(0, 4).map((cat) => (
-                          <Link
-                            key={cat.id}
-                            to={`/category/${cat.slug || cat.id}`}
-                            onClick={() => setShowSuggestions(false)}
-                            className="bg-gray-50 hover:bg-[#00B4D8]/10 hover:text-[#00B4D8] px-3.5 py-2 rounded-full text-xs font-bold text-[#1A2B4C] transition-all duration-200 border border-gray-100"
+                      <div className="max-h-[360px] overflow-y-auto divide-y divide-gray-50">
+                        {searchSuggestions.map((product, sIdx) => (
+                          <Link 
+                            key={`${product.id || product.slug || sIdx}`} 
+                            to={`/product/${getCanonicalProductSlug(product, product.id)}`}
+                            className="flex items-center gap-4 p-3.5 hover:bg-gray-50/80 transition-colors group"
+                            onClick={closeAllMenus}
                           >
-                            {cat.name}
+                            <div className="w-11 h-11 bg-white rounded-xl border border-gray-100 overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
+                              <img 
+                                src={product.images?.[0] || 'https://via.placeholder.com/48'} 
+                                alt={product.productName} 
+                                className="w-full h-full object-contain p-1.5" 
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-bold text-sm text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors truncate">
+                                {product.productName}
+                              </div>
+                              <div className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mt-0.5">
+                                {product.brand} • <span className="text-gray-300">SKU:</span> {product.sku}
+                              </div>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <div className="text-xs font-black text-[#1A2B4C]">
+                                {product.salePrice ? `Rs. ${product.salePrice.toLocaleString()}` : 'Contact for Price'}
+                              </div>
+                              {product.stockQuantity > 0 ? (
+                                <span className="inline-block text-[9px] font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full mt-1">In Stock</span>
+                              ) : (
+                                <span className="inline-block text-[9px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full mt-1">Special Order</span>
+                              )}
+                            </div>
                           </Link>
                         ))}
                       </div>
-                      
-                      {products.length > 0 && (
-                        <>
-                          <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-2 border-t border-gray-50 pt-3">Top Products</div>
-                          <div className="space-y-1">
-                            {products.slice(0, 3).map((p) => (
-                              <Link
-                                key={p.id}
-                                to={`/product/${getCanonicalProductSlug(p, p.id)}`}
-                                onClick={() => setShowSuggestions(false)}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-50 text-xs font-bold text-gray-600 hover:text-[#1A2B4C] transition-all"
-                              >
-                                <Search size={12} className="text-gray-400 shrink-0" />
-                                <span className="truncate">{p.productName}</span>
-                              </Link>
-                            ))}
-                          </div>
-                        </>
-                      )}
+                      <button 
+                        onClick={handleSearchSubmit} 
+                        className="w-full text-center py-3 text-xs font-black text-[#00B4D8] hover:bg-gray-50 border-t border-gray-100 uppercase tracking-widest transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        View All Search Results <ArrowRight size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-300">
+                        <Search size={20} />
+                      </div>
+                      <div className="text-sm font-bold text-[#1A2B4C]">No Hardware Found</div>
+                      <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">We couldn't find matches for "{searchQuery}". Check spelling or try a different category.</p>
                     </div>
                   )}
                 </div>
@@ -504,53 +491,87 @@ function Navbar() {
             </div>
           </div>
 
-          <div className="flex items-center shrink-0">
-            <Link to="/cart" aria-label={`Shopping cart, containing ${itemCount} items`} className="relative p-2 text-[#1A2B4C] hover:text-[#00B4D8] transition-colors group">
+          <div className="flex items-center gap-2 shrink-0">
+            <Link to="/cart" onClick={closeAllMenus} aria-label={`Shopping cart, containing ${itemCount} items`} className="relative p-2 text-[#1A2B4C] hover:text-[#00B4D8] transition-colors group">
               <ShoppingCart size={24} className="group-hover:scale-110 transition-transform" />
               {itemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#F26522] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">{itemCount}</span>
               )}
             </Link>
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle mobile menu"
+              className="lg:hidden p-2 text-[#1A2B4C] hover:text-[#00B4D8] transition-colors cursor-pointer"
+            >
+              {isOpen ? <X size={26} /> : <Menu size={26} />}
+            </button>
           </div>
         </div>
 
-        {/* Main Navigation Row - Only visible when not scrolled */}
-        <div className={`border-t border-gray-100 transition-opacity duration-200 hidden lg:block ${isScrolled ? 'h-0 opacity-0 overflow-hidden border-t-0' : 'h-14 opacity-100'}`}>
-          <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-full flex items-center gap-8 text-[12px] font-bold text-[#1A2B4C] uppercase tracking-wider">
+        {/* Main Navigation Row - Always visible on Desktop (No scroll-collapse jitter) & Controlled Dropdowns */}
+        <nav
+          aria-label="Primary Navigation"
+          className="border-t border-gray-100 hidden lg:block h-12 bg-white"
+          onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActiveDropdown(null); }}
+        >
+          <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-full flex items-center gap-7 text-[12px] font-bold text-[#1A2B4C] uppercase tracking-wider">
             {/* HOME with Dropdown */}
-            <div className="h-14 flex items-center group relative">
-              <Link to="/" className="h-14 flex items-center border-b-[3px] border-transparent group-hover:border-[#00B4D8] group-hover:text-[#00B4D8] transition-colors">HOME</Link>
-              <div className="absolute top-14 left-0 w-[240px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-5">
-                <ul className="space-y-3.5 text-[13px] text-gray-600 font-semibold capitalize tracking-normal">
-                  <li><Link to="/about" className="hover:text-[#00B4D8] transition-colors block">About Us</Link></li>
-                  <li><Link to="/contact" className="hover:text-[#00B4D8] transition-colors block">Contact Us</Link></li>
-                  <li><Link to="/blog" className="hover:text-[#00B4D8] transition-colors block">Company Blog</Link></li>
-                  <li><Link to="/guides" className="hover:text-[#00B4D8] transition-colors block">Buyer's Guides</Link></li>
+            <div
+              className="h-12 flex items-center relative"
+              onPointerEnter={(e) => { if (e.pointerType === 'mouse') setActiveDropdown('home'); }}
+              onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActiveDropdown(null); }}
+            >
+              <Link
+                to="/"
+                onClick={closeAllMenus}
+                className={`h-12 flex items-center gap-1 border-b-[3px] transition-colors ${activeDropdown === 'home' || location.pathname === '/' ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent hover:text-[#00B4D8]'}`}
+              >
+                HOME <ChevronDown size={12} />
+              </Link>
+              <div className={`absolute top-12 left-0 w-[250px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 ${activeDropdown === 'home' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                <ul className="space-y-3 text-[13px] text-gray-700 font-semibold capitalize tracking-normal">
+                  <li><Link to="/about" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">About Us</Link></li>
+                  <li><Link to="/contact" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Contact Us</Link></li>
+                  <li><Link to="/blog" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Company Blog</Link></li>
+                  <li><Link to="/guides" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Buyer's Guides</Link></li>
+                  <li className="pt-2 border-t border-gray-100"><Link to="/sitemap" onClick={closeAllMenus} className="text-[#00B4D8] hover:text-[#1A2B4C] font-bold transition-colors block">Complete Site Directory (153+ Pages)</Link></li>
                 </ul>
               </div>
             </div>
             
             {/* PRODUCTS */}
-            <div className="h-14 flex items-center group relative">
-              <Link to="/shop" className="h-14 flex items-center border-b-[3px] border-transparent group-hover:border-[#00B4D8] group-hover:text-[#00B4D8] transition-colors">PRODUCTS</Link>
-              <div className="absolute top-14 left-0 w-64 bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl py-2">
+            <div
+              className="h-12 flex items-center relative"
+              onPointerEnter={(e) => { if (e.pointerType === 'mouse') setActiveDropdown('products'); }}
+              onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActiveDropdown(null); }}
+            >
+              <Link
+                to="/shop"
+                onClick={closeAllMenus}
+                className={`h-12 flex items-center gap-1 border-b-[3px] transition-colors ${activeDropdown === 'products' || location.pathname.startsWith('/shop') || location.pathname.startsWith('/category') ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent hover:text-[#00B4D8]'}`}
+              >
+                PRODUCTS <ChevronDown size={12} />
+              </Link>
+              <div className={`absolute top-12 left-0 w-72 bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl py-2 transition-opacity duration-150 ${activeDropdown === 'products' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
                 {categories.map(parent => {
                   const subCats = navCategories.filter(c => c.parentId === parent.id);
                   return (
                     <div key={parent.id} className="relative group/sub">
                       <Link 
                         to={`/category/${parent.slug || parent.id}`} 
-                        className="flex items-center justify-between px-6 py-3 font-bold text-[#1A2B4C] hover:bg-gray-50 hover:text-[#00B4D8] transition-colors text-sm uppercase tracking-wider"
+                        onClick={closeAllMenus}
+                        className="flex items-center justify-between px-5 py-2.5 font-bold text-[#1A2B4C] hover:bg-gray-50 hover:text-[#00B4D8] transition-colors text-xs uppercase tracking-wider"
                       >
                         {parent.name}
                         {subCats.length > 0 && <ChevronDown size={14} className="-rotate-90 text-gray-400 group-hover/sub:text-[#00B4D8]" />}
                       </Link>
                       {subCats.length > 0 && (
-                        <div className="absolute top-0 left-full ml-0 w-64 bg-white shadow-2xl opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-300 z-50 border border-gray-100 rounded-2xl py-2">
-                          <ul className="flex flex-col text-[13px] text-gray-500 font-medium capitalize tracking-normal">
+                        <div className="absolute top-0 left-full ml-0 w-64 bg-white shadow-2xl opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-150 z-50 border border-gray-100 rounded-2xl py-2">
+                          <ul className="flex flex-col text-[13px] text-gray-600 font-medium capitalize tracking-normal">
                             {subCats.map(sub => (
                               <li key={sub.id}>
-                                <Link to={`/category/${sub.slug || sub.id}`} className="block px-6 py-2.5 hover:bg-gray-50 hover:text-[#00B4D8] transition-colors">
+                                <Link to={`/category/${sub.slug || sub.id}`} onClick={closeAllMenus} className="block px-5 py-2 hover:bg-gray-50 hover:text-[#00B4D8] transition-colors">
                                   {sub.name}
                                 </Link>
                               </li>
@@ -561,54 +582,86 @@ function Navbar() {
                     </div>
                   );
                 })}
+                <div className="mt-1 pt-2 border-t border-gray-100 px-5 py-2">
+                  <Link to="/shop" onClick={closeAllMenus} className="text-xs font-black text-[#00B4D8] hover:text-[#1A2B4C] flex items-center justify-between">
+                    <span>BROWSE ALL 53+ HARDWARE SKUS</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                </div>
               </div>
             </div>
 
             {/* SERVICES */}
-            <div className="h-14 flex items-center group relative">
-              <Link to="/services" className="h-14 flex items-center border-b-[3px] border-transparent group-hover:border-[#00B4D8] group-hover:text-[#00B4D8] transition-colors">SERVICES</Link>
-              <div className="absolute top-14 left-0 w-[320px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6">
-                <ul className="space-y-3.5 text-[13px] text-gray-700 font-bold capitalize tracking-normal">
-                  <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors block">Corporate Event Management</Link></li>
-                  <li><Link to="/live-streaming-services" className="hover:text-[#00B4D8] transition-colors block">Live Streaming Services</Link></li>
-                  <li><Link to="/av-equipment-rental" className="hover:text-[#00B4D8] transition-colors block">AV Equipment Rental</Link></li>
-                  <li><Link to="/services/hybrid-events" className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Hybrid Event Production</Link></li>
-                  <li><Link to="/services/expo-organizing" className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Expo Organizing</Link></li>
-                  <li><Link to="/esports" className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Esports Events</Link></li>
+            <div
+              className="h-12 flex items-center relative"
+              onPointerEnter={(e) => { if (e.pointerType === 'mouse') setActiveDropdown('services'); }}
+              onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActiveDropdown(null); }}
+            >
+              <Link
+                to="/services"
+                onClick={closeAllMenus}
+                className={`h-12 flex items-center gap-1 border-b-[3px] transition-colors ${activeDropdown === 'services' || location.pathname.startsWith('/services') || location.pathname === '/corporate-event-management' ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent hover:text-[#00B4D8]'}`}
+              >
+                SERVICES <ChevronDown size={12} />
+              </Link>
+              <div className={`absolute top-12 left-0 w-[340px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-6 transition-opacity duration-150 ${activeDropdown === 'services' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                <ul className="space-y-2.5 text-[13px] text-gray-700 font-bold capitalize tracking-normal">
+                  <li><Link to="/corporate-event-management" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Corporate Event Management Hub</Link></li>
+                  <li><Link to="/services/corporate-events" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Corporate Event Production</Link></li>
+                  <li><Link to="/services/hybrid-events" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Hybrid Event Production</Link></li>
+                  <li><Link to="/services/expo-organizing" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Expo &amp; Trade Show Organizing</Link></li>
+                  <li><Link to="/services/esports-events" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">e-Sports Arena Production</Link></li>
+                  <li><Link to="/services/boardroom-integration" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Boardroom AV Integration</Link></li>
+                  <li><Link to="/services/voip-telephony" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Enterprise VoIP &amp; IP-PBX</Link></li>
+                  <li><Link to="/live-streaming-services" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Live Streaming Services</Link></li>
+                  <li><Link to="/av-equipment-rental" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">AV Equipment Rental</Link></li>
+                  <li><Link to="/3d-hologram" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">3D Hologram Display Stages</Link></li>
                 </ul>
               </div>
             </div>
 
-            {/* VIDEO CONFERENCE - Placed in the Center */}
-            <div className="h-14 flex items-center group relative">
-              <Link to="/category/video-conferencing" className="h-14 flex items-center border-b-[3px] border-transparent group-hover:border-[#00B4D8] group-hover:text-[#00B4D8] transition-colors">VIDEO CONFERENCE</Link>
-              <div className="absolute top-14 left-1/2 -translate-x-1/2 w-[540px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6">
-                <div className="mb-4 pb-3 border-b border-gray-100 bg-blue-50/50 p-3 rounded-xl">
-                  <Link to="/video-conferencing-solutions" className="font-black text-xs text-[#1A2B4C] hover:text-[#00B4D8] flex items-center justify-between uppercase tracking-wider">
-                    <span>Enterprise Video Conferencing Solutions</span>
+            {/* VIDEO CONFERENCE */}
+            <div
+              className="h-12 flex items-center relative"
+              onPointerEnter={(e) => { if (e.pointerType === 'mouse') setActiveDropdown('video'); }}
+              onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActiveDropdown(null); }}
+            >
+              <Link
+                to="/video-conference-in-pakistan"
+                onClick={closeAllMenus}
+                className={`h-12 flex items-center gap-1 border-b-[3px] transition-colors ${activeDropdown === 'video' || location.pathname.includes('video-conferenc') ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent hover:text-[#00B4D8]'}`}
+              >
+                VIDEO CONFERENCE <ChevronDown size={12} />
+              </Link>
+              <div className={`absolute top-12 left-1/2 -translate-x-1/2 w-[560px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-6 transition-opacity duration-150 ${activeDropdown === 'video' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                <div className="mb-4 pb-3 border-b border-gray-100 bg-blue-50/60 p-3.5 rounded-xl space-y-2">
+                  <Link to="/video-conference-in-pakistan" onClick={closeAllMenus} className="font-black text-xs text-[#1A2B4C] hover:text-[#00B4D8] flex items-center justify-between uppercase tracking-wider">
+                    <span>Video Conference in Pakistan — Complete Pillar Hub</span>
                     <ArrowRight size={14} />
                   </Link>
-                  <p className="text-[11px] text-gray-500 font-medium mt-1">Authorized Polycom, Cisco &amp; Logitech boardroom integration across Lahore, Karachi &amp; Islamabad.</p>
+                  <Link to="/video-conferencing-solutions" onClick={closeAllMenus} className="font-bold text-[11px] text-[#00B4D8] hover:underline block normal-case">
+                    Explore Turnkey Boardroom Solutions (Polycom Group 500, Poly X70, Cisco &amp; Logitech) →
+                  </Link>
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">Meeting Room Systems</div>
+                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">Boardroom Codecs &amp; Systems</div>
                     <ul className="space-y-2.5 text-[13px] text-gray-600 font-semibold capitalize tracking-normal">
-                      <li><Link to="/product/cisco-room-kit-plus-pakistan" className="hover:text-[#00B4D8] transition-colors block">Cisco Room Kit Plus</Link></li>
-                      <li><Link to="/product/cisco-room-bar-pakistan" className="hover:text-[#00B4D8] transition-colors block">Cisco Room Bar</Link></li>
-                      <li><Link to="/product/poly-studio-x52-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio X52</Link></li>
-                      <li><Link to="/product/poly-studio-x50-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio X50</Link></li>
+                      <li><Link to="/product/polycom-realpresence-group-500-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Polycom Group 500</Link></li>
+                      <li><Link to="/product/cisco-room-kit-plus-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Cisco Room Kit Plus</Link></li>
+                      <li><Link to="/product/poly-studio-x72-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Poly Studio X72 / X70</Link></li>
+                      <li><Link to="/product/poly-studio-x52-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Poly Studio X52</Link></li>
                     </ul>
                   </div>
                   <div>
-                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">All-in-One USB Bars</div>
+                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">All-in-One Video Bars</div>
                     <ul className="space-y-2.5 text-[13px] text-gray-600 font-semibold capitalize tracking-normal">
-                      <li><Link to="/product/logitech-rally-bar-pakistan" className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar</Link></li>
-                      <li><Link to="/product/logitech-rally-bar-mini-pakistan" className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar Mini</Link></li>
-                      <li><Link to="/product/poly-studio-usb-video-bar-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio USB Bar</Link></li>
+                      <li><Link to="/product/logitech-rally-bar-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar</Link></li>
+                      <li><Link to="/product/logitech-rally-bar-mini-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar Mini</Link></li>
+                      <li><Link to="/product/poly-studio-usb-video-bar-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Poly Studio USB Bar</Link></li>
                       <li>
-                        <Link to="/category/video-conferencing" className="text-[#00B4D8] hover:text-[#1A2B4C] transition-colors block font-bold text-xs mt-3.5 flex items-center gap-1">
-                          View All Hardware <ArrowRight size={12} />
+                        <Link to="/category/video-conferencing" onClick={closeAllMenus} className="text-[#00B4D8] hover:text-[#1A2B4C] transition-colors block font-bold text-xs mt-3.5 flex items-center gap-1">
+                          View All Video Hardware <ArrowRight size={12} />
                         </Link>
                       </li>
                     </ul>
@@ -618,36 +671,72 @@ function Navbar() {
             </div>
 
             {/* AI SOLUTIONS */}
-            <div className="h-14 flex items-center group relative">
-              <Link to="/services/ai-development" className="h-14 flex items-center border-b-[3px] border-transparent hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors cursor-pointer">AI SOLUTIONS</Link>
-              <div className="absolute top-14 left-0 w-[300px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6">
-                <ul className="space-y-4 text-[14px] text-gray-600 font-medium capitalize tracking-normal">
-                  <li><Link to="/services/ai-development" className="hover:text-[#00B4D8] transition-colors block">AI Development</Link></li>
-                  <li><Link to="/services/ai-agents-workers" className="hover:text-[#00B4D8] transition-colors block">AI Agents</Link></li>
-                  <li><Link to="/services/ai-automation" className="hover:text-[#00B4D8] transition-colors block">AI Business Automation</Link></li>
+            <div
+              className="h-12 flex items-center relative"
+              onPointerEnter={(e) => { if (e.pointerType === 'mouse') setActiveDropdown('ai'); }}
+              onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActiveDropdown(null); }}
+            >
+              <Link
+                to="/services/ai-development"
+                onClick={closeAllMenus}
+                className={`h-12 flex items-center gap-1 border-b-[3px] transition-colors ${activeDropdown === 'ai' ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent hover:text-[#00B4D8]'}`}
+              >
+                AI SOLUTIONS <ChevronDown size={12} />
+              </Link>
+              <div className={`absolute top-12 left-0 w-[280px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 ${activeDropdown === 'ai' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                <ul className="space-y-3.5 text-[13px] text-gray-700 font-semibold capitalize tracking-normal">
+                  <li><Link to="/services/ai-development" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">AI Development</Link></li>
+                  <li><Link to="/services/ai-agents-workers" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">AI Agents &amp; Digital Workers</Link></li>
+                  <li><Link to="/services/ai-automation" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">AI Business Automation</Link></li>
                 </ul>
               </div>
             </div>
 
             {/* VOIP & UC */}
-            <div className="h-14 flex items-center group relative">
-              <Link to="/voip-service-providers" className="h-14 flex items-center border-b-[3px] border-transparent hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors cursor-pointer">VOIP &amp; UC</Link>
-              <div className="absolute top-14 left-0 w-[300px] bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 rounded-b-2xl p-6">
-                <ul className="space-y-4 text-[14px] text-gray-600 font-medium capitalize tracking-normal">
-                  <li><Link to="/product/3cx-pro-8-sc-pakistan" className="hover:text-[#00B4D8] transition-colors block">3CX Phone System</Link></li>
-                  <li><Link to="/product/freepbx-enterprise-pakistan" className="hover:text-[#00B4D8] transition-colors block">FreePBX Enterprise</Link></li>
-                  <li><Link to="/product/cisco-cucm-license-pakistan" className="hover:text-[#00B4D8] transition-colors block">Cisco CUCM License</Link></li>
-                  <li><Link to="/product/grandstream-ucm6308-pakistan" className="hover:text-[#00B4D8] transition-colors block">Grandstream UCM6308</Link></li>
-                  <li><Link to="/voip-service-providers" className="hover:text-[#00B4D8] transition-colors block font-bold text-[#F26522]">VoIP Service Providers</Link></li>
+            <div
+              className="h-12 flex items-center relative"
+              onPointerEnter={(e) => { if (e.pointerType === 'mouse') setActiveDropdown('voip'); }}
+              onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActiveDropdown(null); }}
+            >
+              <Link
+                to="/voip-service-providers"
+                onClick={closeAllMenus}
+                className={`h-12 flex items-center gap-1 border-b-[3px] transition-colors ${activeDropdown === 'voip' || location.pathname === '/voip-service-providers' ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent hover:text-[#00B4D8]'}`}
+              >
+                VOIP &amp; UC <ChevronDown size={12} />
+              </Link>
+              <div className={`absolute top-12 left-0 w-[290px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 ${activeDropdown === 'voip' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                <ul className="space-y-3 text-[13px] text-gray-700 font-semibold capitalize tracking-normal">
+                  <li><Link to="/product/3cx-pro-8-sc-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">3CX Phone System</Link></li>
+                  <li><Link to="/product/freepbx-enterprise-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">FreePBX Enterprise</Link></li>
+                  <li><Link to="/product/cisco-cucm-license-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Cisco CUCM License</Link></li>
+                  <li><Link to="/product/grandstream-ucm6308-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Grandstream UCM6308</Link></li>
+                  <li className="pt-2 border-t border-gray-100"><Link to="/voip-service-providers" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-bold text-[#F26522]">VoIP Service Providers Hub</Link></li>
                 </ul>
               </div>
             </div>
+
+            {/* Direct Quick-Links */}
+            <Link
+              to="/corporate-event-management"
+              onClick={closeAllMenus}
+              className={`h-12 flex items-center border-b-[3px] transition-colors ${location.pathname === '/corporate-event-management' ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent hover:text-[#00B4D8]'}`}
+            >
+              CORPORATE EVENTS
+            </Link>
+            <Link
+              to="/room-designer"
+              onClick={closeAllMenus}
+              className={`h-12 flex items-center border-b-[3px] transition-colors ${location.pathname === '/room-designer' ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent hover:text-[#00B4D8]'}`}
+            >
+              3D ROOM DESIGNER
+            </Link>
           </div>
-        </div>
+        </nav>
 
         {/* Mobile Menu Panel */}
         {isOpen && (
-          <div className={`fixed bottom-16 left-0 right-0 bg-white px-4 pt-2 pb-safe pb-24 space-y-4 shadow-2xl z-40 overflow-y-auto lg:hidden transition-all duration-300 ${isScrolled ? "top-[64px]" : "top-[96px]"}`}>
+          <div className="fixed top-[80px] bottom-16 left-0 right-0 bg-white px-4 pt-2 pb-safe pb-24 space-y-4 shadow-2xl z-40 overflow-y-auto lg:hidden">
              <form onSubmit={(e) => { e.preventDefault(); handleSearchSubmit(); setIsOpen(false); }} className="py-2 mb-2 border-b border-gray-100 flex gap-2 relative sticky top-0 bg-white z-10">
                 <label htmlFor="mobile-navbar-search" className="sr-only">Search products</label>
                 <div className="relative flex-1">
@@ -667,10 +756,13 @@ function Navbar() {
              </form>
             
              {/* Nested Home & Corporate Info */}
-             <div className="px-2 font-black text-slate-600 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1">Home & Information</div>
+             <div className="px-2 font-black text-slate-600 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1">Home &amp; Information</div>
              <div className="pl-3 space-y-2.5">
                <Link to="/" className="hover:text-[#00B4D8] block text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Home Page</Link>
                <div className="pl-4 space-y-2 border-l border-gray-200 ml-1">
+                 <Link to="/video-conference-in-pakistan" className="hover:text-[#00B4D8] block text-xs font-bold text-[#00B4D8]" onClick={() => setIsOpen(false)}>Video Conference in Pakistan</Link>
+                 <Link to="/corporate-event-management" className="hover:text-[#00B4D8] block text-xs font-bold text-[#00B4D8]" onClick={() => setIsOpen(false)}>Corporate Event Management</Link>
+                 <Link to="/sitemap" className="hover:text-[#00B4D8] block text-xs font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Complete Site Directory (153+ Pages)</Link>
                  <Link to="/about" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-600" onClick={() => setIsOpen(false)}>About Us</Link>
                  <Link to="/contact" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-600" onClick={() => setIsOpen(false)}>Contact Us</Link>
                  <Link to="/blog" className="hover:text-[#00B4D8] block text-xs font-semibold text-gray-600" onClick={() => setIsOpen(false)}>Company Blog</Link>
@@ -721,7 +813,7 @@ function Navbar() {
             <Link to="/services/ai-agents-workers" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>AI Agents</Link>
             <Link to="/services/ai-automation" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>AI Business Automation</Link>
 
-            <div className="px-2 font-black text-gray-400 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1 mt-6">VoIP & UC</div>
+            <div className="px-2 font-black text-gray-400 text-[10px] uppercase tracking-widest border-b border-gray-100 pb-1 mt-6">VoIP &amp; UC</div>
             <Link to="/product/3cx-pro-8-sc-pakistan" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>3CX Phone System</Link>
             <Link to="/product/freepbx-enterprise-pakistan" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>FreePBX Enterprise</Link>
             <Link to="/product/cisco-cucm-license-pakistan" className="hover:text-[#00B4D8] block px-3 py-2 text-sm font-bold text-[#1A2B4C]" onClick={() => setIsOpen(false)}>Cisco CUCM License</Link>
@@ -786,11 +878,9 @@ function Navbar() {
                 </Link>
               </div>
             )}
-
-
           </div>
         )}
-      </div>
+      </header>
       
       {/* Mobile Sticky Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[100] pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
@@ -826,15 +916,6 @@ function Navbar() {
   );
 }
 
-const EventQuote = React.lazy(() => import('./pages/EventQuote').then(m => ({ default: m.EventQuote })));
-const ServicesLanding = React.lazy(() => import('./pages/services/ServicesLanding').then(m => ({ default: m.ServicesLanding })));
-const ServiceDetail = React.lazy(() => import('./pages/services/ServiceDetail').then(m => ({ default: m.ServiceDetail })));
-const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
-const TermsOfService = React.lazy(() => import('./pages/TermsOfService').then(m => ({ default: m.TermsOfService })));
-const Cart = React.lazy(() => import('./pages/Cart').then(m => ({ default: m.Cart })));
-const Checkout = React.lazy(() => import('./pages/Checkout').then(m => ({ default: m.Checkout })));
-const SetupWizard = React.lazy(() => import('./pages/SetupWizard').then(m => ({ default: m.SetupWizard })));
-
 import { ScrollToTop } from "./components/ScrollToTop";
 
 export default function App() {
@@ -850,16 +931,10 @@ export default function App() {
         </a>
         <Navbar />
         <main id="main-content" className="flex-grow flex flex-col">
-          <React.Suspense fallback={
-            <div className="flex items-center justify-center min-h-[60vh] bg-[#F8F9FA]">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-[#00B4D8] border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-[#1A2B4C] font-black tracking-widest text-xs uppercase">Loading Dynamic Module...</p>
-              </div>
-            </div>
-          }>
+          <React.Suspense fallback={null}>
             <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/sitemap" element={<HtmlSitemap />} />
             <Route path="/setup-wizard" element={<SetupWizard />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/brands" element={<Shop />} />

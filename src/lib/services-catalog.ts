@@ -6,6 +6,12 @@ export interface EnrichedService extends Service {
   localizedH1?: string;
   offeringsBreakdown?: { title: string; detail: string }[];
   caseStudies?: { hub: string; project: string; outcome: string }[];
+  pricingTiers?: {
+    tier: string;
+    capacityOrScope: string;
+    slaAndTurnaround: string;
+    referenceInvestment: string;
+  }[];
 }
 
 export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
@@ -56,6 +62,26 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
         outcome: 'Delivered Bosch digital conference microphone delegation, fine-pitch SMD confidence walls, and encrypted hybrid event streaming.'
       }
     ],
+    pricingTiers: [
+      {
+        tier: 'Executive Seminar & AGM Tier',
+        capacityOrScope: '50–150 Pax • 12x8ft P2.5 SMD Wall • 4 Wireless Mics + PA',
+        slaAndTurnaround: '24-Hr Rigging • 1 Standby AV Engineer • 15-Min SLA',
+        referenceInvestment: 'PKR 185,000 – PKR 450,000'
+      },
+      {
+        tier: 'Corporate Gala & Hybrid Townhall',
+        capacityOrScope: '150–400 Pax • 24x10ft SMD Backdrop + Confidence Monitors • 3-Cam SDI + Poly X70 Bridge',
+        slaAndTurnaround: '48-Hr Pre-Rig • 3 Standby Engineers • Redundant Power/ISP',
+        referenceInvestment: 'PKR 550,000 – PKR 1,450,000'
+      },
+      {
+        tier: 'Flagship Summit & 3D Hologram Reveal',
+        capacityOrScope: '400–1,500+ Pax • Curved P2.5 LED Stage + 3D Hologram Mesh + Line-Array Concert PA',
+        slaAndTurnaround: '72-Hr Custom Fabrication • Full Broadcast Crew • Zero-Downtime SLA',
+        referenceInvestment: 'PKR 1,800,000 – PKR 5,000,000+'
+      }
+    ],
     detailedContent: `
       <h2>Turnkey Corporate Event Management in Lahore, Karachi & Islamabad</h2>
       <p>AV Live Communications is Pakistan's premier engineering-led <strong>Corporate event management</strong> partner. Unlike traditional event planners who outsource technical gear, we own and operate an extensive inventory of <strong>SMD LED screen rental for corporate events</strong>, digital line-array audio systems, <strong>3D hologram display stages Pakistan</strong>, and enterprise <strong>Video conference</strong> codecs including the <strong>Polycom Group 500</strong> and <strong>Poly Studio X70 (Poly X70)</strong>.</p>
@@ -79,6 +105,10 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
       {
         q: 'What is the cost of a 30-person executive boardroom AV setup or corporate townhall stage?',
         a: 'A turnkey 30-person executive boardroom AV setup ranges from PKR 1,450,000 to PKR 3,200,000 depending on dual-display 4K interactive flat panels, optical PTZ cameras (Poly Studio X72 / Cisco Room Kit Plus), and ceiling microphone arrays. Corporate event staging starts from PKR 150,000 for single-day AV rental.'
+      },
+      {
+        q: 'Do you provide FBR GST/NTN tax invoices and on-site technical rehearsals before the event?',
+        a: 'Yes. AV Live Communications is a fully registered taxpayer providing official FBR GST/NTN invoices for corporate procurement and conducts a complete technical dry-run and soundcheck 12–24 hours prior to every major corporate event.'
       }
     ]
   },
@@ -122,6 +152,31 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
         hub: 'Clifton, Karachi',
         project: 'AGM Multi-Camera Event Broadcasting for Listed Corporation',
         outcome: 'SECP-compliant multi-camera live broadcast with real-time shareholder Q&A, dual SMD LED walls, and redundant streaming encoders.'
+      },
+      {
+        hub: 'F-7 & Blue Area, Islamabad',
+        project: 'International Policy & UN Agency Hybrid Symposium',
+        outcome: 'Integrated 4-language simultaneous interpretation channels, 3-camera PTZ broadcast switching, and bidirectional Webex/Zoom bridging.'
+      }
+    ],
+    pricingTiers: [
+      {
+        tier: 'Single-Room Hybrid Webinar / AGM',
+        capacityOrScope: '2x 4K PTZ Cameras • Hardware Encoder • Zoom/Teams Mix-Minus Audio Bridge',
+        slaAndTurnaround: 'Same-Day Setup • 1 Broadcast Engineer • Bonded 4G/5G Backup',
+        referenceInvestment: 'PKR 125,000 – PKR 280,000'
+      },
+      {
+        tier: 'Multi-Camera Ballroom Hybrid Broadcast',
+        capacityOrScope: '3–4 SDI Broadcast Cameras • Live Graphics Switcher • Polycom Group 500 / Poly X70 Bridge',
+        slaAndTurnaround: '24-Hr Pre-Test • 2 Broadcast + 1 Audio Engineer • Dual-Encoder Failover',
+        referenceInvestment: 'PKR 350,000 – PKR 890,000'
+      },
+      {
+        tier: 'Multi-City Linked Hybrid Summit',
+        capacityOrScope: 'Simultaneous Lahore + Karachi + Islamabad Venues Bridged Live in 1080p60/4K',
+        slaAndTurnaround: 'Full Site Survey • Dedicated Crew in Each City • 99.99% Uptime SLA',
+        referenceInvestment: 'PKR 1,200,000 – PKR 3,500,000'
       }
     ],
     detailedContent: `
@@ -142,7 +197,15 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
       },
       {
         q: 'Can you stream a hybrid event simultaneously to Zoom, Microsoft Teams, and YouTube?',
-        a: 'Yes, our hardware encoders and broadcast switchers support bonded multi-network cellular/fiber internet and simultaneous 1080p60 RTMP streaming to Zoom Webinars, Microsoft Teams Town Halls, YouTube, and Facebook.'
+        a: 'Yes, our hardware encoders and broadcast switchers support bonded multi-network cellular/fiber internet and simultaneous 1080p60 RTMP streaming to Zoom Webinars, Microsoft Teams Town Halls, YouTube, and LinkedIn Live.'
+      },
+      {
+        q: 'Are your hybrid AGM broadcasts compliant with SECP and PSX listed-company requirements in Pakistan?',
+        a: 'Yes. We regularly produce SECP-compliant Annual General Meetings (AGMs) and Extraordinary General Meetings (EGMs) in Karachi, Lahore, and Islamabad with encrypted recording, verified attendance logs, and live two-way shareholder Q&A.'
+      },
+      {
+        q: 'What happens if the hotel or venue Wi-Fi drops during a live hybrid broadcast?',
+        a: 'We never rely solely on venue Wi-Fi. Every AV Live hybrid broadcast includes a dedicated bonded multi-ISP router combining wired fiber with multi-carrier 4G/5G cellular failover for uninterrupted streaming.'
       }
     ]
   },
@@ -159,8 +222,60 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     category: 'Exhibitions & Trade Shows',
     serviceType: 'Event management',
     priceRange: 'PKR 250,000 - PKR 8,000,000',
+    localizedH1: 'Turnkey Expo Organizing, Custom Exhibition Stalls & 3D Hologram Pavilions in Pakistan',
     keywords:
-      'Expo organizing Pakistan, Event management, Corporate event management, Hologram Display, events, hybrid event, Video Conference in Pakistan',
+      'Expo organizing Pakistan, Exhibition stall fabrication Lahore Karachi, Event management, Corporate event management, Hologram Display, SMD LED screen rental for corporate events, Video Conference in Pakistan',
+    offeringsBreakdown: [
+      {
+        title: 'Custom 3D Booth Fabrication & Truss Architecture',
+        detail: 'Bespoke wooden, acrylic, and aluminum truss pavilions engineered for Lahore Expo Centre, Karachi Expo Centre, and Pak-China Friendship Centre.'
+      },
+      {
+        title: '3D Hologram Display & SMD Video Wall Attractors',
+        detail: 'Floating 3D holographic LED fan matrices, holographic pyramid showcases, and flush-mounted P2.5 curved SMD LED walls to maximize booth foot traffic.'
+      },
+      {
+        title: 'Interactive Touch Kiosks & VIP Demo Pods',
+        detail: '65"–86" Horion 4K interactive touch screens and acoustic meeting pods equipped with Poly Studio X72 video bars for live HQ product demos.'
+      }
+    ],
+    caseStudies: [
+      {
+        hub: 'Johar Town Expo Centre, Lahore',
+        project: 'ITCN Asia & Industrial Tech 36x24ft Double-Decker Pavilion',
+        outcome: 'Fabricated a custom pavilion featuring a 4-fan 3D Hologram Display matrix, seamless corner P2.5 SMD wall, and 3 interactive touch kiosks.'
+      },
+      {
+        hub: 'Karachi Expo Centre, Hassan Square',
+        project: 'Textile & Export Machinery Trade Show Turnkey Stall',
+        outcome: 'Delivered high-lumen laser projection, 16ft SMD video backdrop, and sound-isolated VIP buyer lounge with live Zoom codec link.'
+      },
+      {
+        hub: 'Pak-China Friendship Centre, Islamabad',
+        project: 'Real Estate & Smart City Interactive Exhibition Pavilion',
+        outcome: 'Integrated 3D architectural projection mapping on a physical scale model alongside 75" 4K interactive flat panels.'
+      }
+    ],
+    pricingTiers: [
+      {
+        tier: 'Standard Shell-Scheme Tech Upgrade (3x3m / 3x6m)',
+        capacityOrScope: '65" 4K Interactive Touch Display + 3D Hologram Fan + Branded Counter & Lighting',
+        slaAndTurnaround: '48-Hr Pre-Expo Staging • On-Site Tech Support',
+        referenceInvestment: 'PKR 250,000 – PKR 580,000'
+      },
+      {
+        tier: 'Custom Island Pavilion (6x6m to 9x6m)',
+        capacityOrScope: 'Custom Wood/Truss Fabrication • P2.5 SMD LED Video Wall • 3D Hologram Cabinet • VIP Lounge',
+        slaAndTurnaround: '7-Day 3D CAD Render + Fabrication • Full-Time Expo Engineer',
+        referenceInvestment: 'PKR 950,000 – PKR 2,800,000'
+      },
+      {
+        tier: 'Full Hall / Mega Brand Pavilion',
+        capacityOrScope: 'Multi-Stall Expo Organizing • Registration Kiosks • Main Stage AV & Live Broadcast',
+        slaAndTurnaround: 'Turnkey Floorplan & Power Distribution • Dedicated Crew',
+        referenceInvestment: 'PKR 3,200,000 – PKR 8,000,000+'
+      }
+    ],
     detailedContent: `
       <h2>Turnkey Exhibition Pavilions & Trade Show Engineering</h2>
       <p>Stand out at Lahore Expo Centre, Karachi Expo Centre, and Pak-China Friendship Centre Islamabad with AV Live's custom <strong>Expo Organizing</strong> and bespoke booth fabrication services.</p>
@@ -174,6 +289,18 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
       {
         q: 'Do you provide 3D Hologram Displays for exhibition booths at Lahore and Karachi Expo Centres?',
         a: 'Yes! We rent and install single and multi-fan 3D Hologram Display matrices and holographic showcase cabinets specifically designed to stop foot traffic at crowded trade expos.'
+      },
+      {
+        q: 'Can AV Live design the 3D CAD booth render as well as fabricate the woodwork and AV hardware?',
+        a: 'Yes. Our in-house exhibition architects deliver photorealistic 3D CAD stall designs, custom carpentry, raised backlit flooring, truss rigging, and integrated SMD LED walls under one turnkey contract.'
+      },
+      {
+        q: 'Do you create custom 3D animations for the Hologram Display and curved SMD screens?',
+        a: 'Yes, our motion-graphics studio creates bespoke 3D product renders, alpha-channel holographic animations, and high-contrast loop videos tailored to your exact LED wall pixel resolution.'
+      },
+      {
+        q: 'How early should we book exhibition stall fabrication before a trade show in Pakistan?',
+        a: 'For custom wooden/truss pavilions, we recommend booking 2 to 3 weeks prior to the expo for 3D design sign-off, while standard AV/Hologram/SMD rental upgrades can be deployed within 24–48 hours.'
       }
     ]
   },
@@ -190,8 +317,60 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     category: 'Esports & Experiential',
     serviceType: 'Event management',
     priceRange: 'PKR 300,000 - PKR 6,000,000',
+    localizedH1: 'Championship e-Sports Arena Staging, LAN Networking & Broadcast Production in Pakistan',
     keywords:
-      'esports events Pakistan, Event management, Corporate event management, hybrid event, Hologram Display, events',
+      'esports events Pakistan, e-Sports tournament setup Lahore Karachi Islamabad, Event management, Corporate event management, hybrid event, Hologram Display, SMD LED screen rental',
+    offeringsBreakdown: [
+      {
+        title: '5v5 Stage Pods & Low-Latency Managed LAN',
+        detail: 'Custom sound-dampened 5v5 player booths, player face-cams, noise-isolating team intercoms, and dual-WAN Gigabit managed tournament switching.'
+      },
+      {
+        title: '60fps+ Ultra-Wide SMD LED Main Stage & Replay Walls',
+        detail: 'Zero-tearing Novastar 4K LED wall processing for live 1080p60/4K gameplay, instant kill-cam replays, and 3D Hologram trophy reveals.'
+      },
+      {
+        title: 'Shoutcaster Desk & Multi-Platform Observer Broadcast',
+        detail: 'Dedicated NDI/SDI observer capture pipelines, broadcast talkback headsets, live HUD telemetry overlays, and Twitch/YouTube simulcasting.'
+      }
+    ],
+    caseStudies: [
+      {
+        hub: 'Gulberg & Johar Town, Lahore',
+        project: 'National Collegiate Valorant & Tekken Championship Arena',
+        outcome: 'Engineered 10-player stage pods, 32ft P2.5 main stage SMD screen, DMX reactive lighting, and 1080p60 YouTube/Twitch live broadcast.'
+      },
+      {
+        hub: 'DHA & Clifton, Karachi',
+        project: 'PUBG Mobile & EA FC Pro Invitational LAN Finals',
+        outcome: 'Deployed enterprise Wi-Fi 6E/wired LAN tournament network for 64 players with zero packet loss and 6-camera broadcast production.'
+      },
+      {
+        hub: 'Blue Area & H-12, Islamabad',
+        project: 'University Festival e-Sports & 3D Hologram Trophy Stage',
+        outcome: 'Integrated ViewSonic 240Hz gaming projection, line-array arena sound, and a live 3D hologram championship reveal.'
+      }
+    ],
+    pricingTiers: [
+      {
+        tier: 'University / Community LAN Qualifier',
+        capacityOrScope: 'Stage Truss + 16x9ft SMD Screen • Caster Desk Audio • 2-Cam Twitch/YouTube Stream',
+        slaAndTurnaround: '24-Hr Setup • 2 Broadcast/Network Engineers',
+        referenceInvestment: 'PKR 300,000 – PKR 650,000'
+      },
+      {
+        tier: 'Pro 5v5 Championship Stage',
+        capacityOrScope: 'Dual 5v5 Player Booths • 28ft SMD Wall + Side Scoreboards • 10x Player Face-Cams + DMX Rig',
+        slaAndTurnaround: '48-Hr Arena Build • Dedicated Observer & Audio Team',
+        referenceInvestment: 'PKR 950,000 – PKR 2,400,000'
+      },
+      {
+        tier: 'Stadium / Expo Mega e-Sports Arena',
+        capacityOrScope: 'Full Arena Rigging • Concert Line-Array PA • 3D Hologram Stage • Bonded Multi-ISP Fiber',
+        slaAndTurnaround: '72-Hr Custom Production • Zero-Lag Network Guarantee',
+        referenceInvestment: 'PKR 2,800,000 – PKR 6,000,000'
+      }
+    ],
     detailedContent: `
       <h2>Championship-Grade e-Sports Arena & Broadcast Engineering</h2>
       <p>AV Live engineers full-scale competitive gaming stages, player booths, caster desks, and multi-stream observer production for Pakistan's largest e-Sports tournaments and university championships.</p>
@@ -205,6 +384,18 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
       {
         q: 'Can AV Live handle both the stage SMD screens and the live Twitch/YouTube observer broadcast?',
         a: 'Yes, we provide complete end-to-end e-Sports production including stage trussing, P2.5 SMD LED walls, player comms, shoutcaster desks, and multi-camera live broadcast switching.'
+      },
+      {
+        q: 'How do you prevent player team-chat audio feedback in loud tournament arenas?',
+        a: 'We equip player booths with closed-back active noise-canceling (ANC) headsets (Jabra / Poly) routed through isolated hardware intercom matrices with push-to-talk gates.'
+      },
+      {
+        q: 'Can you capture 10+ player screens and POV face-cams simultaneously without dropping frames?',
+        a: 'Yes. We utilize dedicated NDI/SDI hardware capture cards and vMix/ATEM broadcast switchers on isolated Gigabit VLANs so observer PCs experience zero FPS impact.'
+      },
+      {
+        q: 'Do you provide DMX stage lighting triggered by in-game events like bomb plants or round wins?',
+        a: 'Yes, our lighting engineers program custom DMX moving-head and strobe cues synchronized with tournament milestones and team walkouts.'
       }
     ]
   },
@@ -220,9 +411,61 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     order: 5,
     category: 'AI & Automation',
     serviceType: 'Enterprise AI Development',
-    priceRange: 'Custom Enterprise Scope',
+    priceRange: 'PKR 350,000 - PKR 4,500,000',
+    localizedH1: 'Custom Enterprise AI Development, RAG Assistants & Smart Boardroom Intelligence in Pakistan',
     keywords:
-      'AI development Pakistan, Video Conference in Pakistan, Corporate event management, hybrid event, Poly X70',
+      'AI development Pakistan, Enterprise AI software Lahore Karachi Islamabad, Video Conference in Pakistan, Corporate event management, hybrid event, Poly X70',
+    offeringsBreakdown: [
+      {
+        title: 'Bilingual Meeting Intelligence & Transcription',
+        detail: 'Automated Urdu and English boardroom transcription, speaker diarization, action-item extraction, and CRM sync for Zoom, Teams, and Poly/Cisco codecs.'
+      },
+      {
+        title: 'Private Enterprise RAG Knowledge Assistants',
+        detail: 'Secure internal AI search and document intelligence trained on your company SOPs, legal policies, and technical manuals with role-based access.'
+      },
+      {
+        title: 'Computer Vision & Smart Event Check-In',
+        detail: 'AI occupancy analytics for conference rooms and high-speed QR/facial recognition attendee check-in kiosks for corporate summits.'
+      }
+    ],
+    caseStudies: [
+      {
+        hub: 'Gulberg, Lahore',
+        project: 'Corporate Boardroom Bilingual Urdu/English AI Minute-Taker',
+        outcome: 'Integrated automated meeting transcription with Poly Studio X72 boardrooms, cutting executive minute-preparation time by 85%.'
+      },
+      {
+        hub: 'I.I. Chundrigar Road, Karachi',
+        project: 'Financial Institution Private RAG Policy & Compliance Assistant',
+        outcome: 'Deployed an encrypted internal knowledge assistant indexing 12,000+ banking circulars with sub-2-second citation retrieval.'
+      },
+      {
+        hub: 'Blue Area, Islamabad',
+        project: 'Smart Campus Occupancy & IP Camera Analytics Dashboard',
+        outcome: 'Connected Axis and Hikvision IP cameras to an AI analytics dashboard tracking auditorium utilization and perimeter security.'
+      }
+    ],
+    pricingTiers: [
+      {
+        tier: 'Smart Boardroom AI Transcription Module',
+        capacityOrScope: 'Zoom / Teams / SIP Codec Audio Pipeline + Automated Summary & CRM Webhook',
+        slaAndTurnaround: '2-Week Deployment • 1-Year Maintenance SLA',
+        referenceInvestment: 'PKR 350,000 – PKR 750,000'
+      },
+      {
+        tier: 'Private Enterprise RAG Knowledge Base',
+        capacityOrScope: 'Custom Vector DB + Role-Based Web Portal + ERP/SharePoint/Drive Ingestion',
+        slaAndTurnaround: '3–4 Week Engineering Sprint • On-Prem or Private Cloud',
+        referenceInvestment: 'PKR 850,000 – PKR 2,200,000'
+      },
+      {
+        tier: 'Full Custom AI & Computer Vision Platform',
+        capacityOrScope: 'Multi-Site AI Analytics, Custom Model Fine-Tuning & Hardware Edge Integration',
+        slaAndTurnaround: 'Dedicated AI Solutions Architect • 15-Min Support SLA',
+        referenceInvestment: 'PKR 2,500,000 – PKR 4,500,000+'
+      }
+    ],
     detailedContent: `
       <h2>Custom AI Software & Unified Communications Intelligence</h2>
       <p>We build secure, enterprise-grade AI applications that integrate with your corporate communication stack, ERP/CRM systems, and smart boardroom infrastructure across Pakistan.</p>
@@ -235,7 +478,19 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     faqs: [
       {
         q: 'Can your AI solutions integrate with our existing Video conference and CRM systems?',
-        a: 'Yes, we build custom API integrations connecting Zoom, Microsoft Teams, 3CX/Cisco VoIP systems, and enterprise CRMs like HubSpot, Salesforce, and custom ERPs.'
+        a: 'Yes, we build custom API integrations connecting Zoom, Microsoft Teams, 3CX/Cisco VoIP systems, and enterprise CRMs like HubSpot, Salesforce, Odoo, and custom ERPs.'
+      },
+      {
+        q: 'Does your boardroom transcription AI understand mixed Urdu and Roman-Urdu/English discussions?',
+        a: 'Yes. Our speech-to-text pipelines are specifically tuned for bilingual Pakistani corporate meetings where executives switch between English and Urdu, producing clean structured English action items.'
+      },
+      {
+        q: 'Can our enterprise data remain strictly private without training public AI models?',
+        a: 'Absolutely. We deploy zero-data-retention enterprise APIs or self-hosted VPC/on-premise vector databases so your confidential documents and audio never leave your controlled environment.'
+      },
+      {
+        q: 'How long does it take to deploy a custom AI assistant for our organization?',
+        a: 'A standard RAG knowledge base or boardroom intelligence module is scoped, tested, and deployed into production within 2 to 4 weeks.'
       }
     ]
   },
@@ -251,9 +506,61 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     order: 6,
     category: 'AI & Automation',
     serviceType: 'AI Digital Workers',
-    priceRange: 'Custom Enterprise Scope',
+    priceRange: 'PKR 250,000 - PKR 3,000,000',
+    localizedH1: '24/7 Autonomous AI Voice & WhatsApp Digital Workers Integrated with Enterprise VoIP in Pakistan',
     keywords:
-      'AI agents Pakistan, VoIP AI integration, Corporate event management, Video Conference in Pakistan',
+      'AI agents Pakistan, VoIP AI integration, WhatsApp AI agent Pakistan, 3CX AI voice bot, Corporate event management, Video Conference in Pakistan',
+    offeringsBreakdown: [
+      {
+        title: 'WhatsApp Business & Web Sales Concierge',
+        detail: '24/7 autonomous lead qualification, catalog price lookup, instant PDF quotation generation, and meeting scheduling in English and Urdu.'
+      },
+      {
+        title: 'SIP / IP-PBX Voice Receptionist Agents',
+        detail: 'Low-latency conversational AI voice agents connected via SIP trunk to 3CX, Grandstream UCM, FreePBX, and Cisco CUCM call queues.'
+      },
+      {
+        title: 'Event RSVP & Delegate Support Desk',
+        detail: 'Automated WhatsApp badge delivery, venue GPS directions, agenda Q&A, and VIP seating confirmation for 1,000+ attendee corporate events.'
+      }
+    ],
+    caseStudies: [
+      {
+        hub: 'Johar Town, Lahore',
+        project: 'B2B Hardware Distribution 24/7 WhatsApp Quotation Agent',
+        outcome: 'Reduced first-response time from 4 hours to 8 seconds, automatically qualifying 600+ monthly corporate hardware inquiries.'
+      },
+      {
+        hub: 'Clifton, Karachi',
+        project: 'Healthcare & Diagnostic Network SIP Voice Booking Agent',
+        outcome: 'Integrated an AI voice receptionist with Grandstream UCM6308 PBX to handle 45% of routine appointment calls without human wait times.'
+      },
+      {
+        hub: 'Blue Area, Islamabad',
+        project: 'National Tech Expo 2,500-Attendee WhatsApp Concierge',
+        outcome: 'Automated QR badge issuance, speaker session reminders, and live booth navigation across a 3-day summit.'
+      }
+    ],
+    pricingTiers: [
+      {
+        tier: 'WhatsApp & Web AI Sales Concierge',
+        capacityOrScope: 'Official WhatsApp Cloud API + Product/Service Knowledge Base + CRM Lead Push',
+        slaAndTurnaround: '10-Day Turnkey Launch • 15-Min Support SLA',
+        referenceInvestment: 'PKR 250,000 – PKR 550,000'
+      },
+      {
+        tier: 'SIP / IP-PBX Voice + Omnichannel Agent',
+        capacityOrScope: '3CX / Grandstream / FreePBX SIP Voice Integration + Human Warm-Transfer',
+        slaAndTurnaround: '2–3 Week Integration • Bilingual Urdu/English Voice',
+        referenceInvestment: 'PKR 650,000 – PKR 1,450,000'
+      },
+      {
+        tier: 'Multi-Agent Enterprise Operations Suite',
+        capacityOrScope: 'Sales, Support, HR & Procurement Digital Workers with ERP Tool-Calling',
+        slaAndTurnaround: 'Custom SLA & Dedicated Engineering Support',
+        referenceInvestment: 'PKR 1,600,000 – PKR 3,000,000+'
+      }
+    ],
     detailedContent: `
       <h2>24/7 Autonomous AI Digital Workers & Voice/Chat Agents</h2>
       <p>Deploy intelligent AI agents that handle customer inquiries, schedule boardroom demonstrations, manage event RSVP confirmations, and route SIP/VoIP calls automatically.</p>
@@ -265,7 +572,19 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     faqs: [
       {
         q: 'Do your AI agents support WhatsApp and local Pakistani VoIP PBX trunks?',
-        a: 'Yes, our AI agents integrate directly with WhatsApp Business API, web chat, and SIP-based IP PBX platforms such as 3CX and Grandstream.'
+        a: 'Yes, our AI agents integrate directly with the official Meta WhatsApp Business API, web chat, and SIP-based IP PBX platforms such as 3CX, FreePBX, and Grandstream UCM.'
+      },
+      {
+        q: 'Can the AI agent seamlessly transfer complex inquiries to a live human specialist?',
+        a: 'Yes. Whenever a caller or WhatsApp user requests a human engineer or meets high-value B2B criteria, the agent executes a warm transfer with a complete conversation transcript.'
+      },
+      {
+        q: 'Can the AI digital worker check live inventory or book Google Calendar / Outlook meetings?',
+        a: 'Yes. Through secure function-calling webhooks, our agents query live SKU pricing, check calendar availability, and book confirmed video conference demos automatically.'
+      },
+      {
+        q: 'How do you prevent the AI agent from hallucinating incorrect prices or policies?',
+        a: 'We enforce strict retrieval-augmented generation (RAG) guardrails tied to your verified catalog database and deterministic pricing tables so the agent only quotes approved figures.'
       }
     ]
   },
@@ -281,9 +600,61 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     order: 7,
     category: 'AI & Automation',
     serviceType: 'Workflow Automation',
-    priceRange: 'Custom Enterprise Scope',
+    priceRange: 'PKR 180,000 - PKR 2,500,000',
+    localizedH1: 'Enterprise n8n Workflow Automation, CRM Sync & Smart Boardroom Orchestration in Pakistan',
     keywords:
-      'AI automation Pakistan, n8n workflow automation, Corporate event management, Video Conference in Pakistan',
+      'AI automation Pakistan, n8n workflow automation Lahore Karachi Islamabad, B2B quote automation, Corporate event management, Video Conference in Pakistan',
+    offeringsBreakdown: [
+      {
+        title: 'Self-Hosted n8n Enterprise Workflow Engine',
+        detail: 'Unlimited multi-step workflow execution without per-task Zapier fees—hosted on your private cloud or on-premise server with full audit logs.'
+      },
+      {
+        title: 'Automated B2B Procurement & GST Quote Pipelines',
+        detail: 'Instant PDF BoM generation, FBR GST/NTN tax calculation, Google Sheets/ERP sync, and automated WhatsApp/Email dispatch.'
+      },
+      {
+        title: 'Smart Boardroom & Event Lead Orchestration',
+        detail: 'Calendar-triggered boardroom wake-up presets, Zoom/Teams link provisioning, and real-time trade show lead routing to sales teams.'
+      }
+    ],
+    caseStudies: [
+      {
+        hub: 'Johar Town, Lahore',
+        project: 'Automated B2B Hardware & Google Merchant Center Sync Pipeline',
+        outcome: 'Automated 40-column GMC feed generation, Google Sheets inventory sync, and instant WhatsApp quote alerts via n8n webhooks.'
+      },
+      {
+        hub: 'Shahrah-e-Faisal, Karachi',
+        project: 'Logistics & Distribution ERP-to-WhatsApp Dispatch Automation',
+        outcome: 'Eliminated 35 hours/week of manual data entry by linking order approvals directly to warehouse packing slips and customer tracking alerts.'
+      },
+      {
+        hub: 'Blue Area, Islamabad',
+        project: 'Executive Boardroom Calendar & VoIP Extension Provisioning',
+        outcome: 'Automated Microsoft 365 room booking sync with Cisco/Poly touch panels and instant visitor Wi-Fi/intercom PIN generation.'
+      }
+    ],
+    pricingTiers: [
+      {
+        tier: 'Starter Department Automation Pack',
+        capacityOrScope: 'Up to 5 Custom n8n Workflows (Lead Capture, Google Sheets, Email & WhatsApp Alerts)',
+        slaAndTurnaround: '7-Day Deployment • Full Execution Logging',
+        referenceInvestment: 'PKR 180,000 – PKR 380,000'
+      },
+      {
+        tier: 'Enterprise CRM, ERP & B2B Quote Engine',
+        capacityOrScope: 'Self-Hosted n8n Server + 15 Workflows + Automated PDF BoQ & VoIP Call Logging',
+        slaAndTurnaround: '2-Week Turnkey Setup • 15-Min Technical SLA',
+        referenceInvestment: 'PKR 450,000 – PKR 1,100,000'
+      },
+      {
+        tier: 'Organization-Wide Process Orchestration',
+        capacityOrScope: 'Unlimited Custom Integrations, High-Availability Queue Workers & Dedicated Support',
+        slaAndTurnaround: 'Ongoing Managed Automation SLA',
+        referenceInvestment: 'PKR 1,250,000 – PKR 2,500,000+'
+      }
+    ],
     detailedContent: `
       <h2>Enterprise Workflow & Smart Boardroom Automation</h2>
       <p>Eliminate manual data entry and operational bottlenecks with AV Live's custom n8n and API workflow automation engineering.</p>
@@ -296,6 +667,18 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
       {
         q: 'Can you automate event lead capture and B2B hardware quote workflows?',
         a: 'Yes, we design resilient n8n and webhook pipelines that route leads from your website, expos, and hybrid events directly into Google Sheets, Slack, WhatsApp, and your CRM in real time.'
+      },
+      {
+        q: 'Why do you recommend n8n over Zapier or Make for Pakistani enterprises?',
+        a: 'Self-hosted n8n eliminates expensive per-task USD subscription charges, keeps sensitive corporate data inside your own server infrastructure, and supports complex custom JavaScript/Python logic.'
+      },
+      {
+        q: 'Can n8n integrate with our local accounting, ERP, or VoIP PBX system?',
+        a: 'Yes. Any system with a REST API, webhook, SQL database, or SIP CDR output (including Odoo, SAP, 3CX, Grandstream UCM, and Google Workspace) can be seamlessly connected.'
+      },
+      {
+        q: 'Do we get full visibility and error logs if an external API temporarily goes down?',
+        a: 'Yes. Our n8n architecture includes automatic retry queues, dead-letter error handling, and real-time admin dashboard logs so no lead or transaction is ever lost.'
       }
     ]
   },
@@ -346,6 +729,26 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
         outcome: 'Integrated Polycom RealPresence Group 500 (EagleEye IV 12x PTZ) with 18 Bosch PAVIRO/CCS1000D delegate microphones and dual SMD displays.'
       }
     ],
+    pricingTiers: [
+      {
+        tier: 'Huddle Room Turnkey Kit (2–6 Seats)',
+        capacityOrScope: 'Poly Studio USB / X32 or Rally Bar Mini + 55"–65" 4K Display + Concealed Cabling',
+        slaAndTurnaround: 'Same-Day Installation • 1-Year Local Warranty',
+        referenceInvestment: 'PKR 350,000 – PKR 680,000'
+      },
+      {
+        tier: 'Medium Boardroom Suite (8–14 Seats)',
+        capacityOrScope: 'Logitech Rally Bar / Poly Studio X52 / Cisco Room Bar + 65"–75" Horion 4K Interactive Panel + Expansion Mic',
+        slaAndTurnaround: '48-Hr Commissioning • Acoustic Calibration • 15-Min SLA',
+        referenceInvestment: 'PKR 890,000 – PKR 1,650,000'
+      },
+      {
+        tier: 'Executive Boardroom & Council Chamber (16–30+ Seats)',
+        capacityOrScope: 'Polycom Group 500 / Poly Studio X72 / Cisco Room Kit Plus + Dual 86" Displays or SMD Wall + Ceiling/Delegate Mics',
+        slaAndTurnaround: 'Custom CAD Schematic • 3–5 Day Fit-Out • Priority On-Site SLA',
+        referenceInvestment: 'PKR 1,750,000 – PKR 4,500,000+'
+      }
+    ],
     detailedContent: `
       <h2>Turnkey Executive Boardroom & Video Conference Integration in Pakistan</h2>
       <p>As leading <strong>Polycom video conferencing distributors Lahore</strong>, <strong>Cisco Room Kit installation Karachi</strong> specialists, and <strong>Boardroom AV integration services Islamabad</strong> engineers, AV Live Communications designs and commissions standards-based corporate boardrooms, huddle spaces, and command centers nationwide. We integrate flagship <strong>Video Conference in Pakistan</strong> codecs—including the <strong>Polycom RealPresence Group 500</strong>, <strong>Poly Studio X70 / X72</strong>, Logitech Rally Bar, Yealink, and <strong>Interactive flat panel displays for business Lahore</strong> (Horion 4K Smart Boards)—with architectural acoustics and one-touch automation.</p>
@@ -368,6 +771,10 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
       {
         q: 'What is your technical support SLA for corporate boardrooms?',
         a: 'Every AV Live boardroom installation is backed by our guaranteed 15-minute technical SLA response, zero-downtime replacement warranty, and on-site standby engineers for critical board meetings.'
+      },
+      {
+        q: 'Can our boardroom support Zoom, Microsoft Teams, Cisco Webex, and USB laptop BYOD in the same room?',
+        a: 'Yes. We configure native multi-platform appliances (such as Poly Studio X52/X72, Logitech Rally Bar, and Cisco Room Bar) with one-cable USB-C/HDMI BYOD passthrough so guests can launch any meeting platform effortlessly.'
       }
     ]
   },
@@ -411,6 +818,31 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
         hub: 'Clifton, Karachi',
         project: '120-Seat BPO Contact Center 3CX & Headset Deployment',
         outcome: 'Implemented 3CX PRO with live wallboards, CRM screen-pop, call recording, and Jabra/Poly noise-cancelling headsets.'
+      },
+      {
+        hub: 'Blue Area, Islamabad',
+        project: 'Hospitality & Corporate Tower SIP Intercom + IP Phone Network',
+        outcome: 'Integrated 220 Fanvil and Polycom VVX desk phones with 2N IP Vario door intercoms and Bosch PAVIRO emergency paging.'
+      }
+    ],
+    pricingTiers: [
+      {
+        tier: 'SME Office IP-PBX Starter (15–40 Extensions)',
+        capacityOrScope: '3CX Pro 8-SC or Grandstream UCM + 20 PoE SIP Phones + IVR & Call Recording',
+        slaAndTurnaround: '48-Hr Turnkey Cutover • Zero Downtime Migration',
+        referenceInvestment: 'PKR 480,000 – PKR 950,000'
+      },
+      {
+        tier: 'Multi-Branch Corporate UC Network (50–250 Extensions)',
+        capacityOrScope: 'Grandstream UCM6304 / FreePBX Enterprise + Yealink/Poly/Cisco Phones + Branch SIP Peering',
+        slaAndTurnaround: '3–5 Day Nationwide Rollout • Voice VLAN QoS Tuning',
+        referenceInvestment: 'PKR 1,250,000 – PKR 3,400,000'
+      },
+      {
+        tier: 'High-Availability Call Center / 500+ User Campus',
+        capacityOrScope: 'Redundant HA UCM6308 / Cisco CUCM + ANC Headsets + CRM Integration + SIP Intercoms',
+        slaAndTurnaround: 'Custom Architecture • 24/7 Priority 15-Min SLA',
+        referenceInvestment: 'PKR 3,800,000 – PKR 8,500,000+'
       }
     ],
     detailedContent: `
@@ -431,6 +863,14 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
       {
         q: 'Do you support CRM integration and call recording for contact centers?',
         a: 'Yes, our 3CX, FreePBX, and Grandstream UCM deployments include automated call recording, live queue wallboards, SLA reporting, and native CRM screen-pop integration.'
+      },
+      {
+        q: 'Can we keep our existing PTCL / NTC PRI or analog landlines when upgrading to an IP PBX?',
+        a: 'Yes. Using integrated FXO/E1/PRI gateways on appliances like the Grandstream UCM6304/UCM6308, we bridge your existing PSTN lines seamlessly into your new VoIP network.'
+      },
+      {
+        q: 'Do mobile and remote employees need a physical desk phone to use the PBX?',
+        a: 'No. Every extension can simultaneously ring a physical PoE desk phone (Cisco, Yealink, Poly, Fanvil) and a secure iOS/Android/Windows softphone app (3CX or Grandstream Wave) anywhere in the world.'
       }
     ]
   }
@@ -453,7 +893,10 @@ export function mergeWithFallbackServices(firestoreServices: Service[]): Enriche
         detailedContent: svc.detailedContent || existing.detailedContent,
         imageUrl: svc.imageUrl || existing.imageUrl,
         iconUrl: svc.iconUrl || existing.iconUrl,
-        faqs: existing.faqs
+        faqs: existing.faqs,
+        offeringsBreakdown: existing.offeringsBreakdown,
+        caseStudies: existing.caseStudies,
+        pricingTiers: existing.pricingTiers,
       });
     } else {
       bySlug.set(slug, svc);

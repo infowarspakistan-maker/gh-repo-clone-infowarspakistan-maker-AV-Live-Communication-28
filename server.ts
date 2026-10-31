@@ -894,26 +894,44 @@ async function startServer() {
     const cleanPath = reqPath === '/' ? '' : reqPath.replace(/\/+$/, '');
     const canonicalUrl = `https://avlive.com.pk${cleanPath}`;
 
-    const routeMeta: Record<string, { title: string; description: string; noindex?: boolean; schema?: Record<string, any> }> = {
+    const routeMeta: Record<string, { title: string; description: string; keywords?: string; noindex?: boolean; schema?: Record<string, any> }> = {
       '': {
         title: 'Video Conference | Event Management | AV Live',
-        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events."
+        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events.",
+        keywords: 'Video Conference in Pakistan, Corporate Event Management, Polycom Group 500, Poly Studio X70, Logitech Rally Bar Pakistan, Cisco Room Kit Pakistan, 3D Hologram Display Pakistan, AV Live Communications'
       },
       '/': {
         title: 'Video Conference | Event Management | AV Live',
-        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events."
+        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV systems or book 3D hologram & corporate events.",
+        keywords: 'Video Conference in Pakistan, Corporate Event Management, Polycom Group 500, Poly Studio X70, Logitech Rally Bar Pakistan, Cisco Room Kit Pakistan, 3D Hologram Display Pakistan, AV Live Communications'
+      },
+      '/sitemap': {
+        title: 'HTML Sitemap & Complete Enterprise AV Directory | AV Live Pakistan',
+        description: 'Browse the complete directory of 153+ verified pages on AV Live Communications (avlive.com.pk): Video Conference in Pakistan, Corporate Event Management, 53 Hardware Products, 23 Brands, and Buyer\'s Guides.',
+        keywords: 'AV Live sitemap, avlive.com.pk directory, Video Conference in Pakistan, Corporate event management Pakistan, Polycom Group 500, Poly Studio X70, Logitech Rally Bar Pakistan, Yealink Pakistan, 3D Hologram Display Pakistan',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          '@id': 'https://avlive.com.pk/sitemap#collection',
+          name: 'AV Live Communications Complete HTML Sitemap & Enterprise Hardware Directory',
+          url: 'https://avlive.com.pk/sitemap',
+          description: 'Complete crawlable directory of all 153+ verified pages on avlive.com.pk including Polycom Group 500, Poly Studio X70, Cisco, Logitech, Yealink, Corporate Event Management, and 3D Hologram Displays.'
+        }
       },
       '/shop': {
         title: 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live',
-        description: 'Buy genuine Video Conference in Pakistan hardware: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Yealink, and Corporate Event Management equipment.'
+        description: 'Buy genuine Video Conference in Pakistan hardware: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Yealink, and Corporate Event Management equipment.',
+        keywords: 'Buy Video Conferencing Equipment Pakistan, Polycom Group 500 Price in Pakistan, Poly Studio X70 Price Pakistan, Logitech Rally Bar Price Pakistan, Yealink IP Phones Pakistan, Enterprise AV Store Lahore Karachi Islamabad'
       },
       '/brands': {
         title: 'Authorized Enterprise AV & Video Conferencing Brands in Pakistan | Poly, Cisco, Logitech | AV Live',
-        description: 'Browse official enterprise hardware by authorized brand partner in Pakistan: HP Poly, Cisco, Logitech, Yealink, Jabra, Bosch, Hikvision, Dahua, Axis, Epson, and Panasonic.'
+        description: 'Browse official enterprise hardware by authorized brand partner in Pakistan: HP Poly, Cisco, Logitech, Yealink, Jabra, Bosch, Hikvision, Dahua, Axis, Epson, and Panasonic.',
+        keywords: 'HP Poly Distributor Pakistan, Logitech Video Conferencing Pakistan, Cisco Webex Partner Pakistan, Yealink Distributor Pakistan, Bosch Conference System Pakistan, Jabra Headsets Pakistan'
       },
       '/video-conferencing': {
         title: 'Video Conferencing in Pakistan | Polycom Group 500, Poly X70, Zoom & Teams | AV Live',
-        description: 'Enterprise video conferencing in Pakistan. Official integration of Polycom Group 500, Poly X70, Logitech Rally, Zoom Rooms & Microsoft Teams Rooms across Lahore, Karachi & Islamabad.'
+        description: 'Enterprise video conferencing in Pakistan. Official integration of Polycom Group 500, Poly X70, Logitech Rally, Zoom Rooms & Microsoft Teams Rooms across Lahore, Karachi & Islamabad.',
+        keywords: 'Video Conferencing in Pakistan, Video Conference in Pakistan, Polycom Group 500 Pakistan, Poly Studio X70 Pakistan, Zoom Rooms Pakistan, Microsoft Teams Rooms Pakistan, Boardroom Video Conferencing Lahore Karachi Islamabad'
       },
       '/video-conferencing-solutions': {
         title: 'Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad | Poly, Cisco & Logitech | AV Live',
@@ -1473,6 +1491,7 @@ async function startServer() {
       matched = {
         title,
         description,
+        keywords: `${readableBrand} Pakistan, ${readableBrand} Distributor Lahore Karachi Islamabad, ${readableBrand} Price in Pakistan, ${readableBrand} Video Conferencing Pakistan, Buy ${readableBrand} Hardware Pakistan, AV Live`,
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -1546,12 +1565,22 @@ async function startServer() {
           .map(w => w.toUpperCase() === 'IP' || w.toUpperCase() === 'PTZ' || w.toUpperCase() === 'USB' || w.toUpperCase() === '4K' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))
           .join(' ');
         const effectivePrice = fallbackProd ? resolveProductPricing(fallbackProd).effectivePrice : 50000;
-        const productImg = fallbackProd?.imageUrl || 'https://avlive.com.pk/og-image.jpg';
+        const productImg = fallbackProd?.images?.[0] || fallbackProd?.imageUrl || 'https://avlive.com.pk/og-image.jpg';
         const title = `${readableName} (${gmcMeta.mpn}) | ${gmcMeta.brand} Video Conference in Pakistan | AV Live`;
         const description = gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} MPN ${gmcMeta.mpn} with 1-year Pakistan warranty and nationwide deployment.`;
+        const specRowsHtml = (gmcMeta.defaultSpecs || '')
+          .split(';')
+          .map(s => s.trim())
+          .filter(Boolean)
+          .map(s => {
+            const [k, ...rest] = s.split(':');
+            return k && rest.length > 0 ? `<tr><th>${k.trim()}</th><td>${rest.join(':').trim()}</td></tr>` : '';
+          })
+          .join('');
         matched = {
           title,
           description,
+          keywords: `${readableName}, ${readableName} Price in Pakistan, ${gmcMeta.mpn}, ${gmcMeta.brand} Pakistan, ${fallbackProd?.category || 'Video Conferencing'} Pakistan, Buy ${readableName} Lahore Karachi Islamabad, Video Conference in Pakistan`,
           schema: {
             '@context': 'https://schema.org',
             '@graph': [
@@ -1559,7 +1588,7 @@ async function startServer() {
                 '@type': 'Product',
                 '@id': `${canonicalUrl}#product`,
                 name: readableName,
-                image: [productImg],
+                image: fallbackProd?.images?.length ? fallbackProd.images : [productImg],
                 sku: gmcMeta.mpn,
                 mpn: gmcMeta.mpn,
                 gtin12: gmcMeta.gtin,
@@ -1632,8 +1661,10 @@ async function startServer() {
                   <tr><th>Authorized Brand</th><td>${gmcMeta.brand}</td></tr>
                   <tr><th>Manufacturer Part Number (MPN)</th><td>${gmcMeta.mpn}</td></tr>
                   <tr><th>GS1 GTIN / UPC</th><td>${gmcMeta.gtin}</td></tr>
-                  <tr><th>Reference Price (PKR)</th><td>Rs. ${effectivePrice.toLocaleString()}</td></tr>
+                  <tr><th>Primary Category</th><td>${fallbackProd?.category || 'Video Conferencing'}</td></tr>
+                  <tr><th>Reference Price (PKR)</th><td>Rs. ${effectivePrice.toLocaleString()} (FBR GST Invoice Available)</td></tr>
                   <tr><th>Key Engineering Highlight</th><td>${gmcMeta.highlight}</td></tr>
+                  ${specRowsHtml}
                   <tr><th>Warranty &amp; Compliance</th><td>1-Year Official Local Pakistan Warranty (Optional 3-Year SLA) • PTA Compliant</td></tr>
                 </tbody>
               </table>
@@ -1660,9 +1691,13 @@ async function startServer() {
             text: f.a
           }
         }));
+        const pricingRowsHtml = (svc.pricingTiers || [])
+          .map(t => `<tr><td>${t.tier}</td><td>${t.capacityOrScope}</td><td>${t.slaAndTurnaround}</td><td>${t.referenceInvestment}</td></tr>`)
+          .join('');
         matched = {
           title: `${svc.localizedH1 || svc.title} | AV Live Communications Pakistan`,
           description: svc.description,
+          keywords: svc.keywords || `${svc.title}, Corporate event management Pakistan, Video Conference in Pakistan, Hybrid events Lahore Karachi Islamabad, AV Live`,
           schema: {
             '@context': 'https://schema.org',
             '@graph': [
@@ -1707,6 +1742,14 @@ async function startServer() {
                   <tr><td>24/7 Enterprise Hotlines</td><td>0321 425 6263 / 0339 0000 921 (Request a 15-Minute Quote)</td></tr>
                 </tbody>
               </table>
+              ${pricingRowsHtml ? `
+              <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+                <caption>${svc.title} — Reference Packages, SLA &amp; PKR Investment Matrix</caption>
+                <thead>
+                  <tr><th>Deployment Tier</th><th>Scope &amp; Hardware Stack</th><th>Turnaround &amp; SLA</th><th>Reference PKR Investment</th></tr>
+                </thead>
+                <tbody>${pricingRowsHtml}</tbody>
+              </table>` : ''}
             </article>
           </main>`;
       }
@@ -1724,6 +1767,10 @@ async function startServer() {
         .map(slug => buildFallbackProductFromGmcMeta(slug))
         .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
+      const directCategoryMatch = allFallbackProds.filter(prod =>
+        Array.isArray(prod.categorySlugs) && prod.categorySlugs.includes(catSlug)
+      );
+
       const catKeywordMap: Record<string, string[]> = {
         'video-conferencing': ['video conferencing', 'rally', 'studio', 'group 500', 'room kit', 'meetingbar', 'camera', 'speakerphone', 'touch'],
         'touch-panels': ['touch', 'tc8', 'tc10', 'tap', 'navigator', 'ctp18'],
@@ -1739,10 +1786,12 @@ async function startServer() {
         'projectors': ['projector', 'epson', 'benq', 'optoma', 'panasonic', 'sony', 'viewsonic']
       };
       const matchKeywords = catKeywordMap[catSlug] || [catSlug.replace(/-/g, ' ')];
-      const catProducts = allFallbackProds.filter(prod => {
-        const haystack = `${prod.productName} ${prod.category} ${prod.subcategory} ${prod.shortDescription}`.toLowerCase();
-        return matchKeywords.some(kw => haystack.includes(kw));
-      });
+      const catProducts = directCategoryMatch.length > 0
+        ? directCategoryMatch
+        : allFallbackProds.filter(prod => {
+            const haystack = `${prod.productName} ${prod.category} ${prod.subcategory} ${prod.shortDescription}`.toLowerCase();
+            return matchKeywords.some(kw => haystack.includes(kw));
+          });
       const displayCatProducts = catProducts.length > 0 ? catProducts : allFallbackProds.slice(0, 12);
 
       const title = `${readableCat} | Video Conference in Pakistan | Polycom Group 500 & Poly X70 | AV Live`;
@@ -1751,6 +1800,7 @@ async function startServer() {
       matched = {
         title,
         description,
+        keywords: `${readableCat} Pakistan, ${readableCat} Price in Pakistan, Video Conference in Pakistan, Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Cisco Webex Pakistan, Buy ${readableCat} Lahore Karachi Islamabad`,
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -1858,6 +1908,7 @@ async function startServer() {
         matched = {
           title: `${blogPost.title} | AV Live Blog`,
           description: (blogPost.answerFirstSummary || blogPost.excerpt).substring(0, 160),
+          keywords: `${blogPost.title}, ${blogPost.category} Pakistan, Video Conference in Pakistan, Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Corporate Event Management Pakistan`,
           schema: {
             '@context': 'https://schema.org',
             '@graph': graphItems
@@ -1936,11 +1987,19 @@ async function startServer() {
       );
 
     if (matched) {
+      const resolvedKeywords =
+        matched.keywords ||
+        `${matched.title.replace(/\s*\|\s*AV Live.*$/i, '')}, Video Conference in Pakistan, Corporate Event Management, Polycom Group 500, Poly Studio X70, Logitech Rally Bar, AV Live Pakistan`;
+
       updated = updated
         .replace(/<title(?:\s+data-rh="true")?>[\s\S]*?<\/title>/, `<title data-rh="true">${matched.title}</title>`)
         .replace(
           /<meta(?:\s+data-rh="true")?\s+name="description"\s+content="[^"]*"\s*\/>/,
           `<meta data-rh="true" name="description" content="${matched.description}" />`
+        )
+        .replace(
+          /<meta(?:\s+data-rh="true")?\s+name="keywords"\s+content="[^"]*"\s*\/>/,
+          `<meta data-rh="true" name="keywords" content="${resolvedKeywords.replace(/"/g, '&quot;')}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+property="og:title"\s+content="[^"]*"\s*\/>/,

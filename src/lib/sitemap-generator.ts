@@ -433,6 +433,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
 
 export const STATIC_CORE_ROUTES: string[] = [
   '',
+  '/sitemap',
   '/shop',
   '/brands',
   '/solutions',
@@ -466,6 +467,7 @@ export const STATIC_CORE_ROUTES: string[] = [
   '/projection-mapping',
   '/video-conferencing',
   '/video-conferencing-solutions',
+  '/video-conference-in-pakistan',
   '/corporate-event-management',
   '/live-streaming-services',
   '/av-equipment-rental',

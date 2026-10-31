@@ -7,7 +7,8 @@ import {
   HomepageData, GeneralSettings, ContactData, getGeneralSettings, getContactData, 
   subscribeToHomepage, 
   subscribeToProducts,
-  subscribeToServices
+  subscribeToServices,
+  deduplicateProducts
 } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 
@@ -16,7 +17,7 @@ import { optimizeGalleryImageUrl } from '../lib/image-optimize';
 
 import { StructuredData } from "../components/StructuredData";
 import { FALLBACK_SERVICES_CATALOG } from "../lib/services-catalog";
-import { getCanonicalProductSlug } from "../lib/gmc-feed";
+import { getCanonicalProductSlug, PRODUCT_GMC_METADATA, buildFallbackProductFromGmcMeta } from "../lib/gmc-feed";
 
 const TopBrands = React.lazy(() => import('../components/TopBrands').then(m => ({ default: m.TopBrands })));
 
@@ -81,122 +82,11 @@ const DEFAULT_HOMEPAGE_DATA: HomepageData = {
   },
 };
 
-const DEFAULT_INITIAL_PRODUCTS: Product[] = [
-  {
-    id: 'polycom-realpresence-group-500-pakistan',
-    slug: 'polycom-realpresence-group-500-pakistan',
-    productName: 'Polycom RealPresence Group 500 (EagleEye IV 12x)',
-    sku: '7200-64550-001',
-    brand: 'Poly',
-    regularPrice: 980000,
-    salePrice: 850000,
-    stockQuantity: 8,
-    lowStockThreshold: 2,
-    images: ['https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80'],
-    categoryIds: ['cat-video'],
-    categorySlugs: ['video-conferencing'],
-    shortDescription: 'Enterprise multipoint H.323/SIP video conferencing codec with EagleEye IV 12x optical PTZ camera for large boardrooms in Pakistan.',
-    description: 'Enterprise Polycom Group 500 video conferencing system.',
-    variations: [],
-    isActive: true,
-    isFeatured: true,
-  },
-  {
-    id: 'poly-studio-x72-pakistan',
-    slug: 'poly-studio-x72-pakistan',
-    productName: 'Poly Studio X70 / X72 All-in-One 4K Video Bar',
-    sku: 'A4LZ8AA',
-    brand: 'Poly',
-    regularPrice: 2300000,
-    salePrice: 2000000,
-    stockQuantity: 5,
-    lowStockThreshold: 2,
-    images: ['https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80'],
-    categoryIds: ['cat-video'],
-    categorySlugs: ['video-conferencing'],
-    shortDescription: 'Dual 4K 20MP all-in-one AI video bar with Poly DirectorAI speaker framing for large Zoom and Microsoft Teams boardrooms.',
-    description: 'Flagship Poly X70 / X72 4K video bar.',
-    variations: [],
-    isActive: true,
-    isFeatured: true,
-  },
-  {
-    id: 'logitech-rally-bar-pakistan',
-    slug: 'logitech-rally-bar-pakistan',
-    productName: 'Logitech Rally Bar',
-    sku: '960-001308',
-    brand: 'Logitech',
-    regularPrice: 517500,
-    salePrice: 450000,
-    stockQuantity: 8,
-    lowStockThreshold: 2,
-    images: ['https://images.unsplash.com/photo-1611095773767-114946654271?w=800&q=80'],
-    categoryIds: ['cat-video'],
-    categorySlugs: ['video-conferencing'],
-    shortDescription: 'All-in-one 4K video conferencing bar with motorized PTZ lens, RightSight AI framing, and native Zoom & Teams support.',
-    description: 'Logitech Rally Bar for medium to large rooms.',
-    variations: [],
-    isActive: true,
-    isFeatured: true,
-  },
-  {
-    id: 'cisco-room-kit-plus-pakistan',
-    slug: 'cisco-room-kit-plus-pakistan',
-    productName: 'Cisco Room Kit Plus Video Conferencing System',
-    sku: 'CS-KITPLPTZ4K-K9',
-    brand: 'Cisco',
-    regularPrice: 3680000,
-    salePrice: 3200000,
-    stockQuantity: 5,
-    lowStockThreshold: 2,
-    images: ['https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80'],
-    categoryIds: ['cat-video'],
-    categorySlugs: ['video-conferencing'],
-    shortDescription: 'Cisco quad-camera 4K video bar and Codec Plus bundle for large enterprise boardrooms up to 14 seats.',
-    description: 'Cisco Room Kit Plus enterprise telepresence system.',
-    variations: [],
-    isActive: true,
-    isFeatured: true,
-  },
-  {
-    id: 'poly-studio-x52-pakistan',
-    slug: 'poly-studio-x52-pakistan',
-    productName: 'Poly Studio X52 All-in-One Video Bar',
-    sku: '7200-87620-001',
-    brand: 'Poly',
-    regularPrice: 1610000,
-    salePrice: 1400000,
-    stockQuantity: 5,
-    lowStockThreshold: 2,
-    images: ['https://images.unsplash.com/photo-1611095773767-114946654271?w=800&q=80'],
-    categoryIds: ['cat-video'],
-    categorySlugs: ['video-conferencing'],
-    shortDescription: 'All-in-one 4K 20MP video bar with 95° FOV, DirectorAI framing, and native Zoom/Teams apps for medium rooms.',
-    description: 'Poly Studio X52 video bar.',
-    variations: [],
-    isActive: true,
-    isFeatured: true,
-  },
-  {
-    id: 'poly-studio-usb-video-bar-pakistan',
-    slug: 'poly-studio-usb-video-bar-pakistan',
-    productName: 'Poly Studio USB Video Bar',
-    sku: '7200-85830-012',
-    brand: 'Poly',
-    regularPrice: 212750,
-    salePrice: 185000,
-    stockQuantity: 10,
-    lowStockThreshold: 2,
-    images: ['https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80'],
-    categoryIds: ['cat-video'],
-    categorySlugs: ['video-conferencing'],
-    shortDescription: 'Plug-and-play 4K USB video bar with Poly DirectorAI speaker tracking, Acoustic Fence, and NoiseBlockAI.',
-    description: 'Poly Studio USB video bar.',
-    variations: [],
-    isActive: true,
-    isFeatured: true,
-  },
-];
+const DEFAULT_INITIAL_PRODUCTS: Product[] = deduplicateProducts(
+  Object.keys(PRODUCT_GMC_METADATA)
+    .map((slug) => buildFallbackProductFromGmcMeta(slug))
+    .filter((p): p is Product => Boolean(p))
+);
 
 export function Home() {
   const [content, setContent] = useState<HomepageData>(DEFAULT_HOMEPAGE_DATA);
@@ -207,6 +97,7 @@ export function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
   const [currentVideoSlide, setCurrentVideoSlide] = useState(0);
+  const [activeIntentTab, setActiveIntentTab] = useState<'solutions' | 'shop'>('solutions');
   const [activeFilter, setActiveFilter] = useState('All');
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -261,13 +152,18 @@ export function Home() {
   }, []);
 
   const CATEGORIES = [
-    { name: "Projectors", icon: Projector, link: "/category/projectors", id: "projectors" },
-    { name: "IP Phones", icon: Phone, link: "/category/ip-phones", id: "ip-phones" },
-    { name: "Headsets", icon: Headphones, link: "/category/headsets", id: "headsets" },
     { name: "Video Conferencing", icon: Video, link: "/category/video-conferencing", id: "video-conferencing" },
+    { name: "Boardroom Codecs", icon: Video, link: "/category/boardroom-codecs", id: "boardroom-codecs" },
+    { name: "Large Room AV", icon: Video, link: "/category/large-room", id: "large-room" },
+    { name: "PTZ Cameras", icon: Video, link: "/category/ptz-cameras", id: "ptz-cameras" },
+    { name: "Touch Panels", icon: Box, link: "/category/touch-panels", id: "touch-panels" },
+    { name: "Speakerphones", icon: Mic, link: "/category/speakerphones", id: "speakerphones" },
+    { name: "IP Phones", icon: Phone, link: "/category/ip-phones", id: "ip-phones" },
+    { name: "VoIP Phone Systems", icon: Box, link: "/category/voip-phone-systems", id: "voip-phone-systems" },
+    { name: "Headsets", icon: Headphones, link: "/category/headsets", id: "headsets" },
+    { name: "Projectors", icon: Projector, link: "/category/projectors", id: "projectors" },
     { name: "IP Cameras", icon: ShieldCheck, link: "/category/ip-cameras", id: "ip-cameras" },
-    { name: "Intercom, Paging & Access", icon: Mic, link: "/category/intercom-paging-access", id: "intercom-paging" },
-    { name: "VoIP Phone Systems", icon: Box, link: "/category/voip-phone-systems", id: "voip-systems" }
+    { name: "Intercom & Paging", icon: Mic, link: "/category/intercom-paging-access", id: "intercom-paging-access" }
   ];
 
   const scrollSlider = useCallback((direction: 'left' | 'right') => {
@@ -508,15 +404,16 @@ export function Home() {
       >
         <AnimatePresence mode="wait">
           {slides.length > 0 ? (
-            <div key={currentSlide} className="absolute inset-0">
+            <motion.div
+              key={currentSlide}
+              initial={currentSlide === 0 ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="absolute inset-0"
+            >
               {/* Background zoom & fade transition */}
-              <motion.div 
-                initial={currentSlide === 0 ? false : { opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.02 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="absolute inset-0 w-full h-full"
-              >
+              <div className="absolute inset-0 w-full h-full">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#1A2B4C]/95 via-[#1A2B4C]/70 to-transparent z-10"></div>
                 <img 
                   loading={currentSlide === 0 ? "eager" : "lazy"}
@@ -528,7 +425,7 @@ export function Home() {
                   alt={slides[currentSlide].title} 
                   className="absolute inset-0 w-full h-full object-cover" 
                 />
-              </motion.div>
+              </div>
 
               {/* Slide text content container */}
               <div className="absolute inset-0 z-20 flex flex-col items-start justify-center text-left px-8 md:px-20 max-w-[1400px] mx-auto">
@@ -555,11 +452,17 @@ export function Home() {
                    </Link>
                  </div>
               </div>
-            </div>
+            </motion.div>
           ) : (
-            <div className="flex items-center justify-center h-full text-white/20 font-black text-4xl uppercase tracking-widest">
+            <motion.div
+              key="empty-slide"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center justify-center h-full text-white/20 font-black text-4xl uppercase tracking-widest"
+            >
               AV LIVE CMS INACTIVE
-            </div>
+            </motion.div>
           )}
         </AnimatePresence>
 
@@ -636,28 +539,28 @@ export function Home() {
       </motion.div>
 
       {/* Tabbed Intent Split */}
-      <div className="w-full py-16 bg-white" x-data="{ activeTab: 'solutions' }">
+      <div className="w-full py-16 bg-white">
         <div className="max-w-[1200px] mx-auto px-8">
           <div className="flex justify-center gap-6 mb-12">
             <button 
-              onClick={() => setActiveFilter('solutions')}
-              className={`px-8 py-3 rounded-full font-black uppercase tracking-widest text-sm transition-all ${activeFilter === 'solutions' ? 'bg-[#1A2B4C] text-white shadow-xl' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
+              onClick={() => setActiveIntentTab('solutions')}
+              className={`px-8 py-3 rounded-full font-black uppercase tracking-widest text-sm transition-all cursor-pointer ${activeIntentTab === 'solutions' ? 'bg-[#1A2B4C] text-white shadow-xl' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
             >
-              Event Solutions
+              Event &amp; AI Solutions (9)
             </button>
             <button 
-              onClick={() => setActiveFilter('shop')}
-              className={`px-8 py-3 rounded-full font-black uppercase tracking-widest text-sm transition-all ${activeFilter === 'shop' ? 'bg-[#1A2B4C] text-white shadow-xl' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
+              onClick={() => setActiveIntentTab('shop')}
+              className={`px-8 py-3 rounded-full font-black uppercase tracking-widest text-sm transition-all cursor-pointer ${activeIntentTab === 'shop' ? 'bg-[#1A2B4C] text-white shadow-xl' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
             >
               Professional AV Shop
             </button>
           </div>
 
           <div className="min-h-[400px]">
-            {activeFilter === 'solutions' ? (
+            {activeIntentTab === 'solutions' ? (
               <div className="grid md:grid-cols-3 gap-8">
-                {services.filter(s => s.isActive).slice(0, 3).map((s) => (
-                  <div key={s.id} className="bg-gray-50 rounded-3xl p-8 border border-gray-100 hover:shadow-xl transition-all">
+                {services.filter(s => s.isActive).slice(0, 9).map((s) => (
+                  <div key={s.id} className="bg-gray-50 rounded-3xl p-8 border border-gray-100 hover:shadow-xl transition-all flex flex-col">
                     <img
                       loading="lazy"
                       decoding="async"
@@ -667,16 +570,16 @@ export function Home() {
                       alt={s.title}
                       className="w-full h-48 object-cover rounded-2xl mb-6"
                     />
-                    <h3 className="text-xl font-black text-[#1A2B4C] mb-4">{s.title}</h3>
-                    <p className="text-gray-600 mb-6 line-clamp-3">{s.description.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ')}</p>
-                    <Link to={`/services/${s.slug}`} className="text-[#00B4D8] font-bold text-sm flex items-center gap-2">Learn More <ArrowRight size={16} /></Link>
+                    <h3 className="text-xl font-black text-[#1A2B4C] mb-3">{s.title}</h3>
+                    <p className="text-gray-600 mb-6 line-clamp-3 text-sm flex-grow">{s.description.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ')}</p>
+                    <Link to={`/services/${s.slug}`} className="text-[#00B4D8] hover:text-[#1A2B4C] font-bold text-sm flex items-center gap-2 mt-auto">Learn More <ArrowRight size={16} /></Link>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="grid md:grid-cols-3 gap-8">
-                {products.filter(p => p.isFeatured).slice(0, 3).map((p) => (
-                  <div key={p.id} className="bg-white rounded-3xl p-6 border border-gray-100 hover:shadow-xl transition-all">
+                {products.filter(p => p.isFeatured).slice(0, 6).map((p) => (
+                  <div key={p.id} className="bg-white rounded-3xl p-6 border border-gray-100 hover:shadow-xl transition-all flex flex-col">
                     <img
                       loading="lazy"
                       decoding="async"
@@ -687,7 +590,8 @@ export function Home() {
                       className="w-full h-48 object-cover rounded-2xl mb-6"
                     />
                     <h3 className="text-lg font-bold text-[#1A2B4C] mb-2">{p.productName}</h3>
-                    <Link to={`/product/${getCanonicalProductSlug(p, p.id)}`} className="text-[#00B4D8] font-bold text-sm">View Product</Link>
+                    <p className="text-xs text-slate-500 mb-4 line-clamp-2 flex-grow">{p.shortDescription}</p>
+                    <Link to={`/product/${getCanonicalProductSlug(p, p.id)}`} className="text-[#00B4D8] font-bold text-sm mt-auto">View Product →</Link>
                   </div>
                 ))}
               </div>

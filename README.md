@@ -8,20 +8,21 @@ Welcome to the **AV Live Communications** source code repository and platform bl
 
 | Endpoint / File | Purpose | Live Count / Status |
 | :--- | :--- | :--- |
-| **`/sitemap.xml`** (`public/sitemap.xml`) | Dynamic XML 1.0 Sitemap synced from Firestore + synchronous fallback catalogs | **149 Canonical URLs** (64 Static/Brand/Geo/Pillar, 53 Products, 12 Categories, 9 Services, 11 Blogs) |
+| **`/sitemap.xml`** (`public/sitemap.xml`) | Dynamic XML 1.0 Sitemap synced from Firestore + synchronous fallback catalogs | **153 Canonical URLs** (68 Static/Brand/Geo/Pillar including `/sitemap` & `/video-conference-in-pakistan`, 53 Products, 12 Categories, 9 Services, 11 Blogs) |
+| **`/sitemap`** (`src/pages/HtmlSitemap.tsx`) | Human & Googlebot HTML Sitemap & Enterprise Hardware Directory (all 153 URLs within 2 clicks) | Active (Linked in Navbar & Footer) |
 | **`/llms.txt`** (`public/llms.txt`) | Concise AI Search (ChatGPT, Perplexity, Claude, Gemini) index & entity directory | Active (HTTP 200 `text/plain`) |
-| **`/llms-full.txt`** (`public/llms-full.txt`) | Complete 30KB+ Markdown corpus of all 53 SKUs (MPNs, GTINs, PKR prices), BoM tables & guides | Active (HTTP 200 `text/plain`) |
-| **`/api/gmc-feed.xml`** | Google Merchant Center RSS 2.0 XML Product Feed (`g:id`, `g:mpn`, `g:gtin`, `g:price` in PKR) | **53 Verified Hardware SKUs** |
+| **`/llms-full.txt`** (`public/llms-full.txt`) | Complete 30KB+ Markdown corpus of all 53 SKUs (MPNs, GTINs, real model-specific PKR prices), BoM tables & guides | Active (HTTP 200 `text/plain`) |
+| **`/api/gmc-feed.xml`** | Google Merchant Center RSS 2.0 XML Product Feed (`g:id`, `g:mpn`, `g:gtin`, `g:price` in PKR, multi-angle images, 5+ specs) | **53 Verified Hardware SKUs** |
 | **`/api/gmc-feed.tsv`** | Google Merchant Center Tab-Separated Values (TSV) Feed for Google Sheets scheduled fetch | **53 Verified Hardware SKUs** |
 | **`/robots.txt`** (`public/robots.txt`) | Explicit `Allow: /` for `Googlebot`, `Google-Extended`, `GPTBot`, `OAI-SearchBot`, `PerplexityBot`, `ClaudeBot` | Active (Blocks `/admin/`, `/cart`, `/checkout`, and `?*=` query duplicates) |
 
 ---
 
-## 2. Canonical Route Blueprint (149 Deduplicated Indexable URLs)
+## 2. Canonical Route Blueprint (151+ Deduplicated Indexable URLs)
 
-### A. Core Commercial, Geo & Solution Hubs (64 URLs)
-- **Storefront & Discovery**: `/`, `/shop`, `/brands`, `/solutions`, `/services`, `/events-services`, `/event-quote`, `/esports`, `/room-designer`, `/compare`, `/guides`, `/reviews`, `/blog`, `/faqs`, `/contact`, `/about`
-- **High-Intent Commercial Pillar Pages**: `/video-conferencing`, `/video-conferencing-solutions`, `/corporate-event-management`, `/conference-room-solutions`, `/zoom-rooms`, `/microsoft-teams-rooms`, `/3d-hologram`, `/projection-mapping`, `/voip-service-providers`
+### A. Core Commercial, Geo & Solution Hubs (66 URLs)
+- **Storefront & Discovery**: `/`, `/shop`, `/brands`, `/solutions`, `/services`, `/events-services`, `/event-quote`, `/esports`, `/room-designer`, `/compare`, `/guides`, `/reviews`, `/blog`, `/faqs`, `/contact`, `/about`, `/sitemap`
+- **High-Intent Commercial Pillar Pages**: `/video-conference-in-pakistan`, `/video-conferencing`, `/video-conferencing-solutions`, `/corporate-event-management` (with permanent `301` redirect from `/corporate-event-management-pakistan`), `/conference-room-solutions`, `/zoom-rooms`, `/microsoft-teams-rooms`, `/3d-hologram`, `/projection-mapping`, `/voip-service-providers`
 - **Regional Local SEO Hubs**: `/lahore`, `/karachi`, `/islamabad`
 - **B2B Procurement Programs (`/programs/*`)**: `/programs/quote`, `/programs/blind-drop-shipping`, `/programs/government-education-pricing`, `/programs/fulfillment-services`, `/programs/promotions`, `/programs/provisioning-services`, `/programs/reseller-program`
 - **Trust & Policy Pages**: `/returns`, `/shipping`, `/payment`, `/rma`, `/privacy-policy`, `/terms-of-service`

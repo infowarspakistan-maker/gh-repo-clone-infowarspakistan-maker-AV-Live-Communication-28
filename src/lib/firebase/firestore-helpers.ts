@@ -32,6 +32,62 @@ import {
   getCanonicalProductSlug,
   PRODUCT_GMC_METADATA,
 } from '../gmc-feed';
+import { FALLBACK_SERVICES_CATALOG } from '../services-catalog';
+
+const QUOTA_STORAGE_KEY = 'avlive_fs_quota_tripped_until';
+let memoryQuotaTrippedUntil = 0;
+
+export function isFirestoreQuotaExhausted(): boolean {
+  const now = Date.now();
+  if (memoryQuotaTrippedUntil > now) return true;
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    try {
+      const stored = Number(window.sessionStorage.getItem(QUOTA_STORAGE_KEY) || '0');
+      if (stored > now) {
+        memoryQuotaTrippedUntil = stored;
+        return true;
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }
+  return false;
+}
+
+export function checkAndTripQuota(error: any): boolean {
+  const msg = String(error?.message || error?.code || error || '');
+  if (
+    msg.includes('resource-exhausted') ||
+    msg.includes('Quota limit exceeded') ||
+    msg.includes('Quota exceeded') ||
+    error?.code === 'resource-exhausted'
+  ) {
+    // Trip circuit breaker for 1 hour in current session to eliminate redundant failing network requests
+    const tripUntil = Date.now() + 60 * 60 * 1000;
+    memoryQuotaTrippedUntil = tripUntil;
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      try {
+        window.sessionStorage.setItem(QUOTA_STORAGE_KEY, String(tripUntil));
+      } catch {
+        // ignore storage errors
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+const FALLBACK_CATEGORIES_LIST: Category[] = [
+  { id: 'video-conferencing', name: 'Video Conferencing', slug: 'video-conferencing', description: 'Enterprise 4K PTZ cameras, video bars & codecs', parentId: null, displayOrder: 1, isActive: true, isFeatured: true },
+  { id: 'audio-microphones', name: 'Audio & Microphones', slug: 'audio-microphones', description: 'Ceiling mic arrays, speakerphones & DSPs', parentId: null, displayOrder: 2, isActive: true, isFeatured: true },
+  { id: 'ip-phones', name: 'IP Phones & VoIP', slug: 'ip-phones', description: 'SIP desk phones, reception consoles & IP PBXs', parentId: null, displayOrder: 3, isActive: true, isFeatured: true },
+  { id: 'headsets', name: 'Headsets', slug: 'headsets', description: 'ANC wireless DECT, Bluetooth & USB headsets', parentId: null, displayOrder: 4, isActive: true, isFeatured: true },
+  { id: 'displays', name: 'Commercial Displays & SMD Walls', slug: 'displays', description: 'Interactive flat panels & fine-pitch SMD LED walls', parentId: null, displayOrder: 5, isActive: true, isFeatured: true },
+  { id: 'projectors', name: 'Projectors', slug: 'projectors', description: 'Laser boardroom & large-venue projectors', parentId: null, displayOrder: 6, isActive: true, isFeatured: false },
+  { id: 'ip-cameras', name: 'IP Cameras', slug: 'ip-cameras', description: 'Enterprise NDAA-compliant IP surveillance', parentId: null, displayOrder: 7, isActive: true, isFeatured: false },
+  { id: 'intercom', name: 'Intercom & Paging', slug: 'intercom', description: 'SIP door intercoms & IP paging horns', parentId: null, displayOrder: 8, isActive: true, isFeatured: false },
+  { id: 'networking', name: 'Networking & PoE', slug: 'networking', description: 'Managed PoE+ switches & Wi-Fi 6/7 access points', parentId: null, displayOrder: 9, isActive: true, isFeatured: false },
+];
 
 async function getAuthHeader() {
   const token = await auth.currentUser?.getIdToken();
@@ -119,20 +175,49 @@ export interface Product {
 }
 
 export function deduplicateProducts(products: Product[]): Product[] {
-  const map = new Map<string, Product>();
+  const seenIds = new Set<string>();
+  const seenSlugs = new Set<string>();
+  const result: Product[] = [];
   for (const p of products) {
-    const key = p.id || p.slug || p.sku || p.productName;
-    if (!map.has(key)) {
-      map.set(key, p);
+    const idKey = String(p.id || p.slug || p.sku || p.productName || '').trim();
+    const canonicalSlug = getCanonicalProductSlug(p, p.id);
+    if ((idKey && seenIds.has(idKey)) || (canonicalSlug && seenSlugs.has(canonicalSlug))) {
+      continue;
     }
+    if (idKey) seenIds.add(idKey);
+    if (canonicalSlug) seenSlugs.add(canonicalSlug);
+    result.push(p);
   }
-  return Array.from(map.values());
+  return result;
+}
+
+function getFallbackFilteredProducts(filter?: { isActive?: boolean; categoryId?: string }): Product[] {
+  let products = Object.keys(PRODUCT_GMC_METADATA)
+    .map((slug) => buildFallbackProductFromGmcMeta(slug))
+    .filter(Boolean) as Product[];
+  products = deduplicateProducts(products);
+  if (filter?.isActive !== undefined) {
+    products = products.filter((p) => Boolean(p.isActive) === filter.isActive);
+  }
+  if (filter?.categoryId) {
+    products = products.filter(
+      (p) =>
+        p.categoryIds?.includes(filter.categoryId!) ||
+        p.categorySlugs?.includes(filter.categoryId!)
+    );
+  }
+  return products;
 }
 
 export function subscribeToProducts(
   callback: (products: Product[]) => void,
   filter?: { isActive?: boolean; categoryId?: string }
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback(getFallbackFilteredProducts(filter));
+    return () => {};
+  }
+
   const q = query(collection(db, 'products'));
 
   return onSnapshot(
@@ -164,19 +249,8 @@ export function subscribeToProducts(
       callback(products);
     },
     (error) => {
-      console.warn('Firestore quota exceeded or error in subscribeToProducts, falling back to static GMC products:', error?.message);
-      let products = Object.keys(PRODUCT_GMC_METADATA).map(slug => buildFallbackProductFromGmcMeta(slug)).filter(Boolean) as Product[];
-      if (filter?.isActive !== undefined) {
-        products = products.filter((p) => Boolean(p.isActive) === filter.isActive);
-      }
-      if (filter?.categoryId) {
-        products = products.filter(
-          (p) =>
-            p.categoryIds?.includes(filter.categoryId!) ||
-            p.categorySlugs?.includes(filter.categoryId!)
-        );
-      }
-      callback(products);
+      checkAndTripQuota(error);
+      callback(getFallbackFilteredProducts(filter));
     }
   );
 }
@@ -348,29 +422,41 @@ export interface Category {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const snapshot = await getDocs(
-    query(collection(db, 'categories'), orderBy('displayOrder', 'asc'))
-  );
-  const categories: Category[] = [];
-  snapshot.forEach((doc) => {
-    categories.push({ id: doc.id, ...doc.data() } as Category);
-  });
-  return categories;
+  if (isFirestoreQuotaExhausted()) {
+    return FALLBACK_CATEGORIES_LIST;
+  }
+  try {
+    const snapshot = await getDocs(
+      query(collection(db, 'categories'), orderBy('displayOrder', 'asc'))
+    );
+    const categories: Category[] = [];
+    snapshot.forEach((doc) => {
+      categories.push({ id: doc.id, ...doc.data() } as Category);
+    });
+    return categories.length > 0 ? categories : FALLBACK_CATEGORIES_LIST;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return FALLBACK_CATEGORIES_LIST;
+  }
 }
 
 export function subscribeToCategories(
   callback: (categories: Category[]) => void
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback(FALLBACK_CATEGORIES_LIST);
+    return () => {};
+  }
   const q = query(collection(db, 'categories'), orderBy('displayOrder', 'asc'));
   return onSnapshot(q, (snapshot) => {
     const categories: Category[] = [];
     snapshot.forEach((doc) => {
       categories.push({ id: doc.id, ...doc.data() } as Category);
     });
-    callback(categories);
+    callback(categories.length > 0 ? categories : FALLBACK_CATEGORIES_LIST);
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToCategories:', error?.message);
-    callback([]);
+    checkAndTripQuota(error);
+    callback(FALLBACK_CATEGORIES_LIST);
   });
 }
 
@@ -521,36 +607,46 @@ export async function getOrders(
     endDate?: Date;
   }
 ): Promise<Order[]> {
-  let q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+  if (isFirestoreQuotaExhausted()) return [];
+  try {
+    let q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
 
-  if (filters?.orderStatus) {
-    q = query(q, where('orderStatus', '==', filters.orderStatus));
-  }
-  if (filters?.paymentStatus) {
-    q = query(q, where('paymentStatus', '==', filters.paymentStatus));
-  }
-  if (filters?.customerEmail) {
-    q = query(q, where('customerEmail', '==', filters.customerEmail));
-  }
-  if (filters?.startDate) {
-    q = query(q, where('createdAt', '>=', filters.startDate));
-  }
-  if (filters?.endDate) {
-    q = query(q, where('createdAt', '<=', filters.endDate));
-  }
+    if (filters?.orderStatus) {
+      q = query(q, where('orderStatus', '==', filters.orderStatus));
+    }
+    if (filters?.paymentStatus) {
+      q = query(q, where('paymentStatus', '==', filters.paymentStatus));
+    }
+    if (filters?.customerEmail) {
+      q = query(q, where('customerEmail', '==', filters.customerEmail));
+    }
+    if (filters?.startDate) {
+      q = query(q, where('createdAt', '>=', filters.startDate));
+    }
+    if (filters?.endDate) {
+      q = query(q, where('createdAt', '<=', filters.endDate));
+    }
 
-  const snapshot = await getDocs(q);
-  const orders: Order[] = [];
-  snapshot.forEach((doc) => {
-    orders.push({ id: doc.id, ...doc.data() } as Order);
-  });
-  return orders;
+    const snapshot = await getDocs(q);
+    const orders: Order[] = [];
+    snapshot.forEach((doc) => {
+      orders.push({ id: doc.id, ...doc.data() } as Order);
+    });
+    return orders;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return [];
+  }
 }
 
 export function subscribeToOrders(
   callback: (orders: Order[]) => void,
   filters?: { orderStatus?: Order['orderStatus'] }
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback([]);
+    return () => {};
+  }
   let q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
   if (filters?.orderStatus) {
     q = query(q, where('orderStatus', '==', filters.orderStatus));
@@ -562,18 +658,24 @@ export function subscribeToOrders(
     });
     callback(orders);
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToOrders:', error?.message);
+    checkAndTripQuota(error);
     callback([]);
   });
 }
 
 export async function getOrder(id: string): Promise<Order | null> {
-  const docRef = doc(db, 'orders', id);
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() } as Order;
+  if (isFirestoreQuotaExhausted()) return null;
+  try {
+    const docRef = doc(db, 'orders', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as Order;
+    }
+    return null;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return null;
   }
-  return null;
 }
 
 export async function updateOrderStatus(
@@ -620,65 +722,82 @@ export async function getOrderStats(): Promise<{
   revenueThisMonth: number;
   ordersThisMonth: number;
 }> {
-  const snapshot = await getDocs(collection(db, 'orders'));
-  const orders: Order[] = [];
-  snapshot.forEach((doc) => {
-    orders.push({ id: doc.id, ...doc.data() } as Order);
-  });
-
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-  let totalRevenue = 0;
-  let revenueThisMonth = 0;
-  let pending = 0,
-    processing = 0,
-    shipped = 0,
-    delivered = 0,
-    cancelled = 0;
-
-  orders.forEach((order) => {
-    if (order.orderStatus === 'delivered' || order.paymentStatus === 'paid') {
-      totalRevenue += order.total || 0;
-    }
-    if (order.createdAt?.toDate() && order.createdAt.toDate() >= startOfMonth) {
-      if (order.orderStatus === 'delivered' || order.paymentStatus === 'paid') {
-        revenueThisMonth += order.total || 0;
-      }
-    }
-
-    switch (order.orderStatus) {
-      case 'pending':
-        pending++;
-        break;
-      case 'processing':
-        processing++;
-        break;
-      case 'shipped':
-        shipped++;
-        break;
-      case 'delivered':
-        delivered++;
-        break;
-      case 'cancelled':
-        cancelled++;
-        break;
-    }
-  });
-
-  return {
-    totalOrders: orders.length,
-    totalRevenue,
-    pendingOrders: pending,
-    processingOrders: processing,
-    shippedOrders: shipped,
-    deliveredOrders: delivered,
-    cancelledOrders: cancelled,
-    revenueThisMonth,
-    ordersThisMonth: orders.filter(
-      (o) => o.createdAt?.toDate() && o.createdAt.toDate() >= startOfMonth
-    ).length,
+  const emptyStats = {
+    totalOrders: 0,
+    totalRevenue: 0,
+    pendingOrders: 0,
+    processingOrders: 0,
+    shippedOrders: 0,
+    deliveredOrders: 0,
+    cancelledOrders: 0,
+    revenueThisMonth: 0,
+    ordersThisMonth: 0,
   };
+  if (isFirestoreQuotaExhausted()) return emptyStats;
+  try {
+    const snapshot = await getDocs(collection(db, 'orders'));
+    const orders: Order[] = [];
+    snapshot.forEach((doc) => {
+      orders.push({ id: doc.id, ...doc.data() } as Order);
+    });
+
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    let totalRevenue = 0;
+    let revenueThisMonth = 0;
+    let pending = 0,
+      processing = 0,
+      shipped = 0,
+      delivered = 0,
+      cancelled = 0;
+
+    orders.forEach((order) => {
+      if (order.orderStatus === 'delivered' || order.paymentStatus === 'paid') {
+        totalRevenue += order.total || 0;
+      }
+      if (order.createdAt?.toDate() && order.createdAt.toDate() >= startOfMonth) {
+        if (order.orderStatus === 'delivered' || order.paymentStatus === 'paid') {
+          revenueThisMonth += order.total || 0;
+        }
+      }
+
+      switch (order.orderStatus) {
+        case 'pending':
+          pending++;
+          break;
+        case 'processing':
+          processing++;
+          break;
+        case 'shipped':
+          shipped++;
+          break;
+        case 'delivered':
+          delivered++;
+          break;
+        case 'cancelled':
+          cancelled++;
+          break;
+      }
+    });
+
+    return {
+      totalOrders: orders.length,
+      totalRevenue,
+      pendingOrders: pending,
+      processingOrders: processing,
+      shippedOrders: shipped,
+      deliveredOrders: delivered,
+      cancelledOrders: cancelled,
+      revenueThisMonth,
+      ordersThisMonth: orders.filter(
+        (o) => o.createdAt?.toDate() && o.createdAt.toDate() >= startOfMonth
+      ).length,
+    };
+  } catch (err) {
+    checkAndTripQuota(err);
+    return emptyStats;
+  }
 }
 
 export async function createOrder(data: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
@@ -716,22 +835,32 @@ export interface RMARequest {
 }
 
 export async function getRMARequests(filters?: { status?: RMARequest['status'] }): Promise<RMARequest[]> {
-  let q = query(collection(db, 'rma_requests'), orderBy('createdAt', 'desc'));
-  if (filters?.status) {
-    q = query(q, where('status', '==', filters.status));
+  if (isFirestoreQuotaExhausted()) return [];
+  try {
+    let q = query(collection(db, 'rma_requests'), orderBy('createdAt', 'desc'));
+    if (filters?.status) {
+      q = query(q, where('status', '==', filters.status));
+    }
+    const snapshot = await getDocs(q);
+    const requests: RMARequest[] = [];
+    snapshot.forEach((doc) => {
+      requests.push({ id: doc.id, ...doc.data() } as RMARequest);
+    });
+    return requests;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return [];
   }
-  const snapshot = await getDocs(q);
-  const requests: RMARequest[] = [];
-  snapshot.forEach((doc) => {
-    requests.push({ id: doc.id, ...doc.data() } as RMARequest);
-  });
-  return requests;
 }
 
 export function subscribeToRMARequests(
   callback: (requests: RMARequest[]) => void,
   filters?: { status?: RMARequest['status'] }
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback([]);
+    return () => {};
+  }
   let q = query(collection(db, 'rma_requests'), orderBy('createdAt', 'desc'));
   if (filters?.status) {
     q = query(q, where('status', '==', filters.status));
@@ -743,7 +872,7 @@ export function subscribeToRMARequests(
     });
     callback(requests);
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToRMARequests:', error?.message);
+    checkAndTripQuota(error);
     callback([]);
   });
 }
@@ -787,19 +916,26 @@ export async function getRMAStats(): Promise<{
   rejected: number;
   completed: number;
 }> {
-  const snapshot = await getDocs(collection(db, 'rma_requests'));
-  const requests: RMARequest[] = [];
-  snapshot.forEach((doc) => {
-    requests.push({ id: doc.id, ...doc.data() } as RMARequest);
-  });
+  const emptyStats = { total: 0, pending: 0, approved: 0, rejected: 0, completed: 0 };
+  if (isFirestoreQuotaExhausted()) return emptyStats;
+  try {
+    const snapshot = await getDocs(collection(db, 'rma_requests'));
+    const requests: RMARequest[] = [];
+    snapshot.forEach((doc) => {
+      requests.push({ id: doc.id, ...doc.data() } as RMARequest);
+    });
 
-  return {
-    total: requests.length,
-    pending: requests.filter((r) => r.status === 'pending').length,
-    approved: requests.filter((r) => r.status === 'approved').length,
-    rejected: requests.filter((r) => r.status === 'rejected').length,
-    completed: requests.filter((r) => r.status === 'completed').length,
-  };
+    return {
+      total: requests.length,
+      pending: requests.filter((r) => r.status === 'pending').length,
+      approved: requests.filter((r) => r.status === 'approved').length,
+      rejected: requests.filter((r) => r.status === 'rejected').length,
+      completed: requests.filter((r) => r.status === 'completed').length,
+    };
+  } catch (err) {
+    checkAndTripQuota(err);
+    return emptyStats;
+  }
 }
 
 
@@ -820,64 +956,66 @@ export async function getProduct(idOrSlug: string): Promise<Product | null> {
   const canonicalSlug = resolveCanonicalProductSlugByIdentifier(idOrSlug) || idOrSlug;
   const mappedId = SEO_SLUG_TO_PRODUCT_ID[canonicalSlug] || SEO_SLUG_TO_PRODUCT_ID[idOrSlug] || canonicalSlug;
 
-  try {
-    const docSnap = await getDoc(doc(db, 'products', mappedId));
-    if (docSnap.exists()) {
-      const data = docSnap.data() as Product;
-      return {
-        id: docSnap.id,
-        ...data,
-        slug: getCanonicalProductSlug({ ...data, id: docSnap.id }, docSnap.id),
-      };
-    }
-
-    if (mappedId !== idOrSlug) {
-      const rawSnap = await getDoc(doc(db, 'products', idOrSlug));
-      if (rawSnap.exists()) {
-        const data = rawSnap.data() as Product;
+  if (!isFirestoreQuotaExhausted()) {
+    try {
+      const docSnap = await getDoc(doc(db, 'products', mappedId));
+      if (docSnap.exists()) {
+        const data = docSnap.data() as Product;
         return {
-          id: rawSnap.id,
+          id: docSnap.id,
           ...data,
-          slug: getCanonicalProductSlug({ ...data, id: rawSnap.id }, rawSnap.id),
+          slug: getCanonicalProductSlug({ ...data, id: docSnap.id }, docSnap.id),
         };
       }
-    }
 
-    // Fallback 1: query by slug field in Firestore
-    const slugQuery = query(
-      collection(db, 'products'),
-      where('slug', '==', canonicalSlug),
-      firestoreLimit(1)
-    );
-    const slugSnap = await getDocs(slugQuery);
-    if (!slugSnap.empty) {
-      const firstDoc = slugSnap.docs[0];
-      const data = firstDoc.data() as Product;
-      return {
-        id: firstDoc.id,
-        ...data,
-        slug: getCanonicalProductSlug({ ...data, id: firstDoc.id }, firstDoc.id),
-      };
-    }
+      if (mappedId !== idOrSlug) {
+        const rawSnap = await getDoc(doc(db, 'products', idOrSlug));
+        if (rawSnap.exists()) {
+          const data = rawSnap.data() as Product;
+          return {
+            id: rawSnap.id,
+            ...data,
+            slug: getCanonicalProductSlug({ ...data, id: rawSnap.id }, rawSnap.id),
+          };
+        }
+      }
 
-    // Fallback 2: query by sku field in Firestore (e.g., /product/9137161U)
-    const skuQuery = query(
-      collection(db, 'products'),
-      where('sku', '==', idOrSlug),
-      firestoreLimit(1)
-    );
-    const skuSnap = await getDocs(skuQuery);
-    if (!skuSnap.empty) {
-      const firstDoc = skuSnap.docs[0];
-      const data = firstDoc.data() as Product;
-      return {
-        id: firstDoc.id,
-        ...data,
-        slug: getCanonicalProductSlug({ ...data, id: firstDoc.id }, firstDoc.id),
-      };
+      // Fallback 1: query by slug field in Firestore
+      const slugQuery = query(
+        collection(db, 'products'),
+        where('slug', '==', canonicalSlug),
+        firestoreLimit(1)
+      );
+      const slugSnap = await getDocs(slugQuery);
+      if (!slugSnap.empty) {
+        const firstDoc = slugSnap.docs[0];
+        const data = firstDoc.data() as Product;
+        return {
+          id: firstDoc.id,
+          ...data,
+          slug: getCanonicalProductSlug({ ...data, id: firstDoc.id }, firstDoc.id),
+        };
+      }
+
+      // Fallback 2: query by sku field in Firestore (e.g., /product/9137161U)
+      const skuQuery = query(
+        collection(db, 'products'),
+        where('sku', '==', idOrSlug),
+        firestoreLimit(1)
+      );
+      const skuSnap = await getDocs(skuQuery);
+      if (!skuSnap.empty) {
+        const firstDoc = skuSnap.docs[0];
+        const data = firstDoc.data() as Product;
+        return {
+          id: firstDoc.id,
+          ...data,
+          slug: getCanonicalProductSlug({ ...data, id: firstDoc.id }, firstDoc.id),
+        };
+      }
+    } catch (err) {
+      checkAndTripQuota(err);
     }
-  } catch (err) {
-    console.warn('Firestore getProduct lookup warning, using GMC catalog fallback:', err);
   }
 
   // Fallback 3: synthesize from verified PRODUCT_GMC_METADATA so canonical product URLs never 404
@@ -891,13 +1029,15 @@ export async function getProduct(idOrSlug: string): Promise<Product | null> {
 
 export async function getProducts(): Promise<Product[]> {
   let products: Product[] = [];
-  try {
-    const snapshot = await getDocs(collection(db, 'products'));
-    snapshot.forEach((doc) => {
-      products.push({ id: doc.id, ...doc.data() } as Product);
-    });
-  } catch (err) {
-    console.warn('Firestore quota exceeded in getProducts, falling back to GMC catalog:', err);
+  if (!isFirestoreQuotaExhausted()) {
+    try {
+      const snapshot = await getDocs(collection(db, 'products'));
+      snapshot.forEach((doc) => {
+        products.push({ id: doc.id, ...doc.data() } as Product);
+      });
+    } catch (err) {
+      checkAndTripQuota(err);
+    }
   }
   if (products.length === 0) {
     products = Object.keys(PRODUCT_GMC_METADATA).map(slug => buildFallbackProductFromGmcMeta(slug)).filter(Boolean) as Product[];
@@ -1074,18 +1214,28 @@ function enrichHomepageData(data: HomepageData): HomepageData {
 }
 
 export async function getHomepageData(): Promise<HomepageData | null> {
-  const docRef = doc(db, 'homepage', 'main');
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return enrichHomepageData(docSnap.data() as HomepageData);
+  if (isFirestoreQuotaExhausted()) return null;
+  try {
+    const docRef = doc(db, 'homepage', 'main');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return enrichHomepageData(docSnap.data() as HomepageData);
+    }
+    return null;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return null;
   }
-  return null;
 }
 
 // Subscribe to real-time homepage data
 export function subscribeToHomepage(
   callback: (data: HomepageData | null) => void
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback(null);
+    return () => {};
+  }
   return onSnapshot(doc(db, 'homepage', 'main'), (docSnap) => {
     if (docSnap.exists()) {
       callback(enrichHomepageData(docSnap.data() as HomepageData));
@@ -1093,7 +1243,7 @@ export function subscribeToHomepage(
       callback(null);
     }
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToHomepage:', error?.message);
+    checkAndTripQuota(error);
     callback(null);
   });
 }
@@ -1304,6 +1454,10 @@ export function subscribeToUsers(
   callback: (users: UserProfile[]) => void,
   filter?: { role?: UserProfile['role'] | 'staff' }
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback([]);
+    return () => {};
+  }
   let q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
 
   if (filter?.role) {
@@ -1321,7 +1475,7 @@ export function subscribeToUsers(
     });
     callback(users);
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToUsers:', error?.message);
+    checkAndTripQuota(error);
     callback([]);
   });
 }
@@ -1474,17 +1628,27 @@ export interface GeneralSettings {
 }
 
 export async function getGeneralSettings(): Promise<GeneralSettings | null> {
-  const docRef = doc(db, 'settings', 'global');
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return docSnap.data() as GeneralSettings;
+  if (isFirestoreQuotaExhausted()) return null;
+  try {
+    const docRef = doc(db, 'settings', 'global');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as GeneralSettings;
+    }
+    return null;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return null;
   }
-  return null;
 }
 
 export function subscribeToGeneralSettings(
   callback: (data: GeneralSettings | null) => void
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback(null);
+    return () => {};
+  }
   return onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
     if (docSnap.exists()) {
       callback(docSnap.data() as GeneralSettings);
@@ -1492,7 +1656,7 @@ export function subscribeToGeneralSettings(
       callback(null);
     }
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToGeneralSettings:', error?.message);
+    checkAndTripQuota(error);
     callback(null);
   });
 }
@@ -1559,17 +1723,27 @@ export interface AboutData {
 }
 
 export async function getAboutData(): Promise<AboutData | null> {
-  const docRef = doc(db, 'about', 'main');
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return docSnap.data() as AboutData;
+  if (isFirestoreQuotaExhausted()) return null;
+  try {
+    const docRef = doc(db, 'about', 'main');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as AboutData;
+    }
+    return null;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return null;
   }
-  return null;
 }
 
 export function subscribeToAbout(
   callback: (data: AboutData | null) => void
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback(null);
+    return () => {};
+  }
   return onSnapshot(doc(db, 'about', 'main'), (docSnap) => {
     if (docSnap.exists()) {
       callback(docSnap.data() as AboutData);
@@ -1577,7 +1751,7 @@ export function subscribeToAbout(
       callback(null);
     }
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToAbout:', error?.message);
+    checkAndTripQuota(error);
     callback(null);
   });
 }
@@ -1622,17 +1796,27 @@ export interface ContactData {
 }
 
 export async function getContactData(): Promise<ContactData | null> {
-  const docRef = doc(db, 'contact', 'main');
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return docSnap.data() as ContactData;
+  if (isFirestoreQuotaExhausted()) return null;
+  try {
+    const docRef = doc(db, 'contact', 'main');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as ContactData;
+    }
+    return null;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return null;
   }
-  return null;
 }
 
 export function subscribeToContact(
   callback: (data: ContactData | null) => void
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback(null);
+    return () => {};
+  }
   return onSnapshot(doc(db, 'contact', 'main'), (docSnap) => {
     if (docSnap.exists()) {
       callback(docSnap.data() as ContactData);
@@ -1640,7 +1824,7 @@ export function subscribeToContact(
       callback(null);
     }
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToContact:', error?.message);
+    checkAndTripQuota(error);
     callback(null);
   });
 }
@@ -1673,17 +1857,27 @@ export interface ServicePageData {
 }
 
 export async function getServicesPageData(): Promise<ServicePageData | null> {
-  const docRef = doc(db, 'services_page', 'main');
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return docSnap.data() as ServicePageData;
+  if (isFirestoreQuotaExhausted()) return null;
+  try {
+    const docRef = doc(db, 'services_page', 'main');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as ServicePageData;
+    }
+    return null;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return null;
   }
-  return null;
 }
 
 export function subscribeToServicesPage(
   callback: (data: ServicePageData | null) => void
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback(null);
+    return () => {};
+  }
   return onSnapshot(doc(db, 'services_page', 'main'), (docSnap) => {
     if (docSnap.exists()) {
       callback(docSnap.data() as ServicePageData);
@@ -1691,7 +1885,7 @@ export function subscribeToServicesPage(
       callback(null);
     }
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToServicesPage:', error?.message);
+    checkAndTripQuota(error);
     callback(null);
   });
 }
@@ -1728,16 +1922,20 @@ export async function updateService(id: string, updates: Partial<Service>): Prom
 export function subscribeToServices(
   callback: (services: Service[]) => void
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback(FALLBACK_SERVICES_CATALOG as Service[]);
+    return () => {};
+  }
   const q = query(collection(db, 'services'), orderBy('order', 'asc'));
   return onSnapshot(q, (snapshot) => {
     const services: Service[] = [];
     snapshot.forEach((doc) => {
       services.push({ id: doc.id, ...doc.data() } as Service);
     });
-    callback(services);
+    callback(services.length > 0 ? services : (FALLBACK_SERVICES_CATALOG as Service[]));
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToServices:', error?.message);
-    callback([]);
+    checkAndTripQuota(error);
+    callback(FALLBACK_SERVICES_CATALOG as Service[]);
   });
 }
 
@@ -1747,14 +1945,22 @@ export async function deleteService(id: string): Promise<void> {
 }
 
 export async function getAllServices(): Promise<Service[]> {
-  const snapshot = await getDocs(
-    query(collection(db, 'services'), orderBy('order', 'asc'))
-  );
-  const services: Service[] = [];
-  snapshot.forEach((doc) => {
-    services.push({ id: doc.id, ...doc.data() } as Service);
-  });
-  return services;
+  if (isFirestoreQuotaExhausted()) {
+    return FALLBACK_SERVICES_CATALOG as Service[];
+  }
+  try {
+    const snapshot = await getDocs(
+      query(collection(db, 'services'), orderBy('order', 'asc'))
+    );
+    const services: Service[] = [];
+    snapshot.forEach((doc) => {
+      services.push({ id: doc.id, ...doc.data() } as Service);
+    });
+    return services.length > 0 ? services : (FALLBACK_SERVICES_CATALOG as Service[]);
+  } catch (err) {
+    checkAndTripQuota(err);
+    return FALLBACK_SERVICES_CATALOG as Service[];
+  }
 }
 
 // ============================================
@@ -1770,18 +1976,28 @@ export interface PageContent {
 }
 
 export async function getPageContent(pageId: string): Promise<PageContent | null> {
-  const docRef = doc(db, 'page_contents', pageId);
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() } as PageContent;
+  if (isFirestoreQuotaExhausted()) return null;
+  try {
+    const docRef = doc(db, 'page_contents', pageId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as PageContent;
+    }
+    return null;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return null;
   }
-  return null;
 }
 
 export function subscribeToPageContent(
   pageId: string,
   callback: (data: PageContent | null) => void
 ): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback(null);
+    return () => {};
+  }
   return onSnapshot(doc(db, 'page_contents', pageId), (docSnap) => {
     if (docSnap.exists()) {
       callback({ id: docSnap.id, ...docSnap.data() } as PageContent);
@@ -1789,7 +2005,7 @@ export function subscribeToPageContent(
       callback(null);
     }
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToPageContent:', error?.message);
+    checkAndTripQuota(error);
     callback(null);
   });
 }
@@ -1819,16 +2035,26 @@ export interface BlogPost {
 }
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  const q = query(collection(db, 'blog_posts'), orderBy('publishedAt', 'desc'));
-  const snapshot = await getDocs(q);
-  const posts: BlogPost[] = [];
-  snapshot.forEach((doc) => {
-    posts.push({ id: doc.id, ...doc.data() } as BlogPost);
-  });
-  return posts;
+  if (isFirestoreQuotaExhausted()) return [];
+  try {
+    const q = query(collection(db, 'blog_posts'), orderBy('publishedAt', 'desc'));
+    const snapshot = await getDocs(q);
+    const posts: BlogPost[] = [];
+    snapshot.forEach((doc) => {
+      posts.push({ id: doc.id, ...doc.data() } as BlogPost);
+    });
+    return posts;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return [];
+  }
 }
 
 export function subscribeToBlogPosts(callback: (posts: BlogPost[]) => void): Unsubscribe {
+  if (isFirestoreQuotaExhausted()) {
+    callback([]);
+    return () => {};
+  }
   const q = query(collection(db, 'blog_posts'), orderBy('publishedAt', 'desc'));
   return onSnapshot(q, (snapshot) => {
     const posts: BlogPost[] = [];
@@ -1837,7 +2063,7 @@ export function subscribeToBlogPosts(callback: (posts: BlogPost[]) => void): Uns
     });
     callback(posts);
   }, (error) => {
-    console.warn('Firestore quota exceeded or error in subscribeToBlogPosts:', error?.message);
+    checkAndTripQuota(error);
     callback([]);
   });
 }

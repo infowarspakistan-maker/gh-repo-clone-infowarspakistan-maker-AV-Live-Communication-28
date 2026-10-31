@@ -41,20 +41,36 @@ const INITIAL_FALLBACK_SHOP_PRODUCTS: Product[] = (() => {
   return list;
 })();
 
+const FALLBACK_SHOP_CATEGORIES: Category[] = [
+  { id: 'video-conferencing', name: 'Video Conferencing', slug: 'video-conferencing', description: 'Enterprise Video Conferencing Systems', parentId: null, displayOrder: 1, isActive: true },
+  { id: 'boardroom-codecs', name: 'Boardroom Codecs', slug: 'boardroom-codecs', description: 'Executive Boardroom Codecs', parentId: null, displayOrder: 2, isActive: true },
+  { id: 'large-room', name: 'Large Room Systems', slug: 'large-room', description: 'Large Room & Auditorium AV', parentId: null, displayOrder: 3, isActive: true },
+  { id: 'ptz-cameras', name: 'PTZ Cameras', slug: 'ptz-cameras', description: '4K Optical PTZ Cameras', parentId: null, displayOrder: 4, isActive: true },
+  { id: 'touch-panels', name: 'Touch Panels', slug: 'touch-panels', description: 'Room Touch Controllers & Panels', parentId: null, displayOrder: 5, isActive: true },
+  { id: 'speakerphones', name: 'Speakerphones & Mics', slug: 'speakerphones', description: 'Conference Speakerphones & Ceiling Mics', parentId: null, displayOrder: 6, isActive: true },
+  { id: 'ip-phones', name: 'IP Phones', slug: 'ip-phones', description: 'SIP & VoIP Executive Desk Phones', parentId: null, displayOrder: 7, isActive: true },
+  { id: 'voip-phone-systems', name: 'VoIP PBX & Gateways', slug: 'voip-phone-systems', description: 'Enterprise IP PBX & VoIP Gateways', parentId: null, displayOrder: 8, isActive: true },
+  { id: 'headsets', name: 'Enterprise Headsets', slug: 'headsets', description: 'ANC Call Center & UC Headsets', parentId: null, displayOrder: 9, isActive: true },
+  { id: 'projectors', name: 'Projectors & Displays', slug: 'projectors', description: 'Laser Projectors & Interactive Displays', parentId: null, displayOrder: 10, isActive: true },
+  { id: 'ip-cameras', name: 'IP Security Cameras', slug: 'ip-cameras', description: 'Enterprise IP Surveillance & NVRs', parentId: null, displayOrder: 11, isActive: true },
+  { id: 'intercom-paging-access', name: 'PA, Intercom & Access', slug: 'intercom-paging-access', description: 'SIP Intercom, Paging & Access Control', parentId: null, displayOrder: 12, isActive: true },
+];
+
 export function Shop() {
   const { addToCart } = useCart();
   const { brandSlug } = useParams<{ brandSlug?: string }>();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>(INITIAL_FALLBACK_SHOP_PRODUCTS);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(FALLBACK_SHOP_CATEGORIES);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [expandedParents, setExpandedParents] = useState<{[key: string]: boolean}>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
-  const [visibleCount, setVisibleCount] = useState<number>(16);
+  const [visibleCount, setHoveredVisibleCount] = useState<number>(16);
+  const setVisibleCount = setHoveredVisibleCount;
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // Sync parameters from URL (/brands/:brandSlug or ?brand=...)
@@ -99,7 +115,9 @@ export function Shop() {
           !EXCLUDED_CATEGORY_SLUGS.has(c.slug) &&
           (!(c as any).type || (c as any).type === 'product')
       );
-      setCategories(productOnlyCats);
+      if (productOnlyCats.length > 0) {
+        setCategories(productOnlyCats);
+      }
     });
 
     const unsubscribeProducts = subscribeToProducts((data) => {
@@ -332,7 +350,7 @@ export function Shop() {
   );
 
   const parentCategories = categories.filter(c => {
-    const isProductCategory = !c.parentId && c.isActive && ((c as any).type === 'product');
+    const isProductCategory = !c.parentId && c.isActive && (!(c as any).type || (c as any).type === 'product');
     if (!isProductCategory) return false;
     const parentCount = categoryCounts[c.id!] || 0;
     const hasProducts = parentCount > 0 || categories.some(sub => sub.parentId === c.id && (categoryCounts[sub.id!] || 0) > 0);
@@ -558,6 +576,78 @@ export function Shop() {
               <Filter size={16} className={isSidebarOpen ? "text-[#00B4D8]" : ""} /> 
               Filters
             </button>
+          </div>
+        </div>
+
+        {/* Instant 1-Click Category & Price-Tier Filter Chips Bar */}
+        <div className="mb-8 space-y-3">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+            <button
+              type="button"
+              onClick={() => updateFilters({ category: null })}
+              className={`shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border cursor-pointer ${
+                !selectedCategory
+                  ? 'bg-[#1A2B4C] text-white border-[#1A2B4C] shadow-sm'
+                  : 'bg-white text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
+              }`}
+            >
+              All Hardware ({products.length})
+            </button>
+            {FALLBACK_SHOP_CATEGORIES.map((cat) => {
+              const matchedCat = categories.find(c => c.slug === cat.slug || c.id === cat.id) || cat;
+              const catId = matchedCat.id || cat.slug;
+              const count = categoryCounts[catId] || categoryCounts[cat.slug] || 0;
+              const isActive = selectedCategory === catId || selectedCategory === cat.slug;
+              return (
+                <button
+                  key={cat.slug}
+                  type="button"
+                  onClick={() => updateFilters({ category: isActive ? null : catId })}
+                  className={`shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border flex items-center gap-1.5 cursor-pointer ${
+                    isActive
+                      ? 'bg-[#00B4D8] text-white border-[#00B4D8] shadow-sm'
+                      : 'bg-white text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
+                  }`}
+                >
+                  <span>{cat.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Instant PKR Budget / Price-Tier Chips */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-1">Quick Budget Filter:</span>
+            {[
+              { label: 'All Budgets', min: '', max: '' },
+              { label: 'Under Rs. 100k (Phones & Headsets)', min: '', max: '100000' },
+              { label: 'Rs. 100k – 500k (Huddle & PTZ)', min: '100000', max: '500000' },
+              { label: 'Rs. 500k – 1.5M (Video Bars & PBX)', min: '500000', max: '1500000' },
+              { label: 'Rs. 1.5M+ (Boardroom & Codecs)', min: '1500000', max: '' },
+            ].map((tier) => {
+              const isTierActive = minPrice === tier.min && maxPrice === tier.max;
+              return (
+                <button
+                  key={tier.label}
+                  type="button"
+                  onClick={() => {
+                    setLocalMinPrice(tier.min);
+                    setLocalMaxPrice(tier.max);
+                    updateFilters({ min_price: tier.min, max_price: tier.max });
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer ${
+                    isTierActive
+                      ? 'bg-[#1A2B4C]/10 text-[#1A2B4C] border-[#1A2B4C]'
+                      : 'bg-white text-gray-500 border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
+                  }`}
+                >
+                  {tier.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 

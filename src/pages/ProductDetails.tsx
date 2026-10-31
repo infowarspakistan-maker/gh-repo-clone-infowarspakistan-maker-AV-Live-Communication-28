@@ -26,7 +26,8 @@ import {
   ChevronDown,
   ChevronUp,
   HelpCircle,
-  Play
+  Play,
+  Phone
 } from 'lucide-react';
 import { getProduct, getProducts, getCategories, Product, Category } from '../lib/firebase/firestore-helpers';
 import {
@@ -1227,6 +1228,40 @@ export function ProductDetails() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Sticky Mobile Quote & Buy Bar for Instant Thumb-Zone Conversion */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-3 shadow-[0_-8px_30px_rgba(26,43,76,0.12)]">
+        <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
+          <div className="min-w-0">
+            <span className="block text-[10px] font-black text-gray-400 uppercase tracking-wider truncate">
+              {product.productName}
+            </span>
+            <span className="block text-base font-black text-[#1A2B4C]">
+              Rs. {getSelectedPrice().toLocaleString()}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <a
+              href={`https://wa.me/923214256263?text=${encodeURIComponent(`Hi AV Live, I need a 15-minute corporate quote for ${product.productName} (MPN: ${resolvedMpn}) listed at Rs. ${getSelectedPrice().toLocaleString()}.`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-wider flex items-center gap-1.5 shadow-sm"
+            >
+              <Phone size={13} />
+              <span>15m Quote</span>
+            </a>
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={product.stockQuantity <= 0}
+              className="px-4 py-2.5 rounded-xl bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black text-[10px] uppercase tracking-wider flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+            >
+              <ShoppingCart size={13} />
+              <span>Add</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

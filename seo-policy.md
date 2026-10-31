@@ -120,16 +120,19 @@ This section tracks all completed technical SEO, Google Search Console (GSC), Go
 - [x] **Eliminated 38 Server Error (5xx) & Admin SDK Permission Failures (`server.ts`, `package.json`)**:
   - Added `fetchCollectionWithClientFallback()` using the Firebase Web Client SDK (`firebase/app` + `firebase/firestore`) in `server.ts` so server-side sitemap and Google Merchant Center TSV generation never fail with `7 PERMISSION_DENIED`.
   - Enforced `NODE_ENV=production` in `package.json` `"start"` script and `isProductionServer` detection in `server.ts` so `dist/server.cjs` always serves pre-compiled `dist/` assets with zero Vite dev middleware timeouts.
-- [x] **Zero Loading-Spinner Soft 404s**: `Shop.tsx`, `Category.tsx`, `ProductDetails.tsx`, `ServiceDetail.tsx`, and `Blog.tsx` initialize synchronously with fallback hardware/service/blog catalogs on frame 1.
-- [x] **First-Wave SSR `<div id="root">` Semantic Snapshot (`index.html` & `server.ts`)**:
-  - Pre-renders `<h1>`, Answer-First summaries, and semantic `<table>` matrices inside `<div id="root">...</div><!--ssr-root-end-->` for Homepage, Product pages (`/product/:slug`), Category pages (`/category/:slug`), Brand pages (`/brands/:slug`), Service pages (`/services/:slug`), and Blog guides (`/blog/:slug`).
+- [x] **Zero Loading-Spinner Soft 404s & Synchronous Route Hydration**: All public SEO routes (`Home`, `Shop`, `Category`, `ProductDetails`, `ServiceDetail`, `KeywordLandingPage`, `Blog`, `HtmlSitemap`, etc.) are synchronously bundled and initialize on frame 1 from verified local catalogs without `<React.Suspense>` spinner flashes.
+- [x] **Firestore Quota Circuit-Breaker (`src/lib/firebase/firestore-helpers.ts`)**: Session-level circuit-breaker (`sessionStorage` + in-memory flag) catches `resource-exhausted` (`Quota limit exceeded`) on the first occurrence and resolves all subsequent reads/subscriptions in `0ms` from verified local catalogs (`PRODUCT_GMC_METADATA`, `FALLBACK_CATEGORIES_LIST`, `FALLBACK_SERVICES_CATALOG`, `FALLBACK_BLOG_CATALOG`).
+- [x] **Stable Fixed-Height Navbar & Controlled Auto-Closing Menus (`src/App.tsx`)**: Eliminated the 88px scroll-collapse layout jump and replaced stuck CSS `:hover` dropdowns with controlled React state (`activeDropdown`) that auto-closes on click and route change.
+- [x] **HTML Sitemap & Directory Hub (`/sitemap` via `src/pages/HtmlSitemap.tsx`)**: Links all 151+ canonical URLs (core pillars, regional hubs, 12 categories, 9 services, 23 brands, 11 engineering guides, 21 B2B programs/policies, and 53 hardware SKUs in a semantic HTML `<table>`) within 2 clicks from Navbar and Footer.
+- [x] **First-Wave SSR `<div id="root">` Semantic Snapshot & Dynamic `<meta name="keywords">` (`index.html` & `server.ts`)**:
+  - Pre-renders `<h1>`, Answer-First summaries, and semantic `<table>` matrices inside `<div id="root">...</div><!--ssr-root-end-->` AND dynamically injects route-specific `<meta data-rh="true" name="keywords" content="...">` for Homepage, Product pages (`/product/:slug`), Category pages (`/category/:slug`), Brand pages (`/brands/:slug`), Service pages (`/services/:slug`), Blog guides (`/blog/:slug`), and Pillar pages (`/video-conference-in-pakistan`, `/corporate-event-management`).
 - [x] **Automated Dynamic Sitemap (`/sitemap.xml`)**:
-  - Serves **149 deduplicated canonical URLs** (64 static/brand/geo/pillar routes including `/video-conferencing-solutions` & `/corporate-event-management`, 53 products, 12 hardware categories, 9 services, 11 canonical blog guides) at `/sitemap.xml` with memory cache + disk sync.
+  - Serves **151+ deduplicated canonical URLs** (66 static/brand/geo/pillar routes including `/sitemap`, `/video-conference-in-pakistan`, `/video-conferencing-solutions` & `/corporate-event-management`, 53 products, 12 hardware categories, 9 services, 11 canonical blog guides) at `/sitemap.xml` with memory cache + disk sync.
 - [x] **AI Search Crawler Readiness (`/llms.txt`, `/llms-full.txt` & `robots.txt`)**:
   - Explicit `Allow: /` rules for `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `ClaudeBot`, `Google-Extended`, and `Applebot-Extended`.
   - Complete 30KB+ Markdown hardware/pricing/BoM corpus served at `/llms-full.txt`.
-- [x] **Core Web Vitals, Code-Splitting & Gallery Image Optimization (`Home.tsx`, `Shop.tsx`, `image-optimize.ts`, `App.tsx`)**:
-  - Lazy-loaded `Home` route (`App.tsx`) and below-the-fold `TopBrands` component (`Home.tsx`).
+- [x] **Core Web Vitals & Gallery Image Optimization (`Home.tsx`, `Shop.tsx`, `image-optimize.ts`, `App.tsx`)**:
+  - Synchronous public route imports in `App.tsx` (admin routes remain lazy-loaded) and below-the-fold `TopBrands` component (`Home.tsx`).
   - Added `optimizeGalleryImageUrl()` (`w=480&q=75` WebP/AVIF sizing), `decoding="async"`, explicit `width`/`height`, and native `loading="lazy"` across `Home` and `Shop` galleries (reserving `loading="eager"` + `fetchPriority="high"` for the first 2 LCP cards).
   - Unmounted hidden secondary hover images (`hoveredProductId`) and added 16-item progressive viewport batching (`IntersectionObserver`) on `Shop.tsx` while keeping all 53 products in the `ItemList` JSON-LD and bottom Answer-First HTML table.
   - Restricted `Home.tsx` 15-item Video Conferencing gallery to mount images only for the active and adjacent slide (`Math.abs(slideIdx - currentVideoSlide) <= 1`).
@@ -137,11 +140,14 @@ This section tracks all completed technical SEO, Google Search Console (GSC), Go
   - **Localized Hero Section**: H1 with service + target city (Lahore, Karachi, Islamabad) + **"Request a 15-Minute Quote"** CTA.
   - **Trust & Authority Bar**: Partner logos/links for **Cisco, Poly, Yealink, Logitech, Horion, and Grandstream** + Certified Engineering Team badge.
   - **The "AV Live" Advantage**: Guaranteed 15-minute technical SLA response, zero-downtime guarantee, and on-site standby engineers.
-  - **Service Breakdown**: Boardroom integration, huddle room kits, interactive flat panels, hybrid event broadcasting, 3D hologram stages, SMD LED screen rental, and multi-camera live streaming.
-  - **Localized Proof (Case Studies)**: Real-world deployments in **Johar Town & DHA (Lahore)**, **Clifton (Karachi)**, and **Blue Area (Islamabad)**.
-  - **FAQ & Schema Markup**: Commercial FAQs (including 30-person executive boardroom AV cost) wrapped in `FAQPage` JSON-LD.
+  - **Service Breakdown & Reference PKR Investment Table**: All 9 services feature 3 `offeringsBreakdown` cards and a 3-tier semantic HTML `<table>` (`pricingTiers`) detailing scope, SLA, and reference PKR investment.
+  - **Localized Proof (Case Studies)**: All 9 services feature 3 verified deployments in **Johar Town & DHA (Lahore)**, **Clifton (Karachi)**, and **Blue Area (Islamabad)** (27 regional case studies total).
+  - **FAQ & Schema Markup**: All 9 services feature 4 custom Pakistan B2B FAQs (36 FAQs total) wrapped in `FAQPage` JSON-LD.
   - **Clear Contact Footers**: Primary hotlines **`0321 425 6263`** and **`0339 0000 921`** alongside an integrated 15-minute quote form.
   - **Target Local BoFu Keywords Integrated**: `"Polycom video conferencing distributors Lahore"`, `"Cisco Room Kit installation Karachi"`, `"Enterprise VoIP PBX setup Pakistan"`, `"Boardroom AV integration services Islamabad"`, `"Interactive flat panel displays for business Lahore"`, `"Corporate hybrid event live streaming Lahore"`, `"SMD LED screen rental for corporate events"`, `"3D hologram display stages Pakistan"`, `"Multi-camera event broadcasting Karachi"`.
+- [x] **Full 53-SKU Google Merchant Center (GMC) & PDP Enrichment (`src/lib/gmc-feed.ts`, `ProductDetails.tsx`, `Shop.tsx`)**:
+  - Every canonical SKU in `PRODUCT_GMC_METADATA` now includes verified model-specific PKR `regularPrice` & `salePrice` (spanning Rs. 21,500 to Rs. 3,950,000 across 49 distinct price points), accurate multi-category `categorySlugs` across all 12 categories, multi-angle hardware `images`, 5+ semicolon-delimited `defaultSpecs`, and Answer-First `defaultDescription`.
+  - Added 1-click horizontal Category Filter Chips (with live SKU counts) and Quick Budget Filter Chips on `/shop`, plus a sticky mobile bottom 15-minute WhatsApp Quote & Add-to-Cart bar on `/product/:slug`.
 
 ### 2. 100% Public Page JSON-LD Structured Data Coverage Matrix (38/38 Public Views)
 

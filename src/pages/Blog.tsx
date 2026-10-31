@@ -124,6 +124,7 @@ export function Blog() {
           <SEO
             title={`${matchedPost.title} | AV Live Blog`}
             description={(matchedPost.answerFirstSummary || matchedPost.excerpt).substring(0, 160)}
+            keywords={`${matchedPost.title}, ${matchedPost.category} Pakistan, Video Conferencing Guide Pakistan, Enterprise AV Architecture Lahore Karachi Islamabad, AV Live Communications`}
             url={canonicalUrl}
             type="article"
             image={matchedPost.image}
@@ -279,6 +280,7 @@ export function Blog() {
       <SEO 
         title="AV Live Insights & Tech Blog | Video Conferencing & VoIP Trends"
         description="Expert insights, architectural guides, and industry trends on corporate video conferencing, IP telephony, Microsoft Teams Rooms, and smart boardroom automation in Pakistan."
+        keywords="AV Live Blog, Video Conferencing Guide Pakistan, Boardroom AV System Price Guide Pakistan, Logitech vs Poly Comparison Pakistan, Yealink vs Cisco Pakistan"
         url="https://avlive.com.pk/blog"
         type="website"
         image="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1200"

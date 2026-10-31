@@ -5,12 +5,18 @@ import { subscribeToCategories } from '../lib/firebase/firestore-helpers';
 import { EXCLUDED_CATEGORY_SLUGS } from '../lib/sitemap-generator';
 
 const DEFAULT_FOOTER_CATEGORIES = [
-  { id: 'cat-projectors', name: 'Projectors', slug: 'projectors', isActive: true, type: 'product' },
-  { id: 'cat-voip', name: 'VoIP Phone Systems', slug: 'voip-phone-systems', isActive: true, type: 'product' },
-  { id: 'cat-intercom', name: 'Intercom, Paging & Access', slug: 'intercom-paging-access', isActive: true, type: 'product' },
   { id: 'cat-video', name: 'Video Conferencing', slug: 'video-conferencing', isActive: true, type: 'product' },
-  { id: 'cat-headsets', name: 'Headsets', slug: 'headsets', isActive: true, type: 'product' },
+  { id: 'cat-codecs', name: 'Boardroom Codecs', slug: 'boardroom-codecs', isActive: true, type: 'product' },
+  { id: 'cat-large-room', name: 'Large Room AV', slug: 'large-room', isActive: true, type: 'product' },
+  { id: 'cat-ptz', name: 'PTZ Cameras', slug: 'ptz-cameras', isActive: true, type: 'product' },
+  { id: 'cat-touch', name: 'Touch Panels & Displays', slug: 'touch-panels', isActive: true, type: 'product' },
+  { id: 'cat-speakerphones', name: 'Speakerphones & Mics', slug: 'speakerphones', isActive: true, type: 'product' },
   { id: 'cat-phones', name: 'IP Phones', slug: 'ip-phones', isActive: true, type: 'product' },
+  { id: 'cat-voip', name: 'VoIP Phone Systems', slug: 'voip-phone-systems', isActive: true, type: 'product' },
+  { id: 'cat-headsets', name: 'Headsets', slug: 'headsets', isActive: true, type: 'product' },
+  { id: 'cat-projectors', name: 'Projectors', slug: 'projectors', isActive: true, type: 'product' },
+  { id: 'cat-cameras', name: 'IP Cameras', slug: 'ip-cameras', isActive: true, type: 'product' },
+  { id: 'cat-intercom', name: 'Intercom, Paging & Access', slug: 'intercom-paging-access', isActive: true, type: 'product' },
 ];
 
 export function Footer() {
@@ -56,8 +62,10 @@ export function Footer() {
             <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Information &amp; SEO Hubs</h3>
             <ul className="space-y-4 text-sm text-gray-200">
               <li><Link to="/about" className="hover:text-[#00B4D8] transition-colors">About Us</Link></li>
-              <li><Link to="/video-conferencing" className="hover:text-[#00B4D8] transition-colors">Video Conferencing in Pakistan</Link></li>
-              <li><Link to="/events-services" className="hover:text-[#00B4D8] transition-colors">Corporate Event Management</Link></li>
+              <li><Link to="/video-conference-in-pakistan" className="hover:text-[#00B4D8] transition-colors font-semibold text-white">Video Conference in Pakistan</Link></li>
+              <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors font-semibold text-white">Corporate Event Management</Link></li>
+              <li><Link to="/video-conferencing" className="hover:text-[#00B4D8] transition-colors">Video Conferencing Hardware Hub</Link></li>
+              <li><Link to="/events-services" className="hover:text-[#00B4D8] transition-colors">Event Production &amp; Staging</Link></li>
               <li><Link to="/3d-hologram" className="hover:text-[#00B4D8] transition-colors">3D Hologram Displays</Link></li>
               <li><Link to="/projection-mapping" className="hover:text-[#00B4D8] transition-colors">3D Projection Mapping</Link></li>
               <li><Link to="/zoom-rooms" className="hover:text-[#00B4D8] transition-colors">Zoom Rooms Pakistan</Link></li>
@@ -70,6 +78,7 @@ export function Footer() {
               <li><Link to="/rma" className="hover:text-[#00B4D8] transition-colors">RMA Form</Link></li>
               <li><Link to="/shipping" className="hover:text-[#00B4D8] transition-colors">Shipping Methods</Link></li>
               <li><Link to="/reviews" className="hover:text-[#00B4D8] transition-colors">Verified Customer Reviews</Link></li>
+              <li><Link to="/sitemap" className="hover:text-[#00B4D8] transition-colors font-bold text-[#00B4D8]">Complete HTML Sitemap (153+ Pages)</Link></li>
             </ul>
           </div>
 
@@ -125,7 +134,9 @@ export function Footer() {
           <div>
             &copy; {new Date().getFullYear()} AV LIVE COMMUNICATIONS. All rights reserved.
           </div>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-6">
+            <Link to="/sitemap" className="hover:text-white transition-colors font-semibold">HTML Sitemap</Link>
+            <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">XML Sitemap</a>
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-cookie-settings'))}
               className="hover:text-white transition-colors"

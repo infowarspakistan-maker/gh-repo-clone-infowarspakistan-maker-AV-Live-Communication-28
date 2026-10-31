@@ -310,6 +310,35 @@ export function ServiceDetail() {
               </table>
             </div>
 
+            {/* Semantic HTML SLA & Reference PKR Investment Tiers Table */}
+            {service.pricingTiers && service.pricingTiers.length > 0 && (
+              <div className="mb-10 overflow-x-auto rounded-2xl border border-gray-200">
+                <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                  <caption className="bg-[#00B4D8] text-white font-black text-left px-5 py-3 text-xs uppercase tracking-wider">
+                    {service.title} — Reference Packages, SLA &amp; PKR Investment Matrix (2026)
+                  </caption>
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
+                      <th className="py-3 px-4">Deployment Tier</th>
+                      <th className="py-3 px-4">Scope &amp; Hardware Stack</th>
+                      <th className="py-3 px-4">Turnaround &amp; SLA</th>
+                      <th className="py-3 px-4">Reference PKR Investment</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {service.pricingTiers.map((row, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50/70 transition-colors">
+                        <td className="py-3 px-4 font-black text-[#1A2B4C]">{row.tier}</td>
+                        <td className="py-3 px-4 font-medium text-gray-600">{row.capacityOrScope}</td>
+                        <td className="py-3 px-4 font-bold text-emerald-600">{row.slaAndTurnaround}</td>
+                        <td className="py-3 px-4 font-black text-[#00B4D8] whitespace-nowrap">{row.referenceInvestment}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
             {service.detailedContent ? (
                <div className="prose prose-lg max-w-none break-words prose-headings:font-black prose-headings:text-[#1A2B4C] prose-a:text-[#00B4D8] prose-img:rounded-3xl prose-p:text-gray-600 prose-p:leading-relaxed prose-strong:text-[#1A2B4C] marker:text-[#00B4D8] [&_*]:break-words" dangerouslySetInnerHTML={{ __html: formatContent(service.detailedContent) }} />
             ) : (
