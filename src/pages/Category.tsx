@@ -567,6 +567,15 @@ export function Category() {
         </p>
 
         <div className="pt-4 border-t border-gray-100 flex flex-wrap gap-3">
+          <Link to="/room-designer" className="text-xs font-black text-white bg-[#00B4D8] hover:bg-[#1A2B4C] px-4 py-2 rounded-full transition-colors">
+            Launch 3D Room Designer &amp; LED Calculator →
+          </Link>
+          <Link to="/video-conferencing-solutions" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+            Parent Pillar: Video Conferencing Solutions →
+          </Link>
+          <Link to="/corporate-event-management" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+            Parent Pillar: Corporate Event Management →
+          </Link>
           <Link to="/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
             Logitech Rally Bar vs. Poly Studio X50 Guide →
           </Link>

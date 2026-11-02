@@ -389,10 +389,7 @@ export function ProductDetails() {
 
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-16">
         {/* Title Header Section - Elegant and Spans across the top */}
-        <div 
-          className="max-w-6xl mx-auto mb-8 border-b border-gray-100 pb-6"
-          style={{ marginBottom: '8px', paddingBottom: '7px', paddingLeft: '-4px', paddingRight: '1px' }}
-        >
+        <div className="max-w-6xl mx-auto mb-4 border-b border-gray-100 pb-4">
           <div className="flex flex-wrap items-center gap-3 mb-2 text-xs font-black uppercase tracking-widest text-[#00B4D8]">
              <span>{resolvedBrand}</span>
              <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
@@ -412,10 +409,7 @@ export function ProductDetails() {
              )}
           </div>
           
-          <h1 
-            className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-[#1A2B4C] mb-4"
-            style={{ fontSize: '24px' }}
-          >
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-[#1A2B4C] mb-4">
             {product.productName}
           </h1>
 
@@ -935,6 +929,47 @@ export function ProductDetails() {
                     >
                        <Zap size={18} /> Buy Now with 1-Click
                     </button>
+                  </div>
+                </div>
+
+                {/* Silo Rule 1 & Rule 3: Parent Solutions Pillar Return Link + 3D Room Designer CTA */}
+                <div className="bg-[#1A2B4C] text-white p-5 rounded-2xl border border-[#00B4D8]/30 shadow-md space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8]">Parent Solutions Pillar &amp; 3D Configurator</span>
+                    <span className="text-[10px] font-bold text-gray-300">Hub-and-Spoke Silo</span>
+                  </div>
+                  <p className="text-xs text-gray-200 leading-relaxed font-medium">
+                    Integrating the <strong>{product.productName}</strong> into a corporate boardroom, VoIP PBX network, or LED stage? Explore our turnkey engineering pillars or model your room geometry in 3D:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    <Link
+                      to="/video-conferencing-solutions"
+                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
+                    >
+                      <span>Video Conferencing Pillar</span>
+                      <span>→</span>
+                    </Link>
+                    <Link
+                      to="/room-designer"
+                      className="px-3 py-2 rounded-xl bg-[#00B4D8] hover:bg-[#F26522] text-white text-[11px] font-black transition-colors flex items-center justify-between"
+                    >
+                      <span>3D Room &amp; LED Designer</span>
+                      <span>→</span>
+                    </Link>
+                    <Link
+                      to="/corporate-event-management"
+                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
+                    >
+                      <span>Corporate Event Pillar</span>
+                      <span>→</span>
+                    </Link>
+                    <Link
+                      to="/voip-service-providers"
+                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
+                    >
+                      <span>VoIP &amp; IP-PBX Pillar</span>
+                      <span>→</span>
+                    </Link>
                   </div>
                 </div>
 

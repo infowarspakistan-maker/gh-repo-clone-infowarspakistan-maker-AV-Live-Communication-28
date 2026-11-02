@@ -8,6 +8,7 @@ import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { initializeApp as initializeClientApp, getApps as getClientApps } from 'firebase/app';
 import { getFirestore as getClientFirestore, collection as clientCollection, getDocs as clientGetDocs } from 'firebase/firestore';
 import fs from 'fs';
+import zlib from 'zlib';
 import { updateSheetData } from './server-utils/sheets';
 import {
   generateGmcTsv,
@@ -102,6 +103,62 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // Native HTTP Gzip compression for text/html, JS, CSS, JSON, XML, and SVG to boost Mobile & Desktop PageSpeed scores
+  app.use((req, res, next) => {
+    const acceptEncoding = String(req.headers['accept-encoding'] || '');
+    if (!acceptEncoding.includes('gzip') || req.method === 'HEAD') {
+      return next();
+    }
+    const origSend = res.send.bind(res);
+    res.send = function (body: any): express.Response {
+      try {
+        const contentType = String(res.getHeader('Content-Type') || '');
+        const isCompressible =
+          contentType.includes('text/html') ||
+          contentType.includes('application/javascript') ||
+          contentType.includes('text/javascript') ||
+          contentType.includes('text/css') ||
+          contentType.includes('application/json') ||
+          contentType.includes('application/xml') ||
+          contentType.includes('text/xml') ||
+          contentType.includes('image/svg+xml');
+        if (isCompressible && !res.getHeader('Content-Encoding') && (typeof body === 'string' || Buffer.isBuffer(body))) {
+          const rawBuf = Buffer.isBuffer(body) ? body : Buffer.from(body, 'utf8');
+          if (rawBuf.length > 512) {
+            const compressed = zlib.gzipSync(rawBuf, { level: 6 });
+            res.setHeader('Content-Encoding', 'gzip');
+            res.setHeader('Vary', 'Accept-Encoding');
+            res.removeHeader('Content-Length');
+            return origSend(compressed);
+          }
+        }
+      } catch {
+        // Fallback to uncompressed body on any error
+      }
+      return origSend(body);
+    };
+    next();
+  });
+
+  // Explicit high-cache static routes for favicon.ico, favicon.svg, and apple-touch-icon.png
+  const serveRootIcon = (fileName: string, mimeType: string) => (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const candidates = [
+      path.join(process.cwd(), 'public', fileName),
+      path.join(process.cwd(), 'dist', fileName),
+    ];
+    for (const filePath of candidates) {
+      if (fs.existsSync(filePath)) {
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        return res.status(200).send(fs.readFileSync(filePath));
+      }
+    }
+    next();
+  };
+  app.get('/favicon.ico', serveRootIcon('favicon.ico', 'image/x-icon'));
+  app.get('/favicon.svg', serveRootIcon('favicon.svg', 'image/svg+xml'));
+  app.get('/apple-touch-icon.png', serveRootIcon('apple-touch-icon.png', 'image/png'));
 
   // Helper to verify admin role
   async function verifyAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -904,12 +961,24 @@ async function startServer() {
       escapeHtmlText(str).replace(/"/g, '&quot;');
 
     const clampSeoTitle = (rawTitle: string, maxLen = 65): string => {
-      const normalized = String(rawTitle || 'Video Conference | Event Management | AV Live')
+      const normalized = String(rawTitle || 'Video Conference | Event Management in Pakistan | AV Live')
         .replace(/^e-Sports\b/i, 'Esports')
         .replace(/\s+/g, ' ')
         .trim();
       const capitalized = normalized.replace(/^[a-z]/, c => c.toUpperCase());
-      const withBrand = capitalized.includes('AV Live') ? capitalized : `${capitalized} | AV Live`;
+      let withBrand = capitalized.includes('AV Live') ? capitalized : `${capitalized} | AV Live`;
+      if (withBrand.length < 50) {
+        const baseCore = capitalized.replace(/\s*\|\s*AV Live(?:\s+[^\s|]+)*$/i, '').trim();
+        const candidatePakistan = `${baseCore} | AV Live Pakistan`;
+        const candidateEnterprise = `${baseCore} — Enterprise AV & Events | AV Live`;
+        if (candidatePakistan.length >= 50 && candidatePakistan.length <= maxLen) {
+          withBrand = candidatePakistan;
+        } else if (candidateEnterprise.length <= maxLen) {
+          withBrand = candidateEnterprise;
+        } else if (candidatePakistan.length <= maxLen) {
+          withBrand = candidatePakistan;
+        }
+      }
       if (withBrand.length <= maxLen) return withBrand;
 
       const core = capitalized.replace(/\s*\|\s*AV Live(?:\s+[^\s|]+)*$/i, '').trim();
@@ -928,25 +997,29 @@ async function startServer() {
       return `${cleanCore}${suffix}`;
     };
 
-    const clampSeoDescription = (rawDesc: string, maxLen = 158): string => {
+    const clampSeoDescription = (rawDesc: string, maxLen = 128): string => {
       const clean = String(rawDesc || '')
         .replace(/\s+/g, ' ')
         .trim();
-      if (clean.length <= maxLen) return clean;
+      if (clean.length >= 100 && clean.length <= maxLen) return clean;
+      if (clean.length < 100) {
+        const padded = `${clean.replace(/\.+$/, '')}. Authorized AV Live Pakistan hardware & price PKR warranty.`;
+        if (padded.length <= maxLen) return padded;
+      }
       const sliced = clean.slice(0, maxLen - 1);
       const lastSpace = sliced.lastIndexOf(' ');
-      const trimmed = (lastSpace > 80 ? sliced.slice(0, lastSpace) : sliced).replace(/[,:;|\-–—.\s]+$/, '');
+      const trimmed = (lastSpace > 75 ? sliced.slice(0, lastSpace) : sliced).replace(/[,:;|\-–—.\s]+$/, '');
       return `${trimmed}.`;
     };
 
     const routeMeta: Record<string, { title: string; description: string; keywords?: string; noindex?: boolean; schema?: Record<string, any> }> = {
       '': {
-        title: 'Video Conference | Event Management | AV Live',
-        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV or book 3D hologram & corporate events."
+        title: 'Video Conference in Pakistan | Event Management | AV Live',
+        description: 'Video Conference in Pakistan, Corporate Event Management by AV Live: Poly X70, Cisco Room Kit, 3D Hologram Display price PKR.'
       },
       '/': {
-        title: 'Video Conference | Event Management | AV Live',
-        description: "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV or book 3D hologram & corporate events."
+        title: 'Video Conference in Pakistan | Event Management | AV Live',
+        description: 'Video Conference in Pakistan, Corporate Event Management by AV Live: Poly X70, Cisco Room Kit, 3D Hologram Display price PKR.'
       },
       '/sitemap': {
         title: 'HTML Sitemap & Enterprise AV Directory | AV Live',
@@ -1545,7 +1618,7 @@ async function startServer() {
       const title = clampSeoTitle(`${readableBrand} Distributor Pakistan | AV Hardware | AV Live`, 65);
       const description = clampSeoDescription(
         `Shop genuine ${readableBrand} video conferencing, IP phones & enterprise AV hardware in Pakistan with official warranty from AV Live.`,
-        158
+        128
       );
 
       matched = {
@@ -1615,12 +1688,14 @@ async function startServer() {
         .join('');
 
       ssrCustomBodyHtml = `
-        <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+        <main class="ssr-seo-snapshot">
           <nav aria-label="Breadcrumb"><a href="https://avlive.com.pk">Home</a> &rsaquo; <a href="https://avlive.com.pk/brands">Authorized Brands</a> &rsaquo; <span>${escapeHtmlText(readableBrand)}</span></nav>
           <article>
             <h1>${escapeHtmlText(readableBrand)} Official Hardware Distributor in Pakistan</h1>
+            <h2>${escapeHtmlText(readableBrand)} Authorized Portfolio &amp; Pakistan Price Matrix</h2>
+            <h3>${escapeHtmlText(readableBrand)} Enterprise Models (${brandDisplayProds.length} Verified SKUs)</h3>
             <p>${escapeHtmlText(readableBrand)} enterprise portfolio in Pakistan encompasses ${brandDisplayProds.length} verified models ranging from Rs. ${minBrandPrice.toLocaleString()} to Rs. ${maxBrandPrice.toLocaleString()}, backed by official serial-verified warranty and FBR GST tax invoicing. Flagship ${escapeHtmlText(readableBrand)} deployments include ${brandDisplayProds.slice(0, 3).map(p => escapeHtmlText(p.productName)).join(', ')}.</p>
-            <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+            <table border="1" cellpadding="8" cellspacing="0">
               <caption>${escapeHtmlText(readableBrand)} Models, Part Numbers, Key Highlights &amp; PKR Price Matrix</caption>
               <thead>
                 <tr><th>${escapeHtmlText(readableBrand)} Model</th><th>MPN</th><th>Engineering Specification</th><th>PKR Price</th></tr>
@@ -1629,6 +1704,7 @@ async function startServer() {
             </table>
             <section aria-label="Related Categories and Peer Brands">
               <h2>${escapeHtmlText(readableBrand)} Product Categories &amp; Peer OEM Portals</h2>
+              <h3>${escapeHtmlText(readableBrand)} Hardware Categories &amp; Peer Brands</h3>
               <ul>
                 ${catLinksHtml}
                 ${peerBrandLinksHtml}
@@ -1662,7 +1738,7 @@ async function startServer() {
         const fullSchemaDesc = gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} MPN ${gmcMeta.mpn} with 1-year Pakistan warranty and nationwide deployment.`;
         const description = clampSeoDescription(
           `${readableName} (${gmcMeta.mpn}) in Pakistan: Rs. ${effectivePrice.toLocaleString()}. ${gmcMeta.highlight}. Official ${gmcMeta.brand} warranty.`,
-          158
+          128
         );
         const specEntries = (gmcMeta.defaultSpecs || '')
           .split(';')
@@ -1768,13 +1844,15 @@ async function startServer() {
           }
         };
         ssrCustomBodyHtml = `
-          <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+          <main class="ssr-seo-snapshot">
             <nav aria-label="Breadcrumb"><a href="https://avlive.com.pk">Home</a> &rsaquo; <a href="https://avlive.com.pk/shop">Shop</a> &rsaquo; <a href="https://avlive.com.pk/category/${primaryCatSlug}">${escapeHtmlText(fallbackProd?.category || 'Video Conferencing')}</a> &rsaquo; <a href="https://avlive.com.pk/brands/${brandSlugForLink}">${escapeHtmlText(gmcMeta.brand)}</a> &rsaquo; <span>${escapeHtmlText(readableName)}</span></nav>
             <article>
               <h1>${escapeHtmlText(readableName)} (${escapeHtmlText(gmcMeta.mpn)}) — ${escapeHtmlText(gmcMeta.brand)} Pakistan</h1>
+              <h2>${escapeHtmlText(readableName)} (${escapeHtmlText(gmcMeta.mpn)}) Specifications &amp; PKR Price</h2>
+              <h3>${escapeHtmlText(gmcMeta.brand)} ${escapeHtmlText(readableName)} Architecture (${escapeHtmlText(fallbackProd?.subcategory || fallbackProd?.category || 'Pro-AV')})</h3>
               <p>${escapeHtmlText(fullSchemaDesc)}</p>
               <p>${escapeHtmlText(gmcMeta.brand)} ${escapeHtmlText(readableName)} (${escapeHtmlText(gmcMeta.mpn)}, GTIN ${escapeHtmlText(gmcMeta.gtin)}) is a ${escapeHtmlText(fallbackProd?.subcategory || fallbackProd?.category || 'Pro-AV')} solution available at Rs. ${effectivePrice.toLocaleString()} (MSRP Rs. ${regularPrice.toLocaleString()}). ${escapeHtmlText(gmcMeta.highlight)}. ${escapeHtmlText(specProse)}.</p>
-              <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+              <table border="1" cellpadding="8" cellspacing="0">
                 <caption>${escapeHtmlText(readableName)} (${escapeHtmlText(gmcMeta.mpn)}) Specifications</caption>
                 <tbody>
                   <tr><th>${escapeHtmlText(readableName)} MPN</th><td>${escapeHtmlText(gmcMeta.mpn)} / GTIN ${escapeHtmlText(gmcMeta.gtin)}</td></tr>
@@ -1786,8 +1864,13 @@ async function startServer() {
               </table>
               <section aria-label="Alternative and Compatible Hardware">
                 <h2>Related ${escapeHtmlText(fallbackProd?.category || 'AV')} Alternatives to ${escapeHtmlText(readableName)}</h2>
+                <h3>Compatible ${escapeHtmlText(gmcMeta.brand)} &amp; ${escapeHtmlText(fallbackProd?.category || 'Pro-AV')} Models</h3>
                 <ul>
                   ${relatedLinksHtml}
+                  <li><a href="https://avlive.com.pk/video-conferencing-solutions">Parent Pillar: Video Conferencing Solutions in Pakistan</a></li>
+                  <li><a href="https://avlive.com.pk/corporate-event-management">Parent Pillar: Corporate Event Management &amp; LED Stages</a></li>
+                  <li><a href="https://avlive.com.pk/voip-service-providers">Parent Pillar: VoIP &amp; Unified Communications</a></li>
+                  <li><a href="https://avlive.com.pk/room-designer">Interactive 3D Room Designer &amp; LED Calculator</a></li>
                   <li><a href="https://avlive.com.pk/category/${primaryCatSlug}">${escapeHtmlText(fallbackProd?.category || 'Video Conferencing')} Catalog</a></li>
                   <li><a href="https://avlive.com.pk/brands/${brandSlugForLink}">${escapeHtmlText(gmcMeta.brand)} Pakistan Hub</a></li>
                   <li><a href="https://avlive.com.pk/compare">Compare ${escapeHtmlText(readableName)}</a></li>
@@ -1820,7 +1903,7 @@ async function startServer() {
           .map(t => `<tr><td>${escapeHtmlText(t.tier)}</td><td>${escapeHtmlText(t.capacityOrScope)}</td><td>${escapeHtmlText(t.slaAndTurnaround)}</td><td>${escapeHtmlText(t.referenceInvestment)}</td></tr>`)
           .join('');
         const offeringsHtml = (svc.offeringsBreakdown || [])
-          .map(o => `<li><strong>${escapeHtmlText(o.title)}:</strong> ${escapeHtmlText(o.detail)}</li>`)
+          .map(o => `<h3>${escapeHtmlText(o.title)}</h3><p>${escapeHtmlText(o.detail)}</p>`)
           .join('');
         const caseStudiesHtml = (svc.caseStudies || [])
           .map(cs => `<li><strong>${escapeHtmlText(cs.hub)} — ${escapeHtmlText(cs.project)}:</strong> <em>Outcome:</em> ${escapeHtmlText(cs.outcome)}</li>`)
@@ -1835,7 +1918,7 @@ async function startServer() {
           .join('');
 
         const shortSvcTitle = clampSeoTitle(`${svc.title} in Pakistan | AV Live`, 65);
-        const shortSvcDesc = clampSeoDescription(svc.description, 158);
+        const shortSvcDesc = clampSeoDescription(svc.description, 128);
         matched = {
           title: shortSvcTitle,
           description: shortSvcDesc,
@@ -1865,14 +1948,14 @@ async function startServer() {
           }
         };
         ssrCustomBodyHtml = `
-          <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+          <main class="ssr-seo-snapshot">
             <nav aria-label="Breadcrumb"><a href="https://avlive.com.pk">Home</a> &rsaquo; <a href="https://avlive.com.pk/services">Enterprise Services</a> &rsaquo; <span>${escapeHtmlText(svc.title)}</span></nav>
             <article>
               <h1>${escapeHtmlText(svc.localizedH1 || `${svc.title} — Turnkey Enterprise Service in Pakistan`)}</h1>
               <p>${escapeHtmlText(svc.description)}</p>
-              ${offeringsHtml ? `<h2>${escapeHtmlText(svc.title)} Technical Deliverables</h2><ul>${offeringsHtml}</ul>` : ''}
+              ${offeringsHtml ? `<h2>${escapeHtmlText(svc.title)} Technical Deliverables</h2>${offeringsHtml}` : ''}
               ${pricingRowsHtml ? `
-              <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+              <table border="1" cellpadding="8" cellspacing="0">
                 <caption>${escapeHtmlText(svc.title)} — Packages, Scope, SLA &amp; PKR Investment</caption>
                 <thead>
                   <tr><th>Package Tier</th><th>Technical Scope &amp; Stack</th><th>SLA &amp; Turnaround</th><th>PKR Investment</th></tr>
@@ -1883,8 +1966,17 @@ async function startServer() {
               ${faqHtml ? `<h2>Frequently Asked Questions — ${escapeHtmlText(svc.title)}</h2><dl>${faqHtml}</dl>` : ''}
               <section aria-label="Related Enterprise Services">
                 <h2>Related Engineering &amp; Event Services</h2>
+                <h3>Explore Adjacent ${escapeHtmlText(svc.category || 'AV Live')} Capabilities</h3>
                 <ul>
                   ${peerSvcLinks}
+                  <li><a href="https://avlive.com.pk/room-designer">3D Room Designer &amp; LED Wall Calculator</a></li>
+                  <li><a href="https://avlive.com.pk/product/polycom-realpresence-group-500-pakistan">Polycom RealPresence Group 500</a></li>
+                  <li><a href="https://avlive.com.pk/product/poly-studio-x72-pakistan">Poly Studio X72 / X70</a></li>
+                  <li><a href="https://avlive.com.pk/product/cisco-room-kit-plus-pakistan">Cisco Room Kit Plus</a></li>
+                  <li><a href="https://avlive.com.pk/product/logitech-rally-bar-pakistan">Logitech Rally Bar</a></li>
+                  <li><a href="https://avlive.com.pk/product/horion-k6a-bundle-special-offer">Horion K6a Interactive Flat Panel</a></li>
+                  <li><a href="https://avlive.com.pk/product/3cx-pro-8-sc-pakistan">3CX Phone System PRO 8</a></li>
+                  <li><a href="https://avlive.com.pk/product/2n-ip-vario-intercom-pakistan">2N IP Vario SIP Intercom</a></li>
                   <li><a href="https://avlive.com.pk/event-quote">Instant Event &amp; AV Rental Quote Calculator</a></li>
                   <li><a href="https://avlive.com.pk/programs/quote">Request a Custom B2B Tender BOQ</a></li>
                 </ul>
@@ -2022,7 +2114,7 @@ async function startServer() {
       const title = clampSeoTitle(`${readableCat} in Pakistan | Enterprise AV | AV Live`, 65);
       const description = clampSeoDescription(
         `Explore genuine ${readableCat} in Pakistan: Poly, Cisco, Logitech & Yealink hardware with PKR pricing and official local warranty.`,
-        158
+        128
       );
 
       matched = {
@@ -2078,13 +2170,15 @@ async function startServer() {
         .join('');
 
       ssrCustomBodyHtml = `
-        <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+        <main class="ssr-seo-snapshot">
           <nav aria-label="Breadcrumb"><a href="https://avlive.com.pk">Home</a> &rsaquo; <a href="https://avlive.com.pk/shop">Shop</a> &rsaquo; <span>${escapeHtmlText(readableCat)}</span></nav>
           <article>
             <h1>${escapeHtmlText(readableCat)} Hardware &amp; Integration in Pakistan</h1>
+            <h2>${escapeHtmlText(readableCat)} Architecture &amp; Pakistan PKR Price Matrix</h2>
+            <h3>${escapeHtmlText(readableCat)} Acoustic &amp; Network Procurement Standard (${escapeHtmlText(catBrands.slice(0, 3).join(', '))})</h3>
             <p>${escapeHtmlText(uniqueGuide.overview)} Verified PKR pricing across ${displayCatProducts.length} in-stock ${escapeHtmlText(readableCat)} models spans from Rs. ${minCatPrice.toLocaleString()} to Rs. ${maxCatPrice.toLocaleString()} across authorized brands (${escapeHtmlText(catBrands.join(', '))}).</p>
             <p><strong>Technical Procurement Standard:</strong> ${escapeHtmlText(uniqueGuide.architectureNote)}</p>
-            <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+            <table border="1" cellpadding="8" cellspacing="0">
               <caption>${escapeHtmlText(readableCat)} Models, MPNs, Key Specs &amp; Reference Prices in Pakistan (PKR)</caption>
               <thead>
                 <tr><th>${escapeHtmlText(readableCat)} Model</th><th>OEM Brand</th><th>MPN / SKU</th><th>Key Technical Highlight</th><th>PKR Price</th></tr>
@@ -2093,8 +2187,12 @@ async function startServer() {
             </table>
             <section aria-label="Related Categories and Guides">
               <h2>Related ${escapeHtmlText(readableCat)} Resources &amp; Adjacent Categories</h2>
+              <h3>Adjacent ${escapeHtmlText(readableCat)} Hardware &amp; Buyer's Guides</h3>
               <ul>
                 ${relatedCatLinksHtml}
+                <li><a href="https://avlive.com.pk/video-conferencing-solutions">Parent Pillar: Video Conferencing Solutions</a></li>
+                <li><a href="https://avlive.com.pk/corporate-event-management">Parent Pillar: Corporate Event Management</a></li>
+                <li><a href="https://avlive.com.pk/room-designer">Interactive 3D Room Designer &amp; LED Calculator</a></li>
                 <li><a href="https://avlive.com.pk${uniqueGuide.guideUrl}">${escapeHtmlText(readableCat)} Engineering &amp; Buyer's Guide</a></li>
                 <li><a href="https://avlive.com.pk/compare">Compare ${escapeHtmlText(readableCat)} Models Side-by-Side</a></li>
               </ul>
@@ -2150,7 +2248,7 @@ async function startServer() {
         }
         matched = {
           title: clampSeoTitle(`${blogPost.title} | AV Live`, 65),
-          description: clampSeoDescription(blogPost.answerFirstSummary || blogPost.excerpt, 158),
+          description: clampSeoDescription(blogPost.answerFirstSummary || blogPost.excerpt, 128),
           schema: {
             '@context': 'https://schema.org',
             '@graph': graphItems
@@ -2158,7 +2256,7 @@ async function startServer() {
         };
 
         const tableHtml = blogPost.comparisonTable
-          ? `<table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+          ? `<table border="1" cellpadding="8" cellspacing="0">
               <caption>${escapeHtmlText(blogPost.comparisonTable.caption)}</caption>
               <thead><tr>${blogPost.comparisonTable.headers.map(h => `<th>${escapeHtmlText(h)}</th>`).join('')}</tr></thead>
               <tbody>${blogPost.comparisonTable.rows.map(r => `<tr>${r.map(c => `<td>${escapeHtmlText(c)}</td>`).join('')}</tr>`).join('')}</tbody>
@@ -2170,18 +2268,26 @@ async function startServer() {
         const relatedBlogLinks = relatedBlogs
           .map(rb => `<li><a href="https://avlive.com.pk/blog/${rb.slug}">${escapeHtmlText(rb.title)}</a></li>`)
           .join('');
+        const postRelatedClusterLinks = (blogPost.relatedLinks || [])
+          .map(rl => `<li><a href="https://avlive.com.pk${rl.path}">${escapeHtmlText(rl.label)}</a></li>`)
+          .join('');
         ssrCustomBodyHtml = `
-          <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+          <main class="ssr-seo-snapshot">
             <nav aria-label="Breadcrumb"><a href="https://avlive.com.pk">Home</a> &rsaquo; <a href="https://avlive.com.pk/blog">Engineering Blog</a> &rsaquo; <span>${escapeHtmlText(blogPost.title)}</span></nav>
             <article>
               <h1>${escapeHtmlText(blogPost.title)}</h1>
+              <h2>${escapeHtmlText(blogPost.comparisonTable?.caption || `${blogPost.title} — Technical Analysis`)}</h2>
+              <h3>Executive Summary &amp; Pakistan B2B BoM Benchmarks</h3>
               <p><strong>Direct Answer (TL;DR):</strong> ${escapeHtmlText(blogPost.answerFirstSummary || blogPost.excerpt)}</p>
               ${tableHtml}
               ${paragraphsHtml}
               <section aria-label="Related Engineering Guides">
-                <h2>Related Pakistan Pro-AV &amp; UC Guides</h2>
+                <h2>Related Pakistan Pro-AV Hardware &amp; UC Guides</h2>
+                <h3>Featured Hardware Clusters &amp; Further Reading on ${escapeHtmlText(blogPost.category || 'Enterprise AV')}</h3>
                 <ul>
+                  ${postRelatedClusterLinks}
                   ${relatedBlogLinks}
+                  <li><a href="https://avlive.com.pk/room-designer">Interactive 3D Room Designer &amp; LED Calculator</a></li>
                   <li><a href="https://avlive.com.pk/guides">All Enterprise AV Buyer's Guides</a></li>
                   <li><a href="https://avlive.com.pk/shop">Browse Verified Hardware Catalog</a></li>
                 </ul>
@@ -2206,11 +2312,13 @@ async function startServer() {
             ['Line-Array Concert Audio & Digital Mixing Console', 'Dual line-array hangs, subwoofers, Shure ULX-D wireless mics, Midas/Allen & Heath mixer', 'Galas & Concerts (500–3,000 pax)', 'Rs. 220,000 – Rs. 780,000 / Event']
           ],
           links: [
+            { href: '/room-designer', label: '3D Room Designer & LED Wall Calculator' },
             { href: '/event-quote', label: 'Instant Event & LED Rental Quote Calculator' },
             { href: '/av-equipment-rental', label: 'SMD LED Screen & PA System Rental Lahore' },
             { href: '/live-streaming-services', label: 'Multi-Camera Live Streaming & Webcast Services' },
             { href: '/3d-hologram', label: '3D Hologram Stage Displays Pakistan' },
-            { href: '/projection-mapping', label: '3D Architectural Projection Mapping' }
+            { href: '/projection-mapping', label: '3D Architectural Projection Mapping' },
+            { href: '/product/horion-k6a-bundle-special-offer', label: 'Horion K6a Interactive Display Bundle' }
           ]
         },
         '/services': {
@@ -2224,7 +2332,12 @@ async function startServer() {
             'Cisco, HP Poly, Logitech, Yealink, Bosch',
             '15-Min Proposal & On-Site Standby SLA'
           ]),
-          links: FALLBACK_SERVICES_CATALOG.map(s => ({ href: `/services/${s.slug}`, label: s.title }))
+          links: [
+            ...FALLBACK_SERVICES_CATALOG.map(s => ({ href: `/services/${s.slug}`, label: s.title })),
+            { href: '/room-designer', label: '3D Room Designer & LED Calculator' },
+            { href: '/product/polycom-realpresence-group-500-pakistan', label: 'Polycom RealPresence Group 500' },
+            { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus' }
+          ]
         },
         '/shop': {
           lead: 'The AV Live Enterprise Hardware Store stocks 53 serial-verified Pro-AV, Video Conferencing, SIP IP Telephony, Commercial Laser Projection, and NDAA Surveillance SKUs in Pakistan with immediate warehouse dispatch.',
@@ -2242,6 +2355,7 @@ async function startServer() {
             { href: '/category/boardroom-codecs', label: 'Shop Boardroom Codecs' },
             { href: '/category/ip-phones', label: 'Shop Enterprise IP Phones' },
             { href: '/category/projectors', label: 'Shop Commercial Projectors' },
+            { href: '/room-designer', label: '3D Room Designer & LED Calculator' },
             { href: '/brands', label: 'Browse All 25 Authorized Brands' },
             { href: '/compare', label: 'Side-by-Side Hardware Comparator' }
           ]
@@ -2265,7 +2379,8 @@ async function startServer() {
             { href: '/brands/cisco', label: 'Cisco Collaboration Pakistan' },
             { href: '/brands/yealink', label: 'Yealink Pakistan' },
             { href: '/brands/jabra', label: 'Jabra Audio & Video Pakistan' },
-            { href: '/brands/bosch', label: 'Bosch Conference & Public Address' }
+            { href: '/brands/bosch', label: 'Bosch Conference & Public Address' },
+            { href: '/room-designer', label: '3D Room Designer & LED Calculator' }
           ]
         },
         '/video-conferencing': {
@@ -2282,6 +2397,7 @@ async function startServer() {
             { href: '/category/video-conferencing', label: 'Browse All Video Conferencing Hardware' },
             { href: '/product/polycom-realpresence-group-500-pakistan', label: 'Polycom RealPresence Group 500' },
             { href: '/product/poly-studio-x72-pakistan', label: 'HP Poly Studio X72 Large Room Bar' },
+            { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus' },
             { href: '/product/logitech-rally-bar-pakistan', label: 'Logitech Rally Bar 4K' },
             { href: '/room-designer', label: 'Interactive 3D Conference Room Planner' }
           ]
@@ -2297,6 +2413,11 @@ async function startServer() {
             ['Townhall & Auditorium Broadcast', 'Dual 20x PTZ cameras, DSP matrix mixer, wireless gooseneck mics, laser projection', 'Custom CAD & Acoustic Survey', 'Rs. 2,800,000 – Rs. 6,500,000+']
           ],
           links: [
+            { href: '/room-designer', label: '3D Room Designer & LED Calculator' },
+            { href: '/product/polycom-realpresence-group-500-pakistan', label: 'Polycom RealPresence Group 500' },
+            { href: '/product/poly-studio-x72-pakistan', label: 'Poly Studio X72 / X70' },
+            { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus' },
+            { href: '/product/logitech-rally-bar-pakistan', label: 'Logitech Rally Bar' },
             { href: '/services/boardroom-integration', label: 'Boardroom AV Integration Service Details' },
             { href: '/conference-room-solutions', label: 'Acoustic & Conference Room Solutions' },
             { href: '/zoom-rooms', label: 'Certified Zoom Rooms Integration' },
@@ -2315,6 +2436,10 @@ async function startServer() {
             ['International Expo & Convention', 'Custom 3D fabricated pavilion, interactive touch kiosks, LED fascia', 'Multi-zone wireless audio, lead-capture AI agents', 'Rs. 1,200,000 – Rs. 4,500,000+']
           ],
           links: [
+            { href: '/room-designer', label: '3D Room Designer & LED Wall Calculator' },
+            { href: '/product/horion-k6a-bundle-special-offer', label: 'Horion K6a Interactive Flat Panel Bundle' },
+            { href: '/product/benq-tk705i-pakistan', label: 'BenQ TK705i 4K Projector' },
+            { href: '/product/bosch-paviro-pva-4cr12-pakistan', label: 'Bosch PAVIRO Public Address Controller' },
             { href: '/services/corporate-events', label: 'Corporate Event Management Service Blueprint' },
             { href: '/events-services', label: 'AV Rental Rate Card & Configurator' },
             { href: '/live-streaming-services', label: 'Corporate Webcast & Live Streaming' },
@@ -2326,6 +2451,7 @@ async function startServer() {
 
       const customStatic = staticPageCustomContent[cleanPath];
       if (customStatic) {
+        const cleanStaticH1 = matched.title.replace(/\s*\|\s*AV Live.*$/i, '');
         const rowsHtml = customStatic.rows
           .map(r => `<tr>${r.map(c => `<td>${escapeHtmlText(c)}</td>`).join('')}</tr>`)
           .join('');
@@ -2333,19 +2459,22 @@ async function startServer() {
           .map(l => `<li><a href="https://avlive.com.pk${l.href}">${escapeHtmlText(l.label)}</a></li>`)
           .join('');
         ssrCustomBodyHtml = `
-          <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
-            <nav aria-label="Breadcrumb"><a href="https://avlive.com.pk">Home</a> &rsaquo; <span>${escapeHtmlText(matched.title.replace(/\s*\|\s*AV Live.*$/i, ''))}</span></nav>
+          <main class="ssr-seo-snapshot">
+            <nav aria-label="Breadcrumb"><a href="https://avlive.com.pk">Home</a> &rsaquo; <span>${escapeHtmlText(cleanStaticH1)}</span></nav>
             <article>
-              <h1>${escapeHtmlText(matched.title.replace(/\s*\|\s*AV Live.*$/i, ''))}</h1>
+              <h1>${escapeHtmlText(cleanStaticH1)}</h1>
+              <h2>${escapeHtmlText(customStatic.tableCaption)}</h2>
+              <h3>${escapeHtmlText(cleanStaticH1)} — Scope &amp; Pakistan SLA Standards</h3>
               <p>${escapeHtmlText(customStatic.lead)}</p>
               <p>${escapeHtmlText(customStatic.detail)}</p>
-              <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+              <table border="1" cellpadding="8" cellspacing="0">
                 <caption>${escapeHtmlText(customStatic.tableCaption)}</caption>
                 <thead><tr>${customStatic.headers.map(h => `<th>${escapeHtmlText(h)}</th>`).join('')}</tr></thead>
                 <tbody>${rowsHtml}</tbody>
               </table>
               <section aria-label="Contextual Navigation">
-                <h2>Explore Related Solutions</h2>
+                <h2>Related ${escapeHtmlText(cleanStaticH1)} Portals</h2>
+                <h3>Direct Access to ${escapeHtmlText(cleanStaticH1)} Tools &amp; Catalogs</h3>
                 <ul>${linksHtml}</ul>
               </section>
             </article>
@@ -2368,13 +2497,15 @@ async function startServer() {
         }).join('');
 
         ssrCustomBodyHtml = `
-          <main class="ssr-seo-snapshot" style="max-width:1200px;margin:0 auto;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1A2B4C;">
+          <main class="ssr-seo-snapshot">
             <nav aria-label="Breadcrumb"><a href="https://avlive.com.pk">Home</a> &rsaquo; <span>${escapeHtmlText(cleanHeading)}</span></nav>
             <article>
               <h1>${escapeHtmlText(cleanHeading)}</h1>
+              <h2>${escapeHtmlText(cleanHeading)} — Reference Hardware &amp; Service Matrix</h2>
+              <h3>${escapeHtmlText(cleanHeading)} Deployment Scope (${escapeHtmlText(cleanPath)})</h3>
               <p><strong>Executive Overview (${escapeHtmlText(cleanPath)}):</strong> ${escapeHtmlText(matched.description)}</p>
               <p>AV Live Communications provides engineering consultation, PPRA/FBR tax-compliant invoicing, and 15-minute SLA technical support for <em>${escapeHtmlText(cleanHeading)}</em> across Lahore (Johar Town HQ), Karachi, and Islamabad. Featured hardware for this program includes ${pickedProds.map(p => escapeHtmlText(p.productName)).join(', ')}.</p>
-              <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+              <table border="1" cellpadding="8" cellspacing="0">
                 <caption>${escapeHtmlText(cleanHeading)} — Reference Hardware &amp; Service Matrix</caption>
                 <thead><tr><th>Recommended Model / Service</th><th>MPN / Classification</th><th>Reference Price / SLA</th></tr></thead>
                 <tbody>
@@ -2384,8 +2515,12 @@ async function startServer() {
               </table>
               <section aria-label="Related Enterprise Links">
                 <h2>Related Hardware &amp; Engineering Guides for ${escapeHtmlText(cleanHeading)}</h2>
+                <h3>Recommended Models (${escapeHtmlText(pickedProds[0]?.brand || 'Poly')}, ${escapeHtmlText(pickedProds[1]?.brand || 'Logitech')}) &amp; Guides</h3>
                 <ul>
                   ${prodLinksHtml}
+                  <li><a href="https://avlive.com.pk/room-designer">3D Room Designer &amp; LED Calculator</a></li>
+                  <li><a href="https://avlive.com.pk/video-conferencing-solutions">Video Conferencing Solutions Pillar</a></li>
+                  <li><a href="https://avlive.com.pk/corporate-event-management">Corporate Event Management Pillar</a></li>
                   <li><a href="https://avlive.com.pk/services/${pickedSvc.slug}">${escapeHtmlText(pickedSvc.title)}</a></li>
                   <li><a href="https://avlive.com.pk/blog/${pickedBlog.slug}">${escapeHtmlText(pickedBlog.title)}</a></li>
                 </ul>
@@ -2407,7 +2542,7 @@ async function startServer() {
 
     if (matched) {
       const clampedTitle = clampSeoTitle(matched.title, 65);
-      const clampedDesc = clampSeoDescription(matched.description, 158);
+      const clampedDesc = clampSeoDescription(matched.description, 128);
       const safeTitleText = escapeHtmlText(clampedTitle);
       const safeTitleAttr = escapeHtmlAttr(clampedTitle);
       const safeDescAttr = escapeHtmlAttr(clampedDesc);
@@ -2452,7 +2587,24 @@ async function startServer() {
             name: 'AV Live Communications',
             url: 'https://avlive.com.pk',
             logo: 'https://avlive.com.pk/logo.png',
-            telephone: '+92-321-4256263'
+            image: 'https://avlive.com.pk/og-image.jpg',
+            telephone: '+92-321-4256263',
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: '454 G3, Block G3 Phase 2 Johar Town',
+              addressLocality: 'Lahore',
+              addressRegion: 'Punjab',
+              postalCode: '54782',
+              addressCountry: 'PK'
+            },
+            sameAs: [
+              'https://www.facebook.com/avlivepk',
+              'https://www.instagram.com/avlivepk',
+              'https://www.linkedin.com/company/avlivepk',
+              'https://www.youtube.com/@avlivepk',
+              'https://x.com/avlivepk',
+              'https://twitter.com/avlivepk'
+            ]
           };
           const rawRouteSchema = matched.schema || {
             '@context': 'https://schema.org',
@@ -2545,6 +2697,39 @@ async function startServer() {
     '/brands/polycom': '/brands/poly',
     '/brands/hp-poly': '/brands/poly',
     '/gmc-products.xml': '/feed/google-merchant.tsv',
+    // Internal Link Map — Core Business & Service Alias Redirects
+    '/hybrid-event-production': '/services/hybrid-events',
+    '/boardroom-av-integration': '/services/boardroom-integration',
+    '/expo-trade-show-organizing': '/services/expo-organizing',
+    '/e-sports-arena-production': '/esports',
+    '/3d-hologram-display-stages': '/3d-hologram',
+    '/av-systems-design-engineering': '/services/boardroom-integration',
+    // Internal Link Map — Brand & Platform Solution Alias Redirects
+    '/solutions/zoom-microsoft-teams-rooms': '/zoom-rooms',
+    // Internal Link Map — Product Category Keyword Redirects
+    '/products/video-conference-systems-codecs': '/category/boardroom-codecs',
+    '/products/all-in-one-video-bars': '/category/video-conferencing',
+    '/products/interactive-displays-touch-panels': '/category/touch-panels',
+    '/products/ip-phones-voip': '/category/voip-phone-systems',
+    '/products/audio-microphones': '/category/speakerphones',
+    '/products/wireless-presentation-byod': '/category/touch-panels',
+    '/products/projectors': '/category/projectors',
+    '/products/ip-cameras-ptz': '/category/ptz-cameras',
+    '/products/intercom-paging-access': '/category/intercom-paging-access',
+    '/products/networking-poe': '/category/voip-phone-systems',
+    // Internal Link Map — Location & Availability Keyword Redirects
+    '/contact/lahore': '/lahore',
+    '/contact/karachi': '/karachi',
+    '/contact/islamabad': '/islamabad',
+    '/support': '/contact',
+    '/av-integration-services-lahore': '/lahore',
+    // Internal Link Map — Value Proposition & SLA Keyword Redirects
+    '/services/turnkey-installation': '/services/boardroom-integration',
+    '/request-quote': '/programs/quote',
+    '/about/guarantee': '/about',
+    '/services/on-site-standby-engineers': '/services/corporate-events',
+    '/services/annual-maintenance-contracts': '/services/boardroom-integration',
+    '/about/compliance': '/programs/government-education-pricing',
   };
 
   for (const [fromPath, toPath] of Object.entries(legacyDirectRedirects)) {
@@ -2574,16 +2759,32 @@ async function startServer() {
   });
 
   // Redirect legacy /products/:slug -> /category/:slug or /product/:canonicalSlug
+  const productsCategoryAliasMap: Record<string, string> = {
+    'video-conference-systems-codecs': 'boardroom-codecs',
+    'all-in-one-video-bars': 'video-conferencing',
+    'interactive-displays-touch-panels': 'touch-panels',
+    'ip-phones-voip': 'voip-phone-systems',
+    'audio-microphones': 'speakerphones',
+    'wireless-presentation-byod': 'touch-panels',
+    'projectors': 'projectors',
+    'ip-cameras-ptz': 'ptz-cameras',
+    'intercom-paging-access': 'intercom-paging-access',
+    'networking-poe': 'voip-phone-systems',
+  };
+
   app.get('/products/:legacySlug', (req, res) => {
-    const slug = req.params.legacySlug;
+    const slug = req.params.legacySlug.toLowerCase();
     if (slug === 'compare') {
       return res.redirect(301, '/compare');
     }
-    const resolvedProductSlug = resolveCanonicalProductSlugByIdentifier(slug);
+    if (productsCategoryAliasMap[slug]) {
+      return res.redirect(301, `/category/${productsCategoryAliasMap[slug]}`);
+    }
+    const resolvedProductSlug = resolveCanonicalProductSlugByIdentifier(req.params.legacySlug);
     if (resolvedProductSlug) {
       return res.redirect(301, `/product/${resolvedProductSlug}`);
     }
-    return res.redirect(301, `/category/${slug.toLowerCase()}`);
+    return res.redirect(301, `/category/${slug}`);
   });
 
   // Redirect raw Firestore IDs, MPNs (e.g., /product/9137161U), or legacy slugs to canonical product SEO slugs

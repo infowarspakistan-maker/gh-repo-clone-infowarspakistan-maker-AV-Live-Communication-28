@@ -6,43 +6,45 @@ import { subscribeToProducts, subscribeToCategories } from './lib/firebase/fires
 import { getCanonicalProductSlug } from './lib/gmc-feed';
 import { getCartCount } from './lib/cart';
 
-// Synchronous public SEO routes for instant 0ms navigation & zero-spinner Googlebot WRS hydration
+// Core high-traffic SEO & catalog routes kept synchronous for 0ms render
 import { Home } from './pages/Home';
 import { Shop } from './pages/Shop';
-import { Solutions } from './pages/Solutions';
-import { Services } from './pages/Services';
-import { Esports } from './pages/Esports';
-import { RoomDesigner } from './pages/RoomDesigner';
 import { ProductDetails } from './pages/ProductDetails';
 import { Category } from './pages/Category';
-import { Contact } from './pages/Contact';
-import { Blog } from './pages/Blog';
-import { BuyersGuides } from './pages/BuyersGuides';
-import { About } from './pages/About';
-import { Reviews } from './pages/Reviews';
-import { Compare } from './pages/Compare';
-import { FAQs } from './pages/FAQs';
-import { Payment } from './pages/Payment';
-import { Shipping } from './pages/Shipping';
-import { Returns } from './pages/Returns';
-import { RMA } from './pages/RMA';
-import { BlindDropShipping } from './pages/BlindDropShipping';
-import { GovEdPricing } from './pages/GovEdPricing';
-import { FulfillmentServices } from './pages/FulfillmentServices';
-import { Promotions } from './pages/Promotions';
-import { Provisioning } from './pages/Provisioning';
-import { Quote } from './pages/Quote';
-import { Reseller } from './pages/Reseller';
-import { VoipService } from './pages/VoipService';
-import { KeywordLandingPage } from './pages/KeywordLandingPage';
-import { EventQuote } from './pages/EventQuote';
 import { ServicesLanding } from './pages/services/ServicesLanding';
 import { ServiceDetail } from './pages/services/ServiceDetail';
-import { PrivacyPolicy } from './pages/PrivacyPolicy';
-import { TermsOfService } from './pages/TermsOfService';
-import { Cart } from './pages/Cart';
-import { Checkout } from './pages/Checkout';
-import { HtmlSitemap } from './pages/HtmlSitemap';
+import { KeywordLandingPage } from './pages/KeywordLandingPage';
+import { Blog } from './pages/Blog';
+
+// Secondary & utility public routes code-split to minimize Mobile TBT & initial JS parse time
+const Solutions = React.lazy(() => import('./pages/Solutions').then(m => ({ default: m.Solutions })));
+const Services = React.lazy(() => import('./pages/Services').then(m => ({ default: m.Services })));
+const Esports = React.lazy(() => import('./pages/Esports').then(m => ({ default: m.Esports })));
+const RoomDesigner = React.lazy(() => import('./pages/RoomDesigner').then(m => ({ default: m.RoomDesigner })));
+const Contact = React.lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact })));
+const BuyersGuides = React.lazy(() => import('./pages/BuyersGuides').then(m => ({ default: m.BuyersGuides })));
+const About = React.lazy(() => import('./pages/About').then(m => ({ default: m.About })));
+const Reviews = React.lazy(() => import('./pages/Reviews').then(m => ({ default: m.Reviews })));
+const Compare = React.lazy(() => import('./pages/Compare').then(m => ({ default: m.Compare })));
+const FAQs = React.lazy(() => import('./pages/FAQs').then(m => ({ default: m.FAQs })));
+const Payment = React.lazy(() => import('./pages/Payment').then(m => ({ default: m.Payment })));
+const Shipping = React.lazy(() => import('./pages/Shipping').then(m => ({ default: m.Shipping })));
+const Returns = React.lazy(() => import('./pages/Returns').then(m => ({ default: m.Returns })));
+const RMA = React.lazy(() => import('./pages/RMA').then(m => ({ default: m.RMA })));
+const BlindDropShipping = React.lazy(() => import('./pages/BlindDropShipping').then(m => ({ default: m.BlindDropShipping })));
+const GovEdPricing = React.lazy(() => import('./pages/GovEdPricing').then(m => ({ default: m.GovEdPricing })));
+const FulfillmentServices = React.lazy(() => import('./pages/FulfillmentServices').then(m => ({ default: m.FulfillmentServices })));
+const Promotions = React.lazy(() => import('./pages/Promotions').then(m => ({ default: m.Promotions })));
+const Provisioning = React.lazy(() => import('./pages/Provisioning').then(m => ({ default: m.Provisioning })));
+const Quote = React.lazy(() => import('./pages/Quote').then(m => ({ default: m.Quote })));
+const Reseller = React.lazy(() => import('./pages/Reseller').then(m => ({ default: m.Reseller })));
+const VoipService = React.lazy(() => import('./pages/VoipService').then(m => ({ default: m.VoipService })));
+const EventQuote = React.lazy(() => import('./pages/EventQuote').then(m => ({ default: m.EventQuote })));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
+const TermsOfService = React.lazy(() => import('./pages/TermsOfService').then(m => ({ default: m.TermsOfService })));
+const Cart = React.lazy(() => import('./pages/Cart').then(m => ({ default: m.Cart })));
+const Checkout = React.lazy(() => import('./pages/Checkout').then(m => ({ default: m.Checkout })));
+const HtmlSitemap = React.lazy(() => import('./pages/HtmlSitemap').then(m => ({ default: m.HtmlSitemap })));
 
 // Lazy-loaded admin panels & setup wizard
 const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout').then(m => ({ default: m.AdminLayout || m.default })));
@@ -175,18 +177,23 @@ function Navbar() {
   };
 
   useEffect(() => {
-    // Fetch active products and parent categories
-    const unsubProducts = subscribeToProducts((data) => {
-      setProducts(data);
-    }, { isActive: true });
+    let unsubProducts: (() => void) | undefined;
+    let unsubCategories: (() => void) | undefined;
 
-    const unsubCategories = subscribeToCategories((cats) => {
-      const productCats = cats.filter(c => c.isActive && ((c as any).type === 'product' || !('type' in c)));
-      if (productCats.length > 0) {
-        setNavCategories(productCats);
-        setCategories(productCats.filter(c => !c.parentId));
-      }
-    });
+    // Defer non-critical Firestore listeners off the main thread for instant INP responsiveness
+    const timer = setTimeout(() => {
+      unsubProducts = subscribeToProducts((data) => {
+        setProducts(data);
+      }, { isActive: true });
+
+      unsubCategories = subscribeToCategories((cats) => {
+        const productCats = cats.filter(c => c.isActive && ((c as any).type === 'product' || !('type' in c)));
+        if (productCats.length > 0) {
+          setNavCategories(productCats);
+          setCategories(productCats.filter(c => !c.parentId));
+        }
+      });
+    }, 2200);
 
     // Handle click outside suggestions and user menu
     const handleClickOutside = (e: MouseEvent) => {
@@ -203,8 +210,9 @@ function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      unsubProducts();
-      unsubCategories();
+      clearTimeout(timer);
+      if (unsubProducts) unsubProducts();
+      if (unsubCategories) unsubCategories();
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
@@ -256,14 +264,21 @@ function Navbar() {
     <>
       <div className="bg-[#f8f9fa] text-gray-600 px-4 md:px-8 text-[13px] flex justify-between items-center border-b border-gray-200 font-medium h-10 shrink-0">
         <div className="flex items-center gap-6">
-          <a href="tel:+923214256263" className="flex items-center gap-1.5 hover:text-[#00B4D8] transition-colors"><Phone size={14} className="text-[#00B4D8]" /> 0321 425 6263</a>
+          <a href="tel:+923214256263" className="flex items-center gap-1.5 hover:text-[#00B4D8] transition-colors py-1"><Phone size={14} className="text-[#00B4D8]" /> 0321 425 6263</a>
           <span className="hidden sm:flex items-center gap-1.5"><MapPin size={14} className="text-[#00B4D8]" /> Johar Town Block N, Lahore</span>
+          <div className="hidden xl:flex items-center gap-3 text-xs text-slate-600 border-l border-gray-200 pl-4">
+            <a href="https://www.youtube.com/@avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">YouTube</a>
+            <a href="https://x.com/avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">X</a>
+            <a href="https://www.linkedin.com/company/avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">LinkedIn</a>
+            <a href="https://www.instagram.com/avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">Instagram</a>
+            <a href="https://www.facebook.com/avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">Facebook</a>
+          </div>
         </div>
         <div className="flex items-center gap-5">
-          <Link to="/sitemap" className="hidden md:inline hover:text-[#00B4D8] transition-colors font-semibold text-[#1A2B4C]">Site Directory</Link>
-          <Link to="/contact" className="hover:text-[#00B4D8] transition-colors">Contact Us</Link>
-          <Link to="/blog" className="hover:text-[#00B4D8] transition-colors">Blog</Link>
-          <Link to="/guides" className="hidden sm:inline hover:text-[#00B4D8] transition-colors">Buyer's Guides</Link>
+          <Link to="/sitemap" className="hidden md:inline hover:text-[#00B4D8] transition-colors font-semibold text-[#1A2B4C] py-1">Site Directory</Link>
+          <Link to="/contact" className="hover:text-[#00B4D8] transition-colors py-1">Contact Us</Link>
+          <Link to="/blog" className="hover:text-[#00B4D8] transition-colors py-1">Blog</Link>
+          <Link to="/guides" className="hidden sm:inline hover:text-[#00B4D8] transition-colors py-1">Buyer's Guides</Link>
           {isAuthenticated ? (
             <div className="relative" ref={userMenuRef}>
               <button
@@ -418,10 +433,10 @@ function Navbar() {
                 />
                 <button 
                   type="submit" 
-                  aria-label="Search" 
-                  className="bg-[#1A2B4C] hover:bg-[#00B4D8] text-white rounded-full flex items-center justify-center transition-all duration-200 shrink-0 shadow-sm w-8 h-8 cursor-pointer"
+                  aria-label="Search hardware catalog" 
+                  className="bg-[#1A2B4C] hover:bg-[#00B4D8] text-white rounded-full flex items-center justify-center transition-all duration-200 shrink-0 shadow-sm w-9 h-9 cursor-pointer"
                 >
-                  <Search size={15} />
+                  <Search size={16} />
                 </button>
               </form>
 
@@ -430,7 +445,7 @@ function Navbar() {
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden divide-y divide-gray-50">
                   {searchSuggestions.length > 0 ? (
                     <div>
-                      <div className="px-4 py-2 bg-gray-50/60 text-[10px] font-black uppercase tracking-widest text-[#00B4D8] flex justify-between items-center">
+                      <div className="px-4 py-2 bg-gray-50/60 text-xs font-black uppercase tracking-widest text-[#00B4D8] flex justify-between items-center">
                         <span>Matching Hardware</span>
                         <span>{searchSuggestions.length} items found</span>
                       </div>
@@ -453,8 +468,8 @@ function Navbar() {
                               <div className="font-bold text-sm text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors truncate">
                                 {product.productName}
                               </div>
-                              <div className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mt-0.5">
-                                {product.brand} • <span className="text-gray-300">SKU:</span> {product.sku}
+                              <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mt-0.5">
+                                {product.brand} • <span className="text-gray-400">SKU:</span> {product.sku}
                               </div>
                             </div>
                             <div className="shrink-0 text-right">
@@ -462,9 +477,9 @@ function Navbar() {
                                 {product.salePrice ? `Rs. ${product.salePrice.toLocaleString()}` : 'Contact for Price'}
                               </div>
                               {product.stockQuantity > 0 ? (
-                                <span className="inline-block text-[9px] font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full mt-1">In Stock</span>
+                                <span className="inline-block text-xs font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full mt-1">In Stock</span>
                               ) : (
-                                <span className="inline-block text-[9px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full mt-1">Special Order</span>
+                                <span className="inline-block text-xs font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full mt-1">Special Order</span>
                               )}
                             </div>
                           </Link>
@@ -483,7 +498,7 @@ function Navbar() {
                         <Search size={20} />
                       </div>
                       <div className="text-sm font-bold text-[#1A2B4C]">No Hardware Found</div>
-                      <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">We couldn't find matches for "{searchQuery}". Check spelling or try a different category.</p>
+                      <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto">We couldn't find matches for "{searchQuery}". Check spelling or try a different category.</p>
                     </div>
                   )}
                 </div>
@@ -492,17 +507,17 @@ function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <Link to="/cart" onClick={closeAllMenus} aria-label={`Shopping cart, containing ${itemCount} items`} className="relative p-2 text-[#1A2B4C] hover:text-[#00B4D8] transition-colors group">
+            <Link to="/cart" onClick={closeAllMenus} aria-label={`Shopping cart, containing ${itemCount} items`} className="relative p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#1A2B4C] hover:text-[#00B4D8] transition-colors group">
               <ShoppingCart size={24} className="group-hover:scale-110 transition-transform" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#F26522] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">{itemCount}</span>
+                <span className="absolute -top-1 -right-1 bg-[#F26522] text-white text-xs font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">{itemCount}</span>
               )}
             </Link>
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle mobile menu"
-              className="lg:hidden p-2 text-[#1A2B4C] hover:text-[#00B4D8] transition-colors cursor-pointer"
+              className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#1A2B4C] hover:text-[#00B4D8] transition-colors cursor-pointer"
             >
               {isOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
@@ -540,7 +555,7 @@ function Navbar() {
               </div>
             </div>
             
-            {/* PRODUCTS */}
+            {/* PRODUCTS (4-Ecosystem Hardware Silo Mega-Menu — 3-Click Rule) */}
             <div
               className="h-12 flex items-center relative"
               onPointerEnter={(e) => { if (e.pointerType === 'mouse') setActiveDropdown('products'); }}
@@ -553,40 +568,87 @@ function Navbar() {
               >
                 PRODUCTS <ChevronDown size={12} />
               </Link>
-              <div className={`absolute top-12 left-0 w-72 bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl py-2 transition-opacity duration-150 ${activeDropdown === 'products' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
-                {categories.map(parent => {
-                  const subCats = navCategories.filter(c => c.parentId === parent.id);
-                  return (
-                    <div key={parent.id} className="relative group/sub">
-                      <Link 
-                        to={`/category/${parent.slug || parent.id}`} 
-                        onClick={closeAllMenus}
-                        className="flex items-center justify-between px-5 py-2.5 font-bold text-[#1A2B4C] hover:bg-gray-50 hover:text-[#00B4D8] transition-colors text-xs uppercase tracking-wider"
-                      >
-                        {parent.name}
-                        {subCats.length > 0 && <ChevronDown size={14} className="-rotate-90 text-gray-400 group-hover/sub:text-[#00B4D8]" />}
-                      </Link>
-                      {subCats.length > 0 && (
-                        <div className="absolute top-0 left-full ml-0 w-64 bg-white shadow-2xl opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-150 z-50 border border-gray-100 rounded-2xl py-2">
-                          <ul className="flex flex-col text-[13px] text-gray-600 font-medium capitalize tracking-normal">
-                            {subCats.map(sub => (
-                              <li key={sub.id}>
-                                <Link to={`/category/${sub.slug || sub.id}`} onClick={closeAllMenus} className="block px-5 py-2 hover:bg-gray-50 hover:text-[#00B4D8] transition-colors">
-                                  {sub.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                <div className="mt-1 pt-2 border-t border-gray-100 px-5 py-2">
-                  <Link to="/shop" onClick={closeAllMenus} className="text-xs font-black text-[#00B4D8] hover:text-[#1A2B4C] flex items-center justify-between">
-                    <span>BROWSE ALL 53+ HARDWARE SKUS</span>
-                    <ArrowRight size={13} />
-                  </Link>
+              <div className={`absolute top-12 left-0 w-[860px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-6 transition-opacity duration-150 ${activeDropdown === 'products' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                <div className="grid grid-cols-4 gap-5 text-left normal-case tracking-normal">
+                  {/* Silo 1: Boardroom Codecs & Systems */}
+                  <div>
+                    <Link to="/category/boardroom-codecs" onClick={closeAllMenus} className="font-black text-[11px] text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider block pb-2 mb-2.5 border-b border-gray-100">
+                      1. Boardroom Codecs &amp; Systems
+                    </Link>
+                    <ul className="space-y-1.5 text-[12px] text-gray-600 font-semibold">
+                      <li><Link to="/product/polycom-realpresence-group-500-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Polycom Group 500</Link></li>
+                      <li><Link to="/product/poly-studio-x72-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Poly Studio X72 / X70</Link></li>
+                      <li><Link to="/product/poly-studio-x52-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Poly Studio X52 &amp; G7500</Link></li>
+                      <li><Link to="/product/cisco-room-kit-plus-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Cisco Room Kit Plus</Link></li>
+                      <li><Link to="/product/cisco-room-bar-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Cisco Room Bar &amp; EQ</Link></li>
+                      <li><Link to="/product/logitech-rally-bar-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Logitech Rally Bar &amp; Mini</Link></li>
+                    </ul>
+                  </div>
+
+                  {/* Silo 2: Displays, Projectors & Video Walls */}
+                  <div>
+                    <Link to="/category/projectors" onClick={closeAllMenus} className="font-black text-[11px] text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider block pb-2 mb-2.5 border-b border-gray-100">
+                      2. Displays, Projectors &amp; LED
+                    </Link>
+                    <ul className="space-y-1.5 text-[12px] text-gray-600 font-semibold">
+                      <li><Link to="/product/horion-k6a-bundle-special-offer" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Horion K6a Interactive Panel</Link></li>
+                      <li><Link to="/av-equipment-rental" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">SMD LED Video Walls</Link></li>
+                      <li><Link to="/product/benq-tk705i-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">BenQ TK705i 4K Projector</Link></li>
+                      <li><Link to="/product/benq-w4100i-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">BenQ W4100i Laser Projector</Link></li>
+                      <li><Link to="/product/panasonic-pt-rq45k-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Panasonic PT-RQ45K Laser</Link></li>
+                      <li><Link to="/product/bosch-paviro-pva-4cr12-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Bosch PAVIRO Controller</Link></li>
+                    </ul>
+                  </div>
+
+                  {/* Silo 3: VoIP, IP-PBX & Unified Communications */}
+                  <div>
+                    <Link to="/category/voip-phone-systems" onClick={closeAllMenus} className="font-black text-[11px] text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider block pb-2 mb-2.5 border-b border-gray-100">
+                      3. VoIP, IP-PBX &amp; UC
+                    </Link>
+                    <ul className="space-y-1.5 text-[12px] text-gray-600 font-semibold">
+                      <li><Link to="/product/3cx-pro-8-sc-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">3CX Phone System PRO 8</Link></li>
+                      <li><Link to="/product/freepbx-enterprise-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">FreePBX Enterprise Appliance</Link></li>
+                      <li><Link to="/product/cisco-cucm-license-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Cisco CUCM CallManager</Link></li>
+                      <li><Link to="/product/grandstream-ucm6308-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Grandstream UCM6308 IP-PBX</Link></li>
+                      <li><Link to="/category/ip-phones" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Enterprise SIP IP Phones</Link></li>
+                      <li><Link to="/category/headsets" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Call Center ANC Headsets</Link></li>
+                    </ul>
+                  </div>
+
+                  {/* Silo 4: Audio, Intercom & Cameras */}
+                  <div>
+                    <Link to="/category/intercom-paging-access" onClick={closeAllMenus} className="font-black text-[11px] text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider block pb-2 mb-2.5 border-b border-gray-100">
+                      4. Audio, Intercom &amp; Cameras
+                    </Link>
+                    <ul className="space-y-1.5 text-[12px] text-gray-600 font-semibold">
+                      <li><Link to="/product/axis-m3065-v-camera-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Axis M3065-V Mini Dome</Link></li>
+                      <li><Link to="/category/ptz-cameras" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Auto-Tracking PTZ Cameras</Link></li>
+                      <li><Link to="/category/speakerphones" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Speakerphones &amp; Ceiling Mics</Link></li>
+                      <li><Link to="/product/2n-ip-vario-intercom-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">2N IP Vario SIP Intercom</Link></li>
+                      <li><Link to="/product/axis-a8105-e-door-station-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">Axis A8105-E Door Station</Link></li>
+                      <li><Link to="/category/ip-cameras" onClick={closeAllMenus} className="hover:text-[#00B4D8] block">NDAA Commercial IP Cameras</Link></li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Bottom Silo Bar: All Categories + 3D Room Designer + Industry Verticals */}
+                <div className="mt-5 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3 normal-case">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Industry Verticals:</span>
+                    <Link to="/solutions#healthcare" onClick={closeAllMenus} className="text-[11px] font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-2.5 py-1 rounded-lg">Healthcare &amp; Telemedicine</Link>
+                    <Link to="/solutions#banking" onClick={closeAllMenus} className="text-[11px] font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-2.5 py-1 rounded-lg">Banking Command Centers</Link>
+                    <Link to="/solutions#education" onClick={closeAllMenus} className="text-[11px] font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-2.5 py-1 rounded-lg">HEC Smart Classrooms</Link>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Link to="/room-designer" onClick={closeAllMenus} className="text-xs font-black text-[#F26522] hover:text-[#1A2B4C] flex items-center gap-1">
+                      <span>3D ROOM DESIGNER &amp; LED CALCULATOR</span>
+                      <ArrowRight size={13} />
+                    </Link>
+                    <Link to="/shop" onClick={closeAllMenus} className="text-xs font-black text-[#00B4D8] hover:text-[#1A2B4C] flex items-center gap-1">
+                      <span>ALL 53+ SKUS</span>
+                      <ArrowRight size={13} />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -604,18 +666,19 @@ function Navbar() {
               >
                 SERVICES <ChevronDown size={12} />
               </Link>
-              <div className={`absolute top-12 left-0 w-[340px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-6 transition-opacity duration-150 ${activeDropdown === 'services' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+              <div className={`absolute top-12 left-0 w-[380px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-6 transition-opacity duration-150 ${activeDropdown === 'services' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
                 <ul className="space-y-2.5 text-[13px] text-gray-700 font-bold capitalize tracking-normal">
-                  <li><Link to="/corporate-event-management" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Corporate Event Management Hub</Link></li>
+                  <li><Link to="/video-conferencing-solutions" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Video Conferencing Solutions (Pillar)</Link></li>
+                  <li><Link to="/corporate-event-management" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Corporate Event Management (Pillar)</Link></li>
+                  <li><Link to="/projection-mapping" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">3D Projection Mapping &amp; Hologram Stages</Link></li>
+                  <li><Link to="/services/ai-automation" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">AI Business Automation &amp; Digital Workers</Link></li>
                   <li><Link to="/services/corporate-events" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Corporate Event Production</Link></li>
                   <li><Link to="/services/hybrid-events" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Hybrid Event Production</Link></li>
-                  <li><Link to="/services/expo-organizing" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Expo &amp; Trade Show Organizing</Link></li>
-                  <li><Link to="/services/esports-events" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">e-Sports Arena Production</Link></li>
                   <li><Link to="/services/boardroom-integration" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Boardroom AV Integration</Link></li>
                   <li><Link to="/services/voip-telephony" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Enterprise VoIP &amp; IP-PBX</Link></li>
-                  <li><Link to="/live-streaming-services" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Live Streaming Services</Link></li>
-                  <li><Link to="/av-equipment-rental" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">AV Equipment Rental</Link></li>
+                  <li><Link to="/av-equipment-rental" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">SMD LED Wall &amp; AV Equipment Rental</Link></li>
                   <li><Link to="/3d-hologram" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">3D Hologram Display Stages</Link></li>
+                  <li className="pt-2 border-t border-gray-100"><Link to="/solutions" onClick={closeAllMenus} className="text-[#00B4D8] hover:text-[#1A2B4C] transition-colors block font-black">Solutions by Industry (Healthcare, Banking, HEC) →</Link></li>
                 </ul>
               </div>
             </div>
@@ -633,7 +696,7 @@ function Navbar() {
               >
                 VIDEO CONFERENCE <ChevronDown size={12} />
               </Link>
-              <div className={`absolute top-12 left-1/2 -translate-x-1/2 w-[560px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-6 transition-opacity duration-150 ${activeDropdown === 'video' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+              <div className={`absolute top-12 left-1/2 -translate-x-1/2 w-[620px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-6 transition-opacity duration-150 ${activeDropdown === 'video' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
                 <div className="mb-4 pb-3 border-b border-gray-100 bg-blue-50/60 p-3.5 rounded-xl space-y-2">
                   <Link to="/video-conference-in-pakistan" onClick={closeAllMenus} className="font-black text-xs text-[#1A2B4C] hover:text-[#00B4D8] flex items-center justify-between uppercase tracking-wider">
                     <span>Video Conference in Pakistan — Complete Pillar Hub</span>
@@ -643,25 +706,35 @@ function Navbar() {
                     Explore Turnkey Boardroom Solutions (Polycom Group 500, Poly X70, Cisco &amp; Logitech) →
                   </Link>
                 </div>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-3 gap-5">
                   <div>
-                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">Boardroom Codecs &amp; Systems</div>
-                    <ul className="space-y-2.5 text-[13px] text-gray-600 font-semibold capitalize tracking-normal">
+                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">Poly Ecosystem</div>
+                    <ul className="space-y-2 text-[12px] text-gray-600 font-semibold capitalize tracking-normal">
                       <li><Link to="/product/polycom-realpresence-group-500-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Polycom Group 500</Link></li>
-                      <li><Link to="/product/cisco-room-kit-plus-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Cisco Room Kit Plus</Link></li>
                       <li><Link to="/product/poly-studio-x72-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Poly Studio X72 / X70</Link></li>
                       <li><Link to="/product/poly-studio-x52-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Poly Studio X52</Link></li>
+                      <li><Link to="/product/poly-g7500-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Poly G7500 Modular Codec</Link></li>
+                      <li><Link to="/product/poly-studio-usb-video-bar-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Poly Studio USB Bar</Link></li>
                     </ul>
                   </div>
                   <div>
-                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">All-in-One Video Bars</div>
-                    <ul className="space-y-2.5 text-[13px] text-gray-600 font-semibold capitalize tracking-normal">
+                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">Cisco Ecosystem</div>
+                    <ul className="space-y-2 text-[12px] text-gray-600 font-semibold capitalize tracking-normal">
+                      <li><Link to="/product/cisco-room-kit-plus-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Cisco Room Kit Plus</Link></li>
+                      <li><Link to="/product/cisco-room-bar-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Cisco Room Bar</Link></li>
+                      <li><Link to="/product/cisco-room-kit-eq-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Cisco Room Kit EQ</Link></li>
+                      <li><Link to="/product/cisco-room-kit-pro-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Cisco Room Kit PRO</Link></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-3 pb-1.5 border-b border-gray-100">Logitech &amp; Displays</div>
+                    <ul className="space-y-2 text-[12px] text-gray-600 font-semibold capitalize tracking-normal">
                       <li><Link to="/product/logitech-rally-bar-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar</Link></li>
                       <li><Link to="/product/logitech-rally-bar-mini-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Logitech Rally Bar Mini</Link></li>
-                      <li><Link to="/product/poly-studio-usb-video-bar-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Poly Studio USB Bar</Link></li>
+                      <li><Link to="/product/horion-k6a-bundle-special-offer" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Horion K6a 4K IFP Bundle</Link></li>
                       <li>
-                        <Link to="/category/video-conferencing" onClick={closeAllMenus} className="text-[#00B4D8] hover:text-[#1A2B4C] transition-colors block font-bold text-xs mt-3.5 flex items-center gap-1">
-                          View All Video Hardware <ArrowRight size={12} />
+                        <Link to="/room-designer" onClick={closeAllMenus} className="text-[#F26522] hover:text-[#1A2B4C] transition-colors block font-bold text-xs mt-2 flex items-center gap-1">
+                          3D Room Designer <ArrowRight size={12} />
                         </Link>
                       </li>
                     </ul>
@@ -705,12 +778,13 @@ function Navbar() {
               >
                 VOIP &amp; UC <ChevronDown size={12} />
               </Link>
-              <div className={`absolute top-12 left-0 w-[290px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 ${activeDropdown === 'voip' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
-                <ul className="space-y-3 text-[13px] text-gray-700 font-semibold capitalize tracking-normal">
-                  <li><Link to="/product/3cx-pro-8-sc-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">3CX Phone System</Link></li>
+              <div className={`absolute top-12 left-0 w-[300px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 ${activeDropdown === 'voip' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`}>
+                <ul className="space-y-2.5 text-[13px] text-gray-700 font-semibold capitalize tracking-normal">
+                  <li><Link to="/product/3cx-pro-8-sc-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">3CX Phone System &amp; PRO 8</Link></li>
                   <li><Link to="/product/freepbx-enterprise-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">FreePBX Enterprise</Link></li>
                   <li><Link to="/product/cisco-cucm-license-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Cisco CUCM License</Link></li>
                   <li><Link to="/product/grandstream-ucm6308-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">Grandstream UCM6308</Link></li>
+                  <li><Link to="/product/2n-ip-vario-intercom-pakistan" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block">2N IP Vario &amp; Axis Door Intercoms</Link></li>
                   <li className="pt-2 border-t border-gray-100"><Link to="/voip-service-providers" onClick={closeAllMenus} className="hover:text-[#00B4D8] transition-colors block font-bold text-[#F26522]">VoIP Service Providers Hub</Link></li>
                 </ul>
               </div>
@@ -919,6 +993,12 @@ function Navbar() {
 import { ScrollToTop } from "./components/ScrollToTop";
 
 export default function App() {
+  const [showDeferredWidgets, setShowDeferredWidgets] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowDeferredWidgets(true), 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <SettingsProvider>
@@ -1055,6 +1135,39 @@ export default function App() {
           <Route path="/corporate-event-management-pakistan" element={<Navigate to="/corporate-event-management" replace />} />
           <Route path="/brands/polycom" element={<Navigate to="/brands/poly" replace />} />
           <Route path="/brands/hp-poly" element={<Navigate to="/brands/poly" replace />} />
+          {/* Internal Link Map — Core Business & Service Alias Redirects */}
+          <Route path="/hybrid-event-production" element={<Navigate to="/services/hybrid-events" replace />} />
+          <Route path="/boardroom-av-integration" element={<Navigate to="/services/boardroom-integration" replace />} />
+          <Route path="/expo-trade-show-organizing" element={<Navigate to="/services/expo-organizing" replace />} />
+          <Route path="/e-sports-arena-production" element={<Navigate to="/esports" replace />} />
+          <Route path="/3d-hologram-display-stages" element={<Navigate to="/3d-hologram" replace />} />
+          <Route path="/av-systems-design-engineering" element={<Navigate to="/services/boardroom-integration" replace />} />
+          {/* Internal Link Map — Brand & Platform Solution Alias Redirects */}
+          <Route path="/solutions/zoom-microsoft-teams-rooms" element={<Navigate to="/zoom-rooms" replace />} />
+          {/* Internal Link Map — Product Category Keyword Redirects */}
+          <Route path="/products/video-conference-systems-codecs" element={<Navigate to="/category/boardroom-codecs" replace />} />
+          <Route path="/products/all-in-one-video-bars" element={<Navigate to="/category/video-conferencing" replace />} />
+          <Route path="/products/interactive-displays-touch-panels" element={<Navigate to="/category/touch-panels" replace />} />
+          <Route path="/products/ip-phones-voip" element={<Navigate to="/category/voip-phone-systems" replace />} />
+          <Route path="/products/audio-microphones" element={<Navigate to="/category/speakerphones" replace />} />
+          <Route path="/products/wireless-presentation-byod" element={<Navigate to="/category/touch-panels" replace />} />
+          <Route path="/products/projectors" element={<Navigate to="/category/projectors" replace />} />
+          <Route path="/products/ip-cameras-ptz" element={<Navigate to="/category/ptz-cameras" replace />} />
+          <Route path="/products/intercom-paging-access" element={<Navigate to="/category/intercom-paging-access" replace />} />
+          <Route path="/products/networking-poe" element={<Navigate to="/category/voip-phone-systems" replace />} />
+          {/* Internal Link Map — Location & Availability Keyword Redirects */}
+          <Route path="/contact/lahore" element={<Navigate to="/lahore" replace />} />
+          <Route path="/contact/karachi" element={<Navigate to="/karachi" replace />} />
+          <Route path="/contact/islamabad" element={<Navigate to="/islamabad" replace />} />
+          <Route path="/support" element={<Navigate to="/contact" replace />} />
+          <Route path="/av-integration-services-lahore" element={<Navigate to="/lahore" replace />} />
+          {/* Internal Link Map — Value Proposition & SLA Keyword Redirects */}
+          <Route path="/services/turnkey-installation" element={<Navigate to="/services/boardroom-integration" replace />} />
+          <Route path="/request-quote" element={<Navigate to="/programs/quote" replace />} />
+          <Route path="/about/guarantee" element={<Navigate to="/about" replace />} />
+          <Route path="/services/on-site-standby-engineers" element={<Navigate to="/services/corporate-events" replace />} />
+          <Route path="/services/annual-maintenance-contracts" element={<Navigate to="/services/boardroom-integration" replace />} />
+          <Route path="/about/compliance" element={<Navigate to="/programs/government-education-pricing" replace />} />
           <Route path="/video-conference-in-pakistan" element={<KeywordLandingPage />} />
 
           {/* Fallback keyword landing page for unhandled top-level dynamic SEO slugs & 404 routes */}
@@ -1065,10 +1178,12 @@ export default function App() {
       </React.Suspense>
       </main>
       <Footer />
-      <React.Suspense fallback={null}>
-        <AIAssist />
-        <CookieConsent />
-      </React.Suspense>
+      {showDeferredWidgets && (
+        <React.Suspense fallback={null}>
+          <AIAssist />
+          <CookieConsent />
+        </React.Suspense>
+      )}
       <BackToTop />
       </div>
         </AuthProvider>

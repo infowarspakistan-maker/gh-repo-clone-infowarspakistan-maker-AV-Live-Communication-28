@@ -384,15 +384,19 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       ]
     },
     relatedLinks: [
-      { label: 'Government & HEC Education Pricing Program', path: '/programs/government-education-pricing' },
-      { label: 'Commercial Laser Projectors', path: '/category/projectors' },
-      { label: 'VoIP Phone Systems & IP PBX', path: '/category/voip-phone-systems' },
-      { label: 'Bosch PAVIRO & SIP Paging', path: '/category/intercom-paging-access' }
+      { label: 'Mobile 4K Telemedicine Carts (Poly Studio USB Bar)', path: '/product/poly-studio-usb-video-bar-pakistan' },
+      { label: '2N SIP Cleanroom Intercoms (2N IP Vario)', path: '/product/2n-ip-vario-intercom-pakistan' },
+      { label: 'Banking Command Center Codec (Cisco Room Kit Plus)', path: '/product/cisco-room-kit-plus-pakistan' },
+      { label: 'Multi-Branch Banking IP-PBX (Grandstream UCM6308)', path: '/product/grandstream-ucm6308-pakistan' },
+      { label: 'HEC Smart Classroom Display (Horion K6a Bundle)', path: '/product/horion-k6a-bundle-special-offer' },
+      { label: 'Campus & Hospital PA (Bosch PAVIRO Controller)', path: '/product/bosch-paviro-pva-4cr12-pakistan' },
+      { label: 'Interactive 3D Room Designer & LED Calculator', path: '/room-designer' },
+      { label: 'Government & HEC Education Pricing Program', path: '/programs/government-education-pricing' }
     ],
     content: [
       'Different vertical industries in Pakistan face vastly different acoustic, network security, and regulatory requirements when deploying audio-visual and unified communications infrastructure.',
-      'In the banking sector, boardrooms and treasury floors require standards-based H.323/SIP interoperability and encrypted voice VLANs across hundreds of nationwide branches.',
-      'In higher education and healthcare, reliability, lecture recording integration, and campus-wide emergency paging take center stage. AV Live Communications provides dedicated vertical engineering teams and PPRA/tax-compliant procurement workflows for each sector.'
+      'In the banking sector, boardrooms and treasury floors require standards-based H.323/SIP interoperability (Cisco Room Kit Plus, Polycom RealPresence Group 500) and encrypted voice VLANs across hundreds of nationwide branches powered by Grandstream UCM6308 and Cisco CUCM.',
+      'In higher education and healthcare, reliability, lecture recording integration (Horion K6a Interactive Flat Panels, Poly Studio X52, mobile 4K telemedicine carts with Poly Studio USB), and campus-wide emergency paging (Bosch PAVIRO & 2N SIP Cleanroom Intercoms) take center stage. AV Live Communications provides dedicated vertical engineering teams and PPRA/tax-compliant procurement workflows for each sector.'
     ],
     image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800'
   },
@@ -419,7 +423,8 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
     },
     relatedLinks: [
       { label: 'Conference Speakerphones & Mic Arrays', path: '/category/speakerphones' },
-      { label: 'Intercom, Paging & Bosch Audio', path: '/category/intercom-paging-access' },
+      { label: 'Bosch PAVIRO Controller & Audio', path: '/product/bosch-paviro-pva-4cr12-pakistan' },
+      { label: 'Interactive 3D Room Designer & Acoustic Planner', path: '/room-designer' },
       { label: 'Conference Room Solutions Pakistan', path: '/conference-room-solutions' }
     ],
     content: [

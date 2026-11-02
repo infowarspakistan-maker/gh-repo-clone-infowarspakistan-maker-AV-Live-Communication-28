@@ -257,9 +257,14 @@ export function Blog() {
               )}
 
               <div className="mt-10 pt-8 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
-                <Link to="/shop" className="bg-[#1A2B4C] text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-[#00B4D8] transition-colors">
-                  Explore Enterprise Hardware
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link to="/shop" className="bg-[#1A2B4C] text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-[#00B4D8] transition-colors">
+                    Explore Enterprise Hardware
+                  </Link>
+                  <Link to="/room-designer" className="bg-[#00B4D8] text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors">
+                    3D Room Designer &amp; LED Calculator
+                  </Link>
+                </div>
                 <Link to="/contact" className="text-[#00B4D8] font-bold text-sm hover:text-[#1A2B4C] transition-colors inline-flex items-center gap-2">
                   Schedule an AV Consultation <ArrowRight size={16} />
                 </Link>
@@ -367,7 +372,7 @@ export function Blog() {
                 </p>
                 
                 <Link to={`/blog/${post.slug}`} className="inline-flex items-center gap-2 text-[#00B4D8] font-bold text-sm hover:text-[#1A2B4C] transition-colors mt-auto w-max">
-                  Read More <ArrowRight size={16} />
+                  Read {post.category} Guide <ArrowRight size={16} />
                 </Link>
               </div>
             </motion.article>

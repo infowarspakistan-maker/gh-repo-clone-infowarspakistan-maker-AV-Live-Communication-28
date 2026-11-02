@@ -205,12 +205,71 @@ export function Solutions() {
                 <Link to="/services/hybrid-events" className="bg-white border-2 border-[#1A2B4C] text-[#1A2B4C] px-8 py-3 rounded-full text-sm font-bold hover:bg-[#1A2B4C] hover:text-white transition-all tracking-wider uppercase text-center">
                   Hybrid Event Solutions
                 </Link>
+                <Link to="/room-designer" className="bg-[#00B4D8] text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-[#1A2B4C] transition-all tracking-wider uppercase text-center">
+                  3D Room Designer &amp; LED Calculator
+                </Link>
               </div>
             </div>
             <div className="flex-1 bg-gray-100 rounded-3xl aspect-video overflow-hidden border border-gray-200 relative">
               <img loading="lazy" src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&q=80" alt="Corporate Event Management and Hybrid Events in Pakistan" className="w-full h-full object-cover mix-blend-multiply" />
             </div>
           </motion.div>
+        </div>
+
+        {/* Solutions by Industry (Vertical Hubs: Healthcare, Banking, Higher Education) */}
+        <div className="mt-16 bg-white rounded-[32px] border border-gray-200 p-8 md:p-12 shadow-sm space-y-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-gray-100 pb-6">
+            <div>
+              <span className="text-[#00B4D8] text-xs font-bold uppercase tracking-[0.2em] block mb-2">Solutions by Industry (Vertical Hubs)</span>
+              <h2 className="text-2xl md:text-3xl font-black text-[#1A2B4C]">
+                Sector-Specific Pro-AV &amp; Unified Communications Blueprints
+              </h2>
+            </div>
+            <Link to="/blog/banking-healthcare-university-av-solutions-pakistan" className="text-xs font-black uppercase tracking-wider text-[#00B4D8] hover:text-[#1A2B4C]">
+              Read Complete Vertical Architecture Guide →
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <div id="healthcare" className="p-6 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] block">Vertical Hub 01</span>
+              <h3 className="text-lg font-black text-[#1A2B4C]">Healthcare &amp; Telemedicine</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Mobile 4K telemedicine diagnostic carts, hygienic cleanroom SIP paging, and surgical theater broadcast links across Pakistani teaching hospitals.
+              </p>
+              <ul className="space-y-1.5 text-xs font-bold text-[#00B4D8] pt-2">
+                <li><Link to="/product/poly-studio-usb-video-bar-pakistan" className="hover:underline">Mobile 4K Carts (Poly Studio USB Bar)</Link></li>
+                <li><Link to="/product/2n-ip-vario-intercom-pakistan" className="hover:underline">Cleanroom Paging (2N IP Vario Intercom)</Link></li>
+                <li><Link to="/product/axis-a8105-e-door-station-pakistan" className="hover:underline">Axis A8105-E SIP Door Station</Link></li>
+              </ul>
+            </div>
+
+            <div id="banking" className="p-6 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] block">Vertical Hub 02</span>
+              <h3 className="text-lg font-black text-[#1A2B4C]">Banking &amp; Finance Command Centers</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                AES-256 encrypted H.323/SIP executive boardrooms, 24/7 SMD command-center video walls, and multi-branch SIP trunking PBXs.
+              </p>
+              <ul className="space-y-1.5 text-xs font-bold text-[#00B4D8] pt-2">
+                <li><Link to="/product/cisco-room-kit-plus-pakistan" className="hover:underline">Cisco Room Kit Plus &amp; Codec Pro</Link></li>
+                <li><Link to="/product/polycom-realpresence-group-500-pakistan" className="hover:underline">Polycom RealPresence Group 500</Link></li>
+                <li><Link to="/product/grandstream-ucm6308-pakistan" className="hover:underline">Grandstream UCM6308 &amp; Cisco CUCM</Link></li>
+              </ul>
+            </div>
+
+            <div id="education" className="p-6 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] block">Vertical Hub 03</span>
+              <h3 className="text-lg font-black text-[#1A2B4C]">Higher Education (HEC Smart Classrooms)</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                HEC-compliant hybrid lecture-capture classrooms, 4K interactive flat panels, laser auditorium projectors, and campus-wide public address.
+              </p>
+              <ul className="space-y-1.5 text-xs font-bold text-[#00B4D8] pt-2">
+                <li><Link to="/product/horion-k6a-bundle-special-offer" className="hover:underline">Horion K6a Interactive Flat Panel</Link></li>
+                <li><Link to="/product/poly-studio-x52-pakistan" className="hover:underline">Poly Studio X52 &amp; Auto-Tracking PTZ</Link></li>
+                <li><Link to="/product/bosch-paviro-pva-4cr12-pakistan" className="hover:underline">Bosch PAVIRO Campus PA System</Link></li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         {/* AEO FAQ Block */}

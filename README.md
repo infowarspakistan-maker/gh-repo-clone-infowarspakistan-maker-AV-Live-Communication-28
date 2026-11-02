@@ -93,8 +93,11 @@ Welcome to the **AV Live Communications** source code repository and platform bl
 # Start full-stack development server (port 3000 with SSR SEO injection)
 npm run dev
 
-# Regenerate public/sitemap.xml (149 deduplicated canonical URLs) and public/llms-full.txt
+# Regenerate public/sitemap.xml (155 deduplicated canonical URLs) and public/llms-full.txt
 npx tsx scripts/generate-sitemap.ts
+
+# Run 20-parameter Hub-and-Spoke Silo & Technical SEO Audit across all 155 canonical URLs + 28 alias redirects
+npx tsx scripts/seo-silo-audit.ts
 
 # Type-check codebase
 npm run lint
@@ -103,5 +106,7 @@ npm run lint
 npm run build
 ```
 
-> **Governance Reminder**: Always review `AGENTS.md` and `seo-policy.md` before modifying routes, products, categories, or metadata.
+> **Governance Reminder**: Always review `AGENTS.md` and `seo-policy.md` before modifying routes, products, categories, or metadata. All 28 shorthand/keyword alias paths from the **AV Live Communications Internal Link Map** (`/products/*`, `/contact/*`, `/support`, `/request-quote`, `/hybrid-event-production`, `/boardroom-av-integration`, etc.) are permanently `301`-redirected in `server.ts` and `<Navigate replace />`-routed in `src/App.tsx` to their canonical URLs.
+
+
 

@@ -18,9 +18,9 @@ export const brands = [
   )},
   { id: 'cisco', name: 'Cisco', logo: (
     <div className="flex flex-col items-center leading-none">
-       <div className="flex items-end gap-0.5 mb-1 h-6">
-         {[4, 6, 8, 12, 16, 12, 8, 6, 4].map((h, i) => (
-           <div key={i} className="w-1 bg-[#005073]" style={{ height: `${h}px` }}></div>
+       <div className="flex items-end gap-0.5 mb-1 h-5">
+         {['h-1', 'h-1.5', 'h-2', 'h-3', 'h-4', 'h-3', 'h-2', 'h-1.5', 'h-1'].map((cls, i) => (
+           <div key={i} className={`w-1 bg-[#005073] ${cls}`}></div>
          ))}
        </div>
        <span className="text-2xl font-black text-[#005073] tracking-tight">CISCO</span>
@@ -38,7 +38,6 @@ export const brands = [
       <div className="w-5 h-5 bg-[#1B5796] rounded-sm skew-x-[-15deg]"></div>
       <div className="flex flex-col items-start leading-none">
         <span className="text-sm font-bold text-[#1B5796] tracking-wide">GRANDSTREAM</span>
-        <span className="text-[6px] tracking-widest text-[#666] mt-0.5">CONNECTING THE WORLD</span>
       </div>
     </div>
   )},
@@ -49,16 +48,8 @@ export const brands = [
   )},
   { id: 'itc', name: 'ITC', logo: <span className="text-3xl font-black text-[#1A2B4C] tracking-tight">ITC</span> },
   { id: 'jabra', name: 'Jabra', logo: (
-    <div className="bg-[#FFD100] px-4 py-1.5 flex flex-col items-center justify-center">
-      <div className="flex items-baseline gap-1 text-black font-bold">
-        <span className="text-xl">Jabra</span>
-        <span className="text-sm font-normal">GN</span>
-      </div>
-      <div className="flex gap-[2px] mt-1 w-full justify-center">
-        {[...Array(12)].map((_, i) => (
-          <div key={i} className={`h-[2px] bg-black ${i % 3 === 0 ? 'w-1' : 'w-0.5'}`}></div>
-        ))}
-      </div>
+    <div className="bg-[#FFD100] px-4 py-1.5 flex items-center justify-center rounded-sm">
+      <span className="text-xl text-black font-black tracking-tight">Jabra GN</span>
     </div>
   )},
   { id: 'logitech', name: 'Logitech', logo: (
@@ -71,7 +62,7 @@ export const brands = [
   )},
   { id: 'poly', name: 'Poly', logo: (
     <div className="flex items-center gap-2 text-[#EB3323]">
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8" aria-hidden="true">
         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
       </svg>
       <span className="text-3xl font-bold text-gray-800 tracking-tighter lowercase">poly</span>
@@ -87,32 +78,37 @@ export const brands = [
   { id: 'viewsonic', name: 'ViewSonic', logo: (
     <div className="flex flex-col items-center leading-none">
       <span className="text-2xl font-black text-[#C1121F]">ViewSonic</span>
-      <span className="text-[6px] text-gray-500 font-bold tracking-widest">See the difference</span>
     </div>
   )}
 ];
 
 export const TopBrands = () => {
   return (
-    <div className="py-16 bg-white">
+    <section aria-label="Authorized Enterprise AV Brands" className="py-16 bg-white">
       <div className="max-w-[1400px] mx-auto px-4 md:px-8">
-        <div className="flex justify-between items-end mb-12 relative">
-          <h2 className="text-4xl font-black text-[#343A40] text-center w-full relative z-10">Featured Brands</h2>
-          <Link to="/brands" className="text-sm font-bold text-[#1F558C] hover:text-[#00B4D8] absolute right-0 bottom-2 z-20">View All Brands</Link>
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-10 gap-4">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-black text-[#1A2B4C]">Authorized Pro-AV &amp; Unified Communications Brands</h2>
+            <h3 className="text-sm font-semibold text-slate-600 mt-1">Official Pakistan Distributor &amp; Certified Integration Partner</h3>
+          </div>
+          <Link to="/brands" className="text-sm font-bold text-[#1F558C] hover:text-[#00B4D8] py-2 px-4 rounded-xl bg-gray-50">
+            Explore All 25 Brands
+          </Link>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
-          {brands.map((brand) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {brands.slice(0, 12).map((brand) => (
             <Link 
               key={brand.id}
               to={`/brands/${brand.id}`}
-              className="bg-white border border-gray-200 rounded-md h-24 flex items-center justify-center hover:shadow-lg transition-shadow hover:border-gray-300"
+              aria-label={`Explore ${brand.name} products in Pakistan`}
+              className="bg-white border border-gray-200 rounded-xl h-24 flex items-center justify-center hover:shadow-lg transition-shadow hover:border-[#00B4D8]"
             >
               {brand.logo}
             </Link>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };

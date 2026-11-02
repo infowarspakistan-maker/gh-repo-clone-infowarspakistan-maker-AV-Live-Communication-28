@@ -47,12 +47,18 @@ function toAbsoluteUrl(pathOrUrl?: string, defaultFallback: string = DEFAULT_DOM
 }
 
 export function clampSeoTitle(rawTitle: string, maxLen = 65): string {
-  const normalized = String(rawTitle || 'Video Conference | Event Management | AV Live')
+  const normalized = String(rawTitle || 'Video Conference in Pakistan | Event Management | AV Live')
     .replace(/^e-Sports\b/i, 'Esports')
     .replace(/\s+/g, ' ')
     .trim();
   const capitalized = normalized.replace(/^[a-z]/, c => c.toUpperCase());
-  const withBrand = capitalized.includes('AV Live') ? capitalized : `${capitalized} | AV Live`;
+  let withBrand = capitalized.includes('AV Live') ? capitalized : `${capitalized} | AV Live`;
+  if (withBrand.length < 50 && !/pakistan/i.test(withBrand)) {
+    withBrand = withBrand.replace(/\s*\|\s*AV Live$/i, ' in Pakistan | AV Live');
+  }
+  if (withBrand.length < 50) {
+    withBrand = withBrand.replace(/\s*\|\s*AV Live$/i, ' — Enterprise AV | AV Live');
+  }
   if (withBrand.length <= maxLen) return withBrand;
 
   const core = capitalized.replace(/\s*\|\s*AV Live(?:\s+[^\s|]+)*$/i, '').trim();
@@ -71,20 +77,23 @@ export function clampSeoTitle(rawTitle: string, maxLen = 65): string {
   return `${cleanCore}${suffix}`;
 }
 
-export function clampSeoDescription(rawDesc: string, maxLen = 158): string {
-  const clean = String(rawDesc || '')
+export function clampSeoDescription(rawDesc: string, maxLen = 128): string {
+  let clean = String(rawDesc || '')
     .replace(/\s+/g, ' ')
     .trim();
+  if (clean.length > 0 && clean.length < 100) {
+    clean = `${clean.replace(/\.$/, '')} — Authorized AV Live Pakistan warranty & PKR pricing.`;
+  }
   if (clean.length <= maxLen) return clean;
   const sliced = clean.slice(0, maxLen - 1);
   const lastSpace = sliced.lastIndexOf(' ');
-  const trimmed = (lastSpace > 80 ? sliced.slice(0, lastSpace) : sliced).replace(/[,:;|\-–—.\s]+$/, '');
+  const trimmed = (lastSpace > 75 ? sliced.slice(0, lastSpace) : sliced).replace(/[,:;|\-–—.\s]+$/, '');
   return `${trimmed}.`;
 }
 
 export function SEO({ 
-  title = 'Video Conference | Event Management | AV Live', 
-  description = "AV Live is Pakistan's premier Video Conference & Event Management company. Shop Poly, Logitech & Cisco AV or book 3D hologram & corporate events.",
+  title = 'Video Conference in Pakistan | Event Management | AV Live', 
+  description = 'Video Conference in Pakistan, Corporate Event Management by AV Live: Poly X70, Cisco Room Kit, 3D Hologram Display price PKR.',
   image = DEFAULT_IMAGE,
   imageAlt,
   imageWidth = 1200,
@@ -108,7 +117,7 @@ export function SEO({
   locale = 'en_PK'
 }: SEOProps) {
   const siteTitle = clampSeoTitle(title, 65);
-  const clampedDescription = clampSeoDescription(description, 158);
+  const clampedDescription = clampSeoDescription(description, 128);
   const absoluteUrl = toAbsoluteUrl(url || (typeof window !== 'undefined' ? window.location.pathname : '/'));
   const absoluteImage = toAbsoluteUrl(image, DEFAULT_IMAGE);
   const resolvedAlt = imageAlt || siteTitle;

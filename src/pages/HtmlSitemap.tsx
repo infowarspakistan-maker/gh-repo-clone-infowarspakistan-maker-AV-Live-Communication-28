@@ -224,6 +224,143 @@ export function HtmlSitemap() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+        {/* Section 0: Visual Hub-and-Spoke Silo Architecture Map */}
+        <section className="bg-white rounded-3xl border-2 border-[#00B4D8]/30 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-100">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#00B4D8] block mb-1">
+                Hub-and-Spoke Silo SEO Model (3-Click Architecture)
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-[#1A2B4C]">
+                Visual Sitemap &amp; Internal Linking Architecture
+              </h2>
+            </div>
+            <Link
+              to="/room-designer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#00B4D8] hover:bg-[#1A2B4C] text-white font-black text-xs uppercase tracking-wider transition-all shrink-0"
+            >
+              <span>3D Room Designer &amp; LED Calculator</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-xs">
+            {/* Silo Pillar A: Core Services */}
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2.5">
+              <h3 className="font-black text-[#1A2B4C] text-sm uppercase tracking-wider">Core Services (Pillar Pages)</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/video-conferencing-solutions" className="hover:underline">Video Conferencing Solutions</Link></li>
+                <li><Link to="/corporate-event-management" className="hover:underline">Corporate Event Management</Link></li>
+                <li><Link to="/projection-mapping" className="hover:underline">3D Projection Mapping &amp; Hologram Stages</Link></li>
+                <li><Link to="/services/ai-automation" className="hover:underline">AI Business Automation &amp; Digital Workers</Link></li>
+              </ul>
+            </div>
+
+            {/* Silo Pillar B: Boardroom Codecs & Systems */}
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2.5">
+              <h3 className="font-black text-[#1A2B4C] text-sm uppercase tracking-wider">Boardroom Codecs &amp; Systems</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/product/polycom-realpresence-group-500-pakistan" className="hover:underline">Poly Ecosystem (Group 500, X70, X52, X72, G7500)</Link></li>
+                <li><Link to="/product/cisco-room-kit-plus-pakistan" className="hover:underline">Cisco Ecosystem (Room Kit Plus, Bar, EQ, PRO)</Link></li>
+                <li><Link to="/product/logitech-rally-bar-pakistan" className="hover:underline">Logitech Ecosystem (Rally Bar, Rally Bar Mini)</Link></li>
+              </ul>
+            </div>
+
+            {/* Silo Pillar C: Displays, Projectors & Video Walls */}
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2.5">
+              <h3 className="font-black text-[#1A2B4C] text-sm uppercase tracking-wider">Displays, Projectors &amp; Video Walls</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/product/horion-k6a-bundle-special-offer" className="hover:underline">Horion Interactive Flat Panels (K6a Bundle)</Link></li>
+                <li><Link to="/av-equipment-rental" className="hover:underline">SMD LED Video Walls (P1.8 – P3.91)</Link></li>
+                <li><Link to="/product/benq-tk705i-pakistan" className="hover:underline">Projectors (BenQ TK705i, W4100i, Bosch Paviro)</Link></li>
+              </ul>
+            </div>
+
+            {/* Silo Pillar D: VoIP, IP-PBX & Unified Communications */}
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2.5">
+              <h3 className="font-black text-[#1A2B4C] text-sm uppercase tracking-wider">VoIP, IP-PBX &amp; Unified Comms</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/product/3cx-pro-8-sc-pakistan" className="hover:underline">3CX Phone System &amp; PRO 8</Link></li>
+                <li><Link to="/product/freepbx-enterprise-pakistan" className="hover:underline">FreePBX Enterprise Appliance</Link></li>
+                <li><Link to="/product/cisco-cucm-license-pakistan" className="hover:underline">Cisco CUCM License</Link></li>
+                <li><Link to="/product/grandstream-ucm6308-pakistan" className="hover:underline">Grandstream UCM6308 IP-PBX</Link></li>
+              </ul>
+            </div>
+
+            {/* Silo Pillar E: Audio, Intercom & Cameras */}
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2.5">
+              <h3 className="font-black text-[#1A2B4C] text-sm uppercase tracking-wider">Audio, Intercom &amp; Cameras</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/product/axis-m3065-v-camera-pakistan" className="hover:underline">Auto-Tracking &amp; IP Cameras (Axis M3065-V)</Link></li>
+                <li><Link to="/category/speakerphones" className="hover:underline">Speakerphones &amp; Ceiling Mics</Link></li>
+                <li><Link to="/product/2n-ip-vario-intercom-pakistan" className="hover:underline">Access &amp; Intercoms (2N IP Vario, Axis A8105-E)</Link></li>
+              </ul>
+            </div>
+
+            {/* Silo Pillar F: Solutions by Industry & Interactive Tools */}
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2.5">
+              <h3 className="font-black text-[#1A2B4C] text-sm uppercase tracking-wider">Industry Hubs &amp; Interactive Tools</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/solutions#healthcare" className="hover:underline">Healthcare &amp; Telemedicine (Mobile 4K Carts)</Link></li>
+                <li><Link to="/solutions#banking" className="hover:underline">Banking &amp; Finance Command Centers</Link></li>
+                <li><Link to="/solutions#education" className="hover:underline">Higher Education (HEC Smart Classrooms)</Link></li>
+                <li><Link to="/room-designer" className="hover:underline">3D Room Designer &amp; LED Calculator</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Complete Keyword-to-URL Anchor Text Matrix (Services, Brands, Categories, Locations & SLA) */}
+          <div className="pt-6 border-t border-gray-100">
+            <h3 className="font-black text-[#1A2B4C] text-sm uppercase tracking-wider mb-3">
+              AV Live Communications Keyword &amp; Anchor Text Internal Link Map
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-1.5">
+                <div className="font-black text-[#1A2B4C] uppercase tracking-wider mb-1">Core Business &amp; Brand Anchors</div>
+                <ul className="space-y-1 font-bold text-[#00B4D8]">
+                  <li><Link to="/video-conferencing-solutions" className="hover:underline">Video Conferencing in Pakistan (/video-conferencing-solutions)</Link></li>
+                  <li><Link to="/corporate-event-management" className="hover:underline">Corporate Event Management (/corporate-event-management)</Link></li>
+                  <li><Link to="/services/hybrid-events" className="hover:underline">Hybrid Event Production (/services/hybrid-events)</Link></li>
+                  <li><Link to="/av-equipment-rental" className="hover:underline">AV Equipment Rental (/av-equipment-rental)</Link></li>
+                  <li><Link to="/live-streaming-services" className="hover:underline">Live Streaming Services (/live-streaming-services)</Link></li>
+                  <li><Link to="/services/boardroom-integration" className="hover:underline">Boardroom AV Integration &amp; Engineering (/services/boardroom-integration)</Link></li>
+                  <li><Link to="/services/expo-organizing" className="hover:underline">Expo &amp; Trade Show Organizing (/services/expo-organizing)</Link></li>
+                  <li><Link to="/esports" className="hover:underline">e-Sports Arena Production (/esports)</Link></li>
+                  <li><Link to="/3d-hologram" className="hover:underline">3D Hologram Display Stages (/3d-hologram)</Link></li>
+                  <li><Link to="/zoom-rooms" className="hover:underline">Zoom Rooms / Microsoft Teams Rooms (/zoom-rooms)</Link></li>
+                </ul>
+              </div>
+              <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-1.5">
+                <div className="font-black text-[#1A2B4C] uppercase tracking-wider mb-1">Product Category Keyword Anchors</div>
+                <ul className="space-y-1 font-bold text-[#00B4D8]">
+                  <li><Link to="/category/boardroom-codecs" className="hover:underline">Video Conference Systems / Codecs (/category/boardroom-codecs)</Link></li>
+                  <li><Link to="/category/video-conferencing" className="hover:underline">All-in-One Video Bars / USB Bars (/category/video-conferencing)</Link></li>
+                  <li><Link to="/category/touch-panels" className="hover:underline">Interactive Displays &amp; Touch Panels (/category/touch-panels)</Link></li>
+                  <li><Link to="/category/voip-phone-systems" className="hover:underline">IP Phones, VoIP &amp; Networking PoE (/category/voip-phone-systems)</Link></li>
+                  <li><Link to="/category/speakerphones" className="hover:underline">Audio &amp; Microphones — Ceiling Mics (/category/speakerphones)</Link></li>
+                  <li><Link to="/category/projectors" className="hover:underline">Projectors &amp; Laser Displays (/category/projectors)</Link></li>
+                  <li><Link to="/category/ptz-cameras" className="hover:underline">IP Cameras / Auto-Tracking 4K PTZ Cameras (/category/ptz-cameras)</Link></li>
+                  <li><Link to="/category/intercom-paging-access" className="hover:underline">Intercom, Paging &amp; Access (/category/intercom-paging-access)</Link></li>
+                </ul>
+              </div>
+              <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-1.5">
+                <div className="font-black text-[#1A2B4C] uppercase tracking-wider mb-1">Location &amp; SLA Value Anchors</div>
+                <ul className="space-y-1 font-bold text-[#00B4D8]">
+                  <li><Link to="/lahore" className="hover:underline">AV Live Lahore &amp; AV Integration Services Lahore (/lahore)</Link></li>
+                  <li><Link to="/karachi" className="hover:underline">AV Live Karachi Regional Hub (/karachi)</Link></li>
+                  <li><Link to="/islamabad" className="hover:underline">AV Live Islamabad Regional Hub (/islamabad)</Link></li>
+                  <li><Link to="/contact" className="hover:underline">AV Support Lahore &amp; Karachi — 15-Min SLA Response (/contact)</Link></li>
+                  <li><Link to="/services/boardroom-integration" className="hover:underline">Turnkey Installation &amp; AMC SLA Contracts (/services/boardroom-integration)</Link></li>
+                  <li><Link to="/programs/quote" className="hover:underline">24-Hour Custom BoQ / 24-Hour Custom Quote (/programs/quote)</Link></li>
+                  <li><Link to="/about" className="hover:underline">Zero-Downtime Guarantee (/about)</Link></li>
+                  <li><Link to="/services/corporate-events" className="hover:underline">On-Site Standby Engineers (/services/corporate-events)</Link></li>
+                  <li><Link to="/programs/government-education-pricing" className="hover:underline">FBR GST/NTN Compliant Proposals (/programs/government-education-pricing)</Link></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Section 1: High-Priority Commercial Pillars & Keyword Landing Pages */}
         <section className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm">
           <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">

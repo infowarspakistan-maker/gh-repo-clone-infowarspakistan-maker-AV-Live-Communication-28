@@ -545,8 +545,9 @@ export function KeywordLandingPage() {
               { name: 'Poly', path: '/brands/poly' },
               { name: 'Yealink', path: '/brands/yealink' },
               { name: 'Logitech', path: '/brands/logitech' },
-              { name: 'Horion', path: '/category/video-conferencing' },
+              { name: 'Horion', path: '/brands/horion' },
               { name: 'Grandstream', path: '/brands/grandstream' },
+              { name: 'Zoom / Teams Rooms', path: '/zoom-rooms' },
             ].map((b) => (
               <Link
                 key={b.name}
@@ -560,29 +561,29 @@ export function KeywordLandingPage() {
         </div>
       </section>
 
-      {/* The "AV Live" Advantage Bar */}
+      {/* The "AV Live" Advantage Bar (Mapped to Value Proposition & Service Level Keywords) */}
       <section className="bg-[#F8F9FA] border-b border-gray-200 py-8 px-4">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-col items-center">
+          <Link to="/contact" className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
             <Clock className="text-[#00B4D8] mb-2" size={28} />
-            <h4 className="font-black text-[#1A2B4C] text-sm uppercase">15-Min SLA Response</h4>
-            <p className="text-xs text-gray-500 font-medium">Guaranteed Rapid Engineering Triage</p>
-          </div>
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-col items-center">
+            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-sm uppercase">15-Min SLA Response</h4>
+            <p className="text-xs text-gray-500 font-medium">15-Minute Engineering Callback</p>
+          </Link>
+          <Link to="/about" className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
             <ShieldCheck className="text-[#00B4D8] mb-2" size={28} />
-            <h4 className="font-black text-[#1A2B4C] text-sm uppercase">Zero-Downtime Guarantee</h4>
+            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-sm uppercase">Zero-Downtime Guarantee</h4>
             <p className="text-xs text-gray-500 font-medium">Redundant Codecs &amp; Signal Paths</p>
-          </div>
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-col items-center">
+          </Link>
+          <Link to="/services/corporate-events" className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
             <Award className="text-[#00B4D8] mb-2" size={28} />
-            <h4 className="font-black text-[#1A2B4C] text-sm uppercase">On-Site Standby Engineers</h4>
+            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-sm uppercase">On-Site Standby Engineers</h4>
             <p className="text-xs text-gray-500 font-medium">Lahore • Karachi • Islamabad</p>
-          </div>
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-col items-center">
+          </Link>
+          <Link to="/programs/quote" className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
             <Phone className="text-[#00B4D8] mb-2" size={28} />
-            <h4 className="font-black text-[#1A2B4C] text-sm uppercase">24-Hour Custom BoQ</h4>
+            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-sm uppercase">24-Hour Custom BoQ</h4>
             <p className="text-xs text-gray-500 font-medium">FBR GST/NTN Compliant Proposals</p>
-          </div>
+          </Link>
         </div>
       </section>
 
@@ -639,6 +640,117 @@ export function KeywordLandingPage() {
               <p className="text-xs text-gray-600 leading-relaxed font-medium">
                 Engineered Bosch digital conference microphone arrays, fine-pitch P2.5 LED walls, and 3D hologram display stages with standby engineers.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Silo Rule 1 & Rule 3: Pillar-to-Cluster Hardware Ecosystem Links & 3D Room Designer CTA */}
+      <section className="max-w-7xl mx-auto px-4 pb-16">
+        <div className="bg-white rounded-3xl p-8 md:p-12 border border-gray-200 shadow-sm space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-gray-100 pb-6">
+            <div>
+              <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.3em] block mb-1">Pillar-to-Cluster Hardware Matrix</span>
+              <h2 className="text-2xl md:text-3xl font-black text-[#1A2B4C]">
+                Verified Enterprise Hardware Clusters &amp; 3D Room Designer
+              </h2>
+            </div>
+            <Link
+              to="/room-designer"
+              className="inline-flex items-center gap-2 bg-[#00B4D8] hover:bg-[#1A2B4C] text-white font-black px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider transition-all shrink-0 shadow-md"
+            >
+              <span>3D Room Designer &amp; LED Calculator</span>
+              <ArrowRight size={15} />
+            </Link>
+          </div>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Every turnkey deployment is powered by serialized, GS1-verified OEM hardware. Select a specific product cluster below to view PKR pricing and datasheets, or model your boardroom and SMD LED video wall in our <Link to="/room-designer" className="text-[#00B4D8] font-bold underline">Interactive 3D Room Designer</Link>:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2">
+              <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider">1. Boardroom Codecs</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/product/polycom-realpresence-group-500-pakistan" className="hover:underline">Polycom RealPresence Group 500</Link></li>
+                <li><Link to="/product/poly-studio-x72-pakistan" className="hover:underline">Poly Studio X72 / X70</Link></li>
+                <li><Link to="/product/poly-studio-x52-pakistan" className="hover:underline">Poly Studio X52 &amp; G7500</Link></li>
+                <li><Link to="/product/cisco-room-kit-plus-pakistan" className="hover:underline">Cisco Room Kit Plus &amp; Bar</Link></li>
+                <li><Link to="/product/logitech-rally-bar-pakistan" className="hover:underline">Logitech Rally Bar &amp; Mini</Link></li>
+              </ul>
+            </div>
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2">
+              <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider">2. Displays &amp; Projectors</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/product/horion-k6a-bundle-special-offer" className="hover:underline">Horion K6a Interactive Panel</Link></li>
+                <li><Link to="/av-equipment-rental" className="hover:underline">SMD LED Video Walls (P1.8–P3.9)</Link></li>
+                <li><Link to="/product/benq-tk705i-pakistan" className="hover:underline">BenQ TK705i 4K Projector</Link></li>
+                <li><Link to="/product/benq-w4100i-pakistan" className="hover:underline">BenQ W4100i Laser Projector</Link></li>
+                <li><Link to="/product/bosch-paviro-pva-4cr12-pakistan" className="hover:underline">Bosch PAVIRO Audio System</Link></li>
+              </ul>
+            </div>
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2">
+              <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider">3. VoIP, IP-PBX &amp; UC</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/product/3cx-pro-8-sc-pakistan" className="hover:underline">3CX Phone System &amp; PRO 8</Link></li>
+                <li><Link to="/product/freepbx-enterprise-pakistan" className="hover:underline">FreePBX Enterprise Server</Link></li>
+                <li><Link to="/product/cisco-cucm-license-pakistan" className="hover:underline">Cisco CUCM CallManager</Link></li>
+                <li><Link to="/product/grandstream-ucm6308-pakistan" className="hover:underline">Grandstream UCM6308 IP-PBX</Link></li>
+                <li><Link to="/voip-service-providers" className="hover:underline">VoIP Service Providers Hub</Link></li>
+              </ul>
+            </div>
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2">
+              <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider">4. Audio, Intercom &amp; PTZ</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/product/axis-m3065-v-camera-pakistan" className="hover:underline">Axis M3065-V Network Camera</Link></li>
+                <li><Link to="/category/speakerphones" className="hover:underline">Speakerphones &amp; Ceiling Mics</Link></li>
+                <li><Link to="/product/2n-ip-vario-intercom-pakistan" className="hover:underline">2N IP Vario SIP Intercom</Link></li>
+                <li><Link to="/product/axis-a8105-e-door-station-pakistan" className="hover:underline">Axis A8105-E Door Station</Link></li>
+                <li><Link to="/solutions" className="hover:underline">Solutions by Industry Hub</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Complete Keyword-Mapped Internal Link Directory (Services, Categories, Locations & SLA) */}
+          <div className="pt-6 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2">
+              <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider">Core Business Services</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/video-conferencing-solutions" className="hover:underline">Enterprise Video Conferencing Solutions</Link></li>
+                <li><Link to="/corporate-event-management" className="hover:underline">Corporate Event Management</Link></li>
+                <li><Link to="/services/hybrid-events" className="hover:underline">Hybrid Event Production</Link></li>
+                <li><Link to="/av-equipment-rental" className="hover:underline">AV Equipment Rental</Link></li>
+                <li><Link to="/live-streaming-services" className="hover:underline">Live Streaming Services</Link></li>
+                <li><Link to="/services/boardroom-integration" className="hover:underline">Boardroom AV Integration &amp; Design</Link></li>
+                <li><Link to="/services/expo-organizing" className="hover:underline">Expo &amp; Trade Show Organizing</Link></li>
+                <li><Link to="/esports" className="hover:underline">e-Sports Arena Production</Link></li>
+                <li><Link to="/3d-hologram" className="hover:underline">3D Hologram Display Stages</Link></li>
+              </ul>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2">
+              <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider">Product Category Hubs</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/category/boardroom-codecs" className="hover:underline">Video Conference Systems / Codecs</Link></li>
+                <li><Link to="/category/video-conferencing" className="hover:underline">All-in-One Video Bars / USB Bars</Link></li>
+                <li><Link to="/category/touch-panels" className="hover:underline">Interactive Displays &amp; Touch Panels</Link></li>
+                <li><Link to="/category/voip-phone-systems" className="hover:underline">IP Phones, VoIP &amp; Networking PoE</Link></li>
+                <li><Link to="/category/speakerphones" className="hover:underline">Audio, Acoustic Calibration &amp; Ceiling Mics</Link></li>
+                <li><Link to="/category/projectors" className="hover:underline">Projectors &amp; Laser Displays</Link></li>
+                <li><Link to="/category/ptz-cameras" className="hover:underline">IP Cameras &amp; Auto-Tracking 4K PTZ Cameras</Link></li>
+                <li><Link to="/category/intercom-paging-access" className="hover:underline">Intercom, Paging &amp; Access</Link></li>
+              </ul>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2">
+              <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider">Locations &amp; SLA Guarantees</h3>
+              <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/lahore" className="hover:underline">AV Live Lahore (AV Integration Services Lahore)</Link></li>
+                <li><Link to="/karachi" className="hover:underline">AV Live Karachi Regional Hub</Link></li>
+                <li><Link to="/islamabad" className="hover:underline">AV Live Islamabad Regional Hub</Link></li>
+                <li><Link to="/contact" className="hover:underline">AV Support Lahore &amp; Karachi (15-Min SLA)</Link></li>
+                <li><Link to="/services/boardroom-integration" className="hover:underline">Turnkey Installation &amp; AMC SLA Contracts</Link></li>
+                <li><Link to="/programs/quote" className="hover:underline">24-Hour Custom BoQ / Custom Quote</Link></li>
+                <li><Link to="/programs/government-education-pricing" className="hover:underline">FBR GST/NTN Compliant Proposals</Link></li>
+              </ul>
             </div>
           </div>
         </div>

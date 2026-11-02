@@ -472,6 +472,64 @@ export function ServiceDetail() {
             </div>
           )}
 
+          {/* 6B. Silo Rule 1 & Rule 3: Pillar-to-Cluster Hardware Links & Interactive 3D Room Designer CTA */}
+          <div className="bg-white rounded-[3rem] p-6 sm:p-12 border border-gray-100 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-100 pb-6">
+              <div>
+                <span className="text-[#00B4D8] text-[10px] font-black uppercase tracking-[0.25em] block mb-1">Hub-and-Spoke Silo Architecture</span>
+                <h2 className="text-2xl font-black text-[#1A2B4C]">Recommended Hardware Clusters &amp; 3D Room Designer</h2>
+              </div>
+              <Link
+                to="/room-designer"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#00B4D8] hover:bg-[#1A2B4C] text-white font-black text-xs uppercase tracking-wider transition-all shrink-0 shadow-md"
+              >
+                <span>Launch 3D Room &amp; LED Calculator</span>
+                <ArrowRight size={15} />
+              </Link>
+            </div>
+            <p className="text-sm text-gray-600 leading-relaxed font-medium">
+              Our certified engineers deploy <strong>{service.title}</strong> using factory-sealed OEM hardware clusters. Explore our primary hardware ecosystems or calculate your exact boardroom and SMD LED video wall dimensions in our <Link to="/room-designer" className="text-[#00B4D8] font-bold underline">Interactive 3D Room Designer &amp; LED Calculator</Link>:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+              <div className="p-4 rounded-2xl bg-[#F8F9FA] border border-gray-100 space-y-2">
+                <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider text-[11px]">Boardroom Codecs</h3>
+                <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                  <li><Link to="/product/polycom-realpresence-group-500-pakistan" className="hover:underline">Polycom Group 500</Link></li>
+                  <li><Link to="/product/poly-studio-x72-pakistan" className="hover:underline">Poly Studio X72 / X70</Link></li>
+                  <li><Link to="/product/cisco-room-kit-plus-pakistan" className="hover:underline">Cisco Room Kit Plus</Link></li>
+                  <li><Link to="/product/logitech-rally-bar-pakistan" className="hover:underline">Logitech Rally Bar</Link></li>
+                </ul>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#F8F9FA] border border-gray-100 space-y-2">
+                <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider text-[11px]">Displays &amp; Projectors</h3>
+                <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                  <li><Link to="/product/horion-k6a-bundle-special-offer" className="hover:underline">Horion K6a 4K IFP Bundle</Link></li>
+                  <li><Link to="/product/benq-tk705i-pakistan" className="hover:underline">BenQ TK705i 4K Projector</Link></li>
+                  <li><Link to="/product/benq-w4100i-pakistan" className="hover:underline">BenQ W4100i Projector</Link></li>
+                  <li><Link to="/product/bosch-paviro-pva-4cr12-pakistan" className="hover:underline">Bosch PAVIRO Controller</Link></li>
+                </ul>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#F8F9FA] border border-gray-100 space-y-2">
+                <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider text-[11px]">VoIP &amp; IP-PBX</h3>
+                <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                  <li><Link to="/product/3cx-pro-8-sc-pakistan" className="hover:underline">3CX Phone System PRO 8</Link></li>
+                  <li><Link to="/product/freepbx-enterprise-pakistan" className="hover:underline">FreePBX Enterprise</Link></li>
+                  <li><Link to="/product/cisco-cucm-license-pakistan" className="hover:underline">Cisco CUCM License</Link></li>
+                  <li><Link to="/product/grandstream-ucm6308-pakistan" className="hover:underline">Grandstream UCM6308</Link></li>
+                </ul>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#F8F9FA] border border-gray-100 space-y-2">
+                <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider text-[11px]">Audio, Intercom &amp; PTZ</h3>
+                <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                  <li><Link to="/product/axis-m3065-v-camera-pakistan" className="hover:underline">Axis M3065-V Camera</Link></li>
+                  <li><Link to="/product/2n-ip-vario-intercom-pakistan" className="hover:underline">2N IP Vario Intercom</Link></li>
+                  <li><Link to="/product/axis-a8105-e-door-station-pakistan" className="hover:underline">Axis A8105-E Door Station</Link></li>
+                  <li><Link to="/category/speakerphones" className="hover:underline">Speakerphones &amp; Ceiling Mics</Link></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           {/* 7. Clear Contact Footer with Dual Hotlines (0321 425 6263 & 0339 0000 921) & Integrated Form */}
           <div className="bg-white rounded-[3rem] p-6 sm:p-12 border-2 border-[#00B4D8]/30 shadow-lg">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
