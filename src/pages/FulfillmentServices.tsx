@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Warehouse, Box, Truck, BarChart } from 'lucide-react';
 import { SEO } from '../components/SEO';
@@ -85,9 +86,9 @@ export function FulfillmentServices() {
            <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">
              E-commerce sellers, event management companies, and corporate procurement departments looking to streamline their logistics operations.
            </p>
-           <button className="bg-[#1A2B4C] text-white px-8 py-4 rounded-full font-bold hover:bg-[#00B4D8] transition-colors">
+           <Link to="/contact" className="bg-[#1A2B4C] text-white px-8 py-4 min-h-[48px] rounded-full font-bold hover:bg-[#00B4D8] transition-colors inline-flex items-center justify-center">
              Discuss Your Logistics Needs
-           </button>
+           </Link>
         </div>
       </div>
     </div>

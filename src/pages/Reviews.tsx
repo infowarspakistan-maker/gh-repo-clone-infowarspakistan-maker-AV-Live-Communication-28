@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Star, MessageSquare } from 'lucide-react';
+import { Star, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { SEO } from '../components/SEO';
 
-const REVIEWS = [
+const INITIAL_REVIEWS = [
   {
     id: 1,
     name: "Ahmed Raza",
@@ -46,7 +46,42 @@ const CATEGORIES = ['All', 'Video Conferencing', 'IP Phones', 'Security', 'Event
 
 export function Reviews() {
   const [activeCategory, setActiveCategory] = useState('All');
-  const filteredReviews = activeCategory === 'All' ? REVIEWS : REVIEWS.filter(r => r.category === activeCategory);
+  const [reviewsList, setReviewsList] = useState(INITIAL_REVIEWS);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [newReview, setNewReview] = useState({
+    name: '',
+    role: '',
+    company: '',
+    category: 'Video Conferencing',
+    content: '',
+    rating: 5
+  });
+
+  const filteredReviews = activeCategory === 'All' ? reviewsList : reviewsList.filter(r => r.category === activeCategory);
+
+  const handleAddReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.name.trim() || !newReview.content.trim()) return;
+    setReviewsList(prev => [
+      {
+        id: Date.now(),
+        name: newReview.name.trim(),
+        role: newReview.role.trim() || 'Enterprise Client',
+        company: newReview.company.trim() || 'Verified Organization',
+        category: newReview.category,
+        content: newReview.content.trim(),
+        rating: newReview.rating
+      },
+      ...prev
+    ]);
+    setReviewSubmitted(true);
+    setNewReview({ name: '', role: '', company: '', category: 'Video Conferencing', content: '', rating: 5 });
+    setTimeout(() => {
+      setShowReviewForm(false);
+      setReviewSubmitted(false);
+    }, 2500);
+  };
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
@@ -73,7 +108,7 @@ export function Reviews() {
                   bestRating: '5',
                   worstRating: '1'
                 },
-                review: REVIEWS.map(r => ({
+                review: reviewsList.map(r => ({
                   '@type': 'Review',
                   author: { '@type': 'Person', name: `${r.name} (${r.company})` },
                   reviewRating: { '@type': 'Rating', ratingValue: String(r.rating), bestRating: '5' },
@@ -118,7 +153,7 @@ export function Reviews() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+              className={`px-5 py-2.5 min-h-[48px] rounded-full text-sm font-bold transition-all ${
                 activeCategory === cat 
                   ? 'bg-[#00B4D8] text-white shadow-md shadow-[#00B4D8]/20' 
                   : 'bg-white text-gray-600 border border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
@@ -155,10 +190,77 @@ export function Reviews() {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-           <button className="bg-[#1A2B4C] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#00B4D8] transition-colors inline-block shadow-lg">
-             Write a Review
-           </button>
+        <div className="mt-16 text-center max-w-2xl mx-auto">
+           {!showReviewForm ? (
+             <button
+               type="button"
+               onClick={() => setShowReviewForm(true)}
+               className="bg-[#1A2B4C] text-white px-8 py-4 min-h-[48px] rounded-full font-bold text-lg hover:bg-[#00B4D8] transition-colors inline-flex items-center justify-center shadow-lg"
+             >
+               Write a Review
+             </button>
+           ) : reviewSubmitted ? (
+             <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-8 text-center">
+               <CheckCircle2 size={40} className="text-emerald-600 mx-auto mb-3" />
+               <h3 className="text-xl font-black text-[#1A2B4C]">Thank You for Your Review!</h3>
+               <p className="text-sm text-gray-600 mt-1">Your feedback has been added to our verified client testimonials.</p>
+             </div>
+           ) : (
+             <form onSubmit={handleAddReview} className="bg-white p-8 rounded-3xl border border-gray-200 shadow-lg text-left space-y-4">
+               <div className="flex items-center justify-between mb-2">
+                 <h3 className="text-xl font-black text-[#1A2B4C]">Share Your Enterprise Experience</h3>
+                 <button type="button" onClick={() => setShowReviewForm(false)} className="text-xs font-bold text-gray-400 hover:text-gray-700">Cancel</button>
+               </div>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <input
+                   type="text"
+                   required
+                   placeholder="Your Full Name *"
+                   value={newReview.name}
+                   onChange={(e) => setNewReview(prev => ({ ...prev, name: e.target.value }))}
+                   className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00B4D8]"
+                 />
+                 <input
+                   type="text"
+                   placeholder="Role / Title (e.g. IT Director)"
+                   value={newReview.role}
+                   onChange={(e) => setNewReview(prev => ({ ...prev, role: e.target.value }))}
+                   className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00B4D8]"
+                 />
+                 <input
+                   type="text"
+                   placeholder="Company / Organization"
+                   value={newReview.company}
+                   onChange={(e) => setNewReview(prev => ({ ...prev, company: e.target.value }))}
+                   className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00B4D8]"
+                 />
+                 <select
+                   value={newReview.category}
+                   onChange={(e) => setNewReview(prev => ({ ...prev, category: e.target.value }))}
+                   className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00B4D8] bg-white"
+                 >
+                   <option>Video Conferencing</option>
+                   <option>IP Phones</option>
+                   <option>Security</option>
+                   <option>Events</option>
+                 </select>
+               </div>
+               <textarea
+                 required
+                 rows={3}
+                 placeholder="Describe your experience with AV Live hardware or engineering services *"
+                 value={newReview.content}
+                 onChange={(e) => setNewReview(prev => ({ ...prev, content: e.target.value }))}
+                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00B4D8] resize-none"
+               />
+               <button
+                 type="submit"
+                 className="w-full bg-[#00B4D8] text-white py-3.5 min-h-[48px] rounded-xl font-bold hover:bg-[#1A2B4C] transition-colors"
+               >
+                 Submit Verified Review
+               </button>
+             </form>
+           )}
         </div>
       </div>
     </div>

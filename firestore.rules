@@ -16,7 +16,11 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return isSignedIn() && (
+        request.auth.token.email == 'infowarspakistan@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
     }
 
     function isOwner(userId) {
@@ -48,7 +52,7 @@ service cloud.firestore {
         && data.timeline is string && data.timeline.size() <= 100
         && data.details is string && data.details.size() <= 2000
         && data.status in ['pending', 'responded', 'closed']
-        && data.createdAt == request.time;
+        && data.createdAt is timestamp;
     }
 
     // 4. Collection Matches
@@ -102,6 +106,23 @@ service cloud.firestore {
 
     // Event Quotes
     match /event_quotes/{quoteId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Contact Inquiries, Reseller Applications & Newsletter Subscriptions
+    match /inquiries/{inquiryId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /reseller_applications/{appId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /newsletter_subscribers/{subId} {
+      allow create: if true;
       allow read, update, delete: if isAdmin();
     }
 

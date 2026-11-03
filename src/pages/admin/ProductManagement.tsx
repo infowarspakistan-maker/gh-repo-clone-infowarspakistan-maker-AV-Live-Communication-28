@@ -225,7 +225,7 @@ export function ProductManagement() {
                          <div className="flex items-center gap-5">
                             <div className="w-14 h-14 bg-white rounded-2xl overflow-hidden border border-gray-100 p-2 shrink-0 shadow-sm flex items-center justify-center">
                                {(Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] ? (
-                                 <img loading="lazy" src={product.images?.[0] || 'https://placehold.co/400x400?text=No+Image'} className="w-full h-full object-contain" />
+                                 <img loading="lazy" src={product.images?.[0] || 'https://placehold.co/400x400?text=No+Image'} alt={product.productName || 'Equipment thumbnail'} className="w-full h-full object-contain" />
                                ) : (
                                  <ImageIcon size={20} className="text-gray-300" />
                                )}

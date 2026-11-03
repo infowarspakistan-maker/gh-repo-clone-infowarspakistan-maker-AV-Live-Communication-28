@@ -1,87 +1,61 @@
-# Duplicate Content Elimination & Internal Link Graph Rebalancing Plan
+# Viewport Density, Aspect Ratio & Chrome Resizing Plan (Mobile & Desktop)
 
-This plan resolves the **Duplicate Content clusters (`80.5%–100.0%` similarity)** and **dead-end leaf nodes (red `1` scores)** identified in the WebsiteCrawler Duplicate Content Report and SVG Node Graph for `avlive.com.pk`.
-
-## User Review & Critical Decisions
-
-> [!IMPORTANT]
-> All three architectural decisions below have been confirmed and locked in for execution upon approval:
-
-- **Confirmed Decision 1 (Full SSR Content Differentiation)**: Replace the generic boilerplate fallback in server-side HTML rendering so every static page, category page, brand page, and product page renders unique, domain-specific prose, structured comparison/pricing tables, and technical specifications (`< 30%` pairwise text overlap across sibling routes).
-- **Confirmed Decision 2 (Contextual Mesh Linking for the SVG Node Graph)**: Eliminate dead-end leaf nodes (`1` incoming/outgoing link) by embedding semantic breadcrumb trails, parent Category/Brand hub links, and 4–6 contextually matched sibling/related SKU links inside every Product, Category, Brand, Service, and Blog SSR snapshot.
-- **Confirmed Decision 3 (`/events-services` vs. `/services` Separation)**: Retain both canonical URLs while giving `/events-services` a dedicated **AV Equipment Rental & SMD LED Stage Rate Card Table** (P2.5/P2.9 LED walls, 3D HoloGauze stages, line-array sound, and multi-camera live switching packages) and `/services` a **9-Pillar Enterprise Engineering & SLA Matrix**.
+## Goal
+Reclaim vertical screen real estate across mobile (`< 1024px`) and desktop (`>= 1024px`) by compacting the top header, bottom navigation dock, breadcrumbs, hero banners, page headings, and footer menu while maintaining clean aspect ratios (`16:6` hero banners, `4:3` hardware cards/galleries) so visitors immediately see products and core content above the fold.
 
 ---
 
-## 1. Overview & Core Concept
-
-- **What It Does**:
-  1. **Eliminates Static Route Boilerplate (`84.8%–100%` Duplicate Content)**: Previously, 30+ static routes (`/events-services`, `/services`, `/shop`, `/brands`, `/lahore`, `/karachi`, `/islamabad`, `/zoom-rooms`, `/microsoft-teams-rooms`, `/3d-hologram`, `/projection-mapping`, `/programs/*`, etc.) fell back to the exact same 21-link `<nav>` list in raw SSR HTML. Each static route will now render a unique 150–250 word topical guide, route-specific HTML specification/pricing `<table>`, and targeted internal links relevant to its exact intent.
-  2. **Differentiates Product & Category SSR Snapshots**:
-     - **Product Pages (`/product/:slug`)**: Replaces repetitive table row labels with product-specific engineering prose, unique use-case deployment guidance (room size, acoustic/optical coverage, and compatible platforms), full technical specs, and a **"Compare & Compatible Hardware in `<Category>`"** contextual link cluster.
-     - **Category Pages (`/category/:slug`)**: Injects category-specific buyer guidance, acoustic/network deployment standards, price range summaries (min–max PKR across verified models), and direct links to top brands in that category.
-  3. **Rebalances the Internal Link Node Graph**: Transforms the star-shaped crawl graph (where 32+ outer nodes had only `1` link and middle nodes had `29`) into a balanced mesh graph where every page links to its parent hub and 4–6 related sibling pages.
-- **Target Audience / Persona**: Non-JS search engine crawlers (WebsiteCrawler, Bingbot, first-wave Googlebot, and AI Answer Engines) evaluating content uniqueness and internal PageRank distribution.
-- **Key Value**: Drives pairwise page similarity well below WebsiteCrawler's duplicate threshold (`< 35%` Jaccard/shingle overlap) while distributing internal link equity across all 53 hardware SKUs, 25 brands, 12 categories, and 9 services.
-
----
-
-## 2. User Experience & Visual Design
-
-- **Key User Flows**:
-  - **Search Crawler / SEO Audit Flow**: Crawlers fetching raw HTML receive a self-contained, semantically rich `<main class="ssr-seo-snapshot">` tailored to the exact URL path, complete with a `<nav aria-label="Breadcrumb">` trail, unique `<article>` copy, a route-specific `<table>`, and a `<section aria-label="Related Enterprise Solutions">` mesh link block.
-  - **Human Visitor Flow**: React hydrates seamlessly on frame 1 with zero visual layout shift, preserving the existing enterprise navy (`#1A2B4C`) and cyan (`#00B4D8`) design system.
+## 1. Compact Top Menu & Slim 52px Mobile Bottom Dock (`src/App.tsx`)
+- **Single-Row Mobile Top Header (`54px` total height vs. `120px` legacy)**:
+  - Merge the 2-row mobile header into a single compact row (`px-3 py-1.5 h-[54px]`):
+    - Left: `w-9 h-9` (`36px`) menu drawer toggle button + compact `AV Live` badge link.
+    - Center: `flex-1` pill search input (`h-9` / `36px`, `text-xs`) with clear button, submit icon, and the live search autocomplete dropdown.
+    - Right: `w-9 h-9` (`36px`) direct call button with status dot.
+  - Update the mobile menu drawer position from `top-[116px] bottom-20` to `top-[54px] bottom-[52px]` with compact card spacing (`p-3.5`, `min-h-[38px]` category rows).
+- **Slim Desktop Header (`128px` total / `88px` sticky vs. `168px` legacy)**:
+  - Reduce the top dark utility bar from `h-10` (`40px`) to `h-8` (`32px`, `text-[11px]`).
+  - Reduce the main desktop brand/search/cart row from `md:h-20` (`80px`) to `lg:h-14` (`56px`) with a `h-9` (`36px`) pill search bar and scaled logo (`text-xl`).
+  - Reduce `StaticPrimaryNav` from `h-12` (`48px`) to `h-10` (`40px`) and update dropdown top offsets from `top-12` to `top-10`.
+- **Slim 52px Mobile Bottom Navigation Dock (`52px` vs. `88px` legacy)**:
+  - Reduce dock bar height from `h-16` (`64px`) to `h-[52px]` with `text-[9px]` labels and `17px` icons.
+  - Scale the center floating Cart badge from `-top-6 w-14 h-14 ring-[6px]` to a proportional `-top-3 w-11 h-11 ring-4` button.
 
 ---
 
-## 3. Key Product Decisions & Trade-Offs
-
-- **Decision 1: Route-Specific SSR Content Generator vs. Generic Fallback Navigation**
-  - *Chosen Approach*: Build a dedicated route-content synthesis engine in the SSR HTML injector that generates unique topical paragraphs, custom HTML tables, and intent-matched link clusters for each route group (`regional`, `platform-rooms`, `event-tech`, `b2b-programs`, `trust-policies`, `catalog-hubs`, `categories`, `brands`, and `products`).
-  - *Why*: Removing the shared 21-link boilerplate `<nav>` from every static page immediately drops `/events-services` vs. `/services` similarity from `84.8%` to `< 20%` and stops inflating link counts on the same 21 URLs.
-  - *Alternatives Considered*: Canonicalizing `/events-services` to `/services`—rejected because the user confirmed keeping both URLs as distinct conversion funnels (rental rate card vs. full-service B2B engineering directory).
-
-- **Decision 2: Contextual Related-SKU & Hub Mesh Linking**
-  - *Chosen Approach*: Every `/product/:slug` SSR snapshot will link to:
-    1. Its primary `/category/:catSlug` hub and `/brands/:brandSlug` page.
-    2. Four related products in the same category or price tier (`/product/:relatedSlug`).
-    3. One relevant engineering buyer's guide (`/blog/:guideSlug`) or interactive tool (`/room-designer`, `/compare`).
-  - *Why*: Eliminates the `1`-link leaf nodes in the WebsiteCrawler SVG graph and ensures every product and brand page receives and passes internal PageRank.
+## 2. Slim 28px Breadcrumbs (`src/components/Breadcrumbs.tsx` & `src/pages/ProductDetails.tsx`)
+- **`src/components/Breadcrumbs.tsx`**:
+  - Remove `min-h-[48px] min-w-[48px]` and `mb-8` (`32px` bottom margin) from inline breadcrumb links.
+  - Render a single-line `h-7` (`28px`) horizontally scrollable trail (`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 py-1 mb-2.5 overflow-x-auto whitespace-nowrap hide-scrollbar`).
+- **`src/pages/ProductDetails.tsx`**:
+  - Reduce the top breadcrumb wrapper bar from `py-4` with `min-h-[48px]` links to `py-1.5` (`h-8`), and reduce the main container top margin from `mt-8` to `mt-3 lg:mt-5`.
 
 ---
 
-## 4. Technical Architecture & Data Strategy *(Technical Reference)*
+## 3. Proportional `16:6` Hero Banners, Page Headings & `4:3` Product Aspect Ratios
+- **Homepage (`src/pages/Home.tsx` & `src/components/MobileProductCard.tsx`)**:
+  - **Mobile Hero & Category Strip**: Compact the mobile promo card (`p-3.5 rounded-2xl`, `text-sm sm:text-base` title, `w-20 h-20` `1:1` hardware thumbnail, `py-1.5 px-3` buttons) and circular category icons (`w-11 h-11` instead of `w-14 h-14`) so the 2-column Popular Hardware grid is visible immediately on first paint.
+  - **Desktop Hero Slider**: Replace `min-h-[480px] sm:min-h-[520px] md:h-[600px]` with a proportional `aspect-[16/6] min-h-[280px] max-h-[380px]` container, scale the `<h1>` from `md:text-6xl` (`60px`) to `text-2xl lg:text-4xl` (`36px`), subtitle from `md:text-2xl` to `text-xs lg:text-base`, and CTA buttons to `py-2.5 px-5 text-xs`.
+  - **`MobileProductCard.tsx`**: Use a `aspect-[4/3]` product image frame (`p-2.5`) and compact typography so more product cards fit per screen.
+- **Shop & Brand Catalog (`src/pages/Shop.tsx`)**:
+  - Reduce page vertical padding from `py-12` to `py-3 lg:py-6`.
+  - Reduce header block spacing from `mb-5 lg:mb-8 pb-5 lg:pb-8` to `mb-3 lg:mb-5 pb-2.5 lg:pb-4` and scale `<h1>` from `text-2xl sm:text-3xl lg:text-4xl` to `text-lg sm:text-xl lg:text-2xl`.
+- **Category Pages (`src/pages/Category.tsx`)**:
+  - Reduce the Category Hero from `py-8 lg:py-16` to `py-3.5 lg:py-6`, scale the category thumbnail badge from `w-20 h-20 lg:w-32 lg:h-32` to `w-12 h-12 lg:w-16 lg:h-16`, scale `<h1>` from `text-2xl sm:text-4xl md:text-6xl` to `text-xl sm:text-2xl lg:text-3xl`, and tighten grid top spacing from `mt-6 lg:mt-16` to `mt-4 lg:mt-6`.
+- **Product Details (`src/pages/ProductDetails.tsx`)**:
+  - Scale `<h1>` from `text-2xl md:text-3xl lg:text-4xl mb-4` to `text-lg sm:text-xl lg:text-2xl mb-2`, constrain the primary gallery image to `aspect-[4/3] max-h-[280px] sm:max-h-[380px]`, and tighten layout gaps (`gap-6 lg:gap-10`).
 
-### Architecture & Internal Link Graph Transformation
+---
 
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                   Balanced Mesh Crawl Topology (SSR HTML)                  │
-├────────────────────────────────────────────────────────────────────────────┤
-│                                                                            │
-│   [Homepage /] ──► [/shop] & [/brands] & [/services] & [/events-services]  │
-│         │                                                                  │
-│         ├──► [12 Category Hubs (/category/:slug)]                          │
-│         │       ├── Unique Category Buyer Guide + Min/Max PKR Summary      │
-│         │       ├── Links to Top Brands in Category (/brands/:brand)       │
-│         │       └── Links to All Category SKUs (/product/:slug)            │
-│         │                                                                  │
-│         ├──► [25 Brand Hubs (/brands/:slug)]                               │
-│         │       ├── Unique OEM Authorization & Warranty Summary            │
-│         │       ├── Links to Brand's Primary Categories (/category/:slug)  │
-│         │       └── Links to Verified Brand SKUs (/product/:slug)          │
-│         │                                                                  │
-│         ├──► [53 Product Pages (/product/:slug)]                           │
-│         │       ├── Unique Hardware Narrative + Deployment Use-Case Prose  │
-│         │       ├── Breadcrumb: Home > Shop > Category > Brand > Product   │
-│         │       └── Contextual Mesh: 4 Sibling SKUs + 1 Buyer's Guide      │
-│         │                                                                  │
-│         └──► [Static Pillars (/events-services, /lahore, /programs/*)]     │
-│                 ├── Dedicated Route Table (Rental Rate Card / SLA Matrix)  │
-│                 └── 5–6 Intent-Matched Sibling & Service Links Only        │
-└────────────────────────────────────────────────────────────────────────────┘
-```
+## 4. Compact Footer & Collapsed Mobile SEO Accordion (`src/components/FooterAccordion.tsx` & `src/components/Footer.tsx`)
+- **`src/components/FooterAccordion.tsx`**:
+  - Set `defaultOpenId = null` so all 7 mobile directory accordions start collapsed by default.
+  - Reduce accordion trigger headers from `min-h-[48px] px-4 py-3` to `min-h-[38px] px-3.5 py-2 text-[11px]` and render expanded links in a dense 2-column grid (`grid-cols-2 gap-x-2 gap-y-0.5`) with `py-1 text-[11px]` links.
+- **`src/components/Footer.tsx`**:
+  - Reduce footer vertical padding from `pt-10 lg:pt-12 pb-28 lg:pb-8` to `pt-6 lg:pt-8 pb-16 lg:pb-6`.
+  - Tighten desktop column gaps (`gap-6 lg:gap-8 mb-6`), reduce column headings from `text-lg mb-6` to `text-xs lg:text-sm mb-3`, and compact social/contact pills (`px-2.5 py-1.5 text-[11px]`).
 
-### Verification Targets Before Completion
-- **Pairwise Text Similarity Check**: Run an automated shingle/Jaccard similarity audit across all URL pairs cited in `Duplicate_Content_report_80a8cd80.pdf` (`/product/grandstream-gxp2170-pakistan` vs. `/product/poly-studio-x32-pakistan`, `/category/ip-cameras` vs. `/category/speakerphones`, `/events-services` vs. `/services`, and `/product/polycom-realpresence-group-500-pakistan` vs. `/services/expo-organizing`) and verify that every pair scores **`< 30%` similarity**.
-- **Link Graph Connectivity Check**: Verify that every canonical page in `public/sitemap.xml` emits contextual breadcrumb and related-resource links without repeating a single site-wide 21-link boilerplate list.
+---
+
+## 5. Verification
+- Run `lint_applet` and `compile_applet` to verify zero TypeScript or build regressions.
+- Execute a viewport vertical budget script to verify above-the-fold content visibility across mobile (`375×667`) and desktop (`1366×768`).

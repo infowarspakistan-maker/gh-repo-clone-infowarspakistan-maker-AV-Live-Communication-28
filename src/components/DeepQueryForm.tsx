@@ -83,6 +83,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [quoteId, setQuoteId] = useState('');
   const [quoteData, setQuoteData] = useState<any>(null);
 
@@ -305,7 +306,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('There was an error submitting your request. Please try again.');
+      setSubmitError('Unable to submit your request right now. Please try again or call 0321 425 6263.');
     } finally {
       setSubmitting(false);
     }
@@ -865,18 +866,24 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
                 />
               </div>
 
+              {submitError && (
+                <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3.5 rounded-xl text-xs font-bold">
+                  {submitError}
+                </div>
+              )}
+
               <div className="flex justify-between pt-4 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={prevStep}
-                  className="px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest text-gray-500 hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3 min-h-[48px] rounded-full font-black text-xs uppercase tracking-widest text-gray-500 hover:bg-gray-100 transition-colors"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={!isStepValid() || submitting}
-                  className="bg-[#00B4D8] text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#1A2B4C] transition-all flex items-center gap-2"
+                  className="bg-[#00B4D8] text-white px-8 py-3 min-h-[48px] rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#1A2B4C] transition-all flex items-center gap-2"
                 >
                   {submitting ? (
                     <>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { PackageX, ShieldCheck, Zap, Receipt } from 'lucide-react';
 import { SEO } from '../components/SEO';
@@ -97,7 +98,7 @@ export function BlindDropShipping() {
           <div className="flex-1 bg-blue-50 p-8 rounded-2xl text-center border border-blue-100">
              <h3 className="text-xl font-bold text-blue-900 mb-4">Ready to start?</h3>
              <p className="text-blue-700 mb-8 text-sm">This service is exclusively for registered resellers and agencies.</p>
-             <button className="bg-[#1A2B4C] text-white px-8 py-3 rounded-full font-bold hover:bg-[#00B4D8] transition-colors w-full">Apply for Reseller Account</button>
+             <Link to="/programs/reseller-program" className="bg-[#1A2B4C] text-white px-8 py-3 min-h-[48px] rounded-full font-bold hover:bg-[#00B4D8] transition-colors w-full flex items-center justify-center">Apply for Reseller Account</Link>
           </div>
         </div>
       </div>

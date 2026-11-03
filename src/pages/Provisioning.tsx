@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Settings, Shield, Edit3, Server } from 'lucide-react';
 import { SEO } from '../components/SEO';
@@ -101,9 +102,9 @@ export function Provisioning() {
            <p className="text-gray-300 text-lg mb-6 max-w-2xl mx-auto">
              Minimal setup fee per device. <span className="font-bold text-white">Waived entirely on bulk orders over 50 units.</span>
            </p>
-           <button className="bg-[#00B4D8] text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors">
+           <Link to="/contact" className="bg-[#00B4D8] text-white px-8 py-4 min-h-[48px] rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors inline-flex items-center justify-center">
              Contact Sales
-           </button>
+           </Link>
         </div>
       </div>
     </div>

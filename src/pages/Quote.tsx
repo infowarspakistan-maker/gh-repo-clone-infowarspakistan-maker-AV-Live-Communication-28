@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Send, FileText, Settings, CreditCard, CheckCircle, Loader2 } from 'lucide-react';
+import { Send, FileText, Settings, CreditCard, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase/client';
-import { handleFirestoreError, OperationType } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 
 export function Quote() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     companyName: '',
@@ -38,6 +39,7 @@ export function Quote() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(null);
     const path = 'quote_requests';
     try {
       await addDoc(collection(db, path), {
@@ -47,7 +49,8 @@ export function Quote() {
       });
       setSuccess(true);
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, path);
+      console.error('Error submitting quote request:', error);
+      setErrorMessage('Unable to submit your quote request right now. Please verify required fields or call 0321 425 6263.');
     } finally {
       setLoading(false);
     }
@@ -71,12 +74,12 @@ export function Quote() {
           </div>
           <h1 className="text-3xl font-black text-[#1A2B4C] mb-4">Request Transmitted</h1>
           <p className="text-gray-500 mb-8 font-medium">Your custom quote request has been received. Our AV design team will review your specifications and send a tailored proposal within 24 hours.</p>
-          <button 
-            onClick={() => window.location.href = '/'}
-            className="w-full bg-[#1A2B4C] text-white py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-[#00B4D8] transition-all"
+          <Link 
+            to="/"
+            className="w-full bg-[#1A2B4C] text-white py-4 min-h-[48px] rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-[#00B4D8] transition-all flex items-center justify-center"
           >
             Return to Homepage
-          </button>
+          </Link>
         </motion.div>
       </div>
     );
@@ -143,12 +146,17 @@ export function Quote() {
             ))}
           </div>
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden flex">
-             <div className="h-full bg-[#00B4D8] transition-all duration-300" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
+             <div className={`h-full bg-[#00B4D8] transition-all duration-300 ${step === 1 ? 'w-1/4' : step === 2 ? 'w-2/4' : step === 3 ? 'w-3/4' : 'w-full'}`}></div>
           </div>
         </div>
 
         <div className="bg-white p-8 md:p-10 rounded-3xl border border-gray-200 shadow-sm">
-          
+          {errorMessage && (
+            <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl text-xs font-bold flex items-center gap-2.5">
+              <AlertCircle size={18} className="shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
           <form className="space-y-8" onSubmit={handleSubmit}>
             
             {step === 1 && (

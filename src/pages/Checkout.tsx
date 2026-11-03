@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react';
-import { ShieldCheck, CreditCard, Building2, User, Loader2, CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShieldCheck, CreditCard, Building2, User, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { getCart, getCartTotal, clearCart } from '../lib/cart';
+import { getCart, getCartTotal, clearCart, CartItem } from '../lib/cart';
 import { createOrder } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 
 export function Checkout() {
-  const cartItems = getCart();
-  const subtotal = getCartTotal();
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => getCart());
+  const [subtotal, setSubtotal] = useState<number>(() => getCartTotal());
+
+  useEffect(() => {
+    const syncCart = () => {
+      setCartItems(getCart());
+      setSubtotal(getCartTotal());
+    };
+    window.addEventListener('cart-updated', syncCart);
+    return () => window.removeEventListener('cart-updated', syncCart);
+  }, []);
   
   const [customerType, setCustomerType] = useState<'individual' | 'business'>('individual');
   const [ntn, setNtn] = useState('');
@@ -57,25 +67,27 @@ export function Checkout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [quotationId, setQuotationId] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleCompleteOrder = async () => {
     if (!formData.email || !formData.firstName) {
-      alert('Please complete the required fields.');
+      setErrorMessage('Please enter both your First Name and Email Address before executing deployment.');
       return;
     }
 
+    setErrorMessage(null);
     setIsSubmitting(true);
     try {
       const orderData = {
         orderNumber: `AV-${Math.floor(100000 + Math.random() * 900000)}`,
-        customerId: formData.email, // In a real app, this would be the user UID
+        customerId: formData.email,
         customerName: `${formData.firstName} ${formData.lastName}`,
         customerEmail: formData.email,
         customerPhone: formData.phone,
         items: cartItems.map(item => ({
           productId: item.id.toString(),
           productName: item.name,
-          sku: '', // Should be fetched from product
+          sku: '',
           quantity: item.quantity,
           price: item.price,
           total: item.price * item.quantity,
@@ -92,13 +104,13 @@ export function Checkout() {
         notes: customerType === 'business' ? `NTN: ${ntn}` : undefined,
       };
 
-      const id = await createOrder(orderData);
+      await createOrder(orderData);
       setQuotationId(orderData.orderNumber);
       setOrderComplete(true);
       clearCart();
     } catch (e) {
       console.error(e);
-      alert('System error: Could not process order. Please try again.');
+      setErrorMessage('System error: Could not process order right now. Please try again or call 0321 425 6263.');
     } finally {
       setIsSubmitting(false);
     }
@@ -107,7 +119,7 @@ export function Checkout() {
   if (orderComplete) {
     return (
       <div className="bg-[#F8F9FA] min-h-screen py-16 text-[#1A2B4C] flex items-center justify-center">
-      <SEO title="Checkout" noindex />
+        <SEO title="Checkout" noindex />
         <div className="bg-white p-12 rounded-[3rem] border border-gray-100 shadow-2xl text-center max-w-lg w-full">
           <CheckCircle2 size={64} className="text-emerald-500 mx-auto mb-8" />
           <h1 className="text-4xl font-black mb-4">Transmission Successful</h1>
@@ -116,9 +128,9 @@ export function Checkout() {
             <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Logistics Reference</span>
             <span className="font-mono text-3xl text-[#00B4D8] font-black tracking-tighter">{quotationId}</span>
           </div>
-          <a href="/shop" className="w-full bg-[#1A2B4C] hover:bg-[#00B4D8] text-white py-5 rounded-2xl font-black transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl active:scale-95">
+          <Link to="/shop" className="w-full bg-[#1A2B4C] hover:bg-[#00B4D8] text-white py-5 min-h-[48px] rounded-2xl font-black transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl active:scale-95">
             Return to Catalog
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -296,10 +308,17 @@ export function Checkout() {
                 <span className="font-black text-3xl text-[#00B4D8]">Rs. {total.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
               </div>
 
+              {errorMessage && (
+                <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl text-xs font-bold flex items-start gap-2.5">
+                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               <button 
                 onClick={handleCompleteOrder} 
                 disabled={isSubmitting || cartItems.length === 0} 
-                className="w-full bg-[#1A2B4C] text-white py-6 rounded-2xl font-black hover:bg-[#00B4D8] transition-all uppercase tracking-[0.2em] text-[11px] shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95"
+                className="w-full bg-[#1A2B4C] text-white py-6 min-h-[48px] rounded-2xl font-black hover:bg-[#00B4D8] transition-all uppercase tracking-[0.2em] text-[11px] shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95"
               >
                 {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : 'Execute Deployment'}
               </button>

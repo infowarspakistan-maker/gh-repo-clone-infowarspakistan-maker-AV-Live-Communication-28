@@ -416,7 +416,7 @@ export function InventoryDashboard() {
                               <div className="flex items-center gap-4">
                                  <div className="w-12 h-12 bg-white rounded-xl border border-gray-100 p-2 shrink-0 shadow-sm">
                                     {(Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] ? (
-                                      <img loading="lazy" src={product.images?.[0] || 'https://placehold.co/400x400?text=No+Image'} className="w-full h-full object-contain" />
+                                      <img loading="lazy" src={product.images?.[0] || 'https://placehold.co/400x400?text=No+Image'} alt={product.productName || 'Product inventory thumbnail'} className="w-full h-full object-contain" />
                                     ) : (
                                       <Package className="w-full h-full text-gray-100" />
                                     )}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRightLeft, Info, Check } from 'lucide-react';
 import { SEO } from '../components/SEO';
@@ -75,13 +76,13 @@ export function Compare() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
         <div className="flex gap-4 mb-8 justify-center flex-wrap">
-           <button onClick={() => setCategory('ip-phones')} className={`px-6 py-3 rounded-full font-bold text-sm ${category === 'ip-phones' ? 'bg-[#00B4D8] text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>
+           <button onClick={() => setCategory('ip-phones')} className={`px-6 py-3 min-h-[48px] rounded-full font-bold text-sm transition-colors ${category === 'ip-phones' ? 'bg-[#00B4D8] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-[#00B4D8]'}`}>
              IP Phones
            </button>
-           <button onClick={() => setCategory('video-conferencing')} className={`px-6 py-3 rounded-full font-bold text-sm ${category === 'video-conferencing' ? 'bg-[#00B4D8] text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>
+           <button onClick={() => setCategory('video-conferencing')} className={`px-6 py-3 min-h-[48px] rounded-full font-bold text-sm transition-colors ${category === 'video-conferencing' ? 'bg-[#00B4D8] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-[#00B4D8]'}`}>
              Video Conferencing
            </button>
-           <button onClick={() => setCategory('projectors')} className={`px-6 py-3 rounded-full font-bold text-sm ${category === 'projectors' ? 'bg-[#00B4D8] text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>
+           <button onClick={() => setCategory('projectors')} className={`px-6 py-3 min-h-[48px] rounded-full font-bold text-sm transition-colors ${category === 'projectors' ? 'bg-[#00B4D8] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-[#00B4D8]'}`}>
              Projectors
            </button>
         </div>
@@ -186,9 +187,9 @@ export function Compare() {
              <h3 className="text-2xl font-black mb-2 flex items-center gap-2"><Info className="text-[#00B4D8]"/> Need a Custom Comparison?</h3>
              <p className="text-gray-300">We can compare any products not listed here. Let our experts build a matrix for you.</p>
            </div>
-           <button className="bg-[#00B4D8] text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+           <Link to="/programs/quote" className="bg-[#00B4D8] text-white px-8 py-4 min-h-[48px] rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors whitespace-nowrap inline-flex items-center justify-center">
              Request Comparison Form
-           </button>
+           </Link>
         </div>
       </div>
     </div>

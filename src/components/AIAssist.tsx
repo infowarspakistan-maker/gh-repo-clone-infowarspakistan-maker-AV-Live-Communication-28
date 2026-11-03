@@ -51,9 +51,9 @@ export function AIAssist() {
       <button
         onClick={() => setIsOpen(true)}
         aria-label="Open AV Assist chat"
-        className={`fixed bottom-6 right-6 w-16 h-16 bg-[#00B4D8] text-[#1A2B4C] rounded-full flex items-center justify-center shadow-2xl hover:bg-[#0096B4] hover:text-white transition-transform z-50 ${isOpen ? 'scale-0' : 'scale-100'} hover:scale-110`}
+        className={`fixed bottom-20 right-4 lg:bottom-6 lg:right-6 min-w-[48px] min-h-[48px] w-12 h-12 lg:w-16 lg:h-16 bg-[#00B4D8] text-[#1A2B4C] rounded-full flex items-center justify-center shadow-2xl hover:bg-[#0096B4] hover:text-white transition-transform z-50 ${isOpen ? 'scale-0' : 'scale-100'} hover:scale-110`}
       >
-        <Bot size={28} />
+        <Bot size={24} className="lg:w-7 lg:h-7" />
       </button>
 
       {/* Chat Window */}
@@ -63,7 +63,7 @@ export function AIAssist() {
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-6 right-6 w-[380px] h-[550px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col border border-gray-200 overflow-hidden"
+            className="fixed inset-x-3 bottom-20 sm:inset-x-auto sm:right-6 sm:w-[380px] lg:bottom-6 h-[72vh] max-h-[520px] lg:h-[550px] lg:max-h-none bg-white rounded-2xl shadow-2xl z-[110] flex flex-col border border-gray-200 overflow-hidden"
           >
             {/* Header */}
             <div className="bg-[#1A2B4C] text-white p-4 flex items-center justify-between">
@@ -79,7 +79,7 @@ export function AIAssist() {
               <button 
                 onClick={() => setIsOpen(false)}
                 aria-label="Close AV Assist chat"
-                className="text-slate-300 hover:text-white transition-colors"
+                className="min-w-[48px] min-h-[48px] flex items-center justify-center text-slate-300 hover:text-white transition-colors"
               >
                 <X size={24} />
               </button>
@@ -126,13 +126,13 @@ export function AIAssist() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="Ask about products, quotes..."
-                  className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B4D8] focus:border-transparent"
+                  className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 min-h-[48px] text-sm focus:outline-none focus:ring-2 focus:ring-[#00B4D8] focus:border-transparent"
                 />
                 <button 
                   onClick={handleSend}
                   aria-label="Send message"
                   disabled={!input.trim() || isTyping}
-                  className="w-12 h-12 bg-[#00B4D8] text-[#1A2B4C] rounded-xl flex items-center justify-center disabled:opacity-50 hover:bg-[#0096B4] hover:text-white transition-colors"
+                  className="min-w-[48px] min-h-[48px] w-12 h-12 bg-[#00B4D8] text-[#1A2B4C] rounded-xl flex items-center justify-center disabled:opacity-50 hover:bg-[#0096B4] hover:text-white transition-colors"
                 >
                   <Send size={18} />
                 </button>

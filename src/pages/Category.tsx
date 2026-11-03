@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowRight, Box, Settings, Mic, Video, ShieldCheck, Speaker, Loader2, Zap, LayoutGrid, Layers, Heart } from 'lucide-react';
+import { ArrowRight, Box, Settings, Mic, Video, ShieldCheck, Speaker, Loader2, Zap, LayoutGrid, Layers, Heart, Plus } from 'lucide-react';
 import { subscribeToCategories, subscribeToProducts, Product, Category as CategoryType } from '../lib/firebase/firestore-helpers';
 import {
   getCanonicalProductSlug,
@@ -13,6 +13,8 @@ import { EXCLUDED_CATEGORY_SLUGS, NON_PRODUCT_CATEGORY_REDIRECTS } from '../lib/
 import { addToCart } from '../lib/cart';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { MobileProductCard } from '../components/MobileProductCard';
+import { BlurProductImage } from '../components/BlurProductImage';
 
 const FALLBACK_PRODUCT_CATEGORIES: Record<
   string,
@@ -353,69 +355,67 @@ export function Category() {
         }}
       />
       {/* Category Hero */}
-      <div className="bg-white border-b border-gray-100 py-16 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-16 relative z-10">
-           <div className="absolute top-8 left-8">
-              <Breadcrumbs items={[
-                { label: 'Shop', path: '/shop' },
-                { label: currentCategory.name }
-              ]} />
-           </div>
-           <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-32 h-32 bg-[#1A2B4C] text-[#00B4D8] rounded-[2.5rem] flex items-center justify-center shrink-0 shadow-2xl"
-          >
-            {currentCategory.imageUrl ? (
-              <img fetchPriority="high" src={currentCategory.imageUrl} alt={currentCategory.name} className="w-full h-full object-cover rounded-[2.5rem]" />
-            ) : (
-              <Layers size={48} />
-            )}
-          </motion.div>
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex-1 text-center md:text-left"
-          >
-            <span className="text-[#00B4D8] text-[10px] font-black uppercase tracking-[0.3em] mb-4 block">Hardware Classification</span>
-            <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight">{currentCategory.name}</h1>
-            <p className="text-gray-400 max-w-2xl leading-relaxed font-medium text-lg">
-              {currentCategory.description || 'Enterprise-grade equipment and specialized infrastructure solutions.'}
-            </p>
-          </motion.div>
+      <div className="bg-white border-b border-gray-100 py-3.5 lg:py-6 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
+          <Breadcrumbs items={[
+            { label: 'Shop', path: '/shop' },
+            { label: currentCategory.name }
+          ]} />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 lg:gap-6">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="hidden sm:flex w-12 h-12 lg:w-16 lg:h-16 bg-[#1A2B4C] text-[#00B4D8] rounded-2xl items-center justify-center shrink-0 shadow-md"
+            >
+              {currentCategory.imageUrl ? (
+                <img fetchPriority="high" src={currentCategory.imageUrl} alt={currentCategory.name} className="w-full h-full object-cover rounded-2xl" />
+              ) : (
+                <Layers size={26} />
+              )}
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex-1 text-left"
+            >
+              <span className="text-[#00B4D8] text-[9px] font-black uppercase tracking-[0.25em] mb-0.5 block">Hardware Classification</span>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black mb-1 tracking-tight text-[#1A2B4C]">{currentCategory.name}</h1>
+              <p className="text-gray-500 max-w-2xl leading-relaxed font-medium text-xs sm:text-sm line-clamp-2">
+                {currentCategory.description || 'Enterprise-grade equipment and specialized infrastructure solutions.'}
+              </p>
+            </motion.div>
+          </div>
         </div>
-        {/* Abstract Background */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gray-50 rounded-full translate-x-1/2 -translate-y-1/2"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-4 lg:mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
           
-          {/* Sidebar / Filters */}
-          <div className="lg:col-span-1 space-y-10">
+          {/* Sidebar / Filters (Order 2 on mobile so products appear immediately; Order 1 on desktop) */}
+          <div className="order-2 lg:order-1 lg:col-span-1 space-y-4 lg:space-y-6">
              {subcategories.length > 0 && (
-               <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">Sub-Systems</h3>
-                 <div className="space-y-4">
+               <div className="bg-white p-4 lg:p-6 rounded-2xl lg:rounded-3xl border border-gray-100 shadow-xs">
+                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 lg:mb-4">Sub-Systems</h3>
+                 <div className="space-y-1.5 lg:space-y-2.5">
                     {subcategories.map(sub => (
-                      <Link key={sub.id} to={`/category/${sub.slug}`} className="flex items-center justify-between group">
-                         <span className="text-sm font-black uppercase tracking-widest text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors">{sub.name}</span>
-                         <ArrowRight size={14} className="text-gray-200 group-hover:text-[#00B4D8] group-hover:translate-x-1 transition-all" />
+                      <Link key={sub.id} to={`/category/${sub.slug}`} className="flex items-center justify-between py-1.5 group">
+                         <span className="text-xs font-black uppercase tracking-wider text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors">{sub.name}</span>
+                         <ArrowRight size={13} className="text-gray-300 group-hover:text-[#00B4D8] group-hover:translate-x-1 transition-all" />
                       </Link>
                     ))}
                  </div>
                </div>
              )}
 
-             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">Hardware Partners</h3>
-               <div className="space-y-4">
+             <div className="bg-white p-4 lg:p-6 rounded-2xl lg:rounded-3xl border border-gray-100 shadow-xs">
+               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 lg:mb-4">Hardware Partners</h3>
+               <div className="space-y-1.5 lg:space-y-2.5">
                   {brandsIncategory.map(brand => {
                     const rawSlug = brand.toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
                     const canonicalBrandSlug = rawSlug === 'polycom' || rawSlug === 'hp-poly' ? 'poly' : rawSlug;
                     return (
-                      <Link key={brand} to={`/brands/${encodeURIComponent(canonicalBrandSlug)}`} className="flex items-center justify-between group">
-                         <span className="text-sm font-black uppercase tracking-widest text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors">{brand}</span>
+                      <Link key={brand} to={`/brands/${encodeURIComponent(canonicalBrandSlug)}`} className="flex items-center justify-between py-1.5 group">
+                         <span className="text-xs font-black uppercase tracking-wider text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors">{brand}</span>
                          <div className="w-1.5 h-1.5 bg-gray-100 rounded-full group-hover:bg-[#00B4D8] transition-colors"></div>
                       </Link>
                     );
@@ -426,11 +426,11 @@ export function Category() {
                </div>
              </div>
 
-             <div className="bg-[#1A2B4C] p-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+             <div className="bg-[#1A2B4C] p-5 lg:p-6 rounded-2xl lg:rounded-3xl text-white shadow-lg relative overflow-hidden group">
                 <div className="relative z-10">
-                   <h4 className="text-sm font-black uppercase tracking-widest mb-4">Design Assistance</h4>
-                   <p className="text-xs text-gray-400 leading-relaxed mb-8">Need a custom technical drawing for this infrastructure?</p>
-                   <Link to="/contact" className="bg-[#00B4D8] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-[#1A2B4C] transition-all inline-block">
+                   <h4 className="text-xs font-black uppercase tracking-widest mb-2">Design Assistance</h4>
+                   <p className="text-xs text-gray-300 leading-relaxed mb-4">Need a custom technical drawing for this infrastructure?</p>
+                   <Link to="/contact" className="bg-[#00B4D8] text-white px-4 py-2 min-h-[36px] rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-[#1A2B4C] transition-all inline-flex items-center justify-center">
                       Consult Architect
                    </Link>
                 </div>
@@ -438,59 +438,85 @@ export function Category() {
              </div>
           </div>
 
-          {/* Product Grid */}
-          <div className="lg:col-span-3">
-             <div className="flex items-center justify-between mb-12">
-                <h2 className="text-2xl font-black tracking-tight">{categoryProducts.length} Active Modules Found</h2>
-                <div className="flex items-center gap-4">
-                   <LayoutGrid size={20} className="text-[#00B4D8]" />
+          {/* Product Grid (Order 1 on mobile; 2-column compact reference cards on < 1024px) */}
+          <div className="order-1 lg:order-2 lg:col-span-3">
+             <div className="flex items-center justify-between mb-3 lg:mb-5">
+                <h2 className="text-sm sm:text-lg font-black tracking-tight">{categoryProducts.length} Active Modules Found</h2>
+                <div className="flex items-center gap-3">
+                   <LayoutGrid size={18} className="text-[#00B4D8]" />
                 </div>
              </div>
 
-             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+             <div className="grid grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-5 lg:gap-6">
                 {categoryProducts.map((product, idx) => {
                   const prodSlug = getCanonicalProductSlug(product);
                   const { effectivePrice } = resolveProductPricing(product);
+                  const imgUrl = (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || 'https://placehold.co/600x600?text=No+Image';
                   return (
+                  <React.Fragment key={product.id}>
+                    <div className="lg:hidden">
+                      <MobileProductCard
+                        product={product}
+                        eager={idx < 4}
+                        priority={idx < 2}
+                      />
+                    </div>
                   <motion.div 
-                    key={product.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className="bg-white group rounded-[2.5rem] overflow-hidden border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-2xl"
+                    className="hidden lg:flex bg-white group rounded-[2.5rem] overflow-hidden border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-2xl flex-col justify-between"
                   >
-                    <Link to={`/product/${prodSlug}`} className="aspect-square bg-gray-50 overflow-hidden block">
-                       <img loading="lazy" 
-                         src={(Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || 'https://placehold.co/600x600?text=No+Image'} 
-                         alt={product.productName} 
-                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    <Link to={`/product/${prodSlug}`} className="aspect-[4/3] lg:aspect-square bg-[#F8F9FA] lg:bg-gray-50 overflow-hidden block relative p-2 lg:p-0">
+                       <BlurProductImage
+                         loading={idx < 4 ? 'eager' : 'lazy'}
+                         fetchPriority={idx < 2 ? 'high' : 'auto'}
+                         decoding="async"
+                         width={400}
+                         height={400}
+                         src={imgUrl}
+                         seed={prodSlug}
+                         alt={product.productName}
+                         className="relative z-10 w-full h-full object-contain lg:object-cover mix-blend-multiply lg:mix-blend-normal group-hover:scale-105 transition-transform duration-700"
                        />
+                       <span className="lg:hidden absolute top-2 right-2 w-6 h-6 rounded-full bg-white/90 text-rose-500 flex items-center justify-center shadow-sm">
+                         <Heart size={12} fill="currentColor" />
+                       </span>
                     </Link>
-                    <div className="p-8">
-                       <div className="flex items-center justify-between mb-4">
-                          <span className="text-[10px] text-[#00B4D8] font-black uppercase tracking-widest">{product.brand}</span>
-                          <span className="text-[10px] text-gray-300 font-black tracking-widest">{product.sku}</span>
+                    <div className="p-3 sm:p-5 lg:p-8 flex flex-col flex-1 justify-between">
+                       <div>
+                         <div className="flex items-center justify-between mb-1.5 lg:mb-4">
+                            <span className="text-[9px] lg:text-[10px] text-[#00B4D8] font-black uppercase tracking-widest truncate">{product.brand}</span>
+                            <span className="hidden sm:inline text-[10px] text-gray-300 font-black tracking-widest">{product.sku}</span>
+                         </div>
+                         <Link to={`/product/${prodSlug}`} className="block">
+                            <h3 className="font-black text-xs sm:text-sm lg:text-base text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-1 lg:line-clamp-2 leading-tight mb-2 lg:mb-8 lg:h-10">{product.productName}</h3>
+                         </Link>
                        </div>
-                       <Link to={`/product/${prodSlug}`} className="block">
-                          <h3 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2 leading-tight mb-8 h-10">{product.productName}</h3>
-                       </Link>
-                       <div className="flex items-center justify-between pt-6 border-t border-gray-50">
-                          <span className="text-xl font-black">Rs. {effectivePrice.toLocaleString()}</span>
+                       <div className="flex items-center justify-between pt-2.5 lg:pt-6 border-t border-gray-50">
+                          <span className="text-xs sm:text-base lg:text-xl font-black">Rs. {effectivePrice.toLocaleString()}</span>
                           <button 
                             onClick={() => addToCart({
                               id: product.id!,
                               name: product.productName,
                               price: effectivePrice,
-                              image: (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || '',
+                              image: imgUrl,
                               brand: product.brand
                             } as any)}
-                            className="w-10 h-10 bg-[#1A2B4C] text-white rounded-xl flex items-center justify-center hover:bg-[#00B4D8] transition-all shadow-lg"
+                            aria-label={`Add ${product.productName} to cart`}
+                            className="min-w-[48px] min-h-[48px] -m-2 lg:m-0 flex items-center justify-center cursor-pointer"
                           >
-                             <Zap size={16} />
+                             <span className="lg:hidden w-8 h-8 rounded-full bg-[#1A2B4C] text-white flex items-center justify-center shadow-sm">
+                               <Plus size={15} strokeWidth={2.5} />
+                             </span>
+                             <span className="hidden lg:flex w-10 h-10 bg-[#1A2B4C] text-white rounded-xl items-center justify-center hover:bg-[#00B4D8] transition-all shadow-lg">
+                               <Zap size={16} />
+                             </span>
                           </button>
                        </div>
                     </div>
                   </motion.div>
+                  </React.Fragment>
                   );
                 })}
 

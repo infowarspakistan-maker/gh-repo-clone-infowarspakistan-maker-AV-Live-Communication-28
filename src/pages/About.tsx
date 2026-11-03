@@ -6,26 +6,13 @@ import { SEO } from '../components/SEO';
 
 export function About() {
   const [content, setContent] = useState<AboutData | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = subscribeToAbout((data) => {
       setContent(data);
-      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
-        <div className="text-center">
-          <Loader2 className="animate-spin text-[#00B4D8] mx-auto mb-4" size={40} />
-          <p className="text-gray-400 font-black uppercase tracking-widest text-[10px]">Loading Our Story...</p>
-        </div>
-      </div>
-    );
-  }
 
   const data = {
     heroHeading: content?.heroHeading || 'Unifying People and Ideas Since 2010',

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Landmark, GraduationCap, FileSignature, Handshake, Users } from 'lucide-react';
 import { SEO } from '../components/SEO';
@@ -90,11 +91,11 @@ export function GovEdPricing() {
            <div className="relative z-10 flex-1 text-white">
               <h2 className="text-3xl font-black mb-4">Qualifying Entities</h2>
               <p className="text-gray-300 text-lg mb-6">Government Ministries, WAPDA, PEMRA, Universities, Colleges, and K-12 Schools are eligible for our public sector pricing.</p>
-              <div className="flex gap-4">
-                 <button className="bg-[#00B4D8] text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+              <div className="flex flex-wrap gap-4">
+                 <Link to="/programs/quote" className="bg-[#00B4D8] text-white px-8 py-4 min-h-[48px] rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors whitespace-nowrap inline-flex items-center justify-center">
                    Submit Your NTN
-                 </button>
-                 <a href="tel:03214256263" className="bg-transparent border border-white text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors whitespace-nowrap text-center">
+                 </Link>
+                 <a href="tel:03214256263" className="bg-transparent border border-white text-white px-8 py-4 min-h-[48px] rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors whitespace-nowrap text-center inline-flex items-center justify-center">
                    Call 0321 425 6263
                  </a>
               </div>

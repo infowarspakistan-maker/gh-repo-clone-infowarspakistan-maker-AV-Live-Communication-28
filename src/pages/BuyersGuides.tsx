@@ -66,12 +66,12 @@ export function BuyersGuides() {
               </div>
               <h2 className="text-2xl font-black text-[#1A2B4C] mb-4 leading-tight">The Ultimate IP Phone Buyer's Guide (2026)</h2>
               <div className="flex flex-col gap-3 w-full mt-4">
-                 <button className="bg-[#00B4D8] text-white py-3 px-6 rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
-                   <Download size={16} /> Download Full Guide
-                 </button>
-                 <button className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 rounded-full font-bold text-sm hover:bg-gray-50 transition-colors w-full">
+                 <Link to="/blog/3cx-vs-freepbx-vs-cisco-cucm-voip-guide-pakistan" className="bg-[#00B4D8] text-white py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
+                   <Download size={16} /> Read Full Guide
+                 </Link>
+                 <Link to="/compare" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
                    Compare IP Phone Models
-                 </button>
+                 </Link>
               </div>
             </div>
             <div className="p-8 lg:p-12 lg:w-2/3">
@@ -111,10 +111,10 @@ export function BuyersGuides() {
               </div>
               <h2 className="text-2xl font-black text-[#1A2B4C] mb-4 leading-tight">The Complete Video Conferencing Buyer's Guide</h2>
               <div className="flex flex-col gap-3 w-full mt-4">
-                 <button className="bg-[#00B4D8] text-white py-3 px-6 rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
-                   <Download size={16} /> Download Full Guide
-                 </button>
-                 <Link to="/contact" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 rounded-full font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
+                 <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="bg-[#00B4D8] text-white py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
+                   <Download size={16} /> Read Full Guide
+                 </Link>
+                 <Link to="/contact" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
                    Book a Consultation
                  </Link>
               </div>
@@ -156,10 +156,10 @@ export function BuyersGuides() {
               </div>
               <h2 className="text-2xl font-black text-[#1A2B4C] mb-4 leading-tight">The Public Address & Paging Systems Buyer's Guide</h2>
               <div className="flex flex-col gap-3 w-full mt-4">
-                 <button className="bg-[#00B4D8] text-white py-3 px-6 rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
-                   <Download size={16} /> Download Full Guide
-                 </button>
-                 <Link to="/contact" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 rounded-full font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
+                 <Link to="/blog/bosch-paviro-pa-system-design-guide-pakistan" className="bg-[#00B4D8] text-white py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
+                   <Download size={16} /> Read Full Guide
+                 </Link>
+                 <Link to="/contact" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
                    Request a Site Survey
                  </Link>
               </div>

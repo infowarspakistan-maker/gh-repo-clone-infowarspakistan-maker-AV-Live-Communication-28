@@ -1,9 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { TrendingUp, BookOpen, FileText, ArrowRight } from 'lucide-react';
+import { TrendingUp, BookOpen, FileText, ArrowRight, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase/client';
 import { SEO } from '../components/SEO';
 
 export function Reseller() {
+  const [formData, setFormData] = useState({
+    companyName: '',
+    ntn: '',
+    email: '',
+    details: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleApplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await addDoc(collection(db, 'reseller_applications'), {
+        ...formData,
+        status: 'pending',
+        createdAt: serverTimestamp()
+      });
+      setSubmitted(true);
+      setFormData({ companyName: '', ntn: '', email: '', details: '' });
+    } catch (err) {
+      console.error('Error submitting reseller application:', err);
+      setSubmitError('Unable to submit application right now. Please call 0321 425 6263.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
       <SEO 
@@ -87,19 +119,67 @@ export function Reseller() {
              <p className="text-gray-600 mb-8 leading-relaxed">
                Manage your pricing, check live stock, track orders, and request RMA directly from your custom B2B dashboard.
              </p>
-             <button className="bg-[#1A2B4C] text-white px-8 py-4 rounded-full font-bold hover:bg-[#00B4D8] transition-colors w-max">
+             <Link to="/admin/login" className="bg-[#1A2B4C] text-white px-8 py-4 min-h-[48px] rounded-full font-bold hover:bg-[#00B4D8] transition-colors w-max inline-flex items-center justify-center">
                Login to Portal
-             </button>
+             </Link>
            </div>
            <div className="p-12 lg:w-1/2 border-t lg:border-t-0 lg:border-l border-gray-200">
              <h2 className="text-2xl font-black text-[#1A2B4C] mb-6">Apply Now</h2>
-             <form className="space-y-4">
-               <input type="text" placeholder="Company Name" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00B4D8]" />
-               <input type="text" placeholder="NTN Number" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00B4D8]" />
-               <input type="email" placeholder="Business Email" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00B4D8]" />
-               <textarea placeholder="Tell us about your business" rows={3} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00B4D8] resize-none"></textarea>
-               <button type="button" className="w-full bg-[#00B4D8] text-white py-3 rounded-lg font-bold hover:bg-[#1A2B4C] transition-colors">Submit Application</button>
-             </form>
+             {submitted ? (
+               <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
+                 <CheckCircle2 size={40} className="text-emerald-600 mx-auto" />
+                 <h3 className="text-lg font-black text-[#1A2B4C]">Partner Application Received</h3>
+                 <p className="text-xs text-gray-600 font-medium">Our channel partner desk will verify your NTN and contact you within 24 hours.</p>
+               </div>
+             ) : (
+               <form className="space-y-4" onSubmit={handleApplySubmit}>
+                 {submitError && (
+                   <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg text-xs font-bold flex items-center gap-2">
+                     <AlertCircle size={16} className="shrink-0" />
+                     <span>{submitError}</span>
+                   </div>
+                 )}
+                 <input
+                   type="text"
+                   required
+                   placeholder="Company Name *"
+                   value={formData.companyName}
+                   onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00B4D8]"
+                 />
+                 <input
+                   type="text"
+                   placeholder="NTN Number"
+                   value={formData.ntn}
+                   onChange={(e) => setFormData(prev => ({ ...prev, ntn: e.target.value }))}
+                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00B4D8]"
+                 />
+                 <input
+                   type="email"
+                   required
+                   placeholder="Business Email *"
+                   value={formData.email}
+                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00B4D8]"
+                 />
+                 <textarea
+                   required
+                   placeholder="Tell us about your business *"
+                   rows={3}
+                   value={formData.details}
+                   onChange={(e) => setFormData(prev => ({ ...prev, details: e.target.value }))}
+                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00B4D8] resize-none"
+                 ></textarea>
+                 <button
+                   type="submit"
+                   disabled={submitting}
+                   className="w-full bg-[#00B4D8] text-white py-3 min-h-[48px] rounded-lg font-bold hover:bg-[#1A2B4C] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                 >
+                   {submitting && <Loader2 size={16} className="animate-spin" />}
+                   {submitting ? 'Submitting...' : 'Submit Application'}
+                 </button>
+               </form>
+             )}
            </div>
         </div>
       </div>

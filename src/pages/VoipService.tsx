@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { PhoneCall, Hash, Globe, ServerCog } from 'lucide-react';
 import { SEO } from '../components/SEO';
@@ -109,9 +110,9 @@ export function VoipService() {
              <p className="text-gray-300 leading-relaxed mb-8">
                We don't just sell you the equipment; we manage the entire setup, ensuring QoS (Quality of Service) prioritizes voice traffic over your network.
              </p>
-             <button className="bg-[#00B4D8] text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors w-full shadow-lg shadow-[#00B4D8]/30">
+             <Link to="/programs/quote" className="bg-[#00B4D8] text-white px-8 py-4 min-h-[48px] rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors w-full shadow-lg shadow-[#00B4D8]/30 flex items-center justify-center">
                Request a VoIP Service Quote
-             </button>
+             </Link>
              <p className="text-center mt-6 text-sm text-gray-400">Or call 0321 425 6263</p>
            </div>
         </div>

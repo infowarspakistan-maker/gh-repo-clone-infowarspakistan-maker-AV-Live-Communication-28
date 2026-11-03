@@ -1,31 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Phone, Mail, Clock, Send, Paperclip, Loader2, Globe, Facebook, Linkedin, Youtube, Instagram, Twitter } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, Paperclip, Loader2, Globe, Facebook, Linkedin, Youtube, Instagram, Twitter, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase/client';
 import { subscribeToContact, ContactData } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 
 export function Contact() {
   const [content, setContent] = useState<ContactData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [inquiryForm, setInquiryForm] = useState({
+    fullName: '',
+    organization: '',
+    email: '',
+    phone: '',
+    subject: 'Project Consultation',
+    message: ''
+  });
 
   useEffect(() => {
     const unsubscribe = subscribeToContact((data) => {
       setContent(data);
-      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
-        <div className="text-center">
-          <Loader2 className="animate-spin text-[#00B4D8] mx-auto mb-4" size={40} />
-          <p className="text-gray-400 font-black uppercase tracking-widest text-[10px]">Loading Contact Support...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await addDoc(collection(db, 'inquiries'), {
+        ...inquiryForm,
+        status: 'new',
+        createdAt: serverTimestamp()
+      });
+      setSubmitted(true);
+      setInquiryForm({
+        fullName: '',
+        organization: '',
+        email: '',
+        phone: '',
+        subject: 'Project Consultation',
+        message: ''
+      });
+    } catch (err) {
+      console.error('Error submitting contact inquiry:', err);
+      setSubmitError('Unable to transmit your inquiry right now. Please call 0321 425 6263 or email info@avlive.com.pk.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const data = {
     heroHeading: content?.heroHeading || "Let's Build Your AV Solution Together",
@@ -206,50 +233,119 @@ export function Contact() {
                 <h2 className="text-3xl font-black text-[#1A2B4C] mb-4 tracking-tight">Transmission Terminal</h2>
                 <p className="text-gray-400 font-medium mb-12">Submit your requirements and our certified engineers will respond within 24 hours.</p>
                 
-                <form className="space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Full Name *</label>
-                      <input type="text" required className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all" placeholder="John Doe" />
-                    </div>
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Organization</label>
-                      <input type="text" className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all" placeholder="Enterprise Systems Ltd" />
-                    </div>
+                {submitted ? (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-8 text-center space-y-4">
+                    <CheckCircle2 size={48} className="text-emerald-600 mx-auto" />
+                    <h3 className="text-2xl font-black text-[#1A2B4C]">Transmission Confirmed</h3>
+                    <p className="text-sm text-gray-600 font-medium max-w-md mx-auto">
+                      Thank you for contacting AV Live Communications. Our engineering desk has logged your inquiry and will respond within 24 business hours.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setSubmitted(false)}
+                      className="bg-[#1A2B4C] text-white px-6 py-3 min-h-[48px] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#00B4D8] transition-colors"
+                    >
+                      Send Another Message
+                    </button>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Email Protocol *</label>
-                      <input type="email" required className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all" placeholder="john@enterprise.com" />
+                ) : (
+                  <form className="space-y-8" onSubmit={handleContactSubmit}>
+                    {submitError && (
+                      <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl text-xs font-bold flex items-center gap-3">
+                        <AlertCircle size={18} className="shrink-0" />
+                        <span>{submitError}</span>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Full Name *</label>
+                        <input
+                          type="text"
+                          required
+                          value={inquiryForm.fullName}
+                          onChange={(e) => setInquiryForm(prev => ({ ...prev, fullName: e.target.value }))}
+                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all"
+                          placeholder="John Doe"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Organization</label>
+                        <input
+                          type="text"
+                          value={inquiryForm.organization}
+                          onChange={(e) => setInquiryForm(prev => ({ ...prev, organization: e.target.value }))}
+                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all"
+                          placeholder="Enterprise Systems Ltd"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Phone Link *</label>
-                      <input type="tel" required className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all" placeholder="0321 0000000" />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Email Protocol *</label>
+                        <input
+                          type="email"
+                          required
+                          value={inquiryForm.email}
+                          onChange={(e) => setInquiryForm(prev => ({ ...prev, email: e.target.value }))}
+                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all"
+                          placeholder="john@enterprise.com"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Phone Link *</label>
+                        <input
+                          type="tel"
+                          required
+                          value={inquiryForm.phone}
+                          onChange={(e) => setInquiryForm(prev => ({ ...prev, phone: e.target.value }))}
+                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all"
+                          placeholder="0321 0000000"
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Inquiry Subject *</label>
-                    <select className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-black text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8] transition-all appearance-none cursor-pointer">
-                      <option>Project Consultation</option>
-                      <option>Hardware Quote</option>
-                      <option>Technical Support</option>
-                      <option>RMA Submission</option>
-                      <option>Partner Program</option>
-                    </select>
-                  </div>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Inquiry Subject *</label>
+                      <select
+                        value={inquiryForm.subject}
+                        onChange={(e) => setInquiryForm(prev => ({ ...prev, subject: e.target.value }))}
+                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-black text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8] transition-all appearance-none cursor-pointer"
+                      >
+                        <option>Project Consultation</option>
+                        <option>Hardware Quote</option>
+                        <option>Technical Support</option>
+                        <option>RMA Submission</option>
+                        <option>Partner Program</option>
+                      </select>
+                    </div>
 
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Transmission Message *</label>
-                    <textarea required rows={5} className="w-full bg-gray-50 border border-gray-100 rounded-[2.5rem] px-8 py-6 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all resize-none" placeholder="Describe your technical requirements..."></textarea>
-                  </div>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block px-1">Transmission Message *</label>
+                      <textarea
+                        required
+                        rows={5}
+                        value={inquiryForm.message}
+                        onChange={(e) => setInquiryForm(prev => ({ ...prev, message: e.target.value }))}
+                        className="w-full bg-gray-50 border border-gray-100 rounded-[2.5rem] px-8 py-6 text-sm font-bold focus:outline-none focus:border-[#00B4D8] transition-all resize-none"
+                        placeholder="Describe your technical requirements..."
+                      ></textarea>
+                    </div>
 
-                  <button type="submit" className="w-full bg-[#1A2B4C] text-white py-6 rounded-3xl font-black text-sm uppercase tracking-widest hover:bg-[#00B4D8] transition-all shadow-xl flex items-center justify-center gap-3 group">
-                    <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> 
-                    Engage Experts
-                  </button>
-                </form>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full bg-[#1A2B4C] text-white py-6 min-h-[48px] rounded-3xl font-black text-sm uppercase tracking-widest hover:bg-[#00B4D8] transition-all shadow-xl flex items-center justify-center gap-3 group disabled:opacity-50"
+                    >
+                      {submitting ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      )}
+                      {submitting ? 'Transmitting...' : 'Engage Experts'}
+                    </button>
+                  </form>
+                )}
               </div>
               
               {/* Decorative Circle */}
@@ -266,10 +362,9 @@ export function Contact() {
               src="https://storage.googleapis.com/maps-solutions-olnm31i0i8/locator-plus/10b8/locator-plus.html" 
               width="100%" 
               height="100%" 
-              style={{ border: 0 }} 
               loading="lazy" 
               title="AV Live Communications Store Locator"
-              className="w-full h-full transition-all duration-700"
+              className="w-full h-full border-0 transition-all duration-700"
             ></iframe>
         </div>
       </div>

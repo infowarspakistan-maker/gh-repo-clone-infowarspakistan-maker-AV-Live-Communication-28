@@ -12,7 +12,7 @@ import {
   X, 
   SlidersHorizontal,
   Check,
-  Eye, ArrowRight, Star, Heart,
+  Eye, ArrowRight, Star, Heart, Plus,
 } from 'lucide-react';
 import { Link, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
@@ -27,6 +27,8 @@ import { EXCLUDED_CATEGORY_SLUGS } from '../lib/sitemap-generator';
 import { optimizeGalleryImageUrl } from '../lib/image-optimize';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { MobileProductCard } from '../components/MobileProductCard';
+import { BlurProductImage } from '../components/BlurProductImage';
 
 const INITIAL_FALLBACK_SHOP_PRODUCTS: Product[] = (() => {
   const seen = new Set<string>();
@@ -464,7 +466,7 @@ export function Shop() {
   };
 
   return (
-    <div className="bg-[#F8F9FA] min-h-screen py-12 text-[#1A2B4C]">
+    <div className="bg-[#F8F9FA] min-h-screen py-3 lg:py-6 text-[#1A2B4C]">
       <SEO 
         title={shopSeoTitle}
         description={shopSeoDescription}
@@ -475,7 +477,7 @@ export function Shop() {
         noindex={shouldNoIndexFaceted}
         schema={shopSchema}
       />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <Breadcrumbs
           items={
             activeSingleBrandName
@@ -487,22 +489,22 @@ export function Shop() {
         />
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-8 border-b border-gray-200">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-2.5 lg:gap-4 mb-3 lg:mb-5 pb-2.5 lg:pb-4 border-b border-gray-200">
           <div>
-            <h1 className="text-4xl font-black tracking-tight">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tight leading-snug">
               {activeSingleBrandName
                 ? `${activeSingleBrandName} Video Conferencing & AV Hardware in Pakistan`
                 : 'Professional Audio Visual & Video Conferencing Hardware in Pakistan'}
             </h1>
-            <p className="text-gray-400 mt-2 font-black uppercase tracking-widest text-[10px]">
+            <p className="text-gray-400 mt-0.5 font-black uppercase tracking-widest text-[9px]">
               Official Polycom Group 500, Poly X70, Zoom Rooms & Corporate Event Equipment
             </p>
           </div>
           
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Inline Search */}
-            <div className="relative shrink-0">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+            {/* Inline Search (Desktop/Tablet) */}
+            <div className="hidden lg:block relative shrink-0">
+              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400" size={15} />
               <input 
                 type="text" 
                 placeholder="Search catalog..." 
@@ -513,7 +515,7 @@ export function Shop() {
                     updateFilters({ q: localSearch });
                   }
                 }}
-                className="pl-12 pr-10 py-3.5 bg-white border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00B4D8] focus:border-[#00B4D8] transition-all font-bold text-sm w-64 text-[#1A2B4C]"
+                className="pl-10 pr-8 h-9 bg-white border border-gray-200 rounded-xl shadow-xs focus:outline-none focus:ring-2 focus:ring-[#00B4D8] focus:border-[#00B4D8] transition-all font-bold text-xs w-56 text-[#1A2B4C]"
               />
               {localSearch && (
                 <button 
@@ -521,19 +523,20 @@ export function Shop() {
                     setLocalSearch('');
                     updateFilters({ q: '' });
                   }}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <X size={16} />
+                  <X size={14} />
                 </button>
               )}
             </div>
 
             {/* Sorting */}
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-initial">
               <select 
                 value={sortOption}
                 onChange={(e) => updateFilters({ sort: e.target.value })}
-                className="appearance-none bg-white border border-gray-200 pl-6 pr-12 py-3.5 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00B4D8] font-black text-[10px] uppercase tracking-widest cursor-pointer text-[#1A2B4C]"
+                aria-label="Sort products"
+                className="w-full sm:w-auto h-9 min-h-[36px] appearance-none bg-white border border-gray-200 pl-3 lg:pl-4 pr-8 lg:pr-9 py-1.5 rounded-xl shadow-xs focus:outline-none focus:ring-2 focus:ring-[#00B4D8] font-black text-[10px] uppercase tracking-wider cursor-pointer text-[#1A2B4C]"
               >
                 <option value="featured">Featured Sequence</option>
                 <option value="price-low">Price: Low to High</option>
@@ -543,51 +546,151 @@ export function Shop() {
                 <option value="name-asc">Lexical: A-Z</option>
                 <option value="name-desc">Lexical: Z-A</option>
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
             </div>
 
             {/* Grid/List View Toggler */}
-            <div className="flex border border-gray-200 bg-white rounded-2xl overflow-hidden shadow-sm p-1 h-[46px] items-center">
+            <div className="hidden sm:flex border border-gray-200 bg-white rounded-xl overflow-hidden shadow-xs p-0.5 h-9 items-center">
               <button 
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-xl transition-all h-full aspect-square flex items-center justify-center ${viewMode === 'grid' ? 'bg-[#1A2B4C] text-white shadow-sm' : 'text-gray-400 hover:text-[#1A2B4C]'}`}
+                className={`p-1.5 rounded-lg transition-all h-full aspect-square flex items-center justify-center ${viewMode === 'grid' ? 'bg-[#1A2B4C] text-white shadow-xs' : 'text-gray-400 hover:text-[#1A2B4C]'}`}
                 title="Grid Layout"
               >
-                <Grid size={16} />
+                <Grid size={14} />
               </button>
               <button 
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-xl transition-all h-full aspect-square flex items-center justify-center ${viewMode === 'list' ? 'bg-[#1A2B4C] text-white shadow-sm' : 'text-gray-400 hover:text-[#1A2B4C]'}`}
+                className={`p-1.5 rounded-lg transition-all h-full aspect-square flex items-center justify-center ${viewMode === 'list' ? 'bg-[#1A2B4C] text-white shadow-xs' : 'text-gray-400 hover:text-[#1A2B4C]'}`}
                 title="List Layout"
               >
-                <List size={16} />
+                <List size={14} />
               </button>
             </div>
 
             {/* Filter Toggle Desktop/Mobile */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className={`h-[46px] flex items-center gap-2 px-5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm transition-all border ${
+              className={`h-9 min-h-[36px] flex items-center gap-1.5 px-3.5 rounded-xl font-black text-[10px] uppercase tracking-wider shadow-xs transition-all border ${
                 isSidebarOpen 
                   ? 'bg-[#1A2B4C] text-white border-[#1A2B4C]' 
                   : 'bg-white text-gray-500 border-gray-200 hover:text-[#1A2B4C]'
               }`}
             >
-              <Filter size={16} className={isSidebarOpen ? "text-[#00B4D8]" : ""} /> 
+              <Filter size={14} className={isSidebarOpen ? "text-[#00B4D8]" : ""} /> 
               Filters
             </button>
           </div>
         </div>
 
+        {/* Mobile Brand Pills & Compact Flagship Highlight (< 1024px) */}
+        <div className="lg:hidden mb-3.5 space-y-2.5">
+          {/* Brand Pill Scroller */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+            {[
+              { label: 'All Brands', slug: '' },
+              { label: 'HP Poly', slug: 'poly' },
+              { label: 'Cisco', slug: 'cisco' },
+              { label: 'Logitech', slug: 'logitech' },
+              { label: 'Yealink', slug: 'yealink' },
+              { label: 'Grandstream', slug: 'grandstream' },
+              { label: 'Bosch', slug: 'bosch' },
+              { label: 'Horion', slug: 'horion' },
+            ].map((b) => {
+              const isBrandSelected = b.slug === ''
+                ? selectedBrands.length === 0
+                : selectedBrands.includes(b.slug);
+              return (
+                <button
+                  key={b.label}
+                  type="button"
+                  onClick={() => {
+                    if (b.slug === '') {
+                      updateFilters({ brand: [] });
+                    } else {
+                      updateFilters({ brand: isBrandSelected ? [] : [b.slug] });
+                    }
+                  }}
+                  className={`shrink-0 px-3 py-1.5 min-h-[32px] rounded-full text-[11px] font-bold transition-all border cursor-pointer ${
+                    isBrandSelected
+                      ? 'bg-[#1A2B4C] text-white border-[#1A2B4C] shadow-xs'
+                      : 'bg-white text-gray-500 border-gray-200 hover:text-[#1A2B4C]'
+                  }`}
+                >
+                  {b.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Compact Horizontal Flagship Highlight Card */}
+          {sortedAndFilteredProducts[0] && (() => {
+            const heroProd = sortedAndFilteredProducts[0];
+            const heroSlug = getCanonicalProductSlug(heroProd);
+            const { effectivePrice: heroPrice } = resolveProductPricing(heroProd);
+            const rawImgs = Array.isArray(heroProd.images) ? heroProd.images : (typeof heroProd.images === 'string' ? [heroProd.images] : (heroProd.image ? [heroProd.image] : []));
+            const heroImg = optimizeGalleryImageUrl(rawImgs[0] || 'https://placehold.co/600x450?text=AV+Live', 360, 75);
+            return (
+              <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-xs flex items-center gap-3">
+                <Link to={`/product/${heroSlug}`} className="w-20 h-20 rounded-xl bg-[#F8F9FA] p-2 flex items-center justify-center shrink-0 overflow-hidden">
+                  <BlurProductImage
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    width={160}
+                    height={160}
+                    src={heroImg}
+                    seed={heroSlug}
+                    alt={heroProd.productName}
+                    className="relative z-10 w-full h-full object-contain mix-blend-multiply"
+                  />
+                </Link>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-[9px] font-black uppercase tracking-wider text-white bg-[#1A2B4C] px-2 py-0.5 rounded-full">
+                      Top Pick
+                    </span>
+                    <span className="text-[9px] font-black uppercase tracking-wider text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full truncate">
+                      {heroProd.brand || 'Official PK'}
+                    </span>
+                  </div>
+                  <Link to={`/product/${heroSlug}`} className="text-xs font-black text-[#1A2B4C] line-clamp-1">
+                    {heroProd.productName}
+                  </Link>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-xs font-black text-[#1A2B4C]">
+                      Rs. {heroPrice.toLocaleString()}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        addToCart({
+                          id: heroProd.id || heroSlug,
+                          name: heroProd.productName,
+                          price: heroPrice,
+                          image: heroImg,
+                          brand: heroProd.brand,
+                        } as any)
+                      }
+                      className="px-3 py-1 min-h-[28px] rounded-full bg-[#1A2B4C] text-white font-bold text-[10px] inline-flex items-center gap-1 shadow-xs cursor-pointer"
+                    >
+                      <span>+ Add</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
         {/* Instant 1-Click Category & Price-Tier Filter Chips Bar */}
-        <div className="mb-8 space-y-3">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+        <div className="mb-4 lg:mb-6 space-y-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             <button
               type="button"
               onClick={() => updateFilters({ category: null })}
-              className={`shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border cursor-pointer ${
+              className={`shrink-0 px-3 py-1.5 min-h-[32px] rounded-full text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer ${
                 !selectedCategory
-                  ? 'bg-[#1A2B4C] text-white border-[#1A2B4C] shadow-sm'
+                  ? 'bg-[#1A2B4C] text-white border-[#1A2B4C] shadow-xs'
                   : 'bg-white text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
               }`}
             >
@@ -603,14 +706,14 @@ export function Shop() {
                   key={cat.slug}
                   type="button"
                   onClick={() => updateFilters({ category: isActive ? null : catId })}
-                  className={`shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border flex items-center gap-1.5 cursor-pointer ${
+                  className={`shrink-0 px-3 py-1.5 min-h-[32px] rounded-full text-[10px] font-black uppercase tracking-wider transition-all border flex items-center gap-1.5 cursor-pointer ${
                     isActive
-                      ? 'bg-[#00B4D8] text-white border-[#00B4D8] shadow-sm'
+                      ? 'bg-[#00B4D8] text-white border-[#00B4D8] shadow-xs'
                       : 'bg-white text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
                   }`}
                 >
                   <span>{cat.name}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
                     {count}
                   </span>
                 </button>
@@ -929,7 +1032,7 @@ export function Shop() {
                 </div>
               </div>
             ) : (
-            <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" : "flex flex-col gap-6"}>
+            <div className={viewMode === 'grid' ? "grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8" : "flex flex-col gap-6"}>
               {visibleProducts.map((product, index) => {
                 const productSlug = getCanonicalProductSlug(product);
                 const productKey = product.id || productSlug;
@@ -940,27 +1043,34 @@ export function Shop() {
                 const isEagerCard = index < 4;
 
                 return viewMode === 'grid' ? (
-                  // Grid View Card
+                  <React.Fragment key={productKey}>
+                    <div className="lg:hidden">
+                      <MobileProductCard
+                        product={product}
+                        eager={isEagerCard}
+                        priority={index < 2}
+                      />
+                    </div>
                   <motion.div 
-                    key={productKey}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(index, 8) * 0.02 }}
                     onMouseEnter={() => secondImage && setHoveredProductId(productKey)}
                     onMouseLeave={() => secondImage && setHoveredProductId(null)}
-                    className="bg-white group cursor-pointer rounded-3xl overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
+                    className="hidden lg:flex bg-white group cursor-pointer rounded-3xl overflow-hidden flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
                   >
                     <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
                       <Link to={`/product/${productSlug}`} className="absolute inset-0 z-0">
-                        <img
+                        <BlurProductImage
                           loading={isEagerCard ? 'eager' : 'lazy'}
                           fetchPriority={index < 2 ? 'high' : 'auto'}
                           decoding="async"
                           width={480}
                           height={360}
                           src={firstImage}
+                          seed={productSlug}
                           alt={`Professional AV equipment: ${product.productName} by ${product.brand}`}
-                          className={`absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out ${secondImage ? 'group-hover:opacity-0' : ''}`}
+                          className={`absolute inset-0 z-10 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out ${secondImage ? 'group-hover:opacity-0' : ''}`}
                         />
                         {secondImage && hoveredProductId === productKey && (
                           <img
@@ -980,47 +1090,48 @@ export function Shop() {
                           e.preventDefault();
                           e.stopPropagation();
                         }}
-                        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/40 backdrop-blur-sm flex items-center justify-center text-[#1A2B4C] hover:bg-[#1A2B4C] hover:text-white transition-colors z-10 shadow-sm"
+                        aria-label={`Save ${product.productName}`}
+                        className="absolute top-2.5 right-2.5 lg:top-4 lg:right-4 w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-white/80 lg:bg-white/40 backdrop-blur-sm flex items-center justify-center text-rose-500 lg:text-[#1A2B4C] hover:bg-[#1A2B4C] hover:text-white transition-colors z-10 shadow-sm"
                       >
-                        <Heart size={14} />
+                        <Heart size={13} />
                       </button>
 
                       {cardHasSale && (
-                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#00B4D8] text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-sm z-10">
+                        <div className="absolute top-2.5 left-2.5 lg:top-4 lg:left-4 bg-white/90 backdrop-blur-sm text-[#00B4D8] text-[8px] lg:text-[9px] font-black uppercase tracking-widest px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-md shadow-sm z-10">
                           Special Offer
                         </div>
                       )}
                     </div>
 
-                    <div className="p-6 flex flex-col flex-grow bg-white z-10 relative">
+                    <div className="p-3 sm:p-5 lg:p-6 flex flex-col flex-grow bg-white z-10 relative">
                       <Link to={`/product/${productSlug}`} className="block">
-                        <h3 className="font-bold text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 line-clamp-1">
+                        <h3 className="font-bold text-xs sm:text-base lg:text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-1 lg:mb-2 line-clamp-1">
                           {product.productName}
                         </h3>
                       </Link>
                       
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <div className="flex flex-wrap gap-1.5 lg:gap-2 mb-2 lg:mb-4">
                          {product.brand && (
-                           <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
+                           <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-1.5 lg:px-2 py-0.5 rounded-sm truncate max-w-full">
                              {product.brand}
                            </span>
                          )}
                          {product.sku && (
-                           <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
+                           <span className="hidden sm:inline-block text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
                              {product.sku}
                            </span>
                          )}
                       </div>
 
-                      <div className="text-gray-500 text-xs font-medium leading-relaxed line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.' }} />
+                      <div className="hidden lg:block text-gray-500 text-xs font-medium leading-relaxed line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.' }} />
                       
-                      <div className="mt-auto flex items-end justify-between gap-4 pt-4 border-t border-gray-50">
-                        <div className="flex flex-col">
-                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Price</span>
-                          <div className="flex items-baseline gap-2">
-                            <span className="font-black text-xl text-[#1A2B4C]">Rs. {cardEffectivePrice.toLocaleString()}</span>
+                      <div className="mt-auto flex items-end justify-between gap-2 lg:gap-4 pt-2.5 lg:pt-4 border-t border-gray-50">
+                        <div className="flex flex-col min-w-0">
+                          <span className="hidden lg:block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Price</span>
+                          <div className="flex items-baseline gap-1.5 lg:gap-2 flex-wrap">
+                            <span className="font-black text-xs sm:text-base lg:text-xl text-[#1A2B4C]">Rs. {cardEffectivePrice.toLocaleString()}</span>
                             {cardHasSale && (
-                              <span className="text-[10px] text-gray-400 line-through font-bold">{cardRegularPrice.toLocaleString()}</span>
+                              <span className="hidden sm:inline text-[10px] text-gray-400 line-through font-bold">{cardRegularPrice.toLocaleString()}</span>
                             )}
                           </div>
                         </div>
@@ -1036,13 +1147,18 @@ export function Shop() {
                               brand: product.brand
                             } as any);
                           }}
-                          className="bg-[#1A2B4C] text-white px-5 py-2.5 rounded-lg text-xs font-bold hover:bg-[#00B4D8] transition-all shadow-md hover:shadow-lg active:scale-95 shrink-0 whitespace-nowrap"
+                          aria-label={`Add ${product.productName} to cart`}
+                          className="min-w-[48px] min-h-[48px] -m-2 lg:m-0 flex items-center justify-center lg:bg-[#1A2B4C] lg:text-white lg:px-5 lg:py-2.5 lg:rounded-lg text-xs font-bold lg:hover:bg-[#00B4D8] transition-all lg:shadow-md active:scale-95 shrink-0 whitespace-nowrap cursor-pointer"
                         >
-                           Add to cart
+                          <span className="lg:hidden w-8 h-8 rounded-full bg-[#1A2B4C] text-white flex items-center justify-center shadow-sm">
+                            <Plus size={15} strokeWidth={2.5} />
+                          </span>
+                          <span className="hidden lg:inline">Add to cart</span>
                         </button>
                       </div>
                     </div>
                   </motion.div>
+                  </React.Fragment>
                 ) : (
                   // List View Card
                   <motion.div 
@@ -1052,15 +1168,16 @@ export function Shop() {
                     transition={{ delay: Math.min(index, 8) * 0.02 }}
                     className="bg-white group rounded-[2rem] overflow-hidden flex flex-col sm:flex-row border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-xl p-6 gap-6"
                   >
-                    <Link to={`/product/${productSlug}`} className="w-full sm:w-48 h-48 bg-gray-50 rounded-2xl overflow-hidden relative shrink-0 block">
-                      <img
+                    <Link to={`/product/${productSlug}`} className="w-full sm:w-48 h-48 aspect-square bg-gray-50 rounded-2xl overflow-hidden relative shrink-0 block">
+                      <BlurProductImage
                         loading={isEagerCard ? 'eager' : 'lazy'}
                         decoding="async"
                         width={320}
                         height={320}
                         src={firstImage}
-                        alt={product.productName} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        seed={productSlug}
+                        alt={product.productName}
+                        className="relative z-10 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
                       {cardHasSale && (
                         <div className="absolute top-4 left-4 bg-[#00B4D8] text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-md">

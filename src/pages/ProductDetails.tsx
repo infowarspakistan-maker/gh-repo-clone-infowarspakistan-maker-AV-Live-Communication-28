@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronRight, 
@@ -44,12 +43,14 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export function ProductDetails() {
   const { productId } = useParams<{ productId: string }>();
+  const navigate = useNavigate();
   const initialFallbackProduct = (productId ? buildFallbackProductFromGmcMeta(productId) : null) as Product | null;
   const [product, setProduct] = useState<Product | null>(initialFallbackProduct);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [productCategory, setProductCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(!initialFallbackProduct);
   const [quantity, setQuantity] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [activeTab, setActiveTab] = useState<'overview' | 'specs' | 'in-the-box' | 'support' | 'faq' | 'compare'>('overview');
   const [isZooming, setIsZooming] = useState(false);
@@ -175,14 +176,38 @@ export function ProductDetails() {
 
   const productImages = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
 
+  const canonicalSlug = getCanonicalProductSlug(product, productId);
+  const canonicalProductUrl = `https://avlive.com.pk/product/${canonicalSlug}`;
+  const { regularPrice: resolvedRegularPrice, salePrice: resolvedSalePrice, effectivePrice } = resolveProductPricing(product);
+
+  const getSelectedPrice = () => {
+    let base = effectivePrice;
+    if (deploymentVariant === 'enterprise') base += 15000;
+    if (warrantyVariant === '3year') base += 25000;
+    return base;
+  };
+
   const handleAddToCart = () => {
     addToCart({
-      id: product.id!,
+      id: product.id || canonicalSlug,
       name: product.productName,
-      price: product.salePrice,
+      price: getSelectedPrice(),
       image: productImages[0] || '',
       brand: product.brand
     } as any, quantity);
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2500);
+  };
+
+  const handleBuyNow = () => {
+    addToCart({
+      id: product.id || canonicalSlug,
+      name: product.productName,
+      price: getSelectedPrice(),
+      image: productImages[0] || '',
+      brand: product.brand
+    } as any, quantity);
+    navigate('/cart');
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -203,17 +228,6 @@ export function ProductDetails() {
   const totalRating = parseFloat(
     ((ratingVal * reviewsCountVal + userReviews.reduce((acc, r) => acc + r.rating, 0)) / totalReviewsCount).toFixed(1)
   );
-
-  const canonicalSlug = getCanonicalProductSlug(product, productId);
-  const canonicalProductUrl = `https://avlive.com.pk/product/${canonicalSlug}`;
-  const { regularPrice: resolvedRegularPrice, salePrice: resolvedSalePrice, effectivePrice } = resolveProductPricing(product);
-
-  const getSelectedPrice = () => {
-    let base = effectivePrice;
-    if (deploymentVariant === 'enterprise') base += 15000;
-    if (warrantyVariant === '3year') base += 25000;
-    return base;
-  };
 
   const gmcMeta = PRODUCT_GMC_METADATA[product.id || ''] || PRODUCT_GMC_METADATA[canonicalSlug];
   const resolvedGtin = product.gtin || gmcMeta?.gtin || '610807990012';
@@ -366,20 +380,22 @@ export function ProductDetails() {
         schema={productSchema}
       />
       
-      {/* Breadcrumbs */}
-      <div className="bg-white border-b border-gray-100 py-2 sticky top-[72px] md:top-[88px] z-30">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-           <Breadcrumbs items={[
-             { label: 'Shop', path: '/shop' },
-             ...(productCategory ? [{ label: productCategory.name, path: `/category/${productCategory.slug || productCategory.id}` }] : []),
-             { label: resolvedBrand, path: `/brands/${['polycom', 'hp-poly'].includes(resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')) ? 'poly' : resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` },
-             { label: product.productName }
-           ]} />
-           <div className="hidden md:flex items-center gap-4">
-              <span className="font-black text-[#1A2B4C]">Rs. {getSelectedPrice().toLocaleString()}</span>
+      {/* Slim Breadcrumbs Bar */}
+      <div className="bg-white border-b border-gray-100 py-1 sticky top-[54px] lg:top-[96px] z-30">
+        <div className="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 flex justify-between items-center">
+           <div className="[&>nav]:mb-0">
+             <Breadcrumbs items={[
+               { label: 'Shop', path: '/shop' },
+               ...(productCategory ? [{ label: productCategory.name, path: `/category/${productCategory.slug || productCategory.id}` }] : []),
+               { label: resolvedBrand, path: `/brands/${['polycom', 'hp-poly'].includes(resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')) ? 'poly' : resolvedBrand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` },
+               { label: product.productName }
+             ]} />
+           </div>
+           <div className="hidden md:flex items-center gap-3">
+              <span className="font-black text-sm text-[#1A2B4C]">Rs. {getSelectedPrice().toLocaleString()}</span>
               <button 
                 onClick={handleAddToCart}
-                className="bg-[#00B4D8] text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-[#1A2B4C] transition-all"
+                className="bg-[#00B4D8] text-white px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-[#1A2B4C] transition-all"
               >
                 Buy Now
               </button>
@@ -387,52 +403,52 @@ export function ProductDetails() {
         </div>
       </div>
 
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-16">
-        {/* Title Header Section - Elegant and Spans across the top */}
-        <div className="max-w-6xl mx-auto mb-4 border-b border-gray-100 pb-4">
-          <div className="flex flex-wrap items-center gap-3 mb-2 text-xs font-black uppercase tracking-widest text-[#00B4D8]">
+      <div className="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 mt-3 lg:mt-5 pb-10">
+        {/* Compact Title Header Section */}
+        <div className="max-w-6xl mx-auto mb-3 border-b border-gray-100 pb-3">
+          <div className="flex flex-wrap items-center gap-2 mb-1 text-[10px] font-black uppercase tracking-widest text-[#00B4D8]">
              <span>{resolvedBrand}</span>
-             <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
+             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
              <span className="text-gray-400">MPN: {resolvedMpn}</span>
-             <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
+             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
              <span className="text-gray-400">GTIN: {resolvedGtin}</span>
              {product.stockQuantity > 0 ? (
                <>
-                 <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                 <span className="text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded">In Stock</span>
+                 <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                 <span className="text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">In Stock</span>
                </>
              ) : (
                <>
-                 <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                 <span className="text-red-500 bg-red-50 px-2 py-0.5 rounded">Out of Stock</span>
+                 <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                 <span className="text-red-500 bg-red-50 px-1.5 py-0.5 rounded">Out of Stock</span>
                </>
              )}
           </div>
           
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-[#1A2B4C] mb-4">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tight leading-snug text-[#1A2B4C] mb-2">
             {product.productName}
           </h1>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="flex items-center text-amber-500">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} size={15} fill={i < Math.floor(totalRating) ? "currentColor" : "none"} className={i < Math.floor(totalRating) ? "text-amber-500" : "text-gray-200"} />
+                <Star key={i} size={13} fill={i < Math.floor(totalRating) ? "currentColor" : "none"} className={i < Math.floor(totalRating) ? "text-amber-500" : "text-gray-200"} />
               ))}
             </div>
-            <span className="text-sm font-black text-[#1A2B4C]">{totalRating} / 5.0</span>
-            <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">({totalReviewsCount} Verified Customer Reviews)</span>
+            <span className="text-xs font-black text-[#1A2B4C]">{totalRating} / 5.0</span>
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">({totalReviewsCount} Verified Reviews)</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 max-w-6xl mx-auto items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 max-w-6xl mx-auto items-start">
           
           {/* Left: Image Gallery */}
-          <div className="lg:col-span-7 flex flex-col gap-6">
+          <div className="lg:col-span-7 flex flex-col gap-3.5">
              {/* Main Image or Simulated Video */}
              <motion.div 
                initial={{ opacity: 0, scale: 0.95 }}
                animate={{ opacity: 1, scale: 1 }}
-               className="bg-white rounded-[2rem] border border-gray-100 shadow-xl overflow-hidden relative w-full aspect-square md:aspect-[4/3] max-w-4xl mx-auto group flex items-center justify-center shrink-0"
+               className="bg-white rounded-2xl lg:rounded-3xl border border-gray-100 shadow-md overflow-hidden relative w-full aspect-[4/3] max-h-[260px] sm:max-h-[340px] lg:max-h-[380px] max-w-4xl mx-auto group flex items-center justify-center shrink-0"
              >
                {activeVideo ? (
                  /* Simulated Video Player */
@@ -459,11 +475,10 @@ export function ProductDetails() {
                      
                      {/* Visual Waveform Effect */}
                      <div className="flex gap-1 items-end h-12 mt-6">
-                       {[12, 24, 36, 16, 44, 28, 38, 22, 10, 32, 48, 18, 28, 40, 14, 22, 34, 46].map((h, i) => (
+                       {['h-3', 'h-6', 'h-9', 'h-4', 'h-11', 'h-7', 'h-9', 'h-5', 'h-2.5', 'h-8', 'h-12', 'h-4', 'h-7', 'h-10', 'h-3.5', 'h-5', 'h-8', 'h-11'].map((hClass, i) => (
                          <span 
                            key={i} 
-                           style={{ height: `${h}px` }} 
-                           className="w-1.5 bg-[#00B4D8]/60 rounded-full animate-pulse"
+                           className={`w-1.5 ${hClass} bg-[#00B4D8]/60 rounded-full animate-pulse`}
                          ></span>
                        ))}
                      </div>
@@ -482,7 +497,7 @@ export function ProductDetails() {
                ) : (
                  /* Standard Image Gallery with Zoom */
                  <div 
-                   className="w-full h-full flex items-center justify-center p-6 md:p-12 cursor-crosshair"
+                   className="w-full h-full flex items-center justify-center p-4 md:p-6 cursor-crosshair"
                    onMouseEnter={() => setIsZooming(true)}
                    onMouseLeave={() => setIsZooming(false)}
                    onMouseMove={handleMouseMove}
@@ -501,10 +516,10 @@ export function ProductDetails() {
                    </div>
                    
                    <div className="absolute top-6 right-6 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button aria-label="Share product" className="w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-[#1A2B4C] hover:bg-[#00B4D8] hover:text-white transition-all shadow-md">
+                      <button aria-label="Share product" className="min-w-[48px] min-h-[48px] lg:min-w-0 lg:min-h-0 w-12 h-12 lg:w-10 lg:h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-[#1A2B4C] hover:bg-[#00B4D8] hover:text-white transition-all shadow-md">
                          <Share2 size={16} />
                       </button>
-                      <button aria-label="Add to wishlist" className="w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-[#1A2B4C] hover:bg-rose-500 hover:text-white transition-all shadow-md">
+                      <button aria-label="Add to wishlist" className="min-w-[48px] min-h-[48px] lg:min-w-0 lg:min-h-0 w-12 h-12 lg:w-10 lg:h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-[#1A2B4C] hover:bg-rose-500 hover:text-white transition-all shadow-md">
                          <Heart size={16} />
                       </button>
                    </div>
@@ -570,7 +585,7 @@ export function ProductDetails() {
                      <button 
                        key={tab.id}
                        onClick={() => setActiveTab(tab.id as any)}
-                       className={`text-[10px] md:text-xs font-black uppercase tracking-[0.15em] pb-3 border-b-2 transition-all whitespace-nowrap ${activeTab === tab.id ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent text-gray-400 hover:text-[#1A2B4C]'}`}
+                       className={`min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center text-[10px] md:text-xs font-black uppercase tracking-[0.15em] pb-3 border-b-2 transition-all whitespace-nowrap ${activeTab === tab.id ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent text-gray-400 hover:text-[#1A2B4C]'}`}
                      >
                        {tab.label}
                      </button>
@@ -643,13 +658,13 @@ export function ProductDetails() {
 
                     {/* High-Intent Buyer Comparison Links */}
                     <div className="mt-6 pt-5 border-t border-gray-100 flex flex-wrap gap-2 not-prose">
-                      <Link to="/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan" className="text-[10px] font-black uppercase tracking-wider bg-gray-50 hover:bg-[#00B4D8]/10 text-[#1A2B4C] hover:text-[#00B4D8] px-3 py-1.5 rounded-full border border-gray-200 transition-colors">
+                      <Link to="/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan" className="min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center text-[10px] font-black uppercase tracking-wider bg-gray-50 hover:bg-[#00B4D8]/10 text-[#1A2B4C] hover:text-[#00B4D8] px-3.5 py-2 rounded-full border border-gray-200 transition-colors">
                         Rally Bar vs Poly X50 Guide →
                       </Link>
-                      <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="text-[10px] font-black uppercase tracking-wider bg-gray-50 hover:bg-[#00B4D8]/10 text-[#1A2B4C] hover:text-[#00B4D8] px-3 py-1.5 rounded-full border border-gray-200 transition-colors">
+                      <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center text-[10px] font-black uppercase tracking-wider bg-gray-50 hover:bg-[#00B4D8]/10 text-[#1A2B4C] hover:text-[#00B4D8] px-3.5 py-2 rounded-full border border-gray-200 transition-colors">
                         Boardroom BoM Price Guide →
                       </Link>
-                      <Link to="/compare" className="text-[10px] font-black uppercase tracking-wider bg-gray-50 hover:bg-[#00B4D8]/10 text-[#1A2B4C] hover:text-[#00B4D8] px-3 py-1.5 rounded-full border border-gray-200 transition-colors">
+                      <Link to="/compare" className="min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center text-[10px] font-black uppercase tracking-wider bg-gray-50 hover:bg-[#00B4D8]/10 text-[#1A2B4C] hover:text-[#00B4D8] px-3.5 py-2 rounded-full border border-gray-200 transition-colors">
                         Compare Hardware Side-by-Side →
                       </Link>
                     </div>
@@ -780,15 +795,6 @@ export function ProductDetails() {
               </div>
            </div>
 
-           {/* Hidden container to swallow original closing tags structurally */}
-           <div className="hidden">
-             <div>
-               <button>
-                 <span>Play Demo</span>
-               </button>
-             </div>
-          </div>
-
           {/* Right Column: Short Description and Checkout/Pricing Module */}
           <div className="lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-[160px]">
             <motion.div 
@@ -798,14 +804,13 @@ export function ProductDetails() {
             >
               {/* Short Description Card - Positioned strictly on top of the pricing card */}
               <div 
-                className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-3 w-full h-auto overflow-hidden break-words"
-                style={{ height: '248.85000000000002px' }}
+                className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-3 w-full h-auto break-words"
               >
                 <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8]">
                   Quick Overview
                 </span>
                 <div 
-                  className="text-gray-500 font-semibold leading-relaxed text-sm break-words overflow-hidden max-w-none prose prose-sm prose-p:my-1 prose-ul:my-1 prose-li:my-0.5" 
+                  className="text-gray-500 font-semibold leading-relaxed text-sm break-words max-w-none prose prose-sm prose-p:my-1 prose-ul:my-1 prose-li:my-0.5" 
                   dangerouslySetInnerHTML={{ __html: product.shortDescription || '' }} 
                 />
               </div>
@@ -898,17 +903,19 @@ export function ProductDetails() {
                   {/* Purchase Controls */}
                   <div className="flex flex-col gap-4 mt-2 w-full h-auto">
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-                       <div className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-2xl p-2 w-full sm:w-36 h-[60px] shrink-0">
+                       <div className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-2xl p-2 w-full sm:w-40 h-[60px] shrink-0">
                          <button 
                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                           className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-[#1A2B4C] transition-colors bg-white rounded-xl shadow-sm"
+                           aria-label="Decrease quantity"
+                           className="min-w-[48px] min-h-[48px] lg:min-w-0 lg:min-h-0 w-12 h-12 lg:w-10 lg:h-10 flex items-center justify-center text-gray-400 hover:text-[#1A2B4C] transition-colors bg-white rounded-xl shadow-sm"
                          >
                            <Minus size={16} />
                          </button>
                          <span className="text-center font-black text-lg px-2">{quantity}</span>
                          <button 
                            onClick={() => setQuantity(quantity + 1)}
-                           className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-[#1A2B4C] transition-colors bg-white rounded-xl shadow-sm"
+                           aria-label="Increase quantity"
+                           className="min-w-[48px] min-h-[48px] lg:min-w-0 lg:min-h-0 w-12 h-12 lg:w-10 lg:h-10 flex items-center justify-center text-gray-400 hover:text-[#1A2B4C] transition-colors bg-white rounded-xl shadow-sm"
                          >
                            <Plus size={16} />
                          </button>
@@ -917,15 +924,25 @@ export function ProductDetails() {
                        <button 
                          onClick={handleAddToCart}
                          disabled={product.stockQuantity <= 0}
-                         className="flex-1 bg-[#1A2B4C] text-white h-[60px] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#00B4D8] transition-all shadow-xl shadow-[#1A2B4C]/20 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                         className={`flex-1 text-white h-[60px] rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+                           addedToCart ? 'bg-emerald-600 shadow-emerald-600/20' : 'bg-[#1A2B4C] hover:bg-[#00B4D8] shadow-[#1A2B4C]/20'
+                         }`}
                        >
-                         <ShoppingCart size={18} /> Add to Cart
+                         {addedToCart ? (
+                           <>
+                             <CheckCircle size={18} /> Added to Cart
+                           </>
+                         ) : (
+                           <>
+                             <ShoppingCart size={18} /> Add to Cart
+                           </>
+                         )}
                        </button>
                     </div>
                     <button 
-                      onClick={handleAddToCart}
+                      onClick={handleBuyNow}
                       disabled={product.stockQuantity <= 0}
-                      className="w-full bg-[#00B4D8] text-white h-[60px] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0096B4] transition-all shadow-xl shadow-[#00B4D8]/20 flex items-center justify-center gap-3 active:scale-95"
+                      className="w-full bg-[#00B4D8] text-white h-[60px] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0096B4] transition-all shadow-xl shadow-[#00B4D8]/20 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                        <Zap size={18} /> Buy Now with 1-Click
                     </button>
@@ -944,28 +961,28 @@ export function ProductDetails() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                     <Link
                       to="/video-conferencing-solutions"
-                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
+                      className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
                     >
                       <span>Video Conferencing Pillar</span>
                       <span>→</span>
                     </Link>
                     <Link
                       to="/room-designer"
-                      className="px-3 py-2 rounded-xl bg-[#00B4D8] hover:bg-[#F26522] text-white text-[11px] font-black transition-colors flex items-center justify-between"
+                      className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 rounded-xl bg-[#00B4D8] hover:bg-[#F26522] text-white text-[11px] font-black transition-colors flex items-center justify-between"
                     >
                       <span>3D Room &amp; LED Designer</span>
                       <span>→</span>
                     </Link>
                     <Link
                       to="/corporate-event-management"
-                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
+                      className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
                     >
                       <span>Corporate Event Pillar</span>
                       <span>→</span>
                     </Link>
                     <Link
                       to="/voip-service-providers"
-                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
+                      className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
                     >
                       <span>VoIP &amp; IP-PBX Pillar</span>
                       <span>→</span>
@@ -1018,16 +1035,16 @@ export function ProductDetails() {
               {/* Rating bars */}
               <div className="space-y-2 mt-6">
                 {[
-                  { star: 5, pct: '82%' },
-                  { star: 4, pct: '14%' },
-                  { star: 3, pct: '4%' },
-                  { star: 2, pct: '0%' },
-                  { star: 1, pct: '0%' }
+                  { star: 5, pct: '82%', widthClass: 'w-[82%]' },
+                  { star: 4, pct: '14%', widthClass: 'w-[14%]' },
+                  { star: 3, pct: '4%', widthClass: 'w-[4%]' },
+                  { star: 2, pct: '0%', widthClass: 'w-0' },
+                  { star: 1, pct: '0%', widthClass: 'w-0' }
                 ].map((bar, idx) => (
                   <div key={idx} className="flex items-center gap-3 text-xs font-bold text-gray-500">
                     <span className="w-3">{bar.star}★</span>
                     <div className="flex-grow bg-gray-100 rounded-full h-2 overflow-hidden">
-                      <div style={{ width: bar.pct }} className="bg-[#00B4D8] h-full rounded-full"></div>
+                      <div className={`bg-[#00B4D8] h-full rounded-full ${bar.widthClass}`}></div>
                     </div>
                     <span className="w-8 text-right text-gray-400 font-semibold">{bar.pct}</span>
                   </div>
@@ -1265,14 +1282,14 @@ export function ProductDetails() {
         )}
       </div>
 
-      {/* Sticky Mobile Quote & Buy Bar for Instant Thumb-Zone Conversion */}
-      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-3 shadow-[0_-8px_30px_rgba(26,43,76,0.12)]">
-        <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
+      {/* Sticky Mobile Quote & Buy Bar for Instant Thumb-Zone Conversion (Floating card above Curved Dark-Navy Bottom Dock) */}
+      <div className="lg:hidden fixed bottom-[76px] inset-x-3 z-40 bg-white/95 backdrop-blur-md border border-gray-200/80 rounded-2xl px-3.5 py-2.5 shadow-[0_8px_30px_rgba(11,19,43,0.16)]">
+        <div className="flex items-center justify-between gap-2.5 max-w-lg mx-auto">
           <div className="min-w-0">
-            <span className="block text-[10px] font-black text-gray-400 uppercase tracking-wider truncate">
+            <span className="block text-[10px] font-bold text-gray-400 truncate">
               {product.productName}
             </span>
-            <span className="block text-base font-black text-[#1A2B4C]">
+            <span className="block text-sm font-black text-[#1A2B4C]">
               Rs. {getSelectedPrice().toLocaleString()}
             </span>
           </div>
@@ -1281,7 +1298,7 @@ export function ProductDetails() {
               href={`https://wa.me/923214256263?text=${encodeURIComponent(`Hi AV Live, I need a 15-minute corporate quote for ${product.productName} (MPN: ${resolvedMpn}) listed at Rs. ${getSelectedPrice().toLocaleString()}.`)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-wider flex items-center gap-1.5 shadow-sm"
+              className="px-3.5 py-2.5 min-w-[48px] min-h-[48px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm"
             >
               <Phone size={13} />
               <span>15m Quote</span>
@@ -1290,10 +1307,10 @@ export function ProductDetails() {
               type="button"
               onClick={handleAddToCart}
               disabled={product.stockQuantity <= 0}
-              className="px-4 py-2.5 rounded-xl bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black text-[10px] uppercase tracking-wider flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              className="px-4 py-2.5 min-w-[48px] min-h-[48px] rounded-full bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer"
             >
               <ShoppingCart size={13} />
-              <span>Add</span>
+              <span>Add To Cart</span>
             </button>
           </div>
         </div>

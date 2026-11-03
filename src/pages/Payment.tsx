@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { CreditCard, Landmark, Truck, Wallet, ShieldCheck } from 'lucide-react';
 import { SEO } from '../components/SEO';
@@ -102,9 +103,9 @@ export function Payment() {
                <p className="text-gray-300 text-sm">We partner with select banks for corporate financing on large-scale integration projects.</p>
              </div>
           </div>
-          <button className="bg-[#00B4D8] text-white px-6 py-3 rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+          <Link to="/programs/quote" className="bg-[#00B4D8] text-white px-6 py-3 min-h-[48px] rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors whitespace-nowrap inline-flex items-center justify-center">
             Enquire Now
-          </button>
+          </Link>
         </div>
       </div>
     </div>

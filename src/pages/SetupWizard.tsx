@@ -91,6 +91,7 @@ export function SetupWizard() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [consultError, setConsultError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // 3 Simple Wizard Questions
@@ -530,6 +531,7 @@ export function SetupWizard() {
     if (!consultForm.email || !consultForm.name) return;
 
     setIsSubmitting(true);
+    setConsultError(null);
     try {
       await addDoc(collection(db, 'wizard_leads'), {
         customerName: consultForm.name,
@@ -552,7 +554,7 @@ export function SetupWizard() {
       setConsultForm({ name: '', email: '', company: '', phone: '', notes: '' });
     } catch (error) {
       console.error('Failed to submit consultation lead:', error);
-      alert('An error occurred. Please try again or call our support team.');
+      setConsultError('Unable to submit consultation request right now. Please try again or call 0321 425 6263.');
     } finally {
       setIsSubmitting(false);
     }
@@ -563,6 +565,8 @@ export function SetupWizard() {
       <SEO 
         title="Quick Setup Wizard | Pre-Configured AV & Voice Bundles"
         description="Take our 60-second hardware wizard to identify the optimal enterprise IP phones, conference cameras, and collaboration bundles for your business room scale."
+        url="https://avlive.com.pk/setup-wizard"
+        noindex={true}
       />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -1076,10 +1080,16 @@ export function SetupWizard() {
                       </div>
                     </div>
 
+                    {consultError && (
+                      <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3.5 rounded-xl text-xs font-bold">
+                        {consultError}
+                      </div>
+                    )}
+
                     <button 
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-[#1A2B4C] hover:bg-[#00B4D8] disabled:bg-gray-400 text-white font-black text-[10px] uppercase tracking-widest py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+                      className="w-full bg-[#1A2B4C] hover:bg-[#00B4D8] disabled:bg-gray-400 text-white font-black text-[10px] uppercase tracking-widest py-4 min-h-[48px] rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
                     >
                       {isSubmitting ? 'Submitting Estimate Request...' : 'Submit Hardware Consult Request'}
                     </button>

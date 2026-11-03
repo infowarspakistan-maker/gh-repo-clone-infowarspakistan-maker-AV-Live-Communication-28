@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Send, FileText, Upload, Loader2, CheckCircle } from 'lucide-react';
+import { Send, FileText, Upload, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase/client';
 import { SEO } from '../components/SEO';
@@ -8,10 +9,12 @@ import { SEO } from '../components/SEO';
 export function RMA() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(null);
     const formData = new FormData(e.currentTarget);
     const data = {
       orderNumber: formData.get('orderNumber'),
@@ -30,7 +33,7 @@ export function RMA() {
       setSuccess(true);
     } catch (error) {
       console.error('Error submitting RMA:', error);
-      alert('Error submitting request. Please try again.');
+      setErrorMessage('Error submitting RMA request. Please verify your connection or call 0321 425 6263.');
     } finally {
       setLoading(false);
     }
@@ -54,12 +57,12 @@ export function RMA() {
           </div>
           <h1 className="text-3xl font-black text-[#1A2B4C] mb-4">RMA Submitted Successfully</h1>
           <p className="text-gray-500 mb-8 font-medium">Your request ID has been logged. Our technical team will review the details and contact you within 24 hours.</p>
-          <button 
-            onClick={() => window.location.href = '/'}
-            className="w-full bg-[#1A2B4C] text-white py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-[#00B4D8] transition-all"
+          <Link 
+            to="/"
+            className="w-full bg-[#1A2B4C] text-white py-4 min-h-[48px] rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-[#00B4D8] transition-all flex items-center justify-center"
           >
             Return to Homepage
-          </button>
+          </Link>
         </motion.div>
       </div>
     );
@@ -173,10 +176,17 @@ export function RMA() {
               <input type="file" className="hidden" accept="image/*,video/*" />
             </div>
 
+            {errorMessage && (
+              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl text-xs font-bold flex items-center gap-2.5">
+                <AlertCircle size={18} className="shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-[#1A2B4C] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#00B4D8] transition-colors flex items-center justify-center gap-2 mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#1A2B4C] text-white py-4 min-h-[48px] rounded-xl font-bold text-lg hover:bg-[#00B4D8] transition-colors flex items-center justify-center gap-2 mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />} 
               {loading ? 'Submitting...' : 'Submit RMA Request'}

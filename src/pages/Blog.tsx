@@ -23,6 +23,15 @@ export function Blog() {
   const { postSlug } = useParams<{ postSlug?: string }>();
   const [activeCategory, setActiveCategory] = useState('All');
   const [posts, setPosts] = useState<FallbackBlogPost[]>(FALLBACK_BLOG_POSTS);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    setNewsletterSubscribed(true);
+    setNewsletterEmail('');
+  };
 
   useEffect(() => {
     const unsubscribe = subscribeToBlogPosts((firebasePosts) => {
@@ -329,7 +338,7 @@ export function Blog() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+              className={`px-5 py-2.5 min-h-[48px] rounded-full text-sm font-bold transition-all ${
                 activeCategory === cat 
                   ? 'bg-[#00B4D8] text-white shadow-md shadow-[#00B4D8]/20' 
                   : 'bg-white text-gray-600 border border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
@@ -400,20 +409,28 @@ export function Blog() {
             <h2 className="text-3xl font-black text-white mb-4">Stay Ahead in AV Technology</h2>
             <p className="text-gray-300 mb-8 max-w-lg mx-auto">Subscribe to our newsletter for the latest product updates, industry insights, and exclusive offers.</p>
             
-            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input 
-                type="email" 
-                placeholder="Enter your email address" 
-                required
-                className="flex-1 bg-white/10 border border-white/20 text-white placeholder:text-gray-400 rounded-full px-6 py-4 focus:outline-none focus:border-[#00B4D8] focus:bg-white/20 transition-all"
-              />
-              <button 
-                type="submit"
-                className="bg-[#00B4D8] text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors shrink-0"
-              >
-                Subscribe Now
-              </button>
-            </form>
+            {newsletterSubscribed ? (
+              <div className="bg-emerald-500/20 border border-emerald-400/40 text-white px-6 py-4 rounded-2xl max-w-md mx-auto font-bold text-sm">
+                Subscribed! You will receive our monthly enterprise AV &amp; VoIP engineering digest.
+              </div>
+            ) : (
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                <input 
+                  type="email" 
+                  placeholder="Enter your email address" 
+                  required
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  className="flex-1 bg-white/10 border border-white/20 text-white placeholder:text-gray-400 rounded-full px-6 py-4 focus:outline-none focus:border-[#00B4D8] focus:bg-white/20 transition-all"
+                />
+                <button 
+                  type="submit"
+                  className="bg-[#00B4D8] text-white px-8 py-4 min-h-[48px] rounded-full font-bold hover:bg-white hover:text-[#1A2B4C] transition-colors shrink-0"
+                >
+                  Subscribe Now
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>

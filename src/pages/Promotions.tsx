@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Tag, Gift, Percent, Users } from 'lucide-react';
 import { SEO } from '../components/SEO';
@@ -64,7 +65,7 @@ export function Promotions() {
             </div>
             <div className="p-8">
                <p className="text-gray-600 text-lg mb-6">Buy 1 Cisco 8841 IP Phone, Get a <span className="font-bold text-[#1A2B4C]">Free Cisco Headset</span>.</p>
-               <button className="w-full bg-[#1A2B4C] text-white py-3 rounded-full font-bold hover:bg-[#00B4D8] transition-colors">Claim Offer</button>
+               <Link to="/product/cisco-8841-ip-phone-pakistan" className="w-full bg-[#1A2B4C] text-white py-3 min-h-[48px] rounded-full font-bold hover:bg-[#00B4D8] transition-colors flex items-center justify-center">Claim Offer</Link>
             </div>
           </div>
 
@@ -78,7 +79,7 @@ export function Promotions() {
             </div>
             <div className="p-8">
                <p className="text-gray-600 text-lg mb-6"><span className="font-bold text-[#1A2B4C]">15% off</span> on all Logitech Rally Bars for registered educational institutes.</p>
-               <button className="w-full bg-[#1A2B4C] text-white py-3 rounded-full font-bold hover:bg-[#00B4D8] transition-colors">Apply Now</button>
+               <Link to="/programs/government-education-pricing" className="w-full bg-[#1A2B4C] text-white py-3 min-h-[48px] rounded-full font-bold hover:bg-[#00B4D8] transition-colors flex items-center justify-center">Apply Now</Link>
             </div>
           </div>
 
@@ -92,7 +93,7 @@ export function Promotions() {
             </div>
             <div className="p-8">
                <p className="text-gray-600 text-lg mb-6"><span className="font-bold text-[#1A2B4C]">Up to 40% off</span> on last-generation Polycom and Yealink models.</p>
-               <button className="w-full bg-[#1A2B4C] text-white py-3 rounded-full font-bold hover:bg-[#00B4D8] transition-colors">Shop Clearance</button>
+               <Link to="/shop" className="w-full bg-[#1A2B4C] text-white py-3 min-h-[48px] rounded-full font-bold hover:bg-[#00B4D8] transition-colors flex items-center justify-center">Shop Clearance</Link>
             </div>
           </div>
 
@@ -106,7 +107,7 @@ export function Promotions() {
             </div>
             <div className="p-8">
                <p className="text-gray-600 text-lg mb-6">Refer a business partner and get <span className="font-bold text-[#1A2B4C]">PKR 5,000</span> worth of store credit.</p>
-               <button className="w-full bg-[#1A2B4C] text-white py-3 rounded-full font-bold hover:bg-[#00B4D8] transition-colors">Generate Link</button>
+               <Link to="/programs/reseller-program" className="w-full bg-[#1A2B4C] text-white py-3 min-h-[48px] rounded-full font-bold hover:bg-[#00B4D8] transition-colors flex items-center justify-center">Join Partner Program</Link>
             </div>
           </div>
 
