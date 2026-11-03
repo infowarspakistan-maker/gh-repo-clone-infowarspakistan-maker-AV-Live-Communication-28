@@ -95,13 +95,13 @@ export function Contact() {
         }}
       />
       {/* Hero Section */}
-      <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
+      <div className="bg-[#1A2B4C] text-white pt-10 pb-20 lg:pt-14 lg:pb-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-black mb-6 tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 tracking-tight"
           >
             {data.heroHeading}
           </motion.h1>
@@ -109,7 +109,7 @@ export function Contact() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed font-medium prose prose-invert max-w-none [&_*]:break-words [&_*]:whitespace-normal"
+            className="text-base md:text-lg text-white max-w-3xl mx-auto leading-relaxed font-medium prose prose-invert max-w-none [&_*]:break-words [&_*]:whitespace-normal"
             dangerouslySetInnerHTML={{ __html: data.heroSubheading }}
           />
         </div>
@@ -118,7 +118,7 @@ export function Contact() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#00B4D8]/5 rounded-full -translate-x-1/2 translate-y-1/2 blur-3xl"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 lg:-mt-10 relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Contact Information Sidebar */}

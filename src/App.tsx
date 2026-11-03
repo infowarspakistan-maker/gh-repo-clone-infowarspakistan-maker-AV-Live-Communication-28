@@ -123,7 +123,7 @@ function BackToTop() {
   return (
     <button 
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      className="fixed bottom-16 left-3 lg:left-auto lg:bottom-20 lg:right-6 p-2.5 lg:p-3.5 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center bg-[#00B4D8] text-white rounded-full shadow-xl hover:bg-[#1A2B4C] hover:-translate-y-1 transition-all z-[90]"
+      className="fixed bottom-[132px] left-3 lg:left-auto lg:bottom-24 lg:right-8 p-2.5 lg:p-3.5 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center bg-[#00B4D8] text-white rounded-full shadow-xl hover:bg-[#1A2B4C] hover:-translate-y-1 transition-all z-[90]"
       aria-label="Back to top"
     >
       <ArrowUp size={18} className="lg:w-5 lg:h-5" strokeWidth={2.5} />
@@ -188,7 +188,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
       onClick={handleNavClick}
       className="border-t border-gray-100 hidden lg:block h-10 bg-white"
     >
-      <div className="max-w-[1400px] mx-auto px-4 lg:px-6 xl:px-8 h-full flex items-center justify-between xl:justify-start gap-3.5 xl:gap-7 text-[11px] xl:text-[12px] font-bold text-[#1A2B4C] uppercase tracking-wider whitespace-nowrap">
+      <div className="max-w-[1400px] mx-auto px-4 lg:px-6 xl:px-8 h-full flex items-center justify-between xl:justify-start gap-2.5 xl:gap-6 text-[11px] xl:text-[12px] font-bold text-[#1A2B4C] uppercase tracking-wider whitespace-nowrap">
         {/* HOME with CSS HTML-First Dropdown */}
         <div className="h-10 flex items-center relative group">
           <Link
@@ -216,7 +216,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
           >
             PRODUCTS <ChevronDown size={12} className="transition-transform duration-150 group-hover:rotate-180 group-focus-within:rotate-180 shrink-0" />
           </Link>
-          <div className="absolute top-10 left-0 w-[860px] max-w-[calc(100vw-3rem)] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto">
+          <div className="absolute top-10 left-0 w-[820px] xl:w-[860px] max-w-[calc(100vw-3rem)] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto">
             <div className="grid grid-cols-4 gap-5 text-left normal-case tracking-normal whitespace-normal">
               {/* Silo 1: Boardroom Codecs & Systems */}
               <div>
@@ -311,8 +311,10 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
           </Link>
           <div className="absolute top-10 left-0 w-[360px] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto">
             <ul className="space-y-2 text-[12px] text-gray-700 font-bold capitalize tracking-normal whitespace-normal">
-              <li><Link to="/video-conferencing-solutions" className="hover:text-[#00B4D8] transition-colors block">Video Conferencing Solutions (Pillar)</Link></li>
-              <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors block">Corporate Event Management (Pillar)</Link></li>
+              <li><Link to="/video-conference-in-pakistan" className="hover:text-[#00B4D8] transition-colors block">Video Conference in Pakistan (Pillar)</Link></li>
+              <li><Link to="/event-management-in-pakistan" className="hover:text-[#00B4D8] transition-colors block">Event Management in Pakistan (Pillar)</Link></li>
+              <li><Link to="/video-conferencing-solutions" className="hover:text-[#00B4D8] transition-colors block">Video Conferencing Solutions</Link></li>
+              <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors block">Corporate Event Management</Link></li>
               <li><Link to="/projection-mapping" className="hover:text-[#00B4D8] transition-colors block">3D Projection Mapping &amp; Hologram Stages</Link></li>
               <li><Link to="/services/ai-automation" className="hover:text-[#00B4D8] transition-colors block">AI Business Automation &amp; Digital Workers</Link></li>
               <li><Link to="/services/corporate-events" className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Corporate Event Production</Link></li>
@@ -334,7 +336,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
           >
             VIDEO CONFERENCE <ChevronDown size={12} className="transition-transform duration-150 group-hover:rotate-180 group-focus-within:rotate-180 shrink-0" />
           </Link>
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[620px] max-w-[calc(100vw-2rem)] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto whitespace-normal">
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[580px] xl:w-[620px] max-w-[calc(100vw-2rem)] bg-white shadow-2xl z-50 border border-gray-100 rounded-b-2xl p-5 transition-opacity duration-150 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto whitespace-normal">
             <div className="mb-3.5 pb-2.5 border-b border-gray-100 bg-blue-50/60 p-3 rounded-xl space-y-1.5">
               <Link to="/video-conference-in-pakistan" className="font-black text-xs text-[#1A2B4C] hover:text-[#00B4D8] flex items-center justify-between uppercase tracking-wider">
                 <span>Video Conference in Pakistan — Complete Pillar Hub</span>
@@ -647,14 +649,14 @@ function Navbar() {
       </div>
 
       {/* Compact Sticky Header (Mobile 1-Row 54px; Desktop 56px + 40px Nav = 96px) */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-xs border-b border-gray-100 lg:border-gray-200">
+      <header className="sticky top-0 z-50 bg-white shadow-xs border-b border-gray-100 lg:border-gray-200">
         {/* Compact 1-Row Mobile Top Bar (< 1024px — 54px height) */}
-        <div className="lg:hidden h-[54px] px-3 py-1.5 flex items-center gap-2 bg-[#F8F9FA]/95 backdrop-blur-md">
+        <div className="lg:hidden relative h-[54px] px-3 py-1.5 flex items-center gap-2 bg-[#F8F9FA]">
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle mobile menu"
-            className="w-9 h-9 rounded-xl bg-white border border-gray-200/80 shadow-xs flex items-center justify-center text-[#1A2B4C] hover:text-[#00B4D8] transition-colors shrink-0 cursor-pointer"
+            className="w-9 h-9 -m-1 p-1 rounded-xl bg-white border border-gray-200/80 shadow-xs flex items-center justify-center text-[#1A2B4C] hover:text-[#00B4D8] transition-colors shrink-0 cursor-pointer"
           >
             {isOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -662,7 +664,7 @@ function Navbar() {
           <Link
             to="/"
             onClick={closeAllMenus}
-            className="flex items-center shrink-0 pr-0.5"
+            className="flex items-center shrink-0 pr-0.5 min-h-[36px]"
             aria-label="AV Live Home"
           >
             <span className="bg-[#1A2B4C] text-white font-black text-xs px-1.5 py-1 rounded-md leading-none tracking-tight">
@@ -673,7 +675,7 @@ function Navbar() {
             </span>
           </Link>
 
-          <div ref={mobileSearchRef} className="relative flex-1 min-w-0">
+          <div ref={mobileSearchRef} className="flex-1 min-w-0">
             <form
               onSubmit={handleSearchSubmit}
               className="flex items-center bg-white rounded-xl border border-gray-200/80 shadow-xs h-9 pl-2.5 pr-1"
@@ -718,24 +720,24 @@ function Navbar() {
               </button>
             </form>
 
-            {/* Mobile Live Search Suggestions Dropdown */}
+            {/* Full-Width Mobile Live Search Suggestions Dropdown (Spans full mobile header width) */}
             {showSuggestions && searchQuery.trim().length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden divide-y divide-gray-50">
+              <div className="absolute top-full left-3 right-3 mt-1 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden divide-y divide-gray-50">
                 {searchSuggestions.length > 0 ? (
                   <div>
-                    <div className="px-3 py-1.5 bg-gray-50/60 text-[10px] font-black uppercase tracking-widest text-[#00B4D8] flex justify-between items-center">
+                    <div className="px-3.5 py-2 bg-gray-50/70 text-[10px] font-black uppercase tracking-widest text-[#00B4D8] flex justify-between items-center">
                       <span>Matching Hardware</span>
-                      <span>{searchSuggestions.length} items</span>
+                      <span>{searchSuggestions.length} items found</span>
                     </div>
-                    <div className="max-h-[260px] overflow-y-auto divide-y divide-gray-50">
+                    <div className="max-h-[280px] overflow-y-auto divide-y divide-gray-50">
                       {searchSuggestions.map((product, sIdx) => (
                         <Link
                           key={`mob-${product.id || product.slug || sIdx}`}
                           to={`/product/${getCanonicalProductSlug(product, product.id)}`}
-                          className="flex items-center gap-2.5 p-2.5 hover:bg-gray-50/80 transition-colors group"
+                          className="flex items-center gap-3 p-2.5 hover:bg-gray-50/80 transition-colors group"
                           onClick={closeAllMenus}
                         >
-                          <div className="w-9 h-9 bg-white rounded-lg border border-gray-100 overflow-hidden shrink-0 flex items-center justify-center">
+                          <div className="w-10 h-10 bg-white rounded-lg border border-gray-100 overflow-hidden shrink-0 flex items-center justify-center">
                             <img
                               src={product.images?.[0] || 'https://via.placeholder.com/48'}
                               alt={product.productName}
@@ -751,7 +753,7 @@ function Navbar() {
                             </div>
                           </div>
                           <div className="shrink-0 text-right">
-                            <div className="text-[11px] font-black text-[#1A2B4C]">
+                            <div className="text-xs font-black text-[#1A2B4C]">
                               {product.salePrice ? `Rs. ${product.salePrice.toLocaleString()}` : 'Quote'}
                             </div>
                           </div>
@@ -763,7 +765,7 @@ function Navbar() {
                       onClick={handleSearchSubmit}
                       className="w-full text-center py-2.5 text-[11px] font-black text-[#00B4D8] hover:bg-gray-50 border-t border-gray-100 uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      View All Results <ArrowRight size={13} />
+                      View All Search Results <ArrowRight size={13} />
                     </button>
                   </div>
                 ) : (
@@ -779,7 +781,7 @@ function Navbar() {
           <a
             href="tel:+923214256263"
             aria-label="Call AV Live Engineering Desk"
-            className="relative w-9 h-9 rounded-xl bg-white border border-gray-200/80 shadow-xs flex items-center justify-center text-[#1A2B4C] hover:text-[#00B4D8] transition-colors shrink-0"
+            className="relative w-9 h-9 -m-1 p-1 rounded-xl bg-white border border-gray-200/80 shadow-xs flex items-center justify-center text-[#1A2B4C] hover:text-[#00B4D8] transition-colors shrink-0"
           >
             <Phone size={16} />
             <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500 ring-1 ring-white" />
@@ -927,7 +929,7 @@ function Navbar() {
 
         {/* Compact Mobile Menu Drawer (Fits cleanly between 54px top header and 52px bottom dock) */}
         {isOpen && (
-          <div className="fixed top-[54px] bottom-[52px] left-0 right-0 bg-[#F8F9FA] px-3 pt-2.5 pb-12 space-y-2.5 shadow-2xl z-40 overflow-y-auto lg:hidden">
+          <div className="fixed inset-x-0 top-[54px] bottom-[52px] h-[calc(100dvh-106px)] bg-[#F8F9FA] px-3 pt-2.5 pb-12 space-y-2.5 shadow-2xl z-40 overflow-y-auto lg:hidden">
             {/* Compact Top Hub Identity Card */}
             <div className="bg-white rounded-2xl p-3.5 border border-gray-100 shadow-xs flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
@@ -1040,8 +1042,9 @@ function Navbar() {
               <div className="divide-y divide-gray-50">
                 {[
                   { label: 'Video Conference in Pakistan', path: '/video-conference-in-pakistan', badge: 'VH' },
-                  { label: 'Video Conferencing Solutions', path: '/video-conferencing-solutions', badge: 'VC' },
+                  { label: 'Event Management in Pakistan', path: '/event-management-in-pakistan', badge: 'EM' },
                   { label: 'Corporate Event Management', path: '/corporate-event-management', badge: 'CE' },
+                  { label: 'Video Conferencing Solutions', path: '/video-conferencing-solutions', badge: 'VC' },
                   { label: '3D Projection Mapping & Holograms', path: '/projection-mapping', badge: '3D' },
                   { label: 'AV Equipment & SMD LED Rental', path: '/av-equipment-rental', badge: 'AV' },
                   { label: 'Live Streaming & Hybrid Events', path: '/live-streaming-services', badge: 'LS' },
@@ -1283,6 +1286,8 @@ export default function App() {
             <Route path="/islamabad" element={<KeywordLandingPage />} />
             <Route path="/video-conferencing" element={<KeywordLandingPage />} />
             <Route path="/video-conferencing-solutions" element={<KeywordLandingPage />} />
+            <Route path="/video-conference-in-pakistan" element={<KeywordLandingPage />} />
+            <Route path="/event-management-in-pakistan" element={<KeywordLandingPage />} />
             <Route path="/corporate-event-management" element={<KeywordLandingPage />} />
             <Route path="/live-streaming-services" element={<KeywordLandingPage />} />
             <Route path="/av-equipment-rental" element={<KeywordLandingPage />} />

@@ -45,7 +45,7 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="bg-[#1C4E70] text-white pt-6 lg:pt-8 pb-safe pb-16 lg:pb-6">
+    <footer className="bg-[#1C4E70] text-white pt-6 lg:pt-8 pb-safe pb-36 lg:pb-6">
       <div className="max-w-[1400px] mx-auto px-3 sm:px-6 md:px-8">
         <h2 className="sr-only">Footer Navigation, Social Media &amp; Contact Directory</h2>
 
@@ -78,8 +78,9 @@ export function Footer() {
             <ul className="space-y-1.5 text-xs text-gray-200">
               <li><Link to="/about" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">About AV Live</Link></li>
               <li><Link to="/video-conference-in-pakistan" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Video Conference in Pakistan</Link></li>
+              <li><Link to="/event-management-in-pakistan" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Event Management in Pakistan</Link></li>
               <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Corporate Event Management</Link></li>
-              <li><Link to="/video-conferencing" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Video Conferencing Hardware Hub</Link></li>
+              <li><Link to="/video-conferencing" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Video Conferencing Room Architecture</Link></li>
               <li><Link to="/events-services" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Event Production &amp; Staging</Link></li>
               <li><Link to="/3d-hologram" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">3D Hologram Displays</Link></li>
               <li><Link to="/projection-mapping" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">3D Projection Mapping</Link></li>

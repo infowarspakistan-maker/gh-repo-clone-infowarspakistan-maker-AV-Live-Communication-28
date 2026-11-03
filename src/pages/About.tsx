@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Users, Award, ShieldCheck, MapPin, CheckCircle, Loader2, Target, History, Heart } from 'lucide-react';
 import { subscribeToAbout, AboutData } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export function About() {
   const [content, setContent] = useState<AboutData | null>(null);
@@ -35,8 +36,8 @@ export function About() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
       <SEO 
-        title="About AV Live Communications | Pakistan's AV Integration Leaders"
-        description="Learn about our 15-year journey of unifying people and ideas. AV Live is Pakistan's premier systems integrator for professional communication technology."
+        title="About AV Live | Pro-AV & Event Engineering Pakistan"
+        description="Learn how AV Live Communications delivers enterprise video conferencing, unified communications, 3D hologram stages & corporate events in Pakistan."
         url="https://avlive.com.pk/about"
         image="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
         imageAlt="About AV Live Communications Pakistan"
@@ -44,32 +45,35 @@ export function About() {
           "@context": "https://schema.org",
           "@type": "AboutPage",
           "name": "About AV Live Communications",
-          "description": "Learn about our 15-year journey of unifying people and ideas.",
+          "description": "Learn how AV Live Communications delivers enterprise video conferencing, unified communications, 3D hologram stages & corporate events in Pakistan.",
           "publisher": {
             "@id": "https://avlive.com.pk/#organization"
           }
         }}
       />
-      {/* Hero Section */}
-      <div className="relative h-[500px] flex items-center justify-center overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2.5">
+        <Breadcrumbs items={[{ label: 'About Us' }]} />
+      </div>
+      {/* Compact 16:6 Hero Section */}
+      <div className="relative aspect-[16/9] sm:aspect-[16/6] min-h-[220px] max-h-[300px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img loading="lazy" src={data.heroImageUrl} alt="About Us" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-[#1A2B4C]/80 mix-blend-multiply"></div>
+          <img loading="lazy" src={data.heroImageUrl} alt="About AV Live Communications Pakistan" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-[#1A2B4C]/85 mix-blend-multiply"></div>
         </div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center pt-4 pb-10">
           <motion.span 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.4em] mb-4 block"
+            className="text-[#00B4D8] text-[10px] font-black uppercase tracking-[0.35em] mb-2 block"
           >
-            Since 2010
+            Pioneering Pro-AV &amp; Events Since 2010
           </motion.span>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight"
+            className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2.5 tracking-tight leading-tight"
           >
             {data.heroHeading}
           </motion.h1>
@@ -77,15 +81,15 @@ export function About() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed prose prose-invert max-w-none [&_*]:break-words"
+            className="text-xs sm:text-sm md:text-base text-white/90 max-w-3xl mx-auto leading-relaxed prose prose-invert max-w-none [&_*]:break-words"
             dangerouslySetInnerHTML={{ __html: data.heroSubheading }}
           />
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 -mt-5 relative z-20">
         {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {[
             { label: 'Years Experience', value: data.stats.yearsExperience, icon: History, color: 'text-blue-600', bg: 'bg-blue-50' },
             { label: 'Happy Clients', value: data.stats.happyClients, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -97,19 +101,19 @@ export function About() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + (idx * 0.1) }}
-              className="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-gray-100 text-center"
+              className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 text-center"
             >
-              <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                <stat.icon size={24} />
+              <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center mx-auto mb-2.5`}>
+                <stat.icon size={20} />
               </div>
-              <div className="text-3xl font-black text-[#1A2B4C] mb-1">{stat.value}+</div>
+              <div className="text-2xl sm:text-3xl font-black text-[#1A2B4C] mb-0.5">{stat.value}+</div>
               <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">{stat.label}</div>
             </motion.div>
           ))}
         </div>
 
         {/* Mission & Vision */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-8 lg:mt-10">
           <motion.div 
             whileHover={{ y: -5 }}
             className="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-100 flex flex-col gap-6"
@@ -196,6 +200,43 @@ export function About() {
           {/* Abstract Shapes */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full -translate-x-1/2 translate-y-1/2 blur-3xl"></div>
+        </div>
+
+        {/* Nationwide Engineering Hubs & Milestones Semantic Table */}
+        <div className="mt-10 bg-white rounded-3xl p-5 sm:p-8 border border-gray-100 shadow-xs overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs sm:text-sm">
+            <caption className="bg-[#1A2B4C] text-white font-black text-left px-4 py-3 text-xs uppercase tracking-wider rounded-t-xl">
+              AV Live Communications — Nationwide Engineering Hubs &amp; OEM Accreditations (Est. 2010)
+            </caption>
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
+                <th className="py-3 px-4">Regional Engineering Hub</th>
+                <th className="py-3 px-4">Primary Capabilities &amp; Staging Inventory</th>
+                <th className="py-3 px-4">Authorized OEM Ecosystems</th>
+                <th className="py-3 px-4">Support SLA</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              <tr>
+                <td className="py-3 px-4 font-black text-[#1A2B4C]">Lahore Head Office (Johar Town)</td>
+                <td className="py-3 px-4 text-gray-600">Central Pro-AV Warehouse, P2.5 SMD LED Fleet, 3D Hologram Lab &amp; RMA Bench</td>
+                <td className="py-3 px-4 text-gray-600">HP Poly (Polycom), Cisco, Logitech, Yealink, Bosch</td>
+                <td className="py-3 px-4 font-bold text-[#00B4D8]">15-Min Phone / Same-Day On-Site</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-black text-[#1A2B4C]">Karachi Regional Hub</td>
+                <td className="py-3 px-4 text-gray-600">Banking Command Centers, Multinational Boardrooms &amp; Expo Centre Production</td>
+                <td className="py-3 px-4 text-gray-600">Cisco Room Kits, Poly Studio X72, Grandstream, Axis</td>
+                <td className="py-3 px-4 font-bold text-[#00B4D8]">15-Min Remote / Next-Day On-Site</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-black text-[#1A2B4C]">Islamabad &amp; Rawalpindi Hub</td>
+                <td className="py-3 px-4 text-gray-600">Federal Ministry H.323 Codecs, Bosch Chairman/Delegate Mics &amp; Diplomatic Summits</td>
+                <td className="py-3 px-4 text-gray-600">Polycom Group 500, Bosch Dicentis/CCS, Horion IFP</td>
+                <td className="py-3 px-4 font-bold text-[#00B4D8]">15-Min Remote / On-Site Standby</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

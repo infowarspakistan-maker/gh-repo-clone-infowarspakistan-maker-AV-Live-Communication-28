@@ -73,34 +73,34 @@ export function FAQs() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
       <SEO 
-        title="FAQs | Video Conference in Pakistan, Polycom Group 500, Poly X70 & Event Management | AV Live" 
-        description="Answers to common questions about Video Conference in Pakistan, Polycom Group 500, Poly X70, Corporate event management, hybrid events, Hologram Displays, and nationwide shipping."
-        keywords="Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, AV Live FAQs"
+        title="FAQs | Video Conferencing & Event Management | AV Live" 
+        description="Answers to common questions about Video Conferencing in Pakistan, Polycom Group 500, Poly X70, Corporate Event Management & nationwide delivery."
+        keywords="Video Conferencing FAQs Pakistan, Polycom Group 500, Poly X70, Corporate Event Management FAQs, AV Live FAQs"
         url="https://avlive.com.pk/faqs"
         schema={faqSchema}
       />
-      <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
+      <div className="bg-[#1A2B4C] text-white py-6 lg:py-10 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-black mb-6 tracking-tight"
+            className="text-2xl sm:text-3xl md:text-4xl font-black mb-2.5 tracking-tight"
           >
-            We Have Answers.
+            Frequently Asked Technical &amp; Procurement Questions
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed"
+            className="text-xs sm:text-sm md:text-base text-white/90 max-w-3xl mx-auto leading-relaxed"
           >
-            Quick, helpful answers to the most common questions about shopping, shipping, and support at AV Live.
+            Quick, authoritative answers to the most common questions about enterprise video conferencing, corporate event production, shipping, and SLA support at AV Live.
           </motion.p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 space-y-16">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 lg:mt-10 space-y-10">
         {FAQS.map((group, i) => (
           <div key={i}>
             <h2 className="text-2xl font-black text-[#1A2B4C] mb-8 pb-4 border-b border-gray-200 flex items-center gap-3">

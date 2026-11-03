@@ -412,18 +412,18 @@ export function Shop() {
       : 'https://avlive.com.pk/shop';
 
   const shopSeoTitle = activeSingleBrandName
-    ? `${activeSingleBrandName} Video Conferencing & AV Hardware in Pakistan | Official Dealer | AV Live`
+    ? `${activeSingleBrandName} Official Dealer & Price in Pakistan | AV Live`
     : isBrandsIndexPage
-      ? 'Authorized Enterprise AV & Video Conferencing Brands in Pakistan | AV Live'
+      ? 'Authorized Enterprise AV Brands in Pakistan | AV Live'
       : selectedCategoryName
-        ? `${selectedCategoryName} | Video Conference in Pakistan & Enterprise AV Shop | AV Live`
-        : 'Enterprise AV Shop | Video Conference in Pakistan, Polycom Group 500 & Poly X70 | AV Live';
+        ? `${selectedCategoryName} Price in Pakistan | Enterprise AV Store | AV Live`
+        : 'Enterprise AV Shop | Poly, Logitech & Cisco | AV Live';
 
   const shopSeoDescription = activeSingleBrandName
     ? `Buy genuine ${activeSingleBrandName} video conferencing, IP phones, projectors, and professional AV hardware in Pakistan with official warranty and nationwide delivery.`
     : isBrandsIndexPage
-      ? 'Explore official enterprise AV and video conferencing brands in Pakistan: Polycom, HP Poly, Logitech, Cisco, Yealink, Epson, Dahua, Bosch, Jabra, and more.'
-      : "Browse Pakistan's largest inventory of Video Conference in Pakistan hardware, Polycom Group 500, Poly Studio X70, Cisco & Yealink IP telephony, and Corporate Event Management gear.";
+      ? 'Browse official enterprise hardware by authorized brand in Pakistan: HP Poly, Cisco, Logitech, Yealink, Jabra, Bosch, Hikvision, Dahua & Epson.'
+      : 'Buy genuine video conferencing hardware in Pakistan: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Cisco Room Kits & Yealink IP phones.';
 
   const shopSchema = {
     '@context': 'https://schema.org',

@@ -91,33 +91,43 @@ export function Solutions() {
   };
 
   return (
-    <div className="py-12 bg-[#F8F9FA] min-h-screen text-[#1A2B4C]">
+    <div className="py-4 lg:py-8 bg-[#F8F9FA] min-h-screen text-[#1A2B4C]">
       <SEO 
-        title="Video Conference in Pakistan, Hybrid Event & 3D Hologram Solutions | Polycom Group 500 & Poly X70 | AV Live" 
-        description="Explore turnkey solutions for Video Conference in Pakistan (Polycom Group 500, Poly X70), smart boardrooms, Corporate event management, hybrid event broadcasting, and 3D Hologram Displays."
-        keywords="Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, Zoom Rooms Pakistan, Microsoft Teams Rooms Pakistan"
+        title="Video Conferencing & Hybrid Event Solutions | AV Live" 
+        description="Explore turnkey solutions for Video Conferencing in Pakistan (Poly, Cisco, Logitech), smart boardrooms, hybrid events & 3D Hologram Displays."
+        keywords="Video Conferencing Solutions Pakistan, Polycom Group 500, Poly X70, Corporate Event Management, Hybrid Event Production, 3D Hologram Display, Zoom Rooms Pakistan, Microsoft Teams Rooms Pakistan"
         url="https://avlive.com.pk/solutions"
         schema={solutionsSchema}
       />
       <motion.div 
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
         <Breadcrumbs items={[{ label: 'Solutions' }]} />
         <motion.h1 
-          className="text-4xl font-bold mb-4 uppercase tracking-tighter"
+          className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 uppercase tracking-tight"
           variants={itemVariants}
         >
-          Video Conferencing, Hybrid Event & Hologram Solutions Ecosystem in Pakistan
+          Video Conferencing, Hybrid Event &amp; Hologram Solutions Ecosystem in Pakistan
         </motion.h1>
         <motion.p 
-          className="text-lg text-gray-500 mb-16 max-w-3xl font-medium"
+          className="text-sm sm:text-base text-gray-600 mb-5 max-w-3xl font-medium"
           variants={itemVariants}
         >
-          We integrate the world's leading brands—including <strong>Polycom Group 500</strong>, <strong>Poly X70</strong>, Cisco, and Bosch—to build seamless environments for <strong>Video Conference in Pakistan</strong>, <strong>Hologram Display</strong> product launches, and large-scale <strong>Corporate event management</strong>.
+          We integrate the world's leading brands—including <strong>Polycom Group 500</strong>, <strong>Poly X70</strong>, Cisco, and Bosch—to build seamless environments for <Link to="/video-conference-in-pakistan" className="text-[#00B4D8] font-bold hover:underline">Video Conference in Pakistan</Link>, <Link to="/3d-hologram" className="text-[#00B4D8] font-bold hover:underline">Hologram Display</Link> product launches, and large-scale <Link to="/event-management-in-pakistan" className="text-[#00B4D8] font-bold hover:underline">Event Management in Pakistan</Link>.
         </motion.p>
+
+        {/* Answer-First Direct Engineering Verdict (50-70 Words) */}
+        <div className="bg-white rounded-2xl border-l-4 border-[#00B4D8] border border-gray-200 p-4 sm:p-6 mb-6 shadow-xs">
+          <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1.5">
+            Direct Engineering Verdict (TL;DR) — Enterprise AV &amp; Event Architecture
+          </span>
+          <p className="text-xs sm:text-sm text-[#1A2B4C] font-semibold leading-relaxed">
+            <strong>AV Live Communications</strong> (established 2011) designs and deploys turnkey enterprise ecosystems across <strong>Lahore, Karachi, and Islamabad</strong>: AES-256 encrypted <Link to="/video-conference-in-pakistan" className="text-[#00B4D8] underline">Video Conference in Pakistan</Link> boardrooms (HP Poly Studio X72/X70, Polycom Group 500, Cisco Room Kit Plus), <Link to="/event-management-in-pakistan" className="text-[#00B4D8] underline">Event Management in Pakistan</Link> with in-house P2.5 SMD LED walls and 3D HoloGauze stages, and multi-branch SIP trunking PBXs backed by a 15-minute engineering SLA.
+          </p>
+        </div>
 
         <div className="space-y-8">
           <motion.div 
@@ -269,6 +279,49 @@ export function Solutions() {
                 <li><Link to="/product/bosch-paviro-pva-4cr12-pakistan" className="hover:underline">Bosch PAVIRO Campus PA System</Link></li>
               </ul>
             </div>
+          </div>
+
+          {/* Semantic HTML Industry Solutions & Budget Matrix Table */}
+          <div className="overflow-x-auto rounded-2xl border border-gray-200">
+            <table className="w-full text-left border-collapse text-xs sm:text-sm">
+              <caption className="bg-[#1A2B4C] text-white font-black text-left px-4 py-3 text-xs uppercase tracking-wider">
+                2026 Pakistan Enterprise AV, Boardroom &amp; Hybrid Event Solutions Matrix
+              </caption>
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
+                  <th className="py-3 px-4">Solution Vertical</th>
+                  <th className="py-3 px-4">Core Hardware &amp; AV Stack</th>
+                  <th className="py-3 px-4">Room / Venue Scale</th>
+                  <th className="py-3 px-4">Reference PKR Budget</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                <tr className="hover:bg-gray-50/70">
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]"><Link to="/video-conference-in-pakistan" className="hover:text-[#00B4D8]">Executive Boardroom AV</Link></td>
+                  <td className="py-3 px-4 text-gray-600">Polycom Group 500 / Poly Studio X72 / Cisco Room Kit Plus + Dual 4K Displays</td>
+                  <td className="py-3 px-4 text-gray-600">12–30 Seats</td>
+                  <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 1,450,000 – Rs. 2,850,000</td>
+                </tr>
+                <tr className="hover:bg-gray-50/70">
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]"><Link to="/event-management-in-pakistan" className="hover:text-[#00B4D8]">Corporate &amp; Hybrid Events</Link></td>
+                  <td className="py-3 px-4 text-gray-600">P2.5 SMD LED Video Wall + Line-Array PA + 4K SDI Broadcast Switcher</td>
+                  <td className="py-3 px-4 text-gray-600">150–2,000+ Delegates</td>
+                  <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 350,000 – Rs. 2,500,000+</td>
+                </tr>
+                <tr className="hover:bg-gray-50/70">
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]"><Link to="/3d-hologram" className="hover:text-[#00B4D8]">3D Hologram &amp; Projection Mapping</Link></td>
+                  <td className="py-3 px-4 text-gray-600">20,000 ANSI Lumen Laser Projectors + HoloGauze Silver Mesh + 3D Content</td>
+                  <td className="py-3 px-4 text-gray-600">Keynote Launches &amp; Galas</td>
+                  <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 480,000 – Rs. 1,850,000</td>
+                </tr>
+                <tr className="hover:bg-gray-50/70">
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]"><Link to="/solutions#education" className="hover:text-[#00B4D8]">HEC Smart Classroom &amp; Telemedicine</Link></td>
+                  <td className="py-3 px-4 text-gray-600">Horion K6a 4K IFP + Poly Studio X52 / USB Bar + Bosch PAVIRO Audio</td>
+                  <td className="py-3 px-4 text-gray-600">30–120 Seats</td>
+                  <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 650,000 – Rs. 1,650,000</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 

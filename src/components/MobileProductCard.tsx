@@ -100,10 +100,10 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
           onClick={handleToggleFavorite}
           aria-label={isFavorite ? `Remove ${product.productName} from saved items` : `Save ${product.productName}`}
           aria-pressed={isFavorite}
-          className="absolute top-1 right-1 w-7 h-7 flex items-center justify-center z-10 cursor-pointer"
+          className="absolute top-1 right-1 -m-1.5 p-1.5 w-10 h-10 flex items-center justify-center z-10 cursor-pointer"
         >
           <span
-            className={`w-5 h-5 rounded-full flex items-center justify-center shadow-xs transition-colors ${
+            className={`w-6 h-6 rounded-full flex items-center justify-center shadow-xs transition-colors ${
               isFavorite
                 ? 'bg-rose-500 text-white'
                 : 'bg-white/95 text-rose-500 hover:bg-rose-50'
@@ -130,7 +130,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
           type="button"
           onClick={handleQuickAdd}
           aria-label={`Add ${product.productName} to cart`}
-          className="w-7 h-7 flex items-center justify-center shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8] rounded-full"
+          className="-m-1.5 p-1.5 w-10 h-10 flex items-center justify-center shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8] rounded-full"
         >
           <span
             className={`w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition-all active:scale-95 ${

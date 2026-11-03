@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { PhoneCall, Hash, Globe, ServerCog } from 'lucide-react';
 import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export function VoipService() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
       <SEO 
-        title="Enterprise VoIP & SIP Trunking Solutions | AV Live Pakistan" 
-        description="Reliable business VoIP phone lines, SIP trunking, cloud PBX integration, and international calling minutes configured for Pakistani enterprises."
+        title="Enterprise VoIP & SIP PBX Integration Pakistan | AV Live" 
+        description="Compare and deploy 3CX, FreePBX, Grandstream UCM & Cisco Unified Communications PBX systems with multi-branch SIP trunking in Pakistan."
         url="https://avlive.com.pk/voip-service-providers"
         schema={{
           '@context': 'https://schema.org',
@@ -17,7 +18,7 @@ export function VoipService() {
             {
               '@type': 'Service',
               '@id': 'https://avlive.com.pk/voip-service-providers#service',
-              name: 'Enterprise VoIP & SIP Trunking Solutions in Pakistan',
+              name: 'Enterprise VoIP Service Providers & SIP PBX Integration in Pakistan',
               serviceType: 'IP-PBX & Multi-Branch SIP Trunking Integration',
               provider: { '@id': 'https://avlive.com.pk/#organization' },
               areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
@@ -33,29 +34,85 @@ export function VoipService() {
           ]
         }}
       />
-      <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2.5">
+        <Breadcrumbs items={[{ label: 'VoIP Service Providers' }]} />
+      </div>
+      <div className="bg-[#1A2B4C] text-white py-6 lg:py-10 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-black mb-6 tracking-tight"
+            className="text-2xl sm:text-3xl md:text-4xl font-black mb-2.5 tracking-tight"
           >
-            Connect to the World. Affordable VoIP Services.
+            Enterprise VoIP Service Providers &amp; SIP PBX Integration in Pakistan
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed"
+            className="text-xs sm:text-sm md:text-base text-white/90 max-w-3xl mx-auto leading-relaxed"
           >
-            A VoIP phone system is useless without a great service provider. We partner with Pakistan's leading carriers to deliver reliable SIP trunking, DIDs, and virtual numbers.
+            A VoIP phone system is only as reliable as its SIP carrier and PBX core. We integrate PTCL, Cybernet, Zong, and international SIP trunks with 3CX, FreePBX, Grandstream UCM, and Cisco CUCM across Pakistan.
           </motion.p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 space-y-24">
-        
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-6 lg:mt-10 space-y-10 lg:space-y-14">
+        {/* Answer-First Verdict & Semantic IP-PBX Comparison Table */}
+        <div className="bg-white rounded-2xl lg:rounded-3xl border border-gray-200 p-5 sm:p-7 shadow-xs space-y-5">
+          <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-xl p-4">
+            <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
+              Direct Engineering Verdict (TL;DR) — Pakistan Enterprise VoIP &amp; SIP Trunking
+            </span>
+            <p className="text-xs sm:text-sm font-semibold text-[#1A2B4C] leading-relaxed">
+              For multi-branch Pakistani enterprises and call centers, <strong>AV Live Communications</strong> deploys carrier-neutral SIP trunking (PTCL Smart Voice, Cybernet Fiber SIP, Zong IMS) paired with on-premise or cloud IP-PBX cores (<Link to="/product/3cx-pro-8-sc-pakistan" className="text-[#00B4D8] underline">3CX Pro 8 SC</Link>, <Link to="/product/freepbx-enterprise-pakistan" className="text-[#00B4D8] underline">FreePBX Enterprise</Link>, <Link to="/product/grandstream-ucm6308-pakistan" className="text-[#00B4D8] underline">Grandstream UCM6308</Link>, and <Link to="/product/cisco-cucm-license-pakistan" className="text-[#00B4D8] underline">Cisco CUCM</Link>) and zero-touch provisioned <Link to="/category/ip-phones" className="text-[#00B4D8] underline">SIP IP Phones</Link>.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-gray-200">
+            <table className="w-full text-left border-collapse text-xs sm:text-sm">
+              <caption className="bg-[#1A2B4C] text-white font-black text-left px-4 py-3 text-xs uppercase tracking-wider">
+                2026 Pakistan Enterprise IP-PBX &amp; SIP Trunking Platform Comparison
+              </caption>
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
+                  <th className="py-3 px-4">IP-PBX Platform</th>
+                  <th className="py-3 px-4">Concurrent Calls / Extensions</th>
+                  <th className="py-3 px-4">Key Enterprise Features</th>
+                  <th className="py-3 px-4">Reference PKR Price</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                <tr className="hover:bg-gray-50/70">
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]"><Link to="/product/3cx-pro-8-sc-pakistan" className="hover:text-[#00B4D8]">3CX Phone System PRO (8 SC)</Link></td>
+                  <td className="py-3 px-4 text-gray-600">8 Simultaneous Calls / Unlimited Users</td>
+                  <td className="py-3 px-4 text-gray-600">CRM Integration, Call Queues, Call Recording, WhatsApp/WebRTC</td>
+                  <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 145,000</td>
+                </tr>
+                <tr className="hover:bg-gray-50/70">
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]"><Link to="/product/freepbx-enterprise-pakistan" className="hover:text-[#00B4D8]">FreePBX Enterprise Appliance</Link></td>
+                  <td className="py-3 px-4 text-gray-600">Up to 500 Extensions / 150 Calls</td>
+                  <td className="py-3 px-4 text-gray-600">Zero Per-Seat Licensing, Asterisk SIP Core, IVR &amp; Call Center</td>
+                  <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 320,000</td>
+                </tr>
+                <tr className="hover:bg-gray-50/70">
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]"><Link to="/product/grandstream-ucm6308-pakistan" className="hover:text-[#00B4D8]">Grandstream UCM6308 IP-PBX</Link></td>
+                  <td className="py-3 px-4 text-gray-600">Up to 3,000 Users / 450 Concurrent Calls</td>
+                  <td className="py-3 px-4 text-gray-600">8 FXO + 8 FXS Ports, Redundant Dual PSU, UCM RemoteConnect</td>
+                  <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 495,000</td>
+                </tr>
+                <tr className="hover:bg-gray-50/70">
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]"><Link to="/product/cisco-cucm-license-pakistan" className="hover:text-[#00B4D8]">Cisco Unified CallManager (CUCM)</Link></td>
+                  <td className="py-3 px-4 text-gray-600">Enterprise Multi-Cluster Scale</td>
+                  <td className="py-3 px-4 text-gray-600">Bank-Grade SRTP Encryption, Cisco IP Phone &amp; Room Kit Native</td>
+                  <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 850,000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div>
           <h2 className="text-3xl font-black text-[#1A2B4C] mb-12 text-center">What We Offer</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

@@ -145,7 +145,7 @@ export function ProductDetails() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
         <SEO
-          title={`${fallbackSlug.replace(/-/g, ' ')} | Video Conference in Pakistan | AV Live`}
+          title={`${fallbackSlug.replace(/-/g, ' ')} Price in Pakistan | AV Live`}
           description="Enterprise video conferencing, VoIP telephony, and professional AV hardware in Pakistan with official warranty from AV Live Communications."
           url={`https://avlive.com.pk/product/${fallbackSlug}`}
         />
@@ -360,14 +360,22 @@ export function ProductDetails() {
     ]
   };
 
+  const candidateTitleWithMpn = `${product.productName} (${resolvedMpn}) Pakistan | AV Live`;
+  const candidateTitleShort = `${product.productName} Price in Pakistan | AV Live`;
+  const productSeoTitle = candidateTitleWithMpn.length <= 65
+    ? candidateTitleWithMpn
+    : candidateTitleShort.length <= 65
+    ? candidateTitleShort
+    : `${product.productName} | AV Live`;
+
   return (
     <div className="bg-[#F8F9FA] min-h-screen text-[#1A2B4C]">
       <SEO 
-        title={`${product.productName} | ${resolvedBrand} Video Conference in Pakistan | AV Live`}
-        description={product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '').substring(0, 160) || gmcMeta?.defaultDescription?.substring(0, 160) || `Buy ${product.productName} (${resolvedMpn}) by ${resolvedBrand} for Video Conference in Pakistan. Official warranty, nationwide delivery, and hybrid event support.`}
-        keywords={`${product.productName}, ${resolvedBrand}, ${resolvedMpn}, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events`}
+        title={productSeoTitle}
+        description={product.seoMetaDescription || `${product.productName} (${resolvedMpn}) in Pakistan: Rs. ${effectivePrice.toLocaleString()}. ${gmcMeta?.highlight || product.shortDescription?.replace(/<[^>]*>?/gm, '').substring(0, 90) || `Official ${resolvedBrand} hardware`}. Official ${resolvedBrand} warranty.`}
+        keywords={`${product.productName}, ${resolvedBrand}, ${resolvedMpn}, ${product.productName} price in Pakistan, ${resolvedBrand} Pakistan, official dealer AV Live`}
         image={productImages[0] || product.image}
-        imageAlt={`${product.productName} by ${resolvedBrand} - Video Conference in Pakistan`}
+        imageAlt={`${product.productName} (${resolvedMpn}) by ${resolvedBrand} Price in Pakistan`}
         url={canonicalProductUrl}
         type="product"
         price={effectivePrice}
@@ -796,7 +804,7 @@ export function ProductDetails() {
            </div>
 
           {/* Right Column: Short Description and Checkout/Pricing Module */}
-          <div className="lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-[160px]">
+          <div className="lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-[108px]">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1282,34 +1290,34 @@ export function ProductDetails() {
         )}
       </div>
 
-      {/* Sticky Mobile Quote & Buy Bar for Instant Thumb-Zone Conversion (Floating card above Curved Dark-Navy Bottom Dock) */}
-      <div className="lg:hidden fixed bottom-[76px] inset-x-3 z-40 bg-white/95 backdrop-blur-md border border-gray-200/80 rounded-2xl px-3.5 py-2.5 shadow-[0_8px_30px_rgba(11,19,43,0.16)]">
-        <div className="flex items-center justify-between gap-2.5 max-w-lg mx-auto">
+      {/* Sticky Mobile Quote & Buy Bar for Instant Thumb-Zone Conversion (Aligned 4px above 64px Elevated Center Cart Button) */}
+      <div className="lg:hidden fixed bottom-[68px] inset-x-3 z-40 bg-white/95 backdrop-blur-md border border-gray-200/80 rounded-2xl px-3 py-2 shadow-[0_8px_30px_rgba(11,19,43,0.16)]">
+        <div className="flex items-center justify-between gap-2 max-w-lg mx-auto">
           <div className="min-w-0">
             <span className="block text-[10px] font-bold text-gray-400 truncate">
               {product.productName}
             </span>
-            <span className="block text-sm font-black text-[#1A2B4C]">
+            <span className="block text-xs sm:text-sm font-black text-[#1A2B4C]">
               Rs. {getSelectedPrice().toLocaleString()}
             </span>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <a
               href={`https://wa.me/923214256263?text=${encodeURIComponent(`Hi AV Live, I need a 15-minute corporate quote for ${product.productName} (MPN: ${resolvedMpn}) listed at Rs. ${getSelectedPrice().toLocaleString()}.`)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3.5 py-2.5 min-w-[48px] min-h-[48px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm"
+              className="px-3 py-2 min-w-[44px] min-h-[40px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <Phone size={13} />
+              <Phone size={12} />
               <span>15m Quote</span>
             </a>
             <button
               type="button"
               onClick={handleAddToCart}
               disabled={product.stockQuantity <= 0}
-              className="px-4 py-2.5 min-w-[48px] min-h-[48px] rounded-full bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer"
+              className="px-3.5 py-2 min-w-[44px] min-h-[40px] rounded-full bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer"
             >
-              <ShoppingCart size={13} />
+              <ShoppingCart size={12} />
               <span>Add To Cart</span>
             </button>
           </div>

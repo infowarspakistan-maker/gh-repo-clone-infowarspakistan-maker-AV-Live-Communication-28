@@ -261,7 +261,7 @@ export function Category() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
         <SEO
-          title={`${(categorySlug || 'Hardware').replace(/-/g, ' ')} | Video Conference in Pakistan | AV Live`}
+          title={`${(categorySlug || 'Hardware').replace(/-/g, ' ')} in Pakistan | Enterprise AV | AV Live`}
           description="Explore enterprise video conferencing, VoIP telephony, and commercial AV hardware in Pakistan from AV Live Communications."
           url={`https://avlive.com.pk/category/${categorySlug || ''}`}
         />
@@ -295,11 +295,11 @@ export function Category() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16 text-[#1A2B4C]">
       <SEO 
-        title={`${currentCategory.name} | Video Conference in Pakistan | Polycom Group 500 & Poly X70 | AV Live`}
-        description={currentCategory.description || `Explore genuine ${currentCategory.name} in Pakistan including Polycom Group 500, Poly X70, and enterprise Video conference & Corporate event management hardware.`}
-        keywords={`${currentCategory.name}, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, AV Live`}
+        title={`${currentCategory.name} in Pakistan | Enterprise AV | AV Live`}
+        description={currentCategory.description || `Explore genuine ${currentCategory.name} in Pakistan: Poly, Cisco, Logitech & Yealink hardware with PKR pricing and official local warranty.`}
+        keywords={`${currentCategory.name}, ${currentCategory.name} price in Pakistan, enterprise AV Pakistan, Poly, Cisco, Logitech, Yealink, Bosch, AV Live`}
         image={currentCategory.imageUrl}
-        imageAlt={`${currentCategory.name} - Video Conference in Pakistan & Enterprise AV Solutions`}
+        imageAlt={`${currentCategory.name} Hardware & Integration in Pakistan — AV Live`}
         url={canonicalCategoryUrl}
         schema={{
           "@context": "https://schema.org",
@@ -307,7 +307,7 @@ export function Category() {
             {
               "@type": "CollectionPage",
               "@id": `${canonicalCategoryUrl}#collection`,
-              "name": `${currentCategory.name} - Video Conference in Pakistan | AV Live`,
+              "name": `${currentCategory.name} Hardware Catalog in Pakistan | AV Live`,
               "description": currentCategory.description || `Enterprise ${currentCategory.name} hardware in Pakistan.`,
               "url": canonicalCategoryUrl,
               "mainEntity": {

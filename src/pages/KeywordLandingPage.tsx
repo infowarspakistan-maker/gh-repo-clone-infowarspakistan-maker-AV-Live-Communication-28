@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { ArrowRight, Phone, Sparkles, CheckCircle2, ShieldCheck, MapPin, Award, Clock } from 'lucide-react';
 import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 interface LandingConfig {
   title: string;
@@ -14,6 +15,12 @@ interface LandingConfig {
   primaryCtaText: string;
   primaryCtaLink: string;
   locationCta?: string;
+  answerFirstVerdict?: string;
+  comparisonTable?: {
+    caption: string;
+    headers: string[];
+    rows: string[][];
+  };
   features: string[];
   faqs: { question: string; answer: string }[];
 }
@@ -147,58 +154,128 @@ const LANDING_CONFIGS: Record<string, LandingConfig> = {
     ]
   },
   'video-conferencing': {
-    title: 'Video Conference in Pakistan | Polycom Group 500 & Poly X70 | Boardroom AV | AV Live',
-    description: 'Complete B2B Video Conference in Pakistan solutions. Official Polycom Group 500, Poly X70, Zoom Rooms, Microsoft Teams Rooms, and hybrid event integration.',
-    keywords: 'Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, hybrid event, Corporate event management, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, AV Live',
-    heroHeading: 'Enterprise Video Conference in Pakistan: Polycom Group 500 & Poly X70 Solutions',
-    heroSubheading: 'Connect your teams flawlessly across Lahore, Karachi, Islamabad, and global offices with genuine Polycom Group 500 codecs, Poly X70 4K AI video bars, Zoom Rooms, and Microsoft Teams Rooms.',
+    title: 'Video Conferencing Room Architecture & Integration | AV Live',
+    description: 'Certified Zoom Rooms, Microsoft Teams Rooms (MTR) & H.323/SIP boardroom architecture in Lahore, Karachi & Islamabad with 15-min SLA.',
+    keywords: 'Video conferencing room architecture Pakistan, SIP H.323 codec integration, Zoom Rooms Pakistan, Microsoft Teams Rooms Pakistan, boardroom acoustic calibration, AV Live',
+    heroHeading: 'Video Conferencing Room Architecture, SIP/H.323 Codecs & Cloud Integration',
+    heroSubheading: 'Engineered room acoustics, PoE+ structured cabling, ceiling beamforming microphone arrays, and encrypted H.323/SIP & MTR/Zoom Room integration across Lahore, Karachi, and Islamabad.',
     pillar: 'Video Conferencing',
-    primaryCtaText: 'Book a Free Event or Conference Room Consultation',
+    primaryCtaText: 'Book a Free Conference Room Acoustic Survey',
     primaryCtaLink: '/contact',
-    locationCta: 'Call Now for a 15-Minute Response SLA',
+    locationCta: '15-Minute Engineering SLA across Lahore, Karachi & Islamabad',
+    answerFirstVerdict: 'Successful enterprise video conferencing integration requires matching room acoustics (RT60 < 0.6s) and table geometry with the right platform architecture: standards-based H.323/SIP hardware codecs for encrypted banking/defense boardrooms, Android all-in-one collaboration bars for 4–14 seat cloud rooms, or modular Windows MTR/Zoom Room bundles for multi-camera townhalls.',
+    comparisonTable: {
+      caption: 'Enterprise Video Conferencing Room Topologies & Integration Standards',
+      headers: ['Architecture Topology', 'Core Codec / Appliance', 'Network & Protocol Stack', 'Best Room Deployment', 'Turnkey SLA & Warranty'],
+      rows: [
+        ['Encrypted H.323 / SIP Hardware Codec', 'Polycom RealPresence Group 500 / Cisco Room Kit Plus', 'Dedicated Voice/Video VLAN, AES-256, H.323, SIP,On-Prem MCU', 'Commercial Banks, Defense, Ministries, 16–30 Seat Boardrooms', '15-Min SLA + On-Site Engineer'],
+        ['Native Cloud Appliance Video Bar', 'HP Poly Studio X52 / X72 / Logitech Rally Bar / Yealink A30', 'CollabOS / Poly VideoOS Native Zoom Rooms & Teams Rooms + USB BYOD', 'Huddle Spaces & 6–16 Seat Corporate Conference Rooms', '1-to-3 Year Local Swap Warranty'],
+        ['Multi-Camera Modular Pro-AV Matrix', 'Poly G7500 / Cisco Codec Pro + Dual 20x PTZ + Bosch Ceiling Mics', 'Dante Audio over IP, Dual 4K60 HDMI Matrix, QSC/Bosch DSP', '30–100+ Seat Auditoriums, HEC Lecture Halls & Hybrid Townhalls', 'Custom CAD Blueprint + Acoustic Tuning']
+      ]
+    },
     features: [
-      'Official Polycom Group 500 (7200-64550-001) & Poly Studio X70 (Poly X70) Stock in Pakistan',
-      'Certified Zoom Rooms, Microsoft Teams Rooms & Hybrid Event Integration',
-      'AI-Powered Auto-Tracking 4K PTZ Cameras & Beamforming Ceiling Mics',
-      'Acoustic Calibration, NoiseBlockAI & Echo Cancellation Optimization',
-      'Turnkey Installation & Nationwide SLA Support in Lahore, Karachi & Islamabad'
+      'RT60 Reverberation Modeling, Acoustic Paneling & NoiseBlockAI Tuning',
+      'Standards-Based H.323 / SIP Hardware Codec Provisioning & Firewall Traversal',
+      'Dante Ceiling Beamforming Microphone Arrays & Multi-Zone DSP Matrices',
+      'Single-Cable USB-C BYOD & Wireless 4K Content Sharing (AirPlay, Miracast, Barco/Poly)',
+      'Complete CAD Wiring Schematics, FBR GST Invoicing & 15-Minute Nationwide SLA'
     ],
     faqs: [
       {
-        question: 'Which hardware is best for Video Conference in Pakistan: Polycom Group 500 or Poly X70?',
-        answer: 'The Polycom RealPresence Group 500 (Polycom Group 500) is ideal for standards-based SIP/H.323 boardrooms requiring a 12x optical PTZ EagleEye IV camera and dual-display codec. The Poly Studio X70 (Poly X70) is best for large Zoom Rooms and Microsoft Teams Rooms needing dual 4K 20MP AI cameras and all-in-one cloud collaboration.'
+        question: 'How is /video-conferencing different from our Video Conference in Pakistan hardware catalog?',
+        answer: 'This hub focuses on boardroom acoustic engineering, H.323/SIP network topology, and multi-camera room integration. For direct model-by-model PKR hardware pricing and in-stock endpoints, visit our flagship Video Conference in Pakistan pillar at /video-conference-in-pakistan.'
       },
       {
-        question: 'Which Video conference platforms does AV Live support in Pakistan?',
-        answer: 'We support Zoom Rooms, Microsoft Teams Rooms, Cisco Webex, Google Meet, and native H.323/SIP telepresence on Polycom Group 500 and Poly X70 systems with full local warranty and engineering support.'
+        question: 'Can you integrate existing Bosch or Shure conference microphones with Zoom and Microsoft Teams?',
+        answer: 'Yes. Using Dante-to-USB audio bridges and acoustic echo cancellation (AEC) DSPs, we integrate Bosch CCS 1000 D, Bosch PAVIRO, and ceiling arrays directly into Poly, Cisco, and Logitech rooms.'
       }
     ]
   },
   'video-conference-in-pakistan': {
-    title: 'Video Conference in Pakistan | Polycom Group 500 & Poly X70 | Boardroom AV | AV Live',
-    description: 'Complete B2B Video Conference in Pakistan solutions. Official Polycom Group 500, Poly X70, Zoom Rooms, Microsoft Teams Rooms, and hybrid event integration.',
-    keywords: 'Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, hybrid event, Corporate event management, Zoom meeting room setup Pakistan, Microsoft Teams room setup Pakistan, AV Live',
-    heroHeading: 'Enterprise Video Conference in Pakistan: Polycom Group 500 & Poly X70 Solutions',
-    heroSubheading: 'Connect your teams flawlessly across Lahore, Karachi, Islamabad, and global offices with genuine Polycom Group 500 codecs, Poly X70 4K AI video bars, Zoom Rooms, and Microsoft Teams Rooms.',
+    title: 'Video Conference in Pakistan | Poly, Cisco & Logitech | AV Live',
+    description: 'Complete B2B Video Conference in Pakistan solutions. Official Polycom Group 500, Poly X70, Zoom Rooms, Microsoft Teams Rooms & boardroom AV.',
+    keywords: 'Video Conference in Pakistan, Video conference system price in Pakistan, Polycom Group 500, Poly X70, Logitech Rally Bar Pakistan, Cisco Room Kit Pakistan, Yealink video conferencing Pakistan, AV Live',
+    heroHeading: 'Video Conference in Pakistan: Official Poly, Cisco, Logitech & Yealink Systems (Est. 2011)',
+    heroSubheading: 'Pioneering Video Conference in Pakistan since 2011. Compare and procure serialized, PTA/PPRA-compliant Polycom Group 500, Poly Studio X70/X72, Logitech Rally Bar, Cisco Room Kits, and Yealink endpoints with official PKR pricing and same-day dispatch in Lahore, Karachi, and Islamabad.',
     pillar: 'Video Conferencing',
-    primaryCtaText: 'Book a Free Event or Conference Room Consultation',
+    primaryCtaText: 'Get Official Video Conference Price List (PKR)',
     primaryCtaLink: '/contact',
-    locationCta: 'Call Now for a 15-Minute Response SLA',
+    locationCta: 'Live Demo Experience Centers in Johar Town (Lahore), Clifton (Karachi) & Blue Area (Islamabad)',
+    answerFirstVerdict: 'Since pioneering the "Video Conference in Pakistan" category in 2011, AV Live Communications supplies 100% genuine, serialized HP Poly (Polycom Group 500, Studio X52/X70/X72), Logitech Rally Bar, Cisco Room Kit Plus, and Yealink video conferencing systems from Rs. 195,000 to Rs. 3,200,000+ with on-site acoustic calibration and a 15-minute engineering SLA.',
+    comparisonTable: {
+      caption: '2026 Video Conference in Pakistan — Flagship Hardware & PKR Price Comparison Matrix',
+      headers: ['Video Conference System', 'OEM Brand & MPN', 'Room Capacity & Optics', 'Platform Compatibility', 'Official Pakistan Price (PKR)'],
+      rows: [
+        ['Poly Studio R30 / USB Video Bar', 'HP Poly (842D2AA / 7200-85830-001)', '2–6 Pax Huddle • 4K 120° FOV + DirectorAI', 'USB Plug-and-Play (Zoom, Teams, Meet, Webex)', 'Rs. 195,000 – Rs. 310,000'],
+        ['Logitech Rally Bar Mini / Poly Studio X52', 'Logitech (960-001336) / Poly (8D8K2AA)', '6–12 Pax Medium • 4K 20MP AI Framing + 6m Mic', 'Native Zoom Rooms, Microsoft Teams Rooms & USB', 'Rs. 640,000 – Rs. 795,000'],
+        ['Logitech Rally Bar (Motorized Optical PTZ)', 'Logitech (960-001308)', '10–20 Pax Boardroom • 15x Optical/HD Zoom + 4 Mic Pods', 'Native MTR, Zoom Rooms & BYOD Mode', 'Rs. 845,000 – Rs. 960,000'],
+        ['Polycom RealPresence Group 500 (12x PTZ)', 'Polycom (7200-64550-001)', '14–28 Pax Executive • EagleEye IV 12x Optical PTZ', 'Standards H.323 / SIP + Zoom/Teams Interop', 'Rs. 685,000 – Rs. 920,000'],
+        ['HP Poly Studio X70 / X72 Large Room Bar', 'HP Poly (2405-86690-001 / A4MA9AA)', '16–28 Pax Large Room • Dual 4K 20MP Lenses (70°+120°)', 'Native Zoom Rooms & Microsoft Teams Rooms', 'Rs. 1,150,000 – Rs. 1,490,000'],
+        ['Cisco Room Kit Plus / Quad Camera Bar', 'Cisco (CS-KITPLUS-K9)', '16–30+ Pax C-Suite • 5K Quad Camera + Codec Plus', 'Webex, Native Microsoft Teams Rooms & H.323/SIP', 'Rs. 1,650,000 – Rs. 2,850,000']
+      ]
+    },
     features: [
-      'Official Polycom Group 500 (7200-64550-001) & Poly Studio X70 (Poly X70) Stock in Pakistan',
-      'Certified Zoom Rooms, Microsoft Teams Rooms & Hybrid Event Integration',
-      'AI-Powered Auto-Tracking 4K PTZ Cameras & Beamforming Ceiling Mics',
-      'Acoustic Calibration, NoiseBlockAI & Echo Cancellation Optimization',
-      'Turnkey Installation & Nationwide SLA Support in Lahore, Karachi & Islamabad'
+      'Direct Authorized Stock of Polycom Group 500, Poly Studio X70/X72, Logitech Rally & Cisco Room Kits',
+      'Why We Beat Box-Mover Resellers (accsys, kbse, nasco): Free On-Site RT60 Acoustic & Camera Throw Survey',
+      'Local Buffer Stock in Lahore (Johar Town) for Same-Day Dispatch & Instant RMA Swap Warranty',
+      'Turnkey Integration with Horion 65"–98" 4K Interactive Flat Panels & Bosch Discussion Mics',
+      'FBR GST/NTN Tax Invoices, Manufacturer Authorization Letters (MAL) & PPRA Tender Support'
     ],
     faqs: [
       {
-        question: 'Which hardware is best for Video Conference in Pakistan: Polycom Group 500 or Poly X70?',
-        answer: 'The Polycom RealPresence Group 500 (Polycom Group 500) is ideal for standards-based SIP/H.323 boardrooms requiring a 12x optical PTZ EagleEye IV camera and dual-display codec. The Poly Studio X70 (Poly X70) is best for large Zoom Rooms and Microsoft Teams Rooms needing dual 4K 20MP AI cameras and all-in-one cloud collaboration.'
+        question: 'Why choose AV Live for Video Conference in Pakistan over general IT hardware vendors?',
+        answer: 'Unlike general IT traders or regional distributors that only ship boxes or lock you into a single brand, AV Live has specialized exclusively in Video Conference in Pakistan and live AV engineering since 2011. We stock Poly, Cisco, Logitech, Yealink, Jabra, and Bosch under one roof, perform on-site acoustic tuning, and back every boardroom with a 15-minute engineering SLA.'
       },
       {
-        question: 'Which Video conference platforms does AV Live support in Pakistan?',
-        answer: 'We support Zoom Rooms, Microsoft Teams Rooms, Cisco Webex, Google Meet, and native H.323/SIP telepresence on Polycom Group 500 and Poly X70 systems with full local warranty and engineering support.'
+        question: 'Which hardware is best for Video Conference in Pakistan: Polycom Group 500, Poly X70, or Logitech Rally Bar?',
+        answer: 'Choose the Polycom RealPresence Group 500 for standards-based H.323/SIP government and banking networks requiring a 12x optical PTZ camera. Choose the Poly Studio X70/X72 or Logitech Rally Bar for modern cloud Zoom Rooms and Microsoft Teams Rooms needing dual-camera AI speaker tracking and expansion table microphones.'
+      },
+      {
+        question: 'Do you provide on-site installation and live demos in Lahore, Karachi, and Islamabad?',
+        answer: 'Yes! Visit our Johar Town Experience Center in Lahore, or schedule an on-site demonstration and room survey with our regional engineers in Clifton (Karachi) and Blue Area (Islamabad) by calling 0321 425 6263.'
+      }
+    ]
+  },
+  'event-management-in-pakistan': {
+    title: 'Event Management in Pakistan | Corporate Events & AV | AV Live',
+    description: 'Premier Event Management in Pakistan (Est. 2011). In-house SMD LED screens, line-array sound, 3D hologram stages & corporate events in Lahore, Karachi & Islamabad.',
+    keywords: 'Event management in Pakistan, Corporate event management Pakistan, event management company in Lahore, event management Karachi, event management Islamabad, SMD screen rental Pakistan, sound system rental Lahore, AV Live',
+    heroHeading: 'Event Management in Pakistan: Turnkey Corporate Events, SMD Stages & Hybrid Production (Est. 2011)',
+    heroSubheading: 'Unlike catering and floral agencies that sub-rent audio-visual equipment at a 40% markup, AV Live Communications owns Pakistan’s largest in-house fleet of P2.5 SMD LED video walls, concert line-array sound systems, 3D hologram stages, trussing, and multi-camera broadcast rigs across Lahore, Islamabad, and Karachi.',
+    pillar: 'Event Management',
+    primaryCtaText: 'Get a 15-Minute Event Production BoQ',
+    primaryCtaLink: '/event-quote',
+    locationCta: 'In-House Warehouses & Crew in Lahore (Johar Town), Islamabad (Blue Area) & Karachi (Clifton)',
+    answerFirstVerdict: 'Established in 2011, AV Live is Pakistan’s premier technology-first Event Management company. Because we own 100% of our P2.5 3840Hz SMD LED screens, line-array concert PA sound, aluminum stage trussing, 3D hologram displays, and 4K SDI broadcast switchers, corporate clients save 30%–40% compared to hiring third-party event planner/caterer middlemen.',
+    comparisonTable: {
+      caption: 'Event Management in Pakistan — AV Live Direct Production vs. Traditional Event/Catering Agencies',
+      headers: ['Event Production Pillar', 'AV Live Turnkey Engineering (In-House Fleet)', 'Traditional Event / Catering Agencies', 'Reference AV Live Package (PKR)'],
+      rows: [
+        ['Corporate Conferences, AGMs & Townhalls', 'P2.5 3840Hz SMD LED Wall, Digital Podium, Bosch Gooseneck Mics, 2-Way Zoom/Teams Bridge', 'Sub-rented low-refresh LED screen + basic analog mixer without hybrid echo cancellation', 'Rs. 250,000 – Rs. 650,000'],
+        ['Brand Launches, Galas & 3D Hologram Shows', 'Curved SMD LED Stage, 3D HoloGauze / Pepper’s Ghost Projection, 24x DMX Moving Heads, Line-Array PA', 'Basic stage backdrop & outsourced lighting without 3D holographic or timecode control', 'Rs. 750,000 – Rs. 2,500,000'],
+        ['International Expos, Summits & Diplomatic Events', 'Custom 3D Truss Pavilions, Simultaneous Interpretation (BOSCH), Multi-Cam 4K SDI Broadcast', 'Carpentry stall only; no simultaneous translation or multi-cam SDI live streaming', 'Rs. 950,000 – Rs. 4,200,000+'],
+        ['Concert Sound, Stage Trussing & Arena AV', 'Dual 12" Line-Array Stacks, 18" Subwoofers, Heavy-Duty Goalpost Truss, Laser & CO2 FX', 'Relies on third-party sound vendors with zero acoustic SPL calibration', 'Rs. 350,000 – Rs. 1,800,000']
+      ]
+    },
+    features: [
+      '100% In-House Inventory: Zero Middleman Markups vs. Catering/Decor Event Planners',
+      'Fine-Pitch P1.8, P2.5 & P3.9 Indoor/Outdoor SMD LED Video Walls (3840Hz Broadcast Refresh)',
+      'Concert Line-Array Sound Systems, Digital Mixers, Wireless Lapel/Handheld Mics & Stage Trussing',
+      '3D Hologram Display Stages, Architectural Projection Mapping & Multi-Camera Live Streaming',
+      'Simultaneous Interpretation Systems, Bosch Digital Discussion Mics & 5-Star Hotel Venue Execution (PC, Serena, Marriott, Expo Centre)'
+    ],
+    faqs: [
+      {
+        question: 'How does AV Live differ from other event management companies in Pakistan like catering or decor planners?',
+        answer: 'Most event management companies in Lahore, Karachi, and Islamabad are wedding/catering coordinators who outsource SMD screens, sound systems, stage lighting, and live streaming to technical vendors like us. By contracting AV Live directly, corporate organizations get direct warehouse pricing, broadcast-certified engineers, redundant backup gear, and FBR GST/NTN tax compliance.'
+      },
+      {
+        question: 'Which cities and venues do you cover for Event Management in Pakistan?',
+        answer: 'We execute turnkey corporate events, expos, and hybrid summits across Lahore (Pearl Continental, Expo Centre, Faletti’s, Nishat), Islamabad (Serena Hotel, Marriott, Jinnah Convention Centre), Karachi (Expo Centre, Movenpick, Marriott, PC), Faisalabad, Multan, and Peshawar.'
+      },
+      {
+        question: 'Can you combine physical Event Management with live Video Conferencing for hybrid events?',
+        answer: 'Yes! Because AV Live leads both Event Management in Pakistan and Video Conference in Pakistan, we seamlessly bridge your physical hotel ballroom stage with remote keynote speakers on Zoom, Microsoft Teams, and Webex with zero audio echo.'
       }
     ]
   },
@@ -477,69 +554,73 @@ export function KeywordLandingPage() {
         }}
       />
 
-      {/* Hero Banner */}
-      <section className="relative bg-gradient-to-br from-[#1A2B4C] via-[#0F1B33] to-[#0A1120] text-white py-20 px-4 overflow-hidden border-b border-[#00B4D8]/20">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2.5">
+        <Breadcrumbs items={[{ label: config.pillar, path: '/services' }, { label: config.heroHeading }]} />
+      </div>
+
+      {/* Compact 16:6 Hero Banner */}
+      <section className="relative bg-gradient-to-br from-[#1A2B4C] via-[#0F1B33] to-[#0A1120] text-white py-6 lg:py-10 px-3 sm:px-6 overflow-hidden border-b border-[#00B4D8]/20">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#00B4D8_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00B4D8]/10 border border-[#00B4D8]/30 text-[#00B4D8] font-black text-xs uppercase tracking-widest mb-6">
-            <Sparkles size={16} />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00B4D8]/10 border border-[#00B4D8]/30 text-[#00B4D8] font-black text-[10px] uppercase tracking-widest mb-2.5">
+            <Sparkles size={13} />
             <span>{config.pillar} {config.city ? `• ${config.city}` : '• Pakistan-Wide'}</span>
           </div>
 
-          <h1 className="text-3xl md:text-6xl font-black tracking-tight mb-6 leading-tight max-w-4xl text-white">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight mb-2.5 leading-tight max-w-4xl text-white">
             {config.heroHeading}
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-3xl font-medium leading-relaxed">
+          <p className="text-xs sm:text-sm md:text-base text-gray-300 mb-4 max-w-3xl font-medium leading-relaxed line-clamp-3">
             {config.heroSubheading}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2.5">
             <Link 
               to={config.primaryCtaLink}
-              className="bg-[#00B4D8] hover:bg-[#0096B4] text-white font-black px-8 py-5 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3 text-base uppercase tracking-wider group"
+              className="bg-[#00B4D8] hover:bg-[#0096B4] text-white font-black px-5 py-2.5 min-h-[38px] rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider group"
             >
               <span>{config.primaryCtaText}</span>
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
             </Link>
 
             <a 
               href="tel:+923214256263"
-              className="bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-5 rounded-2xl border border-white/20 transition-all flex items-center justify-center gap-3 text-base"
+              className="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 min-h-[38px] rounded-xl border border-white/20 transition-all flex items-center justify-center gap-2 text-xs"
             >
-              <Phone size={20} className="text-[#00B4D8]" />
+              <Phone size={14} className="text-[#00B4D8]" />
               <span>0321 425 6263 (15-Min SLA)</span>
             </a>
 
             <a 
               href="tel:+923390000921"
-              className="bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-5 rounded-2xl border border-white/20 transition-all flex items-center justify-center gap-3 text-base"
+              className="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 min-h-[38px] rounded-xl border border-white/20 transition-all flex items-center justify-center gap-2 text-xs"
             >
-              <Phone size={20} className="text-[#F26522]" />
+              <Phone size={14} className="text-[#F26522]" />
               <span>0339 0000 921</span>
             </a>
           </div>
 
           {config.locationCta && (
-            <div className="mt-8 flex items-center gap-2 text-sm text-[#00B4D8] font-bold bg-white/5 py-3 px-5 rounded-xl border border-white/10 inline-block">
-              <MapPin size={18} />
+            <div className="mt-3.5 inline-flex items-center gap-2 text-xs text-[#00B4D8] font-bold bg-white/5 py-1.5 px-3.5 rounded-lg border border-white/10">
+              <MapPin size={14} />
               <span>{config.locationCta}</span>
             </div>
           )}
         </div>
       </section>
 
-      {/* Partner Authority & Hardware Trust Bar */}
-      <section className="bg-white border-b border-gray-200 py-6 px-4 shadow-sm">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <Award className="text-[#00B4D8] shrink-0" size={28} />
+      {/* Compact Partner Authority & Hardware Trust Bar */}
+      <section className="bg-white border-b border-gray-200 py-3 px-3 sm:px-6 shadow-xs">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Award className="text-[#00B4D8] shrink-0" size={20} />
             <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] block">Certified Engineering Team</span>
-              <span className="text-sm font-black text-[#1A2B4C]">Authorized Enterprise Hardware Partners</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#00B4D8] block">Certified Engineering Team</span>
+              <span className="text-xs font-black text-[#1A2B4C]">Authorized Enterprise Hardware Partners</span>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {[
               { name: 'Cisco', path: '/brands/cisco' },
               { name: 'Poly', path: '/brands/poly' },
@@ -552,7 +633,7 @@ export function KeywordLandingPage() {
               <Link
                 key={b.name}
                 to={b.path}
-                className="px-4 py-2 rounded-xl bg-[#F8F9FA] hover:bg-[#1A2B4C] text-[#1A2B4C] hover:text-white border border-gray-200 text-xs font-black uppercase tracking-wider transition-all"
+                className="px-3 py-1.5 rounded-lg bg-[#F8F9FA] hover:bg-[#1A2B4C] text-[#1A2B4C] hover:text-white border border-gray-200 text-[10px] font-black uppercase tracking-wider transition-all"
               >
                 {b.name}
               </Link>
@@ -561,43 +642,109 @@ export function KeywordLandingPage() {
         </div>
       </section>
 
-      {/* The "AV Live" Advantage Bar (Mapped to Value Proposition & Service Level Keywords) */}
-      <section className="bg-[#F8F9FA] border-b border-gray-200 py-8 px-4">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <Link to="/contact" className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
-            <Clock className="text-[#00B4D8] mb-2" size={28} />
-            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-sm uppercase">15-Min SLA Response</h4>
-            <p className="text-xs text-gray-500 font-medium">15-Minute Engineering Callback</p>
+      {/* Compact "AV Live" Advantage Bar */}
+      <section className="bg-[#F8F9FA] border-b border-gray-200 py-4 px-3 sm:px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+          <Link to="/contact" className="bg-white p-3.5 rounded-xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
+            <Clock className="text-[#00B4D8] mb-1.5" size={20} />
+            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-xs uppercase">15-Min SLA Response</h4>
+            <p className="text-[10px] text-gray-500 font-medium">15-Minute Engineering Callback</p>
           </Link>
-          <Link to="/about" className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
-            <ShieldCheck className="text-[#00B4D8] mb-2" size={28} />
-            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-sm uppercase">Zero-Downtime Guarantee</h4>
-            <p className="text-xs text-gray-500 font-medium">Redundant Codecs &amp; Signal Paths</p>
+          <Link to="/about" className="bg-white p-3.5 rounded-xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
+            <ShieldCheck className="text-[#00B4D8] mb-1.5" size={20} />
+            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-xs uppercase">Zero-Downtime Guarantee</h4>
+            <p className="text-[10px] text-gray-500 font-medium">Redundant Codecs &amp; Signal Paths</p>
           </Link>
-          <Link to="/services/corporate-events" className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
-            <Award className="text-[#00B4D8] mb-2" size={28} />
-            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-sm uppercase">On-Site Standby Engineers</h4>
-            <p className="text-xs text-gray-500 font-medium">Lahore • Karachi • Islamabad</p>
+          <Link to="/services/corporate-events" className="bg-white p-3.5 rounded-xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
+            <Award className="text-[#00B4D8] mb-1.5" size={20} />
+            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-xs uppercase">On-Site Standby Engineers</h4>
+            <p className="text-[10px] text-gray-500 font-medium">Lahore • Karachi • Islamabad</p>
           </Link>
-          <Link to="/programs/quote" className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
-            <Phone className="text-[#00B4D8] mb-2" size={28} />
-            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-sm uppercase">24-Hour Custom BoQ</h4>
-            <p className="text-xs text-gray-500 font-medium">FBR GST/NTN Compliant Proposals</p>
+          <Link to="/programs/quote" className="bg-white p-3.5 rounded-xl border border-gray-100 hover:border-[#00B4D8] transition-all flex flex-col items-center group">
+            <Phone className="text-[#00B4D8] mb-1.5" size={20} />
+            <h4 className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] text-xs uppercase">24-Hour Custom BoQ</h4>
+            <p className="text-[10px] text-gray-500 font-medium">FBR GST/NTN Compliant Proposals</p>
           </Link>
         </div>
       </section>
 
+      {/* Answer-First Verdict & Semantic Specification/Pricing Comparison Table (AEO / GEO Standard) */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 pt-6 lg:pt-10">
+        <div className="bg-white rounded-3xl p-5 sm:p-8 border border-gray-200 shadow-xs space-y-5">
+          <div>
+            <span className="text-[#00B4D8] text-[10px] font-black uppercase tracking-[0.25em] block mb-1">
+              Direct Engineering Verdict &amp; Reference Matrix
+            </span>
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-[#1A2B4C] mb-2">
+              {config.comparisonTable?.caption || `${config.heroHeading} — Technical Scope & Pakistan Price Matrix`}
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-medium">
+              <strong>Answer-First Summary:</strong>{' '}
+              {config.answerFirstVerdict ||
+                `${config.description} Backed by AV Live Communications (Est. 2011) with in-house engineering teams in Lahore (Johar Town HQ), Karachi (Clifton), and Islamabad (Blue Area), official OEM warranties, FBR GST/NTN invoicing, and a 15-minute technical response SLA.`}
+            </p>
+          </div>
+
+          <div className="overflow-x-auto bg-[#F8F9FA] rounded-2xl p-3 sm:p-5 border border-gray-100">
+            <table className="w-full min-w-[560px] text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-[#1A2B4C] font-black uppercase tracking-wider text-[11px]">
+                  {(config.comparisonTable?.headers || [
+                    'Deployment Tier',
+                    'Recommended Hardware / Production Stack',
+                    'Coverage & Technical Spec',
+                    'Reference PKR Investment',
+                  ]).map((h, i) => (
+                    <th key={i} className="py-2.5 px-3 first:pl-1 last:pr-1">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200/70 text-slate-700">
+                {(config.comparisonTable?.rows || (
+                  config.pillar === 'Video Conferencing'
+                    ? [
+                        ['Huddle & Focus Room (2–6 Pax)', 'Poly Studio R30 / Logitech Rally Bar Mini / Yealink UVC40', '4K 120° Auto-Framing + 4.5m Beamforming Mic', 'Rs. 195,000 – Rs. 485,000'],
+                        ['Medium Conference Room (8–14 Pax)', 'Logitech Rally Bar / Poly Studio X52 / Cisco Room Bar', '20MP 4K AI Director + Expansion Table Mic', 'Rs. 640,000 – Rs. 1,250,000'],
+                        ['Executive Boardroom (16–30 Pax)', 'Polycom Group 500 / Poly Studio X72 / Cisco Room Kit Plus', '12x Optical PTZ / Dual 4K + Ceiling/Table Array', 'Rs. 1,150,000 – Rs. 2,850,000'],
+                      ]
+                    : [
+                        ['Corporate Townhall & AGM Package', 'P2.5 3840Hz SMD LED Wall + Line-Array PA + Bosch Mics', '100–300 Delegates • 2-Cam HD SDI Hybrid Bridge', 'Rs. 250,000 – Rs. 550,000'],
+                        ['Product Launch & 3D Hologram Gala', 'Curved SMD LED Stage + 3D Hologram Display + 24x DMX Lights', '300–1,000+ Guests • 4-Cam 4K Broadcast Switching', 'Rs. 750,000 – Rs. 2,500,000'],
+                        ['International Expo & Convention', 'Custom 3D Truss Pavilion + Simultaneous Interpretation', 'Multi-Hall Venue • Standby Broadcast Engineers', 'Rs. 950,000 – Rs. 4,200,000+'],
+                      ]
+                )).map((row, rIdx) => (
+                  <tr key={rIdx}>
+                    {row.map((cell, cIdx) => (
+                      <td
+                        key={cIdx}
+                        className={`py-3 px-3 first:pl-1 last:pr-1 ${
+                          cIdx === 0 || cIdx === row.length - 1 ? 'font-bold text-[#1A2B4C]' : ''
+                        }`}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       {/* Feature Specification Grid */}
-      <section className="max-w-7xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.3em] block mb-2">Service Breakdown</span>
-          <h2 className="text-3xl font-black text-[#1A2B4C]">What Sets AV Live Solutions Apart</h2>
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 py-8 lg:py-12">
+        <div className="text-center mb-6 lg:mb-9">
+          <span className="text-[#00B4D8] text-[10px] font-black uppercase tracking-[0.25em] block mb-1">Service Breakdown</span>
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#1A2B4C]">What Sets AV Live Solutions Apart</h2>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {config.features.map((feat, idx) => (
-            <div key={idx} className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col">
-              <div className="w-12 h-12 bg-blue-50 text-[#00B4D8] rounded-2xl flex items-center justify-center font-black mb-6">
+            <div key={idx} className="bg-white p-5 lg:p-6 rounded-2xl shadow-xs border border-gray-100 hover:shadow-md transition-all flex flex-col">
+              <div className="w-10 h-10 bg-blue-50 text-[#00B4D8] rounded-xl flex items-center justify-center font-black mb-4">
                 <CheckCircle2 size={24} />
               </div>
               <h3 className="font-bold text-[#1A2B4C] text-lg leading-snug">{feat}</h3>
@@ -714,10 +861,12 @@ export function KeywordLandingPage() {
             <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2">
               <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider">Core Business Services</h3>
               <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/video-conference-in-pakistan" className="hover:underline">Video Conference in Pakistan (Pillar)</Link></li>
+                <li><Link to="/event-management-in-pakistan" className="hover:underline">Event Management in Pakistan (Pillar)</Link></li>
                 <li><Link to="/video-conferencing-solutions" className="hover:underline">Enterprise Video Conferencing Solutions</Link></li>
                 <li><Link to="/corporate-event-management" className="hover:underline">Corporate Event Management</Link></li>
                 <li><Link to="/services/hybrid-events" className="hover:underline">Hybrid Event Production</Link></li>
-                <li><Link to="/av-equipment-rental" className="hover:underline">AV Equipment Rental</Link></li>
+                <li><Link to="/av-equipment-rental" className="hover:underline">AV &amp; SMD Screen Equipment Rental</Link></li>
                 <li><Link to="/live-streaming-services" className="hover:underline">Live Streaming Services</Link></li>
                 <li><Link to="/services/boardroom-integration" className="hover:underline">Boardroom AV Integration &amp; Design</Link></li>
                 <li><Link to="/services/expo-organizing" className="hover:underline">Expo &amp; Trade Show Organizing</Link></li>

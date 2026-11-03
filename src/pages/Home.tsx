@@ -394,27 +394,50 @@ export function Home() {
         }}
       />
       
+      {/* Always-Visible Primary H1 Authority Bar (Visible on Mobile <1024px & Desktop >=1024px for Googlebot Mobile-First Indexing) */}
+      <div className="bg-[#111E36] border-b border-white/10 text-white px-3 sm:px-6 lg:px-8 py-2">
+        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-1.5">
+          <h1 className="text-xs sm:text-sm lg:text-base font-black tracking-tight text-white leading-snug">
+            Video Conference in Pakistan, Event Management in Pakistan &amp; Corporate Event Production — <span className="text-[#00B4D8]">AV Live (Est. 2011)</span>
+          </h1>
+          <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar text-[10px] font-bold shrink-0">
+            <Link to="/video-conference-in-pakistan" className="px-2 py-0.5 rounded bg-[#00B4D8]/20 border border-[#00B4D8]/40 text-[#00B4D8] hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+              Video Conference in Pakistan
+            </Link>
+            <Link to="/event-management-in-pakistan" className="px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+              Event Management in Pakistan
+            </Link>
+            <Link to="/corporate-event-management" className="px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+              Corporate Events
+            </Link>
+            <Link to="/av-equipment-rental" className="px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+              SMD &amp; Sound Rental
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Mobile Storefront Showcase (< 1024px — Compact High-Density Above-the-Fold Layout) */}
       <section aria-label="Mobile Storefront Highlights" className="lg:hidden px-3 pt-2 pb-4 space-y-3 bg-[#F8F9FA]">
-        {/* Compact Deep Navy Rounded Hero Promo Card */}
+        {/* Compact Deep Navy Rounded Hero Promo Card (Dynamic Slide Switcher) */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1A2B4C] via-[#1E325C] to-[#2B4C8C] text-white p-3.5 shadow-md">
           <div className="relative z-10 flex items-center justify-between gap-2.5">
             <div className="flex-1 min-w-0 space-y-1">
               <span className="inline-block text-[9px] font-black uppercase tracking-widest text-[#00B4D8] bg-white/10 px-2 py-0.5 rounded-full">
-                Official PK Partner
+                Official PK Partner • Est. 2011
               </span>
-              <p className="text-sm sm:text-base font-black leading-tight tracking-tight text-white">
-                Enterprise AV &amp; Video Conferencing
-              </p>
+              <h2 className="text-sm sm:text-base font-black leading-tight tracking-tight text-white line-clamp-2">
+                {activeHeroSlide.title}
+              </h2>
               <p className="text-[10px] text-white/80 font-medium leading-snug line-clamp-2">
-                Poly Studio X70, Group 500, Cisco Room Kits &amp; 3D Hologram Stages with local warranty.
+                {(activeHeroSlide.subtitle || '').replace(/<[^>]*>?/gm, '')}
               </p>
               <div className="pt-1 flex flex-wrap items-center gap-1.5">
                 <Link
-                  to="/shop"
+                  to={activeHeroSlide.ctaLink || '/shop'}
                   className="px-3 py-1.5 min-h-[32px] rounded-lg bg-white text-[#1A2B4C] font-black text-[10px] uppercase tracking-wider inline-flex items-center justify-center shadow-xs"
                 >
-                  Shop Catalog
+                  {activeHeroSlide.ctaText || 'Shop Catalog'}
                 </Link>
                 <Link
                   to="/event-quote"
@@ -422,6 +445,25 @@ export function Home() {
                 >
                   15m Quote
                 </Link>
+                {slides.length > 1 && (
+                  <div className="flex items-center gap-1 ml-1">
+                    {slides.map((_: any, idx: number) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setCurrentSlide(idx)}
+                        aria-label={`View hero slide ${idx + 1}`}
+                        className="p-1 cursor-pointer"
+                      >
+                        <span
+                          className={`block h-1.5 rounded-full transition-all ${
+                            idx === currentSlide ? 'w-4 bg-[#00B4D8]' : 'w-1.5 bg-white/35'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 p-1.5 flex items-center justify-center">
@@ -536,30 +578,30 @@ export function Home() {
           })}
 
           <div className="relative md:absolute md:inset-0 z-20 flex flex-col items-start justify-center text-left px-8 lg:px-16 max-w-[1400px] mx-auto">
-             <div className="bg-[#00B4D8] px-3 py-1 rounded-md shadow-md mb-2.5 inline-flex items-center gap-1.5">
+             <div className="bg-[#00B4D8] px-3 py-1 rounded-md shadow-md mb-2 inline-flex items-center gap-1.5">
                 <span className="font-black text-[#1A2B4C] uppercase tracking-widest text-[9px]">Enterprise AV &amp; Events Pakistan</span>
              </div>
 
-             <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-2.5 drop-shadow-xl leading-tight max-w-2xl font-sans">
+             <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black text-white mb-2 drop-shadow-xl leading-tight max-w-2xl font-sans">
                {activeHeroSlide.title}
-             </h1>
+             </h2>
 
              <div 
-               className="text-xs sm:text-sm lg:text-base text-white/90 mb-4 max-w-xl drop-shadow-sm font-medium leading-relaxed line-clamp-2 prose prose-p:m-0 prose-invert" 
+               className="text-xs sm:text-sm text-white/90 mb-3.5 max-w-xl drop-shadow-sm font-medium leading-relaxed line-clamp-2 prose prose-p:m-0 prose-invert" 
                dangerouslySetInnerHTML={{ __html: activeHeroSlide.subtitle || '' }} 
              />
              
              <div className="flex flex-row flex-wrap gap-2.5">
                <Link 
                 to={activeHeroSlide.ctaLink || '/shop'} 
-                className="bg-white text-[#1A2B4C] px-5 py-2.5 min-h-[38px] rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors shadow-lg flex items-center justify-center gap-2 group"
+                className="bg-white text-[#1A2B4C] px-5 py-2 min-h-[36px] rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors shadow-lg flex items-center justify-center gap-2 group"
                >
                  {activeHeroSlide.ctaText || 'Explore Now'}
-                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                 <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
                </Link>
                <Link 
                 to="/event-quote" 
-                className="bg-[#00B4D8]/20 border border-[#00B4D8] text-white px-5 py-2.5 min-h-[38px] rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors flex items-center justify-center gap-2"
+                className="bg-[#00B4D8]/20 border border-[#00B4D8] text-white px-5 py-2 min-h-[36px] rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors flex items-center justify-center gap-2"
                >
                  15-Min Event / AV Quote
                </Link>
@@ -587,9 +629,9 @@ export function Home() {
           </>
         )}
 
-        {/* Pagination Dots */}
+        {/* Pagination Dots (Bottom-Right so they never collide with left-aligned CTA buttons) */}
         {slides.length > 1 && (
-          <div className="absolute bottom-3 left-8 lg:left-16 z-30 flex items-center gap-2">
+          <div className="absolute bottom-3 right-8 lg:right-16 z-30 flex items-center gap-2">
             {slides.map((_: any, index: number) => {
               const isActive = index === currentSlide;
               return (
@@ -625,32 +667,32 @@ export function Home() {
       </section>
 
       {/* Tabbed Intent Split */}
-      <section className="w-full py-16 bg-white">
-        <div className="max-w-[1200px] mx-auto px-6 md:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-10">
-            <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.3em] mb-2 block">Dual Commercial Pillars</span>
-            <h2 className="text-3xl md:text-4xl font-black text-[#1A2B4C] tracking-tight">
+      <section className="w-full py-8 lg:py-14 bg-white">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-6 lg:mb-9">
+            <span className="text-[#00B4D8] text-[10px] lg:text-xs font-black uppercase tracking-[0.25em] mb-1.5 block">Dual Commercial Pillars</span>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#1A2B4C] tracking-tight">
               Turnkey Corporate Event Management, AI &amp; Pro-AV Solutions in Pakistan
             </h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <div className="flex flex-wrap justify-center gap-3 mb-7 lg:mb-10">
             <button 
               onClick={() => setActiveIntentTab('solutions')}
-              className={`px-8 py-3 min-w-[48px] min-h-[48px] rounded-full font-black uppercase tracking-widest text-xs md:text-sm transition-all cursor-pointer ${activeIntentTab === 'solutions' ? 'bg-[#1A2B4C] text-white shadow-xl' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
+              className={`px-6 py-2.5 min-w-[48px] min-h-[42px] rounded-full font-black uppercase tracking-widest text-xs transition-all cursor-pointer ${activeIntentTab === 'solutions' ? 'bg-[#1A2B4C] text-white shadow-lg' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
             >
               Event &amp; AI Solutions (9)
             </button>
             <button 
               onClick={() => setActiveIntentTab('shop')}
-              className={`px-8 py-3 min-w-[48px] min-h-[48px] rounded-full font-black uppercase tracking-widest text-xs md:text-sm transition-all cursor-pointer ${activeIntentTab === 'shop' ? 'bg-[#1A2B4C] text-white shadow-xl' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
+              className={`px-6 py-2.5 min-w-[48px] min-h-[42px] rounded-full font-black uppercase tracking-widest text-xs transition-all cursor-pointer ${activeIntentTab === 'shop' ? 'bg-[#1A2B4C] text-white shadow-lg' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
             >
               Professional AV Shop
             </button>
           </div>
 
-          <div className="min-h-[400px]">
+          <div className="min-h-[340px]">
             {activeIntentTab === 'solutions' ? (
-              <div className="grid md:grid-cols-3 gap-8">
+              <div className="grid md:grid-cols-3 gap-5 lg:gap-7">
                 {services.filter(s => s.isActive).slice(0, 9).map((s) => (
                   <div key={s.id} className="bg-gray-50 rounded-3xl p-8 border border-gray-100 hover:shadow-xl transition-all flex flex-col">
                     <img
@@ -703,16 +745,16 @@ export function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="bg-white py-12 border-t border-gray-100">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-8 relative">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+      <section className="bg-white py-8 lg:py-12 border-t border-gray-100">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 relative">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-3">
             <div>
-              <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.3em] mb-2 block">Authorized Pakistan Stock &amp; Price PKR</span>
-              <h2 className="text-3xl md:text-4xl font-black text-[#1A2B4C] tracking-tight">
+              <span className="text-[#00B4D8] text-[10px] lg:text-xs font-black uppercase tracking-[0.25em] mb-1.5 block">Authorized Pakistan Stock &amp; Price PKR</span>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#1A2B4C] tracking-tight">
                 Featured Video Conference in Pakistan &amp; Enterprise AV Hardware
               </h2>
             </div>
-            <Link to="/shop" className="text-xs font-black text-[#1A2B4C] uppercase tracking-[0.2em] hover:text-[#00B4D8] transition-colors inline-flex items-center gap-2 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 py-2">
+            <Link to="/shop" className="text-xs font-black text-[#1A2B4C] uppercase tracking-[0.2em] hover:text-[#00B4D8] transition-colors inline-flex items-center gap-2 min-h-[44px] lg:min-h-0 py-1.5">
               View All 53 Models <ArrowRight size={16} />
             </Link>
           </div>
@@ -741,14 +783,14 @@ export function Home() {
             <button 
               onClick={() => scrollSlider('left')} 
               aria-label="Scroll featured products left"
-              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/slider:opacity-100 p-4 bg-white border border-gray-100 text-[#1A2B4C] rounded-full hover:bg-[#00B4D8] hover:border-[#00B4D8] hover:text-[#1A2B4C] transition-all shadow-xl hidden md:block cursor-pointer"
+              className="absolute left-2 lg:-left-3 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/slider:opacity-100 p-3.5 bg-white border border-gray-100 text-[#1A2B4C] rounded-full hover:bg-[#00B4D8] hover:border-[#00B4D8] hover:text-[#1A2B4C] transition-all shadow-xl hidden md:block cursor-pointer"
             >
               <ArrowLeft size={20} />
             </button>
             <button 
               onClick={() => scrollSlider('right')} 
               aria-label="Scroll featured products right"
-              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/slider:opacity-100 p-4 bg-white border border-gray-100 text-[#1A2B4C] rounded-full hover:bg-[#00B4D8] hover:border-[#00B4D8] hover:text-[#1A2B4C] transition-all shadow-xl hidden md:block cursor-pointer"
+              className="absolute right-2 lg:-right-3 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/slider:opacity-100 p-3.5 bg-white border border-gray-100 text-[#1A2B4C] rounded-full hover:bg-[#00B4D8] hover:border-[#00B4D8] hover:text-[#1A2B4C] transition-all shadow-xl hidden md:block cursor-pointer"
             >
               <ArrowRight size={20} />
             </button>
@@ -854,10 +896,10 @@ export function Home() {
 
       {/* Flagship Video Conferencing Bento Grid (Zero Inline Styles & Lean DOM) */}
       {flagshipVideoSet.length > 0 && (
-        <section className="max-w-[1400px] mx-auto px-6 md:px-8 py-16 overflow-hidden">
-           <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-black text-[#1A2B4C] tracking-tight">Video Conference in Pakistan — Poly X70 &amp; Cisco Room Kit Solutions</h2>
-              <p className="text-gray-600 mt-2 text-sm md:text-base">Empowering boardrooms with certified visual collaboration &amp; transparent price PKR across Lahore, Karachi &amp; Islamabad</p>
+        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-8 lg:py-14 overflow-hidden">
+           <div className="text-center mb-6 lg:mb-9">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#1A2B4C] tracking-tight">Video Conference in Pakistan — Poly X70 &amp; Cisco Room Kit Solutions</h2>
+              <p className="text-gray-600 mt-1.5 text-xs sm:text-sm md:text-base">Empowering boardrooms with certified visual collaboration &amp; transparent price PKR across Lahore, Karachi &amp; Islamabad</p>
            </div>
            
            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[580px] h-auto">
@@ -1081,6 +1123,80 @@ export function Home() {
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          {/* Competitor Benchmark Matrix: Why AV Live Outperforms Caterer/Decor Event Agencies & Box-Mover IT Resellers */}
+          <div className="mb-12 md:mb-16 overflow-x-auto bg-[#F8F9FA] rounded-3xl p-4 sm:p-6 md:p-8 border border-gray-100">
+            <h3 className="text-lg sm:text-xl font-black text-[#1A2B4C] mb-2">
+              Why Enterprises Choose AV Live (Est. 2011) Over Traditional Event Caterers &amp; Box-Mover IT Vendors
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-600 mb-4 leading-relaxed">
+              Unlike catering/decor agencies that sub-rent audio-visual gear at a 40% markup—or IT box-movers who ship uncalibrated conference hardware without acoustic engineering—AV Live owns Pakistan&apos;s largest in-house inventory of P2.5 SMD LED walls, line-array concert sound, 3D hologram stages, and authorized Poly/Cisco/Logitech/Yealink video conferencing systems.
+            </p>
+            <table className="w-full min-w-[600px] text-left border-collapse text-xs md:text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-[#1A2B4C] font-black uppercase tracking-wider text-[11px]">
+                  <th className="py-3 pr-4">Capability / Ranking Criteria</th>
+                  <th className="py-3 px-4 text-[#00B4D8]">AV Live Communications (Est. 2011)</th>
+                  <th className="py-3 px-4">Decor &amp; Catering Event Agencies</th>
+                  <th className="py-3 pl-4">Standard IT Hardware Resellers</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200/70 text-slate-700">
+                <tr>
+                  <td className="py-3 pr-4 font-bold text-[#1A2B4C]">Video Conference in Pakistan</td>
+                  <td className="py-3 px-4 font-semibold text-[#1A2B4C]">Authorized Poly, Cisco, Logitech &amp; Yealink Stock + On-Site RT60 Acoustic Tuning</td>
+                  <td className="py-3 px-4">No enterprise codec, SIP/H.323, or MTR/Zoom Room capability</td>
+                  <td className="py-3 pl-4">Box delivery only; no ceiling mic DSP or hybrid event bridging</td>
+                </tr>
+                <tr>
+                  <td className="py-3 pr-4 font-bold text-[#1A2B4C]">Event Management in Pakistan</td>
+                  <td className="py-3 px-4 font-semibold text-[#1A2B4C]">100% In-House P2.5 SMD LED Walls, Line-Array PA, Truss, 3D Hologram &amp; Multi-Cam SDI</td>
+                  <td className="py-3 px-4">Focus on catering/floral decor; sub-rents AV gear from third parties</td>
+                  <td className="py-3 pl-4">No live event staging, SMD screens, or broadcast engineering</td>
+                </tr>
+                <tr>
+                  <td className="py-3 pr-4 font-bold text-[#1A2B4C]">Hybrid Corporate Events &amp; AGMs</td>
+                  <td className="py-3 px-4 font-semibold text-[#1A2B4C]">Zero-Echo Mix-Minus Bridging (Poly X70 / Group 500 + 4-Cam SDI Live Stream)</td>
+                  <td className="py-3 px-4">Basic single-webcam laptop feed with frequent audio feedback</td>
+                  <td className="py-3 pl-4">No live stage sound or multi-camera broadcast switching</td>
+                </tr>
+                <tr>
+                  <td className="py-3 pr-4 font-bold text-[#1A2B4C]">National SLA &amp; Tax Compliance</td>
+                  <td className="py-3 px-4 font-semibold text-[#1A2B4C]">15-Min Engineering SLA • Lahore, Karachi &amp; Islamabad Hubs • FBR GST &amp; PPRA Compliant</td>
+                  <td className="py-3 px-4">City-limited catering crew; no certified AV/network engineers</td>
+                  <td className="py-3 pl-4">Standard courier warranty; no standby event engineers</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* 2011 Legacy Keyword & Regional Authority Hub */}
+          <div className="mb-12 bg-[#F8F9FA] rounded-3xl p-5 sm:p-7 border border-gray-100">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] block mb-1">
+              Pioneering Pakistan&apos;s AV &amp; Event Industry Since 2011
+            </span>
+            <h3 className="text-lg sm:text-xl font-black text-[#1A2B4C] mb-3">
+              Direct Pillar Hubs: Video Conference, Event Management &amp; Rental Solutions Across Pakistan
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              <Link to="/video-conference-in-pakistan" className="p-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#00B4D8] transition-all group">
+                <div className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] mb-1">Video Conference in Pakistan →</div>
+                <p className="text-gray-500 text-[11px]">Official Polycom Group 500, Poly Studio X70/X72, Logitech Rally Bar &amp; Cisco Room Kits.</p>
+              </Link>
+              <Link to="/event-management-in-pakistan" className="p-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#00B4D8] transition-all group">
+                <div className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] mb-1">Event Management in Pakistan →</div>
+                <p className="text-gray-500 text-[11px]">Turnkey corporate events, AGMs, product launches, concerts &amp; diplomatic summits nationwide.</p>
+              </Link>
+              <Link to="/corporate-event-management" className="p-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#00B4D8] transition-all group">
+                <div className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] mb-1">Corporate Event Management →</div>
+                <p className="text-gray-500 text-[11px]">Executive conferences, hybrid townhalls, 3D hologram stages &amp; multi-cam broadcasting.</p>
+              </Link>
+              <Link to="/av-equipment-rental" className="p-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#00B4D8] transition-all group">
+                <div className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] mb-1">SMD Screen &amp; Sound Rental →</div>
+                <p className="text-gray-500 text-[11px]">In-house P2.5 SMD LED video walls, line-array PA sound, stage trussing, projectors &amp; mics.</p>
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

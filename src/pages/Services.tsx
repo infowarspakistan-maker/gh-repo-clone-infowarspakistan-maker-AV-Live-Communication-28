@@ -9,11 +9,11 @@ export function Services() {
   const [modalTitle, setModalTitle] = useState('Consult with our AV Expert');
 
   return (
-    <div className="bg-[#F8F9FA] min-h-screen py-12 text-[#1A2B4C]">
+    <div className="bg-[#F8F9FA] min-h-screen py-4 lg:py-8 text-[#1A2B4C]">
       <SEO 
-        title="Event Production, AV Equipment Rental & Corporate Event Management | Hybrid Events & Hologram Display | AV Live Pakistan"
-        description="Book turnkey Corporate event management, SMD LED screen rental, 3D Hologram Display stages, line-array PA systems, and hybrid event Video Conference in Pakistan across Lahore, Karachi & Islamabad."
-        keywords="Event management, Corporate event management, hybrid event, Hologram Display, events, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, AV equipment rental Pakistan, SMD screen rental Lahore Karachi Islamabad"
+        title="Event Production & AV Rental in Pakistan | AV Live"
+        description="Book turnkey corporate event management, SMD LED screen rental, 3D hologram stages, line-array PA systems & hybrid broadcasting in Pakistan."
+        keywords="Event management in Pakistan, Corporate event management, hybrid event, Hologram Display, AV equipment rental Pakistan, SMD screen rental Lahore Karachi Islamabad"
         url="https://avlive.com.pk/events-services"
         image="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=1200"
         imageAlt="AV Live Corporate Event Management, Hybrid Event & Hologram Display Services"
@@ -65,18 +65,18 @@ export function Services() {
       />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumbs items={[{ label: 'Services', path: '/services' }, { label: 'Event Production & AV Rental' }]} />
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-black mb-4 uppercase tracking-tighter">Event Management, Hybrid Event & AV Rental Configurator in Pakistan</h1>
-          <p className="text-lg text-gray-500 font-medium mb-6">
-            Book our professional teams for your next corporate summit, hybrid event, or e-Sports tournament.
+        <div className="text-center mb-6 lg:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-2.5 uppercase tracking-tight">Event Management, Hybrid Event &amp; AV Rental Configurator in Pakistan</h1>
+          <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium mb-4">
+            Book our professional in-house engineering teams for your next corporate summit, hybrid AGM, or e-Sports tournament.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center">
             <button 
               onClick={() => {
                 setModalTitle("Get a Quick Quote");
                 setIsQuoteModalOpen(true);
               }}
-              className="bg-[#00B4D8] text-white px-6 py-3 rounded-full font-bold hover:bg-[#1A2B4C] transition-all uppercase tracking-wider text-xs whitespace-nowrap shadow-md hover:-translate-y-0.5 cursor-pointer"
+              className="bg-[#00B4D8] text-white px-5 py-2.5 rounded-full font-bold hover:bg-[#1A2B4C] transition-all uppercase tracking-wider text-xs whitespace-nowrap shadow-md hover:-translate-y-0.5 cursor-pointer"
             >
               Quick Quote
             </button>
@@ -85,32 +85,32 @@ export function Services() {
                 setModalTitle("Connect with our Consultant");
                 setIsQuoteModalOpen(true);
               }}
-              className="bg-white text-[#1A2B4C] border border-gray-200 px-6 py-3 rounded-full font-bold hover:bg-gray-50 transition-all uppercase tracking-wider text-xs whitespace-nowrap shadow-sm hover:-translate-y-0.5 cursor-pointer"
+              className="bg-white text-[#1A2B4C] border border-gray-200 px-5 py-2.5 rounded-full font-bold hover:bg-gray-50 transition-all uppercase tracking-wider text-xs whitespace-nowrap shadow-sm hover:-translate-y-0.5 cursor-pointer"
             >
               Connect with our Consultant
             </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-[32px] border border-gray-200 p-8 shadow-sm">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
+        <div className="bg-white rounded-2xl sm:rounded-[32px] border border-gray-200 p-4 sm:p-8 shadow-sm">
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center justify-between w-full">
               {[1, 2, 3, 4].map((s) => (
-                <div key={s} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                <div key={s} className={`flex items-center ${s < 4 ? 'flex-1' : ''}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 ${
                     step >= s ? 'bg-[#00B4D8] text-white' : 'bg-gray-100 text-gray-400'
                   }`}>
                     {s}
                   </div>
                   {s < 4 && (
-                    <div className={`h-1 w-16 sm:w-32 mx-2 rounded ${
+                    <div className={`h-1 flex-1 mx-1.5 sm:mx-3 rounded ${
                       step > s ? 'bg-[#00B4D8]' : 'bg-gray-100'
                     }`}></div>
                   )}
                 </div>
               ))}
             </div>
-            <div className="flex justify-between mt-2 text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-widest">
+            <div className="flex justify-between mt-2 text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">
               <span>Service Type</span>
               <span>Scope</span>
               <span>Add-ons</span>
@@ -257,8 +257,50 @@ export function Services() {
           <li><strong>Hologram Display</strong> Stages, 3D Holographic Fans & Architectural Projection Mapping</li>
           <li><strong>Hybrid Event</strong> Broadcasting & <strong>Video Conference</strong> Integration (<strong>Polycom Group 500</strong>, <strong>Poly X70</strong>, Zoom & Teams)</li>
           <li>Esports Tournament Arena Infrastructure & High-Refresh Broadcast Switching</li>
-          <li>Professional AV Equipment Rental (Fine-Pitch SMD LED Walls, Line Array Sound, Intelligent Lighting)</li>
+          <li><strong>Professional AV Equipment Rental</strong> (Fine-Pitch SMD LED Walls, Line Array Sound, Intelligent Lighting)</li>
         </ul>
+
+        <div className="overflow-x-auto rounded-2xl border border-gray-200 mb-8">
+          <table className="w-full text-left border-collapse text-xs sm:text-sm">
+            <caption className="bg-[#1A2B4C] text-white font-black text-left px-4 py-3 text-xs uppercase tracking-wider">
+              2026 Pakistan Event Production &amp; AV Equipment Rental Rate Card (PKR Reference)
+            </caption>
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
+                <th className="py-3 px-4">Rental Equipment / Stage Package</th>
+                <th className="py-3 px-4">Technical Specification</th>
+                <th className="py-3 px-4">Recommended Venue Size</th>
+                <th className="py-3 px-4">Reference Rental Rate (PKR)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              <tr className="hover:bg-gray-50/70">
+                <td className="py-3 px-4 font-black text-[#1A2B4C]">P2.5 High-Refresh SMD LED Main Stage Wall</td>
+                <td className="py-3 px-4 text-gray-600">3840Hz broadcast refresh, Novastar 4K processor, seamless die-cast cabinets</td>
+                <td className="py-3 px-4 text-gray-600">100–1,000+ Delegates</td>
+                <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 180,000 – Rs. 650,000 / Day</td>
+              </tr>
+              <tr className="hover:bg-gray-50/70">
+                <td className="py-3 px-4 font-black text-[#1A2B4C]">3D Hologram Stage &amp; HoloGauze Rig</td>
+                <td className="py-3 px-4 text-gray-600">20,000 ANSI lumen laser projection + silver holographic mesh + 3D motion render</td>
+                <td className="py-3 px-4 text-gray-600">Keynote Product Launches</td>
+                <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 480,000 – Rs. 1,650,000 / Event</td>
+              </tr>
+              <tr className="hover:bg-gray-50/70">
+                <td className="py-3 px-4 font-black text-[#1A2B4C]">Multi-Camera 4K SDI Hybrid Webcast Flypack</td>
+                <td className="py-3 px-4 text-gray-600">3x Sony/Panasonic PTZ/ENG cameras, ATEM 4K switcher, Zoom/Teams/YouTube bridge</td>
+                <td className="py-3 px-4 text-gray-600">Townhalls &amp; AGMs</td>
+                <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 150,000 – Rs. 350,000 / Day</td>
+              </tr>
+              <tr className="hover:bg-gray-50/70">
+                <td className="py-3 px-4 font-black text-[#1A2B4C]">Line-Array Concert Audio &amp; Digital Mixing Console</td>
+                <td className="py-3 px-4 text-gray-600">Dual line-array hangs, subwoofers, Shure ULX-D wireless mics, digital mixer</td>
+                <td className="py-3 px-4 text-gray-600">Galas &amp; Concerts (500–3,000 pax)</td>
+                <td className="py-3 px-4 font-bold text-[#00B4D8]">Rs. 220,000 – Rs. 780,000 / Event</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <div className="border-t border-gray-100 pt-8 space-y-6">
           <h3 className="text-2xl font-black text-[#1A2B4C]">Frequently Asked Questions (Event Management & Video Conference)</h3>

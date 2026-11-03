@@ -1058,8 +1058,8 @@ async function startServer() {
         }
       },
       '/video-conferencing': {
-        title: 'Video Conferencing in Pakistan | Poly & Logitech | AV Live',
-        description: 'Enterprise video conferencing in Pakistan. Official integration of Polycom Group 500, Poly X70, Logitech Rally, Zoom & Teams Rooms nationwide.'
+        title: 'Video Conferencing Room Architecture & Integration | AV Live',
+        description: 'Certified Zoom Rooms, Microsoft Teams Rooms (MTR) & H.323/SIP boardroom architecture in Lahore, Karachi & Islamabad with 15-min SLA.'
       },
       '/video-conferencing-solutions': {
         title: 'Video Conferencing Solutions in Pakistan | AV Live',
@@ -1278,17 +1278,68 @@ async function startServer() {
         description: 'Explore turnkey solutions for Video Conferencing in Pakistan (Poly, Cisco, Logitech), smart boardrooms, hybrid events & 3D Hologram Displays.'
       },
       '/video-conference-in-pakistan': {
-        title: 'Video Conference in Pakistan | Poly & Logitech | AV Live',
+        title: 'Video Conference in Pakistan | Poly, Cisco & Logitech | AV Live',
         description: 'Complete B2B Video Conference in Pakistan solutions. Official Polycom Group 500, Poly X70, Zoom Rooms, Microsoft Teams Rooms & boardroom AV.',
         schema: {
           '@context': 'https://schema.org',
-          '@type': 'Service',
-          '@id': 'https://avlive.com.pk/video-conference-in-pakistan#service',
-          name: 'Enterprise Video Conference in Pakistan: Polycom Group 500 & Poly X70 Solutions',
-          serviceType: 'Enterprise Video Conferencing & Boardroom Integration',
-          provider: { '@id': 'https://avlive.com.pk/#organization' },
-          areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
-          url: 'https://avlive.com.pk/video-conference-in-pakistan'
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/video-conference-in-pakistan#service',
+              name: 'Video Conference in Pakistan: Official Poly, Cisco, Logitech & Yealink Systems',
+              serviceType: 'Enterprise Video Conferencing & Boardroom Integration',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
+              url: 'https://avlive.com.pk/video-conference-in-pakistan'
+            },
+            {
+              '@type': 'FAQPage',
+              '@id': 'https://avlive.com.pk/video-conference-in-pakistan#faq',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'Why choose AV Live for Video Conference in Pakistan over general IT hardware vendors?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Since pioneering Video Conference in Pakistan in 2011, AV Live stocks authorized HP Poly (Polycom Group 500, Studio X70/X72), Cisco Room Kits, Logitech Rally Bar, and Yealink systems with on-site RT60 acoustic calibration and a 15-minute nationwide engineering SLA.'
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      '/event-management-in-pakistan': {
+        title: 'Event Management in Pakistan | Corporate Events & AV | AV Live',
+        description: 'Premier Event Management in Pakistan (Est. 2011). In-house SMD LED screens, line-array sound, 3D hologram stages & corporate events in Lahore, Karachi & Islamabad.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/event-management-in-pakistan#service',
+              name: 'Event Management in Pakistan: Turnkey Corporate Events, SMD Stages & Hybrid Production',
+              serviceType: 'Corporate Event Management, SMD LED Screen Rental, Concert Sound & Hybrid Broadcasting',
+              description: 'Turnkey Event Management in Pakistan powered by AV Live’s 100% in-house inventory of P2.5 SMD LED video walls, line-array sound systems, 3D hologram stages, and multi-camera broadcast crews across Lahore, Islamabad, and Karachi.',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: ['Lahore', 'Islamabad', 'Karachi', 'Pakistan'],
+              url: 'https://avlive.com.pk/event-management-in-pakistan'
+            },
+            {
+              '@type': 'FAQPage',
+              '@id': 'https://avlive.com.pk/event-management-in-pakistan#faq',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'How does AV Live differ from other event management companies in Pakistan like catering or decor planners?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Unlike catering and floral event coordinators that sub-rent audio-visual gear at a 40% markup, AV Live owns Pakistan’s largest in-house fleet of P2.5 SMD LED walls, line-array PA sound, stage trussing, 3D hologram displays, and 4K SDI broadcast switchers in Lahore, Islamabad, and Karachi.'
+                  }
+                }
+              ]
+            }
+          ]
         }
       },
       '/about': {
@@ -2398,22 +2449,71 @@ async function startServer() {
           ]
         },
         '/video-conferencing': {
-          lead: 'Deploy studio-grade 4K video conferencing systems across huddle rooms, executive boardrooms, and training halls in Lahore, Karachi, and Islamabad with certified HP Poly, Logitech, Cisco, and Yealink hardware.',
-          detail: 'Our acoustics and network engineers handle end-to-end room geometry modeling, PoE cable routing, dual-display mounting, and Zoom/Teams cloud tenant provisioning.',
-          tableCaption: 'Pakistan Video Conferencing Room Sizing & Hardware Architecture',
-          headers: ['Room Classification', 'Seating Capacity', 'Recommended Hardware Stack', 'Reference Budget (PKR)'],
+          lead: 'Engineered video conferencing room architecture, RT60 acoustic calibration, PoE+ structured cabling, and encrypted H.323/SIP & native Zoom/Teams Room integration across Lahore, Karachi, and Islamabad.',
+          detail: 'Our acoustics and network engineers design multi-camera boardroom topologies, ceiling beamforming microphone arrays, Dante audio-over-IP matrices, and single-cable USB-C BYOD switching.',
+          tableCaption: 'Enterprise Video Conferencing Room Topologies & Integration Standards',
+          headers: ['Architecture Topology', 'Core Codec / Appliance', 'Network & Protocol Stack', 'Best Room Deployment'],
           rows: [
-            ['Focus & Huddle Room', '2–6 Seats', 'Poly Studio R30 / Logitech MeetUp 2 / Yealink UVC40', 'Rs. 195,000 – Rs. 450,000'],
-            ['Mid-Sized Conference Room', '8–14 Seats', 'Poly Studio X52 / Logitech Rally Bar / Cisco Room Bar', 'Rs. 680,000 – Rs. 1,350,000'],
-            ['Executive Boardroom', '16–28 Seats', 'Polycom Group 500 / Poly Studio X72 / Logitech Rally Plus', 'Rs. 1,450,000 – Rs. 2,850,000']
+            ['Encrypted H.323 / SIP Hardware Codec', 'Polycom RealPresence Group 500 / Cisco Room Kit Plus', 'Dedicated Voice/Video VLAN, AES-256, H.323, SIP', 'Banks, Defense, Ministries, 16–30 Seat Boardrooms'],
+            ['Native Cloud Appliance Video Bar', 'HP Poly Studio X52 / X72 / Logitech Rally Bar / Yealink A30', 'CollabOS / Poly VideoOS Native Zoom & Teams Rooms', 'Huddle Spaces & 6–16 Seat Conference Rooms'],
+            ['Multi-Camera Modular Pro-AV Matrix', 'Poly G7500 / Cisco Codec Pro + Dual 20x PTZ + Bosch Mics', 'Dante Audio over IP, Dual 4K60 HDMI Matrix, AEC DSP', '30–100+ Seat Auditoriums & Hybrid Townhalls']
           ],
           links: [
+            { href: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan (Hardware & PKR Price Pillar)' },
             { href: '/category/video-conferencing', label: 'Browse All Video Conferencing Hardware' },
             { href: '/product/polycom-realpresence-group-500-pakistan', label: 'Polycom RealPresence Group 500' },
             { href: '/product/poly-studio-x72-pakistan', label: 'HP Poly Studio X72 Large Room Bar' },
             { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus' },
             { href: '/product/logitech-rally-bar-pakistan', label: 'Logitech Rally Bar 4K' },
             { href: '/room-designer', label: 'Interactive 3D Conference Room Planner' }
+          ]
+        },
+        '/video-conference-in-pakistan': {
+          lead: 'Pioneering Video Conference in Pakistan since 2011: compare and procure 100% genuine, serialized HP Poly (Polycom Group 500, Studio X52/X70/X72), Logitech Rally Bar, Cisco Room Kit Plus, and Yealink video conferencing systems with official PKR pricing.',
+          detail: 'Unlike general IT box-movers (accsys, kbse, nasco) that ship uncalibrated hardware without acoustic engineering, AV Live maintains local buffer stock in Lahore (Johar Town HQ), Karachi (Clifton), and Islamabad (Blue Area) backed by free RT60 room surveys and a 15-minute technical SLA.',
+          tableCaption: '2026 Video Conference in Pakistan — Flagship Hardware & PKR Price Comparison Matrix',
+          headers: ['Video Conference System', 'OEM Brand & MPN', 'Room Capacity & Optics', 'Official Pakistan Price (PKR)'],
+          rows: [
+            ['Poly Studio R30 / USB Video Bar', 'HP Poly (842D2AA)', '2–6 Pax Huddle • 4K 120° FOV + DirectorAI', 'Rs. 195,000 – Rs. 310,000'],
+            ['Logitech Rally Bar Mini / Poly Studio X52', 'Logitech / HP Poly (8D8K2AA)', '6–12 Pax Medium • 4K 20MP AI Framing + 6m Mic', 'Rs. 640,000 – Rs. 795,000'],
+            ['Logitech Rally Bar (Optical PTZ)', 'Logitech (960-001308)', '10–20 Pax Boardroom • 15x Optical/HD Zoom + 4 Mic Pods', 'Rs. 845,000 – Rs. 960,000'],
+            ['Polycom RealPresence Group 500', 'Polycom (7200-64550-001)', '14–28 Pax Executive • EagleEye IV 12x Optical PTZ', 'Rs. 685,000 – Rs. 920,000'],
+            ['HP Poly Studio X70 / X72 Large Room Bar', 'HP Poly (2405-86690-001)', '16–28 Pax Large Room • Dual 4K 20MP Lenses', 'Rs. 1,150,000 – Rs. 1,490,000'],
+            ['Cisco Room Kit Plus / Quad Camera', 'Cisco (CS-KITPLUS-K9)', '16–30+ Pax C-Suite • 5K Quad Camera + Codec Plus', 'Rs. 1,650,000 – Rs. 2,850,000']
+          ],
+          links: [
+            { href: '/category/video-conferencing', label: 'Shop All Video Conferencing Hardware (In Stock)' },
+            { href: '/product/polycom-realpresence-group-500-pakistan', label: 'Polycom RealPresence Group 500 Price in Pakistan' },
+            { href: '/product/poly-studio-x72-pakistan', label: 'HP Poly Studio X72 / X70 Price in Pakistan' },
+            { href: '/product/logitech-rally-bar-pakistan', label: 'Logitech Rally Bar Price in Pakistan' },
+            { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus Price in Pakistan' },
+            { href: '/video-conferencing-solutions', label: 'Enterprise Video Conferencing Solutions Hub' },
+            { href: '/event-management-in-pakistan', label: 'Event Management in Pakistan Pillar' },
+            { href: '/room-designer', label: '3D Conference Room Designer & BoM Calculator' }
+          ]
+        },
+        '/event-management-in-pakistan': {
+          lead: 'Established in 2011, AV Live Communications is Pakistan’s premier technology-first Event Management company—owning 100% of our in-house P2.5 3840Hz SMD LED video walls, concert line-array sound systems, stage trussing, 3D hologram displays, and 4K SDI multi-camera broadcast rigs across Lahore, Islamabad, and Karachi.',
+          detail: 'Whereas traditional event planners and catering agencies (a2zeventssolutions, gncaterers, blacktieevents) sub-rent audio-visual equipment from third parties at a 30%–40% markup, corporate clients contracting AV Live directly receive warehouse-direct pricing, redundant signal paths, Bosch simultaneous interpretation, and on-site broadcast engineers.',
+          tableCaption: 'Event Management in Pakistan — AV Live Direct Production vs. Traditional Catering/Decor Agencies',
+          headers: ['Event Production Pillar', 'AV Live Turnkey Engineering (In-House Fleet)', 'Traditional Event / Catering Agencies', 'Reference AV Live Package (PKR)'],
+          rows: [
+            ['Corporate Conferences, AGMs & Townhalls', 'P2.5 3840Hz SMD LED Wall, Digital Podium, Bosch Gooseneck Mics, 2-Way Zoom/Teams Bridge', 'Sub-rented LED screen + analog mixer without hybrid echo cancellation', 'Rs. 250,000 – Rs. 650,000'],
+            ['Brand Launches, Galas & 3D Hologram Shows', 'Curved SMD LED Stage, 3D HoloGauze Projection, 24x DMX Moving Heads, Line-Array PA', 'Basic stage backdrop & outsourced lighting without 3D holographic control', 'Rs. 750,000 – Rs. 2,500,000'],
+            ['International Expos, Summits & Diplomatic Events', 'Custom 3D Truss Pavilions, Bosch Simultaneous Interpretation, Multi-Cam 4K SDI Broadcast', 'Carpentry stall only; no translation booths or multi-cam SDI live streaming', 'Rs. 950,000 – Rs. 4,200,000+'],
+            ['Concert Sound, Stage Trussing & Arena AV', 'Dual 12" Line-Array Stacks, 18" Subwoofers, Heavy-Duty Goalpost Truss, Laser FX', 'Relies on third-party sound vendors with zero acoustic SPL calibration', 'Rs. 350,000 – Rs. 1,800,000']
+          ],
+          links: [
+            { href: '/corporate-event-management', label: 'Corporate Event Management & Hybrid Staging' },
+            { href: '/av-equipment-rental', label: 'SMD LED Screen & Concert Sound System Rental' },
+            { href: '/3d-hologram', label: '3D Hologram Display Stages Pakistan' },
+            { href: '/projection-mapping', label: '3D Architectural & Stage Projection Mapping' },
+            { href: '/live-streaming-services', label: 'Multi-Camera Event Broadcasting & Webcasting' },
+            { href: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan Pillar' },
+            { href: '/lahore', label: 'Event Management Company in Lahore (Johar Town HQ)' },
+            { href: '/islamabad', label: 'Event Management & AV Rental in Islamabad (Blue Area)' },
+            { href: '/karachi', label: 'Event Management & Production in Karachi (Clifton)' },
+            { href: '/event-quote', label: 'Instant 24-Hour Event Production Quote Calculator' }
           ]
         },
         '/video-conferencing-solutions': {
@@ -2427,6 +2527,7 @@ async function startServer() {
             ['Townhall & Auditorium Broadcast', 'Dual 20x PTZ cameras, DSP matrix mixer, wireless gooseneck mics, laser projection', 'Custom CAD & Acoustic Survey', 'Rs. 2,800,000 – Rs. 6,500,000+']
           ],
           links: [
+            { href: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan Hardware Pillar' },
             { href: '/room-designer', label: '3D Room Designer & LED Calculator' },
             { href: '/product/polycom-realpresence-group-500-pakistan', label: 'Polycom RealPresence Group 500' },
             { href: '/product/poly-studio-x72-pakistan', label: 'Poly Studio X72 / X70' },
@@ -2450,6 +2551,7 @@ async function startServer() {
             ['International Expo & Convention', 'Custom 3D fabricated pavilion, interactive touch kiosks, LED fascia', 'Multi-zone wireless audio, lead-capture AI agents', 'Rs. 1,200,000 – Rs. 4,500,000+']
           ],
           links: [
+            { href: '/event-management-in-pakistan', label: 'Event Management in Pakistan National Pillar' },
             { href: '/room-designer', label: '3D Room Designer & LED Wall Calculator' },
             { href: '/product/horion-k6a-bundle-special-offer', label: 'Horion K6a Interactive Flat Panel Bundle' },
             { href: '/product/benq-tk705i-pakistan', label: 'BenQ TK705i 4K Projector' },

@@ -143,25 +143,25 @@ export function Blog() {
               '@graph': schemaGraph
             }}
           />
-          <div className="bg-[#1A2B4C] text-white py-16">
+          <div className="bg-[#1A2B4C] text-white py-6 lg:py-10">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-              <Link to="/blog" className="inline-flex items-center gap-2 text-[#00B4D8] font-bold text-sm mb-6 hover:text-white transition-colors">
-                <ArrowLeft size={16} /> Back to All Articles
+              <Link to="/blog" className="inline-flex items-center gap-2 text-[#00B4D8] font-bold text-xs sm:text-sm mb-3 hover:text-white transition-colors">
+                <ArrowLeft size={15} /> Back to All Articles
               </Link>
-              <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-[#00B4D8] mb-4">
+              <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold uppercase tracking-wider text-[#00B4D8] mb-2.5">
                 <span>{matchedPost.category}</span>
                 <span>•</span>
                 <span>{matchedPost.date}</span>
                 <span>•</span>
                 <span>{matchedPost.readTime}</span>
               </div>
-              <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight">
                 {matchedPost.title}
               </h1>
             </div>
           </div>
 
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+          <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 mt-4 lg:mt-6">
             <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-lg p-6 sm:p-12">
               {/* Answer-First AEO Direct Verdict Block */}
               <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-6 mb-8">
@@ -292,8 +292,8 @@ export function Blog() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-16">
       <SEO 
-        title="AV Live Insights & Tech Blog | Video Conferencing & VoIP Trends"
-        description="Expert insights, architectural guides, and industry trends on corporate video conferencing, IP telephony, Microsoft Teams Rooms, and smart boardroom automation in Pakistan."
+        title="Enterprise AV & Video Conferencing Blog | AV Live"
+        description="Technical guides, boardroom design blueprints & PKR pricing insights on video conferencing, VoIP telephony & live event technology in Pakistan."
         keywords="AV Live Blog, Video Conferencing Guide Pakistan, Boardroom AV System Price Guide Pakistan, Logitech vs Poly Comparison Pakistan, Yealink vs Cisco Pakistan"
         url="https://avlive.com.pk/blog"
         type="website"
@@ -309,31 +309,31 @@ export function Blog() {
           }
         }}
       />
-      {/* Hero Section */}
-      <div className="bg-[#1A2B4C] text-white py-16 relative overflow-hidden">
+      {/* Compact Hero Section */}
+      <div className="bg-[#1A2B4C] text-white py-6 lg:py-10 relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-black mb-6 tracking-tight"
+            className="text-2xl sm:text-3xl md:text-4xl font-black mb-2.5 tracking-tight"
           >
-            AV Live Blog
+            AV Live Engineering Blog &amp; Case Studies
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-lg md:text-xl text-white max-w-2xl mx-auto leading-relaxed"
+            className="text-xs sm:text-sm md:text-base text-white/90 max-w-2xl mx-auto leading-relaxed"
           >
-            Insights, Trends & Expert Advice. Stay updated with the latest in video conferencing, IP phones, AV integration, and event technology.
+            Technical insights, boardroom architecture guides, and PKR pricing benchmarks on video conferencing, IP phones, and live event technology in Pakistan.
           </motion.p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-6 lg:mt-8 mb-12">
         {/* Category Filter */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-16">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mb-8">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}

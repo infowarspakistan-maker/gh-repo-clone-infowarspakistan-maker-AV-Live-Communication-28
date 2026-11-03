@@ -214,4 +214,6 @@ This section tracks all completed technical SEO, Google Search Console (GSC), Go
 5. `/blog/shure-bosch-ceiling-microphones-vs-table-mics-pakistan` — *Ceiling Microphone Arrays vs. Table Microphones: Acoustic Guide for Pakistani Boardrooms*
 6. `/video-conferencing-solutions` & `/services/boardroom-integration` — *Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad (Poly, Cisco, Yealink, Logitech, Horion, Grandstream)*
 7. `/corporate-event-management` & `/services/corporate-events` — *Corporate Event Management, Hybrid Live Streaming, SMD LED Screen Rental & 3D Hologram Stages in Pakistan*
+8. `/video-conference-in-pakistan` & `/event-management-in-pakistan` — *2011 Legacy National Pillars with Mobile-First `<h1>` Parity, De-Cannibalized SKU/Category Titles, and Competitor Benchmark Matrices against IT Box-Movers (`accsys.pk`, `kbse.com.pk`, `nasco-av.com`) and Catering/Decor Event Agencies (`a2zeventssolutions.com`, `gncaterers.com`, `blacktieeventsandcaters.com`)*
+
 

@@ -172,76 +172,75 @@ export function ServiceDetail() {
         type="website"
         schema={serviceSchema}
       />
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 pt-2.5">
         <Breadcrumbs items={[{ label: 'Services', path: '/services' }, { label: service.title }]} />
       </div>
-      {/* 1. Localized Hero Section with Direct 15-Minute Quote CTA */}
-      <div className="bg-[#1A2B4C] text-white py-20 md:py-24 relative overflow-hidden">
+      {/* 1. Compact Localized Hero Section with Direct 15-Minute Quote CTA */}
+      <div className="bg-[#1A2B4C] text-white py-6 lg:py-10 relative overflow-hidden">
         {service.imageUrl && (
            <div className="absolute inset-0 z-0">
              <img
                fetchPriority="high"
                decoding="async"
                width={1400}
-               height={600}
+               height={525}
                src={optimizeGalleryImageUrl(service.imageUrl, 1400, 80)}
                alt={service.localizedH1 || service.title}
                className="w-full h-full object-cover mix-blend-overlay opacity-30"
              />
            </div>
         )}
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full overflow-hidden">
-          <Link to="/services" className="text-[#00B4D8] font-bold text-sm uppercase tracking-widest hover:text-white transition-colors mb-4 inline-block">← Back to All Services</Link>
-          <div className="inline-flex items-center gap-2 bg-[#00B4D8]/15 border border-[#00B4D8]/30 text-[#00B4D8] px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest mb-5 block w-fit">
-            <Sparkles size={14} />
-            <span>Lahore (Johar Town &amp; DHA) • Karachi (Clifton) • Islamabad (Blue Area)</span>
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 relative z-10 w-full overflow-hidden">
+          <div className="inline-flex items-center gap-1.5 bg-[#00B4D8]/15 border border-[#00B4D8]/30 text-[#00B4D8] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2.5 w-fit">
+            <Sparkles size={12} />
+            <span>Lahore (Johar Town &amp; DHA) • Karachi • Islamabad</span>
           </div>
-          <h1 className="text-3xl md:text-6xl font-black mb-6 max-w-4xl tracking-tight leading-tight break-words">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black mb-2.5 max-w-4xl tracking-tight leading-tight break-words">
             {service.localizedH1 || service.title}
           </h1>
-          <div className="text-lg md:text-2xl text-gray-200 max-w-4xl leading-relaxed font-medium prose prose-invert max-w-none break-words [&_*]:break-words [&_*]:whitespace-normal mb-8" dangerouslySetInnerHTML={{ __html: formatContent(service.description || '') }} />
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="text-xs sm:text-sm md:text-base text-gray-200 max-w-3xl leading-relaxed font-medium line-clamp-3 prose prose-invert max-w-none break-words [&_*]:break-words [&_*]:whitespace-normal mb-4" dangerouslySetInnerHTML={{ __html: formatContent(service.description || '') }} />
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => {
                 setModalTitle('Request a 15-Minute Quote');
                 setIsQuoteModalOpen(true);
               }}
-              className="bg-[#00B4D8] hover:bg-[#0096B4] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl flex items-center gap-3 cursor-pointer"
+              className="bg-[#00B4D8] hover:bg-[#0096B4] text-white px-5 py-2.5 min-h-[38px] rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg flex items-center gap-2 cursor-pointer"
             >
               <span>Request a 15-Minute Quote</span>
-              <ArrowRight size={18} />
+              <ArrowRight size={15} />
             </button>
             <a
               href="tel:+923214256263"
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/25 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/25 px-4 py-2.5 min-h-[38px] rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-1.5"
             >
-              <Phone size={16} className="text-[#00B4D8]" />
+              <Phone size={14} className="text-[#00B4D8]" />
               <span>0321 425 6263</span>
             </a>
             <a
               href="tel:+923390000921"
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/25 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/25 px-4 py-2.5 min-h-[38px] rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-1.5"
             >
-              <Phone size={16} className="text-[#F26522]" />
+              <Phone size={14} className="text-[#F26522]" />
               <span>0339 0000 921</span>
             </a>
           </div>
         </div>
       </div>
 
-      {/* 2. Trust & Authority Bar (Partner Hardware Logos + Certified Engineering Team) */}
-      <div className="bg-white border-b border-gray-200 py-6 px-4 shadow-sm">
-        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#00B4D8]/10 text-[#00B4D8] flex items-center justify-center shrink-0">
-              <Award size={22} />
+      {/* 2. Compact Trust & Authority Bar (Partner Hardware Logos + Certified Engineering Team) */}
+      <div className="bg-white border-b border-gray-200 py-3 px-3 sm:px-6 shadow-xs">
+        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#00B4D8]/10 text-[#00B4D8] flex items-center justify-center shrink-0">
+              <Award size={18} />
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] block">Certified Pro-AV Engineering Team</span>
-              <span className="text-sm font-black text-[#1A2B4C]">Official Deployment Partner Across Pakistan</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#00B4D8] block">Certified Pro-AV Engineering Team</span>
+              <span className="text-xs font-black text-[#1A2B4C]">Official Deployment Partner Across Pakistan</span>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {[
               { name: 'Cisco', link: '/brands/cisco', tag: 'Room Kits & CUCM' },
               { name: 'HP Poly', link: '/brands/poly', tag: 'Group 500 & Studio X' },
