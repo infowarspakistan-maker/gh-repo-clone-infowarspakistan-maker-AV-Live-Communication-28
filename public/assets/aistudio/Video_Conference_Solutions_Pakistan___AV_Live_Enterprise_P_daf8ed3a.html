@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="artifact-type" content="narrative">
+<meta name="design-style" content="carbon">
+<title>Enterprise Video Conferencing &amp; Hybrid Communications Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  color-scheme: light;
+
+  /* 1. Carbon style tokens */
+  --background: #ffffff;
+  --surface-container-low: #f4f4f4;
+  --surface-container: #f4f4f4;
+  --surface-container-high: #e0e0e0;
+
+  --on-surface: #161616;
+  --on-surface-variant: #525252;
+
+  --outline: #8d8d8d;
+  --outline-variant: #e0e0e0;
+
+  --primary: #0f62fe;
+  --primary-hover: #0043ce;
+  --on-primary: #ffffff;
+  --primary-container: #d0e2ff;
+  --on-primary-container: #161616;
+  --secondary: #6f6f6f;
+  --tertiary: #198038;
+  --tertiary-container: #defbe6;
+  --error: #da1e28;
+  --on-error: #ffffff;
+
+  --data-1: #0f62fe;
+  --data-2: #6929c4;
+  --data-3: #005d5d;
+  --data-4: #9f1853;
+  --data-context: #8d8d8d;
+
+  --font-headline: 'IBM Plex Sans', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-label: 'IBM Plex Mono', monospace;
+
+  --rounded: 0.125rem;
+  --rounded-lg: 0.25rem;
+  --rounded-full: 0.75rem;
+
+  --shadow-1: 0 2px 6px rgb(0 0 0 / 0.1);
+  --shadow-2: 0 4px 12px rgb(0 0 0 / 0.12);
+  --rule: 1px solid var(--outline-variant);
+  --field-rule: 1px solid var(--outline);
+  --indicator: 2px solid var(--primary);
+  --indicator-state: 3px solid var(--primary);
+  --indicator-success: 3px solid var(--tertiary);
+  --indicator-warn: 3px solid var(--warning);
+
+  /* 3. Shared foundation tokens */
+  --positive: #198038;
+  --warning: #b28600;
+  --warning-container: #fcf4d6;
+  --focus: #0f62fe;
+
+  --display-size: clamp(2.25rem, 1.4rem + 3.2vw, 3.75rem);
+  --headline-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.25rem);
+  --subhead-size: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
+  --body-size: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --label-size: 0.75rem;
+
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+}
+
+/* Base reset */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  overflow-x: clip;
+  margin: 0;
+  padding: 0;
+  background: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+header { position: static !important; }
+
+.page-grid {
+  display: grid;
+  gap: var(--space-2xl);
+  padding: var(--space-xl) var(--space-lg) var(--space-3xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.page-grid * { min-width: 0; }
+
+/* Focus accessibility */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Carbon Typography */
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+
+.label {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--on-surface-variant);
+  display: block;
+}
+
+.headline {
+  font-family: var(--font-headline);
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: 1.18;
+  color: var(--on-surface);
+}
+.headline strong { font-weight: 600; }
+
+.display-title {
+  font-size: var(--display-size);
+  margin-top: var(--space-sm);
+  max-width: 24ch;
+}
+
+.section-title {
+  font-size: var(--headline-size);
+  margin-top: var(--space-xs);
+  max-width: 34ch;
+}
+
+.subhead {
+  font-family: var(--font-headline);
+  font-size: var(--subhead-size);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--on-surface);
+}
+
+.lede {
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  color: var(--on-surface-variant);
+  max-width: 65ch;
+  margin-top: var(--space-md);
+  line-height: 1.55;
+}
+
+.prose {
+  max-width: 65ch;
+  color: var(--on-surface);
+}
+.prose + .prose { margin-top: var(--space-md); }
+.prose-muted { color: var(--on-surface-variant); font-size: 0.9375rem; }
+
+.mono-value {
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.key-value {
+  font-family: var(--font-label);
+  font-weight: 300;
+  font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
+  line-height: 1.15;
+  color: var(--on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Carbon Structural Elements */
+.section-block {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.section-head {
+  border-bottom: var(--rule);
+  padding-bottom: var(--space-md);
+}
+
+.layer {
+  background: var(--surface-container);
+  border-radius: 0;
+  padding: var(--space-lg);
+}
+.layer .layer {
+  background: var(--surface-container-high);
+}
+
+.key-tile {
+  border-bottom: var(--indicator);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: var(--space-md);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.kpi-tile {
+  background: var(--surface-container);
+  padding: var(--space-md) var(--space-lg);
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+}
+.kpi-tile .kpi-helper {
+  font-size: 0.8125rem;
+  color: var(--on-surface-variant);
+}
+
+/* Masthead & Navigation Jump Strip */
+.masthead {
+  border-bottom: var(--rule);
+  padding-bottom: var(--space-xl);
+}
+
+.meta-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-lg);
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  height: 24px;
+  padding: 0 var(--space-sm);
+  border-radius: var(--rounded-full);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.tag-neutral {
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+}
+.tag-success {
+  background: var(--tertiary-container);
+  color: var(--on-surface);
+}
+.tag-warn {
+  background: var(--warning-container);
+  color: var(--on-surface);
+}
+
+.jump-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-lg);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: var(--rule);
+}
+
+.jump-link {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  text-decoration: none;
+  padding: var(--space-xs) 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 2px solid transparent;
+  transition: border-color var(--dur-micro) var(--ease-out);
+}
+.jump-link:hover {
+  border-bottom-color: var(--primary);
+}
+
+/* Asymmetric 2-col grids */
+.split-8-4 {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+.split-5-7 {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+.split-7-5 {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+/* Notifications / Callout Strips */
+.notice-strip {
+  background: var(--surface-container);
+  border-left: var(--indicator-state);
+  padding: var(--space-md) var(--space-lg);
+  display: grid;
+  gap: var(--space-xs);
+}
+.notice-strip.notice-success { border-left: var(--indicator-success); }
+.notice-strip.notice-warn { border-left: var(--indicator-warn); }
+.notice-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+.notice-title i, .notice-title svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.notice-strip.notice-success .notice-title svg { color: var(--tertiary); }
+.notice-strip.notice-warn .notice-title svg { color: var(--warning); }
+
+/* Tabs (Carbon style: plain text over gray 20 baseline, 2px blue indicator) */
+.tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  border-bottom: var(--rule);
+}
+.tab-btn {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: var(--space-sm) 0 var(--space-md);
+  min-height: 44px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: -1px;
+  transition: color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.tab-btn:hover {
+  color: var(--on-surface);
+}
+.tab-btn.is-active {
+  color: var(--on-surface);
+  font-weight: 600;
+  border-bottom: var(--indicator);
+}
+
+/* Buttons (Carbon: square corners, 48px or 40px inline, left-aligned label with right room) */
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+.btn {
+  appearance: none;
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-xl) var(--space-sm) var(--space-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-sm);
+  border: 1px solid transparent;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.btn-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.btn-secondary:hover {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--primary);
+  padding-right: var(--space-md);
+}
+.btn-ghost:hover {
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+}
+.btn-danger-arm {
+  background: var(--error);
+  color: var(--on-error);
+}
+.btn:disabled {
+  background: var(--surface-container-high);
+  color: var(--on-surface-variant);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+/* Inputs & Form Controls (Carbon: 40px+, gray 10 fill, underline rule) */
+.field-group {
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+}
+.field-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+}
+.carbon-select,
+.carbon-input {
+  width: 100%;
+  min-height: 44px;
+  background: var(--background);
+  border: 0;
+  border-bottom: var(--field-rule);
+  border-radius: 0;
+  padding: 0 var(--space-xl) 0 var(--space-md);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--on-surface);
+  transition: border-color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+}
+.carbon-input {
+  padding: 0 var(--space-md);
+}
+.layer .carbon-select,
+.layer .carbon-input {
+  background: var(--background);
+}
+.carbon-select:hover,
+.carbon-input:hover {
+  background: var(--surface-container-high);
+}
+.carbon-select:focus-visible,
+.carbon-input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.room-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  gap: var(--space-sm);
+}
+
+.room-option-btn {
+  appearance: none;
+  text-align: left;
+  background: var(--background);
+  border: 1px solid var(--outline-variant);
+  border-bottom: 2px solid var(--outline-variant);
+  border-radius: 0;
+  padding: var(--space-md);
+  min-height: 84px;
+  cursor: pointer;
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+  font-family: var(--font-body);
+  color: var(--on-surface);
+  transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.room-option-btn:hover {
+  background: var(--surface-container-high);
+}
+.room-option-btn.is-selected {
+  background: var(--primary-container);
+  border-color: var(--primary);
+  border-bottom: var(--indicator);
+  color: var(--on-primary-container);
+}
+.room-option-title {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+.room-option-meta {
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+.room-option-btn.is-selected .room-option-meta {
+  color: var(--on-primary-container);
+}
+
+.addon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: var(--space-sm);
+}
+.addon-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  background: var(--background);
+  padding: var(--space-sm) var(--space-md);
+  min-height: 48px;
+  border-bottom: var(--rule);
+  cursor: pointer;
+}
+.addon-check:hover {
+  background: var(--surface-container-high);
+}
+.addon-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+.addon-meta {
+  display: grid;
+  gap: 2px;
+}
+.addon-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--on-surface);
+}
+.addon-price {
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+
+/* Tables (Carbon: gray 20 header, mono uppercase headers, zebra gray 10, no vertical lines) */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-top: var(--rule);
+  border-bottom: var(--rule);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9375rem;
+}
+thead th {
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--rule);
+  white-space: nowrap;
+}
+tbody td {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--rule);
+  vertical-align: top;
+}
+tbody tr:nth-child(even) td {
+  background: var(--surface-container-low);
+}
+tbody tr.is-highlighted td {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+.num-col {
+  text-align: right;
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* List divider */
+.carbon-list {
+  display: grid;
+  gap: var(--space-sm);
+}
+.carbon-list > * + * {
+  border-top: var(--rule);
+  padding-top: var(--space-sm);
+}
+
+/* Chart container */
+.chart-panel {
+  background: var(--surface-container);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+.chart-box {
+  position: relative;
+  width: 100%;
+  min-height: 360px;
+  height: 360px;
+}
+
+/* Interactive Signal Flow Diagram */
+.signal-flow-wrap {
+  background: var(--surface-container);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+.signal-nodes-bar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+.signal-node-btn {
+  appearance: none;
+  background: var(--background);
+  border: 0;
+  border-bottom: 2px solid var(--outline-variant);
+  padding: var(--space-sm) var(--space-md);
+  min-height: 68px;
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  font-family: var(--font-body);
+  color: var(--on-surface);
+  transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.signal-node-btn:hover {
+  background: var(--surface-container-high);
+}
+.signal-node-btn.is-active {
+  background: var(--primary-container);
+  border-bottom: var(--indicator);
+  color: var(--on-primary-container);
+}
+.signal-node-step {
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+.signal-node-btn.is-active .signal-node-step {
+  color: var(--on-primary-container);
+  font-weight: 600;
+}
+.signal-node-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.svg-frame {
+  background: var(--background);
+  border: var(--rule);
+  padding: var(--space-md);
+  width: 100%;
+}
+.svg-frame svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Configurator layout */
+.configurator-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.bom-summary-box {
+  background: var(--background);
+  border-top: var(--indicator);
+  padding: var(--space-md) var(--space-lg);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.bom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-md);
+  padding: var(--space-xs) 0;
+  border-bottom: var(--rule);
+}
+.bom-row:last-child { border-bottom: 0; }
+
+.status-feedback {
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  color: var(--tertiary);
+  min-height: 1.25rem;
+}
+
+/* Collapsible details (progressive disclosure) */
+details.carbon-details {
+  background: var(--surface-container);
+  padding: var(--space-md) var(--space-lg);
+}
+details.carbon-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+}
+details.carbon-details summary::-webkit-details-marker { display: none; }
+details.carbon-details[open] summary {
+  border-bottom: var(--rule);
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+/* Responsive container & page rules */
+.card-wrapper { container-type: inline-size; }
+@container (max-width: 520px) {
+  .bom-row { flex-direction: column; gap: 2px; }
+}
+
+@media (max-width: 900px) {
+  .split-8-4,
+  .split-5-7,
+  .split-7-5,
+  .configurator-shell {
+    grid-template-columns: 1fr;
+  }
+  .signal-nodes-bar {
+    grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .page-grid {
+    grid-template-columns: 1fr;
+    padding: var(--space-md);
+    gap: var(--space-xl);
+  }
+  .chart-box {
+    min-height: 280px;
+    height: 280px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<main class="page-grid">
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="meta-strip">
+      <span class="label">Architecture &amp; Procurement Specification · Route /video-conference</span>
+      <span class="tag">PPRA / FBR GST-NTN Compliant</span>
+      <span class="tag tag-success">15-Min Engineering SLA</span>
+      <span class="tag tag-neutral">Lahore · Karachi · Islamabad</span>
+    </div>
+
+    <h1 class="headline display-title">
+      Enterprise Video Conferencing <strong>&amp; Hybrid Communications</strong>
+    </h1>
+
+    <p class="lede">
+      An engineering reference for unified communication protocols, acoustic signal chains, hardware stacks, and room-by-room deployment economics—from two-person huddle spaces to multi-city SECP-compliant broadcasts.
+    </p>
+
+    <div class="kpi-grid">
+      <div class="kpi-tile key-tile">
+        <span class="label">Engineering Response SLA</span>
+        <span class="key-value">15 min</span>
+        <span class="kpi-helper">On-site &amp; remote technical dispatch across Lahore HQ, Karachi, and Islamabad</span>
+      </div>
+      <div class="kpi-tile">
+        <span class="label">Multi-City Broadcast Uptime</span>
+        <span class="key-value">99.99%</span>
+        <span class="kpi-helper">Bonded wired fibre with multi-carrier 4G/5G cellular failover</span>
+      </div>
+      <div class="kpi-tile">
+        <span class="label">Camera-Safe LED Refresh</span>
+        <span class="key-value">3,840 Hz</span>
+        <span class="kpi-helper">Broadcast-grade drive rate preventing shutter banding on 4K SDI chains</span>
+      </div>
+      <div class="kpi-tile">
+        <span class="label">Entry Endpoint Reference</span>
+        <span class="key-value">Rs. 248k</span>
+        <span class="kpi-helper">Poly Studio USB Video Bar (7200-85830-012) to turnkey halls up to Rs. 5.0M+</span>
+      </div>
+    </div>
+
+    <nav class="jump-bar" aria-label="Document sections">
+      <a class="jump-link" href="#history">01 · 20-Year Evolution</a>
+      <a class="jump-link" href="#protocols">02 · Cloud vs. On-Premises SIP</a>
+      <a class="jump-link" href="#acoustics">03 · Room Stack vs. Webcam</a>
+      <a class="jump-link" href="#configurator">04 · Room Configurator</a>
+      <a class="jump-link" href="#catalogue">05 · Hardware Matrix &amp; QA</a>
+    </nav>
+  </header>
+
+  <!-- SECTION 1: HISTORICAL ANALYSIS -->
+  <section id="history" class="section-block">
+    <div class="section-head">
+      <span class="label">01 · Two-Decade Operational Transformation (2006–2026)</span>
+      <h2 class="headline section-title">
+        How persistent telepresence displaced <strong>millions of flight hours and executive downtime</strong>
+      </h2>
+    </div>
+
+    <div class="split-7-5">
+      <div class="chart-panel">
+        <div>
+          <h3 class="subhead">Enterprise Meeting Modality Shift &amp; Travel Displacement</h3>
+          <span class="label">Share of multi-site executive &amp; institutional briefings (%) · Illustrative 20-year trajectory</span>
+        </div>
+        <div class="chart-box">
+          <canvas id="historyChart" aria-label="20-year enterprise video conferencing adoption and physical travel displacement chart"></canvas>
+        </div>
+        <p class="prose-muted">
+          Trajectory synthesised from 2004–2026 corporate AV production benchmarks (Visual i Solutions, AVLI Global, AV Live Communications) and IEEE hybrid meeting standards.
+        </p>
+      </div>
+
+      <div class="carbon-list">
+        <div class="layer">
+          <span class="label">Phase 1 · 2006–2011 · Dedicated ISDN &amp; H.323 Rooms</span>
+          <p class="prose" style="margin-top: var(--space-xs);">
+            Early enterprise telepresence relied on costly dedicated ISDN/MPLS circuits and proprietary H.323 boardroom codecs. Only multinational headquarters and banking boards could justify the capital outlay, leaving regional offices dependent on domestic flights for routine governance.
+          </p>
+        </div>
+        <div class="layer">
+          <span class="label">Phase 2 · 2012–2018 · IP SIP Consolidation &amp; HD Bridges</span>
+          <p class="prose" style="margin-top: var(--space-xs);">
+            Transition from leased ISDN lines to standard IP SIP trunking and hardware endpoints such as Polycom RealPresence Group 500 lowered bandwidth barriers. Inter-city summits linking Lahore, Karachi, and Islamabad began replacing single-day executive air shuttles.
+          </p>
+        </div>
+        <div class="layer">
+          <span class="label">Phase 3 · 2019–2022 · Cloud SaaS Ubiquity</span>
+          <p class="prose" style="margin-top: var(--space-xs);">
+            Zoom Rooms, Microsoft Teams Rooms, and Cisco Webex standardised software-defined endpoints. Millions of commuting and flight hours evaporated across corporate governance, university lectures, and policy consultations—exposing the acoustic limits of consumer webcams.
+          </p>
+        </div>
+        <div class="layer key-tile">
+          <span class="label">Phase 4 · 2023–2026 · Zero-Echo AI &amp; Hybrid Broadcasts</span>
+          <p class="prose" style="margin-top: var(--space-xs);">
+            Modern rooms fuse optical PTZ speaker framing, DSP mix-minus echo cancellation, dual-4K displays, and bidirectional cloud-to-SIP gateways—delivering sub-second parity between physical attendees in Pakistan and remote stakeholders in Dubai, London, or Singapore.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <article class="layer">
+        <span class="label">Enterprise &amp; Financial Sector</span>
+        <h3 class="subhead" style="margin-top: var(--space-xs);">Executive Continuity &amp; SECP AGMs</h3>
+        <p class="prose" style="margin-top: var(--space-sm);">
+          Listed corporations conduct statutory Annual and Extraordinary General Meetings (AGMs/EGMs) across Karachi, Lahore, and Islamabad with two-way shareholder Q&amp;A, eliminating multi-city board travel while preserving verified attendance logs and encrypted archival recordings.
+        </p>
+      </article>
+      <article class="layer">
+        <span class="label">Government &amp; Diplomatic Forums</span>
+        <h3 class="subhead" style="margin-top: var(--space-xs);">Multi-Agency &amp; Policy Coordination</h3>
+        <p class="prose" style="margin-top: var(--space-sm);">
+          Public-sector ministries, policy forums in Islamabad’s Blue Area, and multilateral agencies bridge international delegates with simultaneous interpretation channels and PPRA-compliant hardware stacks—cutting diplomatic transit budgets and accelerating crisis response.
+        </p>
+      </article>
+      <article class="layer">
+        <span class="label">Higher Education &amp; Medical CME</span>
+        <h3 class="subhead" style="margin-top: var(--space-xs);">Accessible Hybrid Instruction</h3>
+        <p class="prose" style="margin-top: var(--space-sm);">
+          Universities and accredited Continuing Medical Education (CME) symposia stream dual-feed camera angles, high-resolution diagnostic imagery, and live captions to remote clinicians and campuses, turning every lecture hall into an on-demand knowledge asset.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- SECTION 2: UNIFIED COMMUNICATION PROTOCOLS -->
+  <section id="protocols" class="section-block">
+    <div class="section-head">
+      <span class="label">02 · Unified Communication Protocol Architecture</span>
+      <h2 class="headline section-title">
+        Cloud SaaS agility versus <strong>private on-premises IP/SIP sovereignty</strong>
+      </h2>
+    </div>
+
+    <p class="prose">
+      Selecting between cloud-native room appliances and self-hosted IP/SIP infrastructure is fundamentally a risk, compliance, and survivability decision. Explore the three deployment architectures below before reviewing the protocol specification matrix.
+    </p>
+
+    <div class="tab-bar" role="tablist" aria-label="Unified communication deployment models">
+      <button type="button" class="tab-btn is-active" id="tab-proto-cloud" role="tab" aria-selected="true" onclick="selectProtocolTab('cloud')">
+        Cloud SaaS (Teams / Zoom / Meet / Webex)
+      </button>
+      <button type="button" class="tab-btn" id="tab-proto-onprem" role="tab" aria-selected="false" onclick="selectProtocolTab('onprem')">
+        Private On-Premises IP / SIP &amp; H.323
+      </button>
+      <button type="button" class="tab-btn" id="tab-proto-hybrid" role="tab" aria-selected="false" onclick="selectProtocolTab('hybrid')">
+        Hybrid Dual-Registration &amp; Broadcast Bridge
+      </button>
+    </div>
+
+    <div id="protocol-detail-panel" class="split-8-4">
+      <!-- Populated dynamically via JS with default Cloud SaaS content visible at rest -->
+      <div class="layer" id="proto-main-card">
+        <span class="label" id="proto-eyebrow">Architecture 01 · Multi-Tenant Cloud SaaS</span>
+        <h3 class="subhead" id="proto-heading" style="margin-top: var(--space-xs);">Zoom Rooms, Microsoft Teams Rooms, Google Meet &amp; Cisco Webex</h3>
+        <p class="prose" id="proto-summary" style="margin-top: var(--space-sm);">
+          Dedicated room appliances (such as Poly Studio X32/X72, Logitech Rally Bar, and Cisco Webex Room Kit Plus) authenticate directly to hyperscale cloud tenants over TLS 1.3 and SRTP. IT teams gain rapid single-pane provisioning, automated firmware updates, AI noise suppression, and one-touch calendar join without maintaining local MCU bridges.
+        </p>
+        <div class="kpi-grid" style="margin-top: var(--space-md);">
+          <div class="layer">
+            <span class="label">Encryption Standard</span>
+            <p class="prose" id="proto-encryption" style="margin-top: var(--space-xs); font-weight: 500;">TLS 1.3 Signalling · AES-256-GCM SRTP Media</p>
+          </div>
+          <div class="layer">
+            <span class="label">WAN Outage Survivability</span>
+            <p class="prose" id="proto-survivability" style="margin-top: var(--space-xs); font-weight: 500;">Dependent on ISP; requires bonded 4G/5G failover</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="notice-strip" id="proto-compliance-box">
+        <div class="notice-title">
+          <i data-lucide="shield-check" width="18" height="18" aria-hidden="true"></i>
+          <span id="proto-compliance-title">Agile Enterprise Fit</span>
+        </div>
+        <p class="prose-muted" id="proto-compliance-text">
+          Ideal for multinationals, distributed sales teams, and external partner collaboration where rapid deployment, calendar integration, and cross-platform guest links outweigh domestic data-residency mandates.
+        </p>
+      </aside>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Protocol / Dimension</th>
+            <th>Cloud SaaS Rooms</th>
+            <th>Private On-Premises IP / SIP &amp; H.323</th>
+            <th>Hybrid Cloud + SIP Gateway</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Primary Platforms</strong></td>
+            <td>Zoom Rooms, Microsoft Teams Rooms, Google Meet, Cisco Webex</td>
+            <td>Grandstream UCM6308 IP PBX, internal SIP trunks, H.323 MCUs</td>
+            <td>Dual-registered Poly G7500 / Studio X70 / Cisco Room Kit Plus</td>
+          </tr>
+          <tr>
+            <td><strong>Signalling &amp; Transport</strong></td>
+            <td>HTTPS / WebSockets, ICE/STUN/TURN, proprietary cloud media</td>
+            <td>SIP (RFC 3261 over TLS/TCP), H.323 (H.225/H.245), RTP/SRTP</td>
+            <td>Local SIP/H.323 + cloud CVI / Direct Guest Join interoperability</td>
+          </tr>
+          <tr>
+            <td><strong>Data Sovereignty</strong></td>
+            <td>Media transits regional cloud PoPs; cloud recording optional</td>
+            <td>100% on-premises media &amp; recordings inside corporate/state LAN</td>
+            <td>Sensitive internal calls stay on LAN; external guests bridged via SBC</td>
+          </tr>
+          <tr>
+            <td><strong>Regulatory Compliance</strong></td>
+            <td>ISO 27001, SOC 2; SECP AGM streaming with access logs</td>
+            <td>Defence, banking core, classified ministries, air-gapped networks</td>
+            <td>SECP / PSX hybrid AGMs + private executive boardroom fallback</td>
+          </tr>
+          <tr>
+            <td><strong>WAN Outage Survivability</strong></td>
+            <td>Calls drop if all external ISP &amp; cellular links fail</td>
+            <td>Full LAN/MPLS site-to-site calling survives total internet blackout</td>
+            <td>Internal rooms continue on local SIP PBX; external stream fails over to 5G</td>
+          </tr>
+          <tr>
+            <td><strong>Verified Hardware</strong></td>
+            <td>Poly Studio USB, Studio X32, Logitech Rally Bar / Mini</td>
+            <td>Grandstream UCM6308, Polycom Group 500, Poly G7500, VVX 250</td>
+            <td>Cisco Room Kit Plus, Poly Studio X70/X72, Bosch PAVIRO PA</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 3: DESKTOP WEBCAMS VS ENTERPRISE STACKS -->
+  <section id="acoustics" class="section-block">
+    <div class="section-head">
+      <span class="label">03 · Acoustic &amp; Optical Engineering</span>
+      <h2 class="headline section-title">
+        Why desktop webcams fail above <strong>four seats—and how enterprise stacks solve it</strong>
+      </h2>
+    </div>
+
+    <p class="prose">
+      Connecting a consumer laptop webcam to a ballroom projector or boardroom television introduces immediate acoustic feedback, unintelligible far-field speech, and flat wide-angle framing. Enterprise conference room stacks isolate every stage of the signal path in dedicated hardware. Select any node in the signal flow schematic below to inspect its engineering parameters.
+    </p>
+
+    <div class="signal-flow-wrap">
+      <div class="signal-nodes-bar" role="group" aria-label="Enterprise AV signal chain stages">
+        <button type="button" class="signal-node-btn is-active" id="sig-btn-0" onclick="selectSignalNode(0)">
+          <span class="signal-node-step">Stage 01</span>
+          <span class="signal-node-name">Beamforming Mics</span>
+        </button>
+        <button type="button" class="signal-node-btn" id="sig-btn-1" onclick="selectSignalNode(1)">
+          <span class="signal-node-step">Stage 02</span>
+          <span class="signal-node-name">DSP AEC &amp; Mix-Minus</span>
+        </button>
+        <button type="button" class="signal-node-btn" id="sig-btn-2" onclick="selectSignalNode(2)">
+          <span class="signal-node-step">Stage 03</span>
+          <span class="signal-node-name">Optical PTZ Tracking</span>
+        </button>
+        <button type="button" class="signal-node-btn" id="sig-btn-3" onclick="selectSignalNode(3)">
+          <span class="signal-node-step">Stage 04</span>
+          <span class="signal-node-name">Dual-4K Routing</span>
+        </button>
+        <button type="button" class="signal-node-btn" id="sig-btn-4" onclick="selectSignalNode(4)">
+          <span class="signal-node-step">Stage 05</span>
+          <span class="signal-node-name">Bonded WAN Failover</span>
+        </button>
+      </div>
+
+      <div class="split-7-5">
+        <div class="svg-frame">
+          <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Enterprise conference room AV signal flow diagram from microphones and cameras through DSP AEC to dual 4K displays and bonded uplink">
+            <!-- Connection lines -->
+            <line x1="138" y1="70" x2="182" y2="70" stroke="var(--outline)" stroke-width="2" />
+            <line x1="298" y1="70" x2="342" y2="70" stroke="var(--outline)" stroke-width="2" />
+            <line x1="458" y1="70" x2="502" y2="70" stroke="var(--outline)" stroke-width="2" />
+            <line x1="618" y1="70" x2="658" y2="70" stroke="var(--outline)" stroke-width="2" />
+            <!-- Return mix-minus loop -->
+            <path d="M 400 112 L 400 168 L 240 168 L 240 112" fill="none" stroke="var(--primary)" stroke-width="2" stroke-dasharray="5 4" />
+            <text x="320" y="186" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--primary)">MIX-MINUS AEC REFERENCE BUS (ZERO ECHO)</text>
+
+            <!-- Node 0: Mic Array -->
+            <g id="svg-node-0">
+              <rect x="16" y="28" width="122" height="84" fill="var(--primary-container)" stroke="var(--primary)" stroke-width="2" />
+              <text x="26" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--on-primary-container)">01 · CAPTURE</text>
+              <text x="26" y="68" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--on-surface)">Beamforming</text>
+              <text x="26" y="85" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="var(--on-surface-variant)">Ceiling / Table</text>
+            </g>
+
+            <!-- Node 1: DSP -->
+            <g id="svg-node-1">
+              <rect x="182" y="28" width="116" height="84" fill="var(--surface-container)" stroke="var(--outline)" stroke-width="1.5" />
+              <text x="192" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--on-surface-variant)">02 · AUDIO DSP</text>
+              <text x="192" y="68" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--on-surface)">Hardware AEC</text>
+              <text x="192" y="85" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="var(--on-surface-variant)">Mix-Minus Bus</text>
+            </g>
+
+            <!-- Node 2: PTZ Camera -->
+            <g id="svg-node-2">
+              <rect x="342" y="28" width="116" height="84" fill="var(--surface-container)" stroke="var(--outline)" stroke-width="1.5" />
+              <text x="352" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--on-surface-variant)">03 · OPTICS</text>
+              <text x="352" y="68" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--on-surface)">Optical PTZ</text>
+              <text x="352" y="85" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="var(--on-surface-variant)">Speaker Frame</text>
+            </g>
+
+            <!-- Node 3: Codec & Dual 4K -->
+            <g id="svg-node-3">
+              <rect x="502" y="28" width="116" height="84" fill="var(--surface-container)" stroke="var(--outline)" stroke-width="1.5" />
+              <text x="512" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--on-surface-variant)">04 · CODEC</text>
+              <text x="512" y="68" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--on-surface)">Dual-4K Route</text>
+              <text x="512" y="85" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="var(--on-surface-variant)">People + Content</text>
+            </g>
+
+            <!-- Node 4: Bonded WAN -->
+            <g id="svg-node-4">
+              <rect x="658" y="28" width="88" height="84" fill="var(--surface-container)" stroke="var(--outline)" stroke-width="1.5" />
+              <text x="666" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--on-surface-variant)">05 · WAN</text>
+              <text x="666" y="68" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--on-surface)">Bonded</text>
+              <text x="666" y="85" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="var(--on-surface-variant)">Fibre + 5G</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="layer key-tile" id="signal-detail-card">
+          <span class="label" id="sig-detail-stage">Stage 01 · Acoustic Pickup</span>
+          <h3 class="subhead" id="sig-detail-title" style="margin-top: var(--space-xs);">Beamforming Ceiling &amp; Table Microphone Arrays</h3>
+          <p class="prose" id="sig-detail-desc" style="margin-top: var(--space-sm);">
+            Multi-element MEMS beamforming arrays steer narrow acoustic pickup lobes (typically 15°–30°) onto the active speaker while rejecting HVAC fans, projector blowers, and paper rustle. Unlike omnidirectional laptop microphones, coverage remains uniform up to 7–10 metres from the display wall.
+          </p>
+          <p class="mono-value" id="sig-detail-spec" style="margin-top: var(--space-md); font-size: 0.8125rem; color: var(--on-surface-variant);">
+            KEY METRIC: 6–10 m pickup radius · Acoustic fence noise-block zone
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Engineering Dimension</th>
+            <th>Single-User Desktop Webcam</th>
+            <th>Enterprise Conference Room Stack</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Acoustic Echo Cancellation (AEC)</strong></td>
+            <td>Software OS-level AEC; clips speech during double-talk (half-duplex ducking)</td>
+            <td>Dedicated hardware DSP AEC per microphone channel; full-duplex natural interruption</td>
+          </tr>
+          <tr>
+            <td><strong>Mix-Minus Audio Routing</strong></td>
+            <td>None; bridging a room PA causes severe feedback howl and remote echo</td>
+            <td>Isolated mix-minus bus sends remote voices to room PA while subtracting them from the codec uplink</td>
+          </tr>
+          <tr>
+            <td><strong>Camera Optics &amp; Tracking</strong></td>
+            <td>Fixed-focus digital crop; far-end participants appear tiny beyond 2.5 metres</td>
+            <td>Dual-lens / motorised optical PTZ (5×–25× zoom) with speaker framing and presenter tracking</td>
+          </tr>
+          <tr>
+            <td><strong>Microphone Pickup</strong></td>
+            <td>1–2 omnidirectional capsules; optimal under 1.2 metres in quiet spaces</td>
+            <td>Beamforming arrays + wireless gooseneck / ceiling Dante expansion across 6–30+ seats</td>
+          </tr>
+          <tr>
+            <td><strong>Display &amp; Content Routing</strong></td>
+            <td>Single laptop screen share; steals screen real estate from remote faces</td>
+            <td>Dual-display 4K HDMI/SDI routing: Screen A for remote participants, Screen B for 4K slides + confidence monitor</td>
+          </tr>
+          <tr>
+            <td><strong>Network &amp; Failover</strong></td>
+            <td>Shared office Wi-Fi; drops packets under congested hotel or campus loads</td>
+            <td>Dedicated wired Gigabit VLAN QoS + bonded multi-ISP fibre and 4G/5G cellular failover</td>
+          </tr>
+          <tr>
+            <td><strong>Support &amp; Redundancy</strong></td>
+            <td>Ad-hoc IT ticket; manual USB replugging during executive meetings</td>
+            <td>15-minute SLA engineering dispatch, hot-standby hardware spares, pre-meeting dry-run</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 4: INTERACTIVE SOLUTION CONFIGURATOR -->
+  <section id="configurator" class="section-block">
+    <div class="section-head">
+      <span class="label">04 · Interactive Room Sizing &amp; BoM Engine</span>
+      <h2 class="headline section-title">
+        Conference Room Solution <strong>Configurator &amp; Recommender</strong>
+      </h2>
+    </div>
+
+    <p class="prose">
+      Select your room capacity, unified communication protocol, vendor preference, and regional SLA hub below. The engine calculates a verified hardware stack from Poly, Cisco, Logitech, and Grandstream catalogues with authentic PKR pricing, manufacturer part numbers (MPNs), and turnkey integration benchmarks. Your configuration saves automatically between sessions.
+    </p>
+
+    <div class="configurator-shell">
+      <!-- LEFT: INPUTS -->
+      <div class="layer" style="display: grid; gap: var(--space-lg);">
+        <div>
+          <span class="label">Step 1 · Room Capacity &amp; Acoustic Footprint</span>
+          <div class="room-selector-grid" style="margin-top: var(--space-sm);" role="radiogroup" aria-label="Select room type">
+            <button type="button" class="room-option-btn is-selected" id="room-btn-huddle" onclick="setRoomType('huddle')">
+              <span class="room-option-title">Huddle Space</span>
+              <span class="room-option-meta">2–6 Pax · 3 × 3.5 m</span>
+            </button>
+            <button type="button" class="room-option-btn" id="room-btn-medium" onclick="setRoomType('medium')">
+              <span class="room-option-title">Small / Medium Room</span>
+              <span class="room-option-meta">6–14 Pax · 4.5 × 6 m</span>
+            </button>
+            <button type="button" class="room-option-btn" id="room-btn-boardroom" onclick="setRoomType('boardroom')">
+              <span class="room-option-title">Executive Boardroom</span>
+              <span class="room-option-meta">15–30 Pax · 6 × 10 m</span>
+            </button>
+            <button type="button" class="room-option-btn" id="room-btn-auditorium" onclick="setRoomType('auditorium')">
+              <span class="room-option-title">Hall / Auditorium</span>
+              <span class="room-option-meta">50–500+ Pax · Ballroom</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-grid" style="gap: var(--space-md);">
+          <div class="field-group">
+            <label class="field-label" for="cfg-protocol">Step 2 · Communication Protocol</label>
+            <select id="cfg-protocol" class="carbon-select" onchange="updateConfigurator()">
+              <option value="cloud">Cloud SaaS (Teams / Zoom / Meet / Webex)</option>
+              <option value="onprem">Private On-Premises IP / SIP &amp; H.323</option>
+              <option value="hybrid">Hybrid Cloud + SIP + Live Broadcast</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="cfg-vendor">Step 3 · Vendor Ecosystem Preference</label>
+            <select id="cfg-vendor" class="carbon-select" onchange="updateConfigurator()">
+              <option value="optimal">Optimal Match (Cross-Vendor)</option>
+              <option value="poly">HP Poly Stack</option>
+              <option value="cisco">Cisco Webex / Room Kit Stack</option>
+              <option value="logitech">Logitech + Grandstream Stack</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="cfg-city">Step 4 · SLA Dispatch Hub</label>
+            <select id="cfg-city" class="carbon-select" onchange="updateConfigurator()">
+              <option value="lahore">Lahore (Johar Town HQ) — 15-Min SLA</option>
+              <option value="karachi">Karachi (Clifton / DHA) — 15-Min SLA</option>
+              <option value="islamabad">Islamabad (Blue Area / F-7) — 15-Min SLA</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <span class="label">Step 5 · Optional Peripherals &amp; Infrastructure Modules</span>
+          <div class="addon-grid" style="margin-top: var(--space-sm);">
+            <label class="addon-check" for="addon-ucm">
+              <input type="checkbox" id="addon-ucm" onchange="updateConfigurator()">
+              <span class="addon-meta">
+                <span class="addon-name">Grandstream UCM6308 IP PBX</span>
+                <span class="addon-price">MPN: UCM6308 · Rs. 425,000</span>
+              </span>
+            </label>
+            <label class="addon-check" for="addon-vvx">
+              <input type="checkbox" id="addon-vvx" onchange="updateConfigurator()">
+              <span class="addon-meta">
+                <span class="addon-name">Polycom VVX 250 IP Desk Phone</span>
+                <span class="addon-price">MPN: 2200-48820-025 · Rs. 31,500</span>
+              </span>
+            </label>
+            <label class="addon-check" for="addon-intercom">
+              <input type="checkbox" id="addon-intercom" onchange="updateConfigurator()">
+              <span class="addon-meta">
+                <span class="addon-name">2N IP Vario SIP Room Intercom</span>
+                <span class="addon-price">MPN: 9137161U · Rs. 148,000</span>
+              </span>
+            </label>
+            <label class="addon-check" for="addon-bosch">
+              <input type="checkbox" id="addon-bosch" onchange="updateConfigurator()">
+              <span class="addon-meta">
+                <span class="addon-name">Bosch PAVIRO PVA-2P500 PA Amp</span>
+                <span class="addon-price">MPN: PVA-2P500 · Rs. 375,000</span>
+              </span>
+            </label>
+            <label class="addon-check" for="addon-headset">
+              <input type="checkbox" id="addon-headset" onchange="updateConfigurator()">
+              <span class="addon-meta">
+                <span class="addon-name">Yealink BH70 Dual UC Headset</span>
+                <span class="addon-price">MPN: BH70-DUAL-UC · Rs. 42,000</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" onclick="exportBomCsv()">
+            <i data-lucide="download" width="16" height="16" aria-hidden="true"></i>
+            <span>Export BoM Specification (.csv)</span>
+          </button>
+          <button type="button" class="btn btn-ghost" id="btn-reset-cfg" onclick="resetConfigurator(this)">
+            <i data-lucide="rotate-ccw" width="16" height="16" aria-hidden="true"></i>
+            <span>Reset Configuration</span>
+          </button>
+        </div>
+        <div class="status-feedback" id="cfg-status-msg" role="status" aria-live="polite"></div>
+      </div>
+
+      <!-- RIGHT: LIVE RECOMMENDATION OUTPUT -->
+      <div class="layer card-wrapper" style="display: grid; gap: var(--space-md);">
+        <div style="display: flex; justify-content: space-between; align-items: start; gap: var(--space-md); flex-wrap: wrap;">
+          <div>
+            <span class="label" id="rec-room-badge">Recommended Stack · Huddle Space (2–6 Pax)</span>
+            <h3 class="subhead" id="rec-primary-name" style="margin-top: var(--space-xs);">Poly Studio USB Video Bar</h3>
+          </div>
+          <span class="tag tag-success" id="rec-sla-badge">15-Min SLA · Lahore HQ</span>
+        </div>
+
+        <div class="svg-frame" id="rec-topology-svg" aria-label="Recommended room topology schematic">
+          <!-- Dynamically rendered SVG room schematic -->
+        </div>
+
+        <div class="bom-summary-box">
+          <span class="label">Primary Codec / Endpoint &amp; Verified Pricing</span>
+          <div class="bom-row">
+            <span><strong>Primary Hardware</strong> (<span class="mono-value" id="rec-primary-mpn">7200-85830-012</span>)</span>
+            <span class="mono-value" id="rec-primary-price" style="font-weight: 600;">Rs. 248,000</span>
+          </div>
+          <div class="bom-row" id="rec-secondary-row">
+            <span><strong id="rec-secondary-label">Companion Display / Optical Kit</strong> (<span class="mono-value" id="rec-secondary-mpn">BENQ-TK705I</span>)</span>
+            <span class="mono-value" id="rec-secondary-price">Rs. 398,000</span>
+          </div>
+          <div class="bom-row" id="rec-addons-row">
+            <span>Selected Peripherals &amp; Infrastructure (<span id="rec-addons-count">0</span> items)</span>
+            <span class="mono-value" id="rec-addons-price">Rs. 0</span>
+          </div>
+          <div class="bom-row" style="border-top: var(--rule); padding-top: var(--space-sm); margin-top: var(--space-xs);">
+            <span><strong>Verified Hardware BoM Total (Excl. GST)</strong></span>
+            <span class="key-value" id="rec-total-price" style="font-size: 1.5rem; color: var(--primary);">Rs. 248,000</span>
+          </div>
+        </div>
+
+        <div class="layer" style="padding: var(--space-md);">
+          <span class="label">Engineering Notes &amp; Turnkey Benchmark</span>
+          <p class="prose" id="rec-arch-notes" style="margin-top: var(--space-xs); font-size: 0.9375rem;">
+            Plug-and-play USB 4K video bar with Poly Acoustic Fence and NoiseBlockAI, suitable for 2–6 seat huddle spaces on Teams, Zoom, or Google Meet.
+          </p>
+          <p class="mono-value" id="rec-turnkey-band" style="margin-top: var(--space-sm); font-size: 0.8125rem; color: var(--on-surface-variant);">
+            TURNKEY INTEGRATION BENCHMARK: Rs. 248,000 – Rs. 450,000 (incl. cabling &amp; calibration)
+          </p>
+        </div>
+
+        <div class="notice-strip notice-success">
+          <div class="notice-title">
+            <i data-lucide="check-circle-2" width="18" height="18" aria-hidden="true"></i>
+            <span id="rec-alt-title">Alternative Vendor Stack &amp; Compliance</span>
+          </div>
+          <p class="prose-muted" id="rec-alt-text">
+            Alternative: Logitech Rally Bar Mini (MPN: 960-001336 · Rs. 635,000) for dedicated standalone appliance mode. Official PPRA / FBR GST-NTN invoicing included.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: COMPLETE HARDWARE MATRIX & PRODUCTION QA -->
+  <section id="catalogue" class="section-block">
+    <div class="section-head">
+      <span class="label">05 · Reference Hardware &amp; Turnkey Production Matrix</span>
+      <h2 class="headline section-title">
+        Verified hardware catalogue, MPNs, <strong>and show-day verification checks</strong>
+      </h2>
+    </div>
+
+    <div class="split-8-4" style="align-items: end;">
+      <p class="prose">
+        Filter the complete reference hardware inventory below by vendor or category. All PKR figures reflect documented reference unit pricing; large-scale auditorium and multi-city deployments also draw upon turnkey production packages ranging from PKR 125,000 for single-room hybrid webinars to PKR 5,000,000+ for flagship multi-day summits.
+      </p>
+      <div class="field-group">
+        <label class="field-label" for="cat-filter">Filter Hardware Matrix</label>
+        <select id="cat-filter" class="carbon-select" onchange="filterHardwareTable()">
+          <option value="all">All Verified Models (16 Items)</option>
+          <option value="codec">Room Codecs &amp; Video Bars</option>
+          <option value="projection">Projection, Cameras &amp; Stage Optics</option>
+          <option value="voip">VoIP PBX, Intercoms, PA &amp; Headsets</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Recommended Model</th>
+            <th>Vendor</th>
+            <th>MPN</th>
+            <th>Primary Role</th>
+            <th class="num-col">Reference Price (PKR)</th>
+          </tr>
+        </thead>
+        <tbody id="hardware-table-body">
+          <!-- Populated cleanly via JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-grid">
+      <div class="layer">
+        <span class="label">Turnkey Package · 50–150 Pax</span>
+        <h3 class="subhead" style="margin-top: var(--space-xs);">Executive Seminar &amp; AGM Tier</h3>
+        <p class="key-value" style="font-size: 1.375rem; margin-top: var(--space-sm);">PKR 185,000 – 450,000</p>
+        <p class="prose-muted" style="margin-top: var(--space-xs);">
+          12×8 ft P2.5 SMD LED wall, 4 wireless microphones + PA, 2-camera HD SDI Zoom/Teams bridge, 24-hour rigging, 1 standby AV engineer, 15-minute SLA.
+        </p>
+      </div>
+      <div class="layer">
+        <span class="label">Turnkey Package · 150–400 Pax</span>
+        <h3 class="subhead" style="margin-top: var(--space-xs);">Corporate Gala &amp; Hybrid Townhall</h3>
+        <p class="key-value" style="font-size: 1.375rem; margin-top: var(--space-sm);">PKR 550,000 – 1,450,000</p>
+        <p class="prose-muted" style="margin-top: var(--space-xs);">
+          24×10 ft P2.5 SMD backdrop + confidence monitors, 3–4 camera SDI switching + Poly Studio X70 / Group 500 bridge, 3 standby engineers, dual-encoder &amp; power/ISP failover.
+        </p>
+      </div>
+      <div class="layer">
+        <span class="label">Turnkey Package · Multi-City</span>
+        <h3 class="subhead" style="margin-top: var(--space-xs);">Linked Tri-City Summit &amp; Flagship</h3>
+        <p class="key-value" style="font-size: 1.375rem; margin-top: var(--space-sm);">PKR 1,200,000 – 5,000,000+</p>
+        <p class="prose-muted" style="margin-top: var(--space-xs);">
+          Simultaneous Lahore, Karachi, and Islamabad venues bridged live in 1080p60/4K, curved P2.5 LED or 3D HoloGauze stages, line-array PA, dedicated broadcast crew, 99.99% uptime SLA.
+        </p>
+      </div>
+    </div>
+
+    <details class="carbon-details">
+      <summary>
+        <span>Pre-Event Engineering &amp; Acoustic Verification Checklist (9-Point Production Gate)</span>
+        <span class="label">Expand Checklist</span>
+      </summary>
+      <div class="card-grid">
+        <div class="carbon-list">
+          <p class="prose-muted"><strong>1. Run-Sheet-First Scoping:</strong> Lock programme cues, speaker handoffs, and remote Q&amp;A moderators before finalising kit lists.</p>
+          <p class="prose-muted"><strong>2. Viewing &amp; Pixel Pitch Check:</strong> Specify P1.95–P2.6 SMD LED for close indoor conferences and P2.6–P3.91 for larger theatres; calculate native cabinet pixels before briefing graphic designers.</p>
+          <p class="prose-muted"><strong>3. Camera &amp; 3,840 Hz Refresh Verification:</strong> Test actual PTZ/SDI shutter speeds against the LED wall and calibrated 700–800 cd/m² indoor brightness to eliminate moiré and flicker.</p>
+        </div>
+        <div class="carbon-list">
+          <p class="prose-muted"><strong>4. Mix-Minus &amp; AEC Dry-Run (12–24 Hrs Prior):</strong> Confirm zero acoustic echo between the hall PA and remote Zoom/Teams/SIP codecs across every wireless and gooseneck channel.</p>
+          <p class="prose-muted"><strong>5. Bonded ISP Failover Test:</strong> Never rely on venue Wi-Fi; verify wired fibre + multi-carrier 4G/5G failover and secondary hardware RTMP encoder before doors open.</p>
+          <p class="prose-muted"><strong>6. Accessibility &amp; Presenter Comfort:</strong> Position confidence monitors along natural eyelines, enable live captioning, and ensure separate local recording for post-event compliance.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- SOURCES FOOTER -->
+  <footer style="border-top: var(--rule); padding-top: var(--space-lg); display: grid; gap: var(--space-sm);">
+    <span class="label">Sources &amp; Engineering References</span>
+    <p class="prose-muted">
+      Compiled from regional hardware reference matrices and corporate AV engineering specifications: AV Live Communications (Video Conferencing, Hybrid Event Production, Corporate Event Management, 3D Hologram &amp; Projection Mapping, and Lahore/Karachi/Islamabad SLA guides), AVisual Productions (Corporate AV Solutions Guide), Visual i Solutions (Corporate AV Production Guide), AVLI Global (Corporate Event Production Guide), EagerLED (9-Check Stage Rental LED Guide), Novelty Spain (Corporate Event AV Optimisation), AV Xpert (Hybrid Conferencing Guide), IEEE Hybrid Meeting Practices Guide, AVIXA Display Size Guidance, and W3C Accessible Audio &amp; Video Guidance.
+    </p>
+  </footer>
+
+</main>
+
+<api-shim></api-shim>
+<script>
+// Read CSS tokens cleanly for Chart.js (zero inline hex literals in JS)
+function cssToken(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+// =========================================================================
+// 1. HISTORICAL CHART (Chart.js)
+// =========================================================================
+function initHistoryChart() {
+  const canvas = document.getElementById('historyChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  const cBlue = cssToken('--data-1');
+  const cPurple = cssToken('--data-2');
+  const cTeal = cssToken('--data-3');
+  const cGray = cssToken('--data-context');
+  const cInk = cssToken('--on-surface-variant');
+  const cGrid = cssToken('--outline-variant');
+  const fontMono = cssToken('--font-label');
+
+  new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: [`2006`, `2009`, `2012`, `2015`, `2018`, `2020`, `2023`, `2026`],
+      datasets: [
+        {
+          label: `Cloud & Hybrid Room Stacks (%)`,
+          data: [2, 5, 11, 22, 34, 68, 76, 82],
+          borderColor: cBlue,
+          backgroundColor: cBlue,
+          borderWidth: 2.5,
+          pointRadius: 3,
+          tension: 0.15
+        },
+        {
+          label: `Private On-Premises IP / SIP & H.323 (%)`,
+          data: [18, 23, 29, 31, 28, 17, 16, 14],
+          borderColor: cPurple,
+          backgroundColor: cPurple,
+          borderWidth: 2,
+          pointRadius: 3,
+          tension: 0.15
+        },
+        {
+          label: `In-Person Only (Air/Inter-City Travel Required) (%)`,
+          data: [80, 72, 60, 47, 38, 15, 8, 4],
+          borderColor: cGray,
+          backgroundColor: cGray,
+          borderWidth: 1.5,
+          borderDash: [4, 4],
+          pointRadius: 2.5,
+          tension: 0.15
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'start',
+          labels: {
+            boxWidth: 12,
+            boxHeight: 12,
+            color: cInk,
+            font: { family: fontMono, size: 11 }
+          }
+        },
+        tooltip: {
+          backgroundColor: cssToken('--background'),
+          titleColor: cssToken('--on-surface'),
+          bodyColor: cssToken('--on-surface'),
+          borderColor: cGrid,
+          borderWidth: 1,
+          cornerRadius: 0,
+          titleFont: { family: fontMono, size: 12 },
+          bodyFont: { family: fontMono, size: 12 }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: cInk, font: { family: fontMono, size: 11 } }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          grid: { color: cGrid },
+          ticks: {
+            color: cInk,
+            font: { family: fontMono, size: 11 },
+            callback: function(v) { return v + `%`; }
+          }
+        }
+      }
+    }
+  });
+}
+
+// =========================================================================
+// 2. PROTOCOL EXPLORER TABS
+// =========================================================================
+const PROTOCOL_DATA = {
+  cloud: {
+    eyebrow: `Architecture 01 · Multi-Tenant Cloud SaaS`,
+    heading: `Zoom Rooms, Microsoft Teams Rooms, Google Meet & Cisco Webex`,
+    summary: `Dedicated room appliances (such as Poly Studio X32/X72, Logitech Rally Bar, and Cisco Webex Room Kit Plus) authenticate directly to hyperscale cloud tenants over TLS 1.3 and SRTP. IT teams gain rapid single-pane provisioning, automated firmware updates, AI noise suppression, and one-touch calendar join without maintaining local MCU bridges.`,
+    encryption: `TLS 1.3 Signalling · AES-256-GCM SRTP Media`,
+    survivability: `Dependent on external ISP; requires bonded 4G/5G failover`,
+    complianceTitle: `Agile Enterprise Fit`,
+    complianceText: `Ideal for multinationals, distributed sales teams, and external partner collaboration where rapid deployment, calendar integration, and cross-platform guest links outweigh domestic data-residency mandates.`
+  },
+  onprem: {
+    eyebrow: `Architecture 02 · Private On-Premises IP / SIP & H.323`,
+    heading: `Self-Hosted SIP Trunking, Grandstream UCM6308 & Hardware Codecs`,
+    summary: `Signalling and multipoint media switching remain inside the organisation’s private MPLS/VLAN perimeter using hardware endpoints (Poly G7500, Polycom RealPresence Group 500, Cisco Room Kit Plus) registered to on-premises SIP PBXs such as Grandstream UCM6308. No audio, video, or roster metadata leaves the domestic facility.`,
+    encryption: `SIP over TLS · H.235 / AES-256 Hardware SRTP`,
+    survivability: `100% LAN/MPLS survivability during external internet blackouts`,
+    complianceTitle: `Defence, Banking & Sovereignty Mandate`,
+    complianceText: `Essential for defence establishments, central/commercial banking cores, judicial chambers, and ministries requiring air-gapped LAN operation, local archival compliance, and immunity to external cloud outages.`
+  },
+  hybrid: {
+    eyebrow: `Architecture 03 · Hybrid Dual-Registration & Broadcast Bridge`,
+    heading: `Simultaneous SIP Intranet + Cloud Guest Bridging & Multi-Cam Streaming`,
+    summary: `Combines hardware codecs with Session Border Controllers (SBCs) and SDI/XLR mix-minus broadcast switchers. Internal executive rooms connect over private encrypted SIP/H.323 while external shareholders, remote keynote speakers, or listed-company AGM attendees join via Zoom, Microsoft Teams, or 1080p60 RTMP streams.`,
+    encryption: `Dual-zone SBC isolation · Encrypted AGM Logs`,
+    survivability: `Local rooms stay on SIP PBX; external stream fails over to 5G`,
+    complianceTitle: `SECP / PSX AGM & Tri-City Summits`,
+    complianceText: `Engineered for listed-company AGMs/EGMs and Lahore–Karachi–Islamabad policy forums needing verified shareholder attendance logs, 4-language interpretation, and uninterrupted failover.`
+  }
+};
+
+function selectProtocolTab(key) {
+  const data = PROTOCOL_DATA[key];
+  if (!data) return;
+
+  const keys = [`cloud`, `onprem`, `hybrid`];
+  for (let i = 0; i < keys.length; i++) {
+    const btn = document.getElementById(`tab-proto-` + keys[i]);
+    if (btn) {
+      const active = keys[i] === key;
+      btn.classList.toggle(`is-active`, active);
+      btn.setAttribute(`aria-selected`, active ? `true` : `false`);
+    }
+  }
+
+  const map = [
+    [`proto-eyebrow`, data.eyebrow],
+    [`proto-heading`, data.heading],
+    [`proto-summary`, data.summary],
+    [`proto-encryption`, data.encryption],
+    [`proto-survivability`, data.survivability],
+    [`proto-compliance-title`, data.complianceTitle],
+    [`proto-compliance-text`, data.complianceText]
+  ];
+  for (let j = 0; j < map.length; j++) {
+    const el = document.getElementById(map[j][0]);
+    if (el) el.textContent = map[j][1];
+  }
+}
+
+// =========================================================================
+// 3. INTERACTIVE SIGNAL FLOW NODES
+// =========================================================================
+const SIGNAL_NODES = [
+  {
+    stage: `Stage 01 · Acoustic Pickup`,
+    title: `Beamforming Ceiling & Table Microphone Arrays`,
+    desc: `Multi-element MEMS beamforming arrays steer narrow acoustic pickup lobes (typically 15°–30°) onto the active speaker while rejecting HVAC fans, projector blowers, and paper rustle. Unlike omnidirectional laptop microphones, coverage remains uniform up to 7–10 metres from the display wall.`,
+    spec: `KEY METRIC: 6–10 m pickup radius · Acoustic fence noise-block zone`
+  },
+  {
+    stage: `Stage 02 · Hardware Audio DSP`,
+    title: `Acoustic Echo Cancellation (AEC) & Mix-Minus Buses`,
+    desc: `Hardware DSP processors run dedicated AEC per microphone channel and build an isolated mix-minus bus: far-end remote voices are routed to the room’s line-array PA speakers (such as Bosch PAVIRO PVA-2P500) while being mathematically subtracted from the return codec feed—eliminating howling and remote echo.`,
+    spec: `KEY METRIC: Full-duplex double-talk · Zero echo on PA + Teams/Zoom bridge`
+  },
+  {
+    stage: `Stage 03 · Optical Framing`,
+    title: `Motorised Optical PTZ & Multi-Camera Tracking`,
+    desc: `Enterprise bars and integrator codecs (Poly Studio X70/X72, Logitech Rally Bar, Cisco Room Kit Plus) pair dual 4K sensors with 5×–25× optical PTZ lenses. AI speaker tracking frames the active panellist in tight portrait detail without pixelation, while auditorium setups add 3–4 SDI broadcast cameras.`,
+    spec: `KEY METRIC: 4K60 optical zoom · Sub-second speaker framing transitions`
+  },
+  {
+    stage: `Stage 04 · Video Matrix & Codecs`,
+    title: `Dual-Display 4K Routing & Confidence Monitors`,
+    desc: `Dedicated hardware codecs split remote human video onto Display A and crisp 4K presentation content onto Display B, while presenters receive floor-mounted confidence monitors showing slide timers and next-slide previews. Large halls drive 3,840 Hz P2.5 SMD LED walls via Novastar 4K processors.`,
+    spec: `KEY METRIC: Dual HDMI/SDI 4K routing · 3,840 Hz camera-safe LED drive`
+  },
+  {
+    stage: `Stage 05 · Network Resilience`,
+    title: `Bonded Multi-ISP Fibre & 4G/5G Failover`,
+    desc: `Enterprise rooms isolate AV traffic on QoS-prioritised Gigabit VLANs. For critical townhalls and SECP AGMs, dedicated bonded routers merge wired venue fibre with multi-carrier 4G/5G cellular modems and dual hardware RTMP/SIP encoders—preventing venue Wi-Fi dropouts from interrupting live delivery.`,
+    spec: `KEY METRIC: 99.99% uptime SLA · Seamless packet-level cellular failover`
+  }
+];
+
+function selectSignalNode(idx) {
+  const node = SIGNAL_NODES[idx];
+  if (!node) return;
+
+  for (let i = 0; i < 5; i++) {
+    const btn = document.getElementById(`sig-btn-` + i);
+    if (btn) btn.classList.toggle(`is-active`, i === idx);
+
+    const g = document.getElementById(`svg-node-` + i);
+    if (g) {
+      const rect = g.querySelector(`rect`);
+      if (rect) {
+        rect.setAttribute(`fill`, i === idx ? `var(--primary-container)` : `var(--surface-container)`);
+        rect.setAttribute(`stroke`, i === idx ? `var(--primary)` : `var(--outline)`);
+        rect.setAttribute(`stroke-width`, i === idx ? `2` : `1.5`);
+      }
+    }
+  }
+
+  const stageEl = document.getElementById(`sig-detail-stage`);
+  const titleEl = document.getElementById(`sig-detail-title`);
+  const descEl = document.getElementById(`sig-detail-desc`);
+  const specEl = document.getElementById(`sig-detail-spec`);
+  if (stageEl) stageEl.textContent = node.stage;
+  if (titleEl) titleEl.textContent = node.title;
+  if (descEl) descEl.textContent = node.desc;
+  if (specEl) specEl.textContent = node.spec;
+}
+
+// =========================================================================
+// 4. VERIFIED HARDWARE CATALOGUE & CONFIGURATOR ENGINE
+// =========================================================================
+const HARDWARE_CATALOGUE = [
+  { model: `Poly Studio USB Video Bar`, vendor: `HP Poly`, mpn: `7200-85830-012`, role: `Huddle & small room USB 4K video bar`, price: 248000, cat: `codec` },
+  { model: `Poly Studio V52`, vendor: `HP Poly`, mpn: `A09D4AA`, role: `Medium room premium USB video bar`, price: 485000, cat: `codec` },
+  { model: `Poly Studio X32`, vendor: `HP Poly`, mpn: `A3SV5AA`, role: `All-in-one Cloud / SIP room appliance`, price: 495000, cat: `codec` },
+  { model: `Poly G7500`, vendor: `HP Poly`, mpn: `7200-87310-001`, role: `Modular dual-4K boardroom & hall codec`, price: 1420000, cat: `codec` },
+  { model: `Logitech Rally Bar Mini`, vendor: `Logitech`, mpn: `960-001336`, role: `Huddle & small room all-in-one bar`, price: 635000, cat: `codec` },
+  { model: `Logitech Rally Bar`, vendor: `Logitech`, mpn: `960-001308`, role: `Medium-to-large room optical PTZ bar`, price: 865000, cat: `codec` },
+  { model: `Cisco Webex Room Kit Plus`, vendor: `Cisco`, mpn: `CS-KITPLUS-K9`, role: `Enterprise Webex / SIP integrator codec`, price: 1690000, cat: `codec` },
+  { model: `Cisco Room Kit Plus (PTZ 4K)`, vendor: `Cisco`, mpn: `CS-KITPLPTZ4K-K9`, role: `Large boardroom / hall PTZ 4K system`, price: 1780000, cat: `codec` },
+  { model: `Sony Bravia Projector 7`, vendor: `Sony`, mpn: `VPL-XW5000ES`, role: `4K native laser auditorium projector`, price: 1495000, cat: `projection` },
+  { model: `Optoma GT4000UHD`, vendor: `Optoma`, mpn: `OPT-GT4000UHD`, role: `Ultra-short-throw 4K laser projector`, price: 625000, cat: `projection` },
+  { model: `BenQ TK705i`, vendor: `BenQ`, mpn: `BENQ-TK705I`, role: `4K smart meeting room projector`, price: 398000, cat: `projection` },
+  { model: `Hikvision PTZ Camera`, vendor: `Hikvision`, mpn: `DS-2DE4A425IW-DE`, role: `25× optical PTZ capture for halls`, price: 149000, cat: `projection` },
+  { model: `Grandstream UCM6308`, vendor: `Grandstream`, mpn: `UCM6308`, role: `On-premises IP PBX & SIP/video server`, price: 425000, cat: `voip` },
+  { model: `Bosch PAVIRO PVA-2P500`, vendor: `Bosch`, mpn: `PVA-2P500`, role: `Digital PA amplifier & hall audio`, price: 375000, cat: `voip` },
+  { model: `2N IP Vario Intercom`, vendor: `2N`, mpn: `9137161U`, role: `SIP boardroom access & gate intercom`, price: 148000, cat: `voip` },
+  { model: `Yealink BH70 Dual Headset`, vendor: `Yealink`, mpn: `BH70-DUAL-UC`, role: `Enterprise wireless UC headset`, price: 42000, cat: `voip` },
+  { model: `Grandstream GXP2170`, vendor: `Grandstream`, mpn: `GXP2170`, role: `Executive Gigabit IP desk phone`, price: 39500, cat: `voip` },
+  { model: `Polycom VVX 250`, vendor: `Polycom`, mpn: `2200-48820-025`, role: `Enterprise colour SIP desk phone`, price: 31500, cat: `voip` }
+];
+
+const ADDONS = {
+  ucm: { id: `addon-ucm`, name: `Grandstream UCM6308 IP PBX`, mpn: `UCM6308`, price: 425000 },
+  vvx: { id: `addon-vvx`, name: `Polycom VVX 250 IP Desk Phone`, mpn: `2200-48820-025`, price: 31500 },
+  intercom: { id: `addon-intercom`, name: `2N IP Vario SIP Room Intercom`, mpn: `9137161U`, price: 148000 },
+  bosch: { id: `addon-bosch`, name: `Bosch PAVIRO PVA-2P500 PA Amp`, mpn: `PVA-2P500`, price: 375000 },
+  headset: { id: `addon-headset`, name: `Yealink BH70 Dual UC Headset`, mpn: `BH70-DUAL-UC`, price: 42000 }
+};
+
+let cfgState = {
+  room: `huddle`,
+  protocol: `cloud`,
+  vendor: `optimal`,
+  city: `lahore`,
+  addons: { ucm: false, vvx: false, intercom: false, bosch: false, headset: false }
+};
+
+function formatPkr(amount) {
+  return `Rs. ` + Number(amount).toLocaleString(`en-GB`);
+}
+
+function getRecommendation(state) {
+  const r = state.room;
+  const v = state.vendor;
+  const p = state.protocol;
+
+  // Determine Primary & Secondary hardware based on room + vendor + protocol
+  let primary = { name: `Poly Studio USB Video Bar`, mpn: `7200-85830-012`, price: 248000 };
+  let secondary = null;
+  let altText = ``;
+  let notes = ``;
+  let turnkeyBand = ``;
+
+  if (r === `huddle`) {
+    turnkeyBand = `TURNKEY INTEGRATION BENCHMARK: Rs. 248,000 – Rs. 650,000 (room display & cabling optional)`;
+    if (v === `logitech`) {
+      primary = { name: `Logitech Rally Bar Mini`, mpn: `960-001336`, price: 635000 };
+      notes = `Compact all-in-one appliance mode for 2–6 seat huddle booths with dual-lens AI framing and built-in Teams/Zoom appliance OS.`;
+      altText = `Alternative: Poly Studio USB Video Bar (MPN: 7200-85830-012 · Rs. 248,000) for BYOD USB host laptops.`;
+    } else if (v === `cisco`) {
+      primary = { name: `Poly Studio X32 (Cisco Webex Interop)`, mpn: `A3SV5AA`, price: 495000 };
+      notes = `All-in-one Android appliance certified for native Webex, Zoom, and SIP interop in small huddle footprints (Cisco Room Kit Plus scales up from 12+ seats).`;
+      altText = `Alternative: Logitech Rally Bar Mini (MPN: 960-001336 · Rs. 635,000) or Poly Studio USB (Rs. 248,000).`;
+    } else if (p === `onprem`) {
+      primary = { name: `Poly Studio X32`, mpn: `A3SV5AA`, price: 495000 };
+      notes = `Standalone SIP/H.323-capable room bar registering directly to an on-premises Grandstream UCM6308 IP PBX without requiring a dedicated room PC.`;
+      altText = `Alternative: Logitech Rally Bar Mini (MPN: 960-001336 · Rs. 635,000) or Poly Studio USB + PC soft-client.`;
+    } else {
+      primary = { name: `Poly Studio USB Video Bar`, mpn: `7200-85830-012`, price: 248000 };
+      notes = `High-value 4K USB video bar with Acoustic Fence noise isolation and speaker tracking for 2–6 seat BYOD huddle spaces.`;
+      altText = `Alternative: Poly Studio X32 (MPN: A3SV5AA · Rs. 495,000) or Logitech Rally Bar Mini (MPN: 960-001336 · Rs. 635,000).`;
+    }
+  } else if (r === `medium`) {
+    turnkeyBand = `TURNKEY INTEGRATION BENCHMARK: Rs. 650,000 – Rs. 1,250,000 (incl. 4K display & acoustic cabling)`;
+    if (v === `logitech`) {
+      primary = { name: `Logitech Rally Bar`, mpn: `960-001308`, price: 865000 };
+      notes = `Motorised 5× optical PTZ bar with dual-speaker output and RightSight 2 framing for 6–14 seat rooms.`;
+      altText = `Alternative: Poly Studio X32 (MPN: A3SV5AA · Rs. 495,000) or Poly Studio V52 (MPN: A09D4AA · Rs. 485,000).`;
+    } else if (v === `cisco`) {
+      primary = { name: `Cisco Webex Room Kit Plus`, mpn: `CS-KITPLUS-K9`, price: 1690000 };
+      notes = `Dedicated quad-camera / codec bar delivering Webex & SIP registration with dual-screen 4K content routing.`;
+      altText = `Alternative: Logitech Rally Bar (MPN: 960-001308 · Rs. 865,000) or Poly Studio V52 (Rs. 485,000).`;
+    } else if (v === `poly`) {
+      primary = { name: `Poly Studio X32`, mpn: `A3SV5AA`, price: 495000 };
+      secondary = { name: `BenQ TK705i 4K Display Projector`, mpn: `BENQ-TK705I`, price: 398000 };
+      notes = `Poly Studio X32 all-in-one codec paired with 4K projection for clean Sightlines across 6–14 seat conference tables.`;
+      altText = `Alternative: Poly Studio V52 (MPN: A09D4AA · Rs. 485,000) for USB MTR PC deployments or Logitech Rally Bar (Rs. 865,000).`;
+    } else {
+      primary = { name: `Logitech Rally Bar`, mpn: `960-001308`, price: 865000 };
+      notes = `Optimal 6–14 seat room system featuring motorised optical PTZ, low-distortion speakers, and native Teams/Zoom/SIP operation.`;
+      altText = `Alternative: Poly Studio X32 (MPN: A3SV5AA · Rs. 495,000) or Poly Studio V52 (MPN: A09D4AA · Rs. 485,000).`;
+    }
+  } else if (r === `boardroom`) {
+    turnkeyBand = `TURNKEY 30-PERSON BOARDROOM BENCHMARK: PKR 1,450,000 – PKR 3,200,000 (incl. dual 4K interactive panels & ceiling mics)`;
+    if (v === `cisco`) {
+      primary = { name: `Cisco Room Kit Plus (PTZ 4K)`, mpn: `CS-KITPLPTZ4K-K9`, price: 1780000 };
+      secondary = { name: `Optoma GT4000UHD 4K Laser Display`, mpn: `OPT-GT4000UHD`, price: 625000 };
+      notes = `Enterprise 15–30 seat executive boardroom architecture with optical PTZ 4K tracking, dual-display routing, and native SIP/H.323 + Webex/Teams interop.`;
+      altText = `Alternative: Poly G7500 Modular Codec (MPN: 7200-87310-001 · Rs. 1,420,000) or Poly Studio X70/X72 dual-camera stack.`;
+    } else if (v === `logitech`) {
+      primary = { name: `Logitech Rally Bar`, mpn: `960-001308`, price: 865000 };
+      secondary = { name: `Optoma GT4000UHD 4K Laser Display`, mpn: `OPT-GT4000UHD`, price: 625000 };
+      notes = `Extended with Rally Mic Pods for 15–30 seat table coverage alongside ultra-short-throw 4K laser projection.`;
+      altText = `Alternative: Poly G7500 (MPN: 7200-87310-001 · Rs. 1,420,000) or Cisco Room Kit Plus (MPN: CS-KITPLPTZ4K-K9 · Rs. 1,780,000).`;
+    } else {
+      primary = { name: `Poly G7500 Modular 4K Codec`, mpn: `7200-87310-001`, price: 1420000 };
+      secondary = { name: `Optoma GT4000UHD 4K Laser Display`, mpn: `OPT-GT4000UHD`, price: 625000 };
+      notes = `Modular flagship boardroom codec supporting external beamforming ceiling mic arrays, dual-4K displays, H.323/SIP sovereignty, and cloud bridging (expandable with Poly Studio X70/X72 endpoints).`;
+      altText = `Alternative: Cisco Room Kit Plus PTZ 4K (MPN: CS-KITPLPTZ4K-K9 · Rs. 1,780,000) or Cisco Webex Room Kit Plus (Rs. 1,690,000).`;
+    }
+  } else {
+    // auditorium 50-500+ pax
+    turnkeyBand = `TURNKEY HALL & HYBRID BROADCAST BENCHMARK: PKR 550,000 – PKR 5,000,000+ (P2.5 SMD LED wall + 3–4 Cam SDI + Bonded Failover)`;
+    if (v === `cisco`) {
+      primary = { name: `Cisco Room Kit Plus (PTZ 4K)`, mpn: `CS-KITPLPTZ4K-K9`, price: 1780000 };
+      secondary = { name: `Sony Bravia Projector 7 (4K Laser)`, mpn: `VPL-XW5000ES`, price: 1495000 };
+      notes = `Auditorium-grade multi-camera bridge feeding 4K laser projection (or 3,840 Hz P2.5 SMD LED wall) with mix-minus DSP isolation into hall line-array PA.`;
+      altText = `Alternative: Poly G7500 (MPN: 7200-87310-001 · Rs. 1,420,000) + Hikvision 25× PTZ Camera (DS-2DE4A425IW-DE · Rs. 149,000).`;
+    } else {
+      primary = { name: `Poly G7500 Modular 4K Codec`, mpn: `7200-87310-001`, price: 1420000 };
+      secondary = { name: `Sony Bravia Projector 7 + Hikvision PTZ`, mpn: `VPL-XW5000ES + DS-2DE4A425IW-DE`, price: 1644000 };
+      notes = `Full auditorium broadcast core: Poly G7500 (or Polycom Group 500) mix-minus bridge, 4K laser projection / P2.5 SMD LED backdrop, and 25× optical PTZ audience capture.`;
+      altText = `Alternative: Cisco Room Kit Plus PTZ 4K (MPN: CS-KITPLPTZ4K-K9 · Rs. 1,780,000). Add Bosch PAVIRO PVA-2P500 (Rs. 375,000) for hall PA.`;
+    }
+  }
+
+  // Add protocol-specific guidance
+  if (p === `onprem`) {
+    notes += ` Configured for private LAN SIP/H.323 survivability—zero cloud dependency for internal calls.`;
+  } else if (p === `hybrid`) {
+    notes += ` Includes dual-zone mix-minus audio routing for simultaneous cloud webcast and SIP/PA bridging.`;
+  }
+
+  return { primary, secondary, altText, notes, turnkeyBand };
+}
+
+function renderRoomTopologySvg(roomType) {
+  const container = document.getElementById(`rec-topology-svg`);
+  if (!container) return;
+
+  const configs = {
+    huddle: {
+      title: `HUDDLE LAYOUT · 2–6 PAX · SINGLE 4K DISPLAY + VIDEO BAR`,
+      seats: 4,
+      dualScreen: false,
+      paBox: false
+    },
+    medium: {
+      title: `MEETING ROOM · 6–14 PAX · DUAL-MODE DISPLAY + BEAMFORMING BAR`,
+      seats: 10,
+      dualScreen: false,
+      paBox: false
+    },
+    boardroom: {
+      title: `EXECUTIVE BOARDROOM · 15–30 PAX · DUAL 4K DISPLAYS + CEILING MIC ARRAY`,
+      seats: 18,
+      dualScreen: true,
+      paBox: false
+    },
+    auditorium: {
+      title: `AUDITORIUM / HALL · 50–500+ PAX · P2.5 SMD WALL + PTZ + MIX-MINUS PA`,
+      seats: 30,
+      dualScreen: true,
+      paBox: true
+    }
+  };
+  const c = configs[roomType] || configs.huddle;
+
+  const displaySvg = c.dualScreen
+    ? `<rect x="130" y="28" width="110" height="10" fill="var(--primary)" /><rect x="260" y="28" width="110" height="10" fill="var(--primary)" /><text x="250" y="22" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--on-surface-variant)">DUAL 4K DISPLAYS / P2.5 SMD WALL + CODEC</text>`
+    : `<rect x="175" y="28" width="150" height="10" fill="var(--primary)" /><text x="250" y="22" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--on-surface-variant)">4K DISPLAY + ALL-IN-ONE VIDEO BAR</text>`;
+
+  const paSvg = c.paBox
+    ? `<rect x="24" y="42" width="76" height="40" fill="var(--surface-container)" stroke="var(--outline)" stroke-width="1.5" /><text x="62" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="var(--on-surface)">DSP + PA</text><text x="62" y="72" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="var(--on-surface-variant)">MIX-MINUS</text><rect x="400" y="42" width="76" height="40" fill="var(--surface-container)" stroke="var(--outline)" stroke-width="1.5" /><text x="438" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="var(--on-surface)">OPTICAL PTZ</text><text x="438" y="72" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="var(--on-surface-variant)">BONDED WAN</text>`
+    : ``;
+
+  const tableWidth = roomType === `huddle` ? 120 : roomType === `medium` ? 180 : 250;
+  const tableX = (500 - tableWidth) / 2;
+
+  container.innerHTML = `
+    <svg viewBox="0 0 500 165" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${c.title}">
+      <rect x="8" y="8" width="484" height="149" fill="var(--background)" stroke="var(--outline-variant)" stroke-width="1" />
+      ${displaySvg}
+      ${paSvg}
+      <path d="M 250 42 L 180 120 L 320 120 Z" fill="var(--primary-container)" opacity="0.55" />
+      <rect x="${tableX}" y="68" width="${tableWidth}" height="52" fill="var(--surface-container-high)" stroke="var(--outline)" stroke-width="1.5" />
+      <text x="250" y="97" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="500" fill="var(--on-surface)">${c.seats} SEATS / CAMERA FOV</text>
+      <text x="250" y="146" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--on-surface-variant)">${c.title}</text>
+    </svg>
+  `;
+}
+
+function setRoomType(room) {
+  cfgState.room = room;
+  updateConfigurator();
+}
+
+function readDomIntoState() {
+  const protoEl = document.getElementById(`cfg-protocol`);
+  const vendorEl = document.getElementById(`cfg-vendor`);
+  const cityEl = document.getElementById(`cfg-city`);
+  if (protoEl) cfgState.protocol = protoEl.value;
+  if (vendorEl) cfgState.vendor = vendorEl.value;
+  if (cityEl) cfgState.city = cityEl.value;
+
+  const addonKeys = Object.keys(ADDONS);
+  for (let i = 0; i < addonKeys.length; i++) {
+    const k = addonKeys[i];
+    const cb = document.getElementById(ADDONS[k].id);
+    if (cb) cfgState.addons[k] = cb.checked;
+  }
+}
+
+function applyStateToDom() {
+  const rooms = [`huddle`, `medium`, `boardroom`, `auditorium`];
+  for (let i = 0; i < rooms.length; i++) {
+    const btn = document.getElementById(`room-btn-` + rooms[i]);
+    if (btn) btn.classList.toggle(`is-selected`, rooms[i] === cfgState.room);
+  }
+
+  const protoEl = document.getElementById(`cfg-protocol`);
+  const vendorEl = document.getElementById(`cfg-vendor`);
+  const cityEl = document.getElementById(`cfg-city`);
+  if (protoEl) protoEl.value = cfgState.protocol;
+  if (vendorEl) vendorEl.value = cfgState.vendor;
+  if (cityEl) cityEl.value = cfgState.city;
+
+  const addonKeys = Object.keys(ADDONS);
+  for (let i = 0; i < addonKeys.length; i++) {
+    const k = addonKeys[i];
+    const cb = document.getElementById(ADDONS[k].id);
+    if (cb) cb.checked = Boolean(cfgState.addons[k]);
+  }
+}
+
+function renderConfiguratorOutput() {
+  const roomLabels = {
+    huddle: `Huddle Space (2–6 Pax)`,
+    medium: `Small / Medium Meeting Room (6–14 Pax)`,
+    boardroom: `Executive Boardroom (15–30 Pax)`,
+    auditorium: `Multi-Purpose Hall / Auditorium (50–500+ Pax)`
+  };
+  const cityLabels = {
+    lahore: `15-Min SLA · Lahore HQ`,
+    karachi: `15-Min SLA · Karachi`,
+    islamabad: `15-Min SLA · Islamabad`
+  };
+
+  const rooms = [`huddle`, `medium`, `boardroom`, `auditorium`];
+  for (let i = 0; i < rooms.length; i++) {
+    const btn = document.getElementById(`room-btn-` + rooms[i]);
+    if (btn) btn.classList.toggle(`is-selected`, rooms[i] === cfgState.room);
+  }
+
+  const rec = getRecommendation(cfgState);
+
+  let addonsSum = 0;
+  let addonsCount = 0;
+  const addonKeys = Object.keys(ADDONS);
+  for (let i = 0; i < addonKeys.length; i++) {
+    const k = addonKeys[i];
+    if (cfgState.addons[k]) {
+      addonsSum += ADDONS[k].price;
+      addonsCount += 1;
+    }
+  }
+
+  const total = rec.primary.price + (rec.secondary ? rec.secondary.price : 0) + addonsSum;
+
+  const setText = function(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  setText(`rec-room-badge`, `Recommended Stack · ` + (roomLabels[cfgState.room] || roomLabels.huddle));
+  setText(`rec-sla-badge`, cityLabels[cfgState.city] || cityLabels.lahore);
+  setText(`rec-primary-name`, rec.primary.name);
+  setText(`rec-primary-mpn`, rec.primary.mpn);
+  setText(`rec-primary-price`, formatPkr(rec.primary.price));
+
+  const secRow = document.getElementById(`rec-secondary-row`);
+  if (secRow) {
+    if (rec.secondary) {
+      secRow.style.display = `flex`;
+      setText(`rec-secondary-label`, rec.secondary.name);
+      setText(`rec-secondary-mpn`, rec.secondary.mpn);
+      setText(`rec-secondary-price`, formatPkr(rec.secondary.price));
+    } else {
+      secRow.style.display = `none`;
+    }
+  }
+
+  setText(`rec-addons-count`, String(addonsCount));
+  setText(`rec-addons-price`, formatPkr(addonsSum));
+  setText(`rec-total-price`, formatPkr(total));
+  setText(`rec-arch-notes`, rec.notes);
+  setText(`rec-turnkey-band`, rec.turnkeyBand);
+  setText(`rec-alt-text`, rec.altText);
+
+  renderRoomTopologySvg(cfgState.room);
+}
+
+async function persistConfiguratorState() {
+  if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+    try {
+      await window.notebookAppApi.setAppState({ cfgState: cfgState });
+    } catch (e) {
+      // Non-fatal in preview environments
+    }
+  }
+}
+
+function updateConfigurator() {
+  readDomIntoState();
+  renderConfiguratorOutput();
+  persistConfiguratorState();
+  const statusEl = document.getElementById(`cfg-status-msg`);
+  if (statusEl) statusEl.textContent = ``;
+}
+
+function resetConfigurator(btn) {
+  if (btn && btn.dataset.armed !== `true`) {
+    btn.dataset.armed = `true`;
+    const span = btn.querySelector(`span`);
+    if (span) span.textContent = `Confirm Reset`;
+    btn.classList.add(`btn-danger-arm`);
+    return;
+  }
+  if (btn) {
+    btn.dataset.armed = `false`;
+    const span = btn.querySelector(`span`);
+    if (span) span.textContent = `Reset Configuration`;
+    btn.classList.remove(`btn-danger-arm`);
+  }
+  cfgState = {
+    room: `huddle`,
+    protocol: `cloud`,
+    vendor: `optimal`,
+    city: `lahore`,
+    addons: { ucm: false, vvx: false, intercom: false, bosch: false, headset: false }
+  };
+  applyStateToDom();
+  renderConfiguratorOutput();
+  persistConfiguratorState();
+  const statusEl = document.getElementById(`cfg-status-msg`);
+  if (statusEl) statusEl.textContent = `Configuration reset to default Huddle Space baseline.`;
+}
+
+function exportBomCsv() {
+  const rec = getRecommendation(cfgState);
+  const rows = [
+    [`Category`, `Model`, `MPN`, `Reference Price (PKR)`, `SLA / Hub`],
+    [`Primary Endpoint`, rec.primary.name, rec.primary.mpn, String(rec.primary.price), cfgState.city.toUpperCase() + ` 15-Min SLA`]
+  ];
+  if (rec.secondary) {
+    rows.push([`Display / Optical Kit`, rec.secondary.name, rec.secondary.mpn, String(rec.secondary.price), `Included`]);
+  }
+  let total = rec.primary.price + (rec.secondary ? rec.secondary.price : 0);
+  const addonKeys = Object.keys(ADDONS);
+  for (let i = 0; i < addonKeys.length; i++) {
+    const k = addonKeys[i];
+    if (cfgState.addons[k]) {
+      const a = ADDONS[k];
+      rows.push([`Optional Add-on`, a.name, a.mpn, String(a.price), `Included`]);
+      total += a.price;
+    }
+  }
+  rows.push([`TOTAL (Excl. GST)`, cfgState.room + ` / ` + cfgState.protocol, `-`, String(total), `PPRA / FBR GST-NTN Compliant`]);
+
+  const csv = rows.map(function(r) {
+    return r.map(function(cell) {
+      return `"` + String(cell).replace(/"/g, `""`) + `"`;
+    }).join(`,`);
+  }).join(`\n`);
+
+  const statusEl = document.getElementById(`cfg-status-msg`);
+  if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+    window.notebookAppApi.triggerFileDownload({
+      content: csv,
+      contentType: `text/csv`,
+      encoding: `UTF-8`,
+      filename: `video-conference-bom-` + cfgState.room + `.csv`
+    });
+    if (statusEl) statusEl.textContent = `Exported video-conference-bom-` + cfgState.room + `.csv`;
+  } else {
+    if (statusEl) statusEl.textContent = `BoM summary prepared (` + rows.length + ` line items · ` + formatPkr(total) + `).`;
+  }
+}
+
+// =========================================================================
+// 5. HARDWARE MATRIX TABLE FILTER
+// =========================================================================
+function filterHardwareTable() {
+  const filterEl = document.getElementById(`cat-filter`);
+  const tbody = document.getElementById(`hardware-table-body`);
+  if (!tbody) return;
+
+  const filterVal = filterEl ? filterEl.value : `all`;
+  const filtered = HARDWARE_CATALOGUE.filter(function(item) {
+    return filterVal === `all` || item.cat === filterVal;
+  });
+
+  tbody.innerHTML = filtered.map(function(item) {
+    return `<tr>
+      <td><strong>` + item.model + `</strong></td>
+      <td>` + item.vendor + `</td>
+      <td class="mono-value">` + item.mpn + `</td>
+      <td>` + item.role + `</td>
+      <td class="num-col">` + formatPkr(item.price) + `</td>
+    </tr>`;
+  }).join(``);
+}
+
+// =========================================================================
+// 6. INITIALISATION & PERSISTENCE HYDRATION
+// =========================================================================
+async function initApp() {
+  if (typeof lucide !== `undefined` && typeof lucide.createIcons === `function`) {
+    lucide.createIcons();
+  }
+
+  initHistoryChart();
+  filterHardwareTable();
+
+  if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+    try {
+      const saved = await window.notebookAppApi.getAppState();
+      if (saved && saved.cfgState) {
+        cfgState = Object.assign({}, cfgState, saved.cfgState);
+        if (saved.cfgState.addons) {
+          cfgState.addons = Object.assign({}, cfgState.addons, saved.cfgState.addons);
+        }
+      }
+    } catch (e) {
+      // Fallback cleanly to default state
+    }
+  }
+
+  applyStateToDom();
+  renderConfiguratorOutput();
+
+  if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+    window.notebookAppApi.notifyAppReady();
+  }
+}
+
+document.addEventListener(`DOMContentLoaded`, initApp);
+</script>
+</body>
+</html>

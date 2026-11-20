@@ -1,0 +1,9 @@
+Issue,Validation,Items
+"Missing field ""hasMerchantReturnPolicy"" (in ""offers"")",Not Started,48
+"Missing field ""shippingDetails"" (in ""offers"")",Not Started,48
+"Missing field ""description""",Not Started,48
+"Missing field ""validFrom"" (in ""offers"")",Not Started,18
+"Review has multiple aggregate ratings (in ""aggregateRating"")",Not Started,18
+"Review has multiple aggregate ratings (in ""review"")",Not Started,18
+Invalid GTIN,Not Started,1
+Invalid GTIN,Not Started,1

@@ -289,7 +289,7 @@ export function ProductDetails() {
   );
 
   const gmcMeta = PRODUCT_GMC_METADATA[canonicalSlug] || PRODUCT_GMC_METADATA[product.id || ''];
-  const resolvedGtin = gmcMeta?.gtin || product.gtin || '610807990012';
+  const resolvedGtin = gmcMeta?.gtin || product.gtin || '610807990017';
   const resolvedMpn = cleanMpn(gmcMeta?.mpn || product.mpn || product.sku, canonicalSlug);
   const resolvedBrand = (product.brand === 'Poly (HP' ? 'HP Poly' : product.brand) || gmcMeta?.brand || 'AV Live';
   const rawSpecsStr = String(product.specifications || '');
@@ -327,7 +327,7 @@ export function ProductDetails() {
         "@type": "Product",
         "@id": `${canonicalProductUrl}#product`,
         "name": product.productName,
-        "image": productImages.length > 0 ? productImages : ["https://avlive.com.pk/og-image.jpg"],
+        "image": schemaImages.length > 0 ? schemaImages : ["https://avlive.com.pk/og-image.jpg"],
         "description": product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '') || gmcMeta?.defaultDescription || `Buy ${product.productName} by ${resolvedBrand} for Video Conference in Pakistan.`,
         "sku": resolvedMpn,
         "mpn": resolvedMpn,
@@ -365,6 +365,7 @@ export function ProductDetails() {
           "url": canonicalProductUrl,
           "priceCurrency": "PKR",
           "price": effectivePrice.toFixed(2),
+          "validFrom": "2026-01-01",
           "priceValidUntil": "2027-12-31",
           "itemCondition": "https://schema.org/NewCondition",
           "availability": (product.stockQuantity ?? 10) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",

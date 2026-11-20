@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { DeepQueryModal } from '../components/DeepQueryModal';
+import { RealProjectsAndClients } from '../components/RealProjectsAndClients';
 
 export function Services() {
   const [step, setStep] = useState(1);
@@ -15,8 +16,8 @@ export function Services() {
         description="Book turnkey corporate event management, SMD LED screen rental, 3D hologram stages, line-array PA systems & hybrid broadcasting in Pakistan."
         keywords="Event management in Pakistan, Corporate event management, hybrid event, Hologram Display, AV equipment rental Pakistan, SMD screen rental Lahore Karachi Islamabad"
         url="https://avlive.com.pk/events-services"
-        image="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=1200"
-        imageAlt="AV Live Corporate Event Management, Hybrid Event & Hologram Display Services"
+        image="https://avlive.com.pk/images/projects/meta-values-summit.webp"
+        imageAlt="AV Live Corporate Event Management, Hybrid Event & SMD LED Stage Production in Pakistan"
         schema={{
           "@context": "https://schema.org",
           "@graph": [
@@ -28,7 +29,7 @@ export function Services() {
               "serviceType": ["Event management", "Corporate event management", "hybrid event", "Hologram Display", "Video Conference in Pakistan"],
               "provider": { "@id": "https://avlive.com.pk/#organization" },
               "areaServed": ["Lahore", "Karachi", "Islamabad", "Pakistan"],
-              "description": "End-to-end Corporate event management, hybrid event broadcasting, 3D Hologram Display stages, SMD LED walls, and enterprise Video conference integration using Polycom Group 500 and Poly X70."
+              "description": "End-to-end Corporate event management, hybrid event broadcasting, 3D Hologram Display stages, SMD LED walls, and enterprise Video conference integration backed by 1,000+ events managed across Pakistan."
             },
             {
               "@type": "FAQPage",
@@ -68,7 +69,7 @@ export function Services() {
         <div className="text-center mb-6 lg:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-2.5 uppercase tracking-tight">Event Management, Hybrid Event &amp; AV Rental Configurator in Pakistan</h1>
           <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium mb-4">
-            Book our professional in-house engineering teams for your next corporate summit, hybrid AGM, or e-Sports tournament.
+            Backed by 1,000+ corporate events, international summits, and hybrid AGMs managed across Lahore, Islamabad, and Karachi for Meta, World Bank, USAID, Nestlé, and Novo Nordisk.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <button 
@@ -241,7 +242,11 @@ export function Services() {
         </div>
       </div>
 
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm">
+      <div className="mt-12">
+        <RealProjectsAndClients defaultTab="events" />
+      </div>
+
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm">
         <h2 className="text-3xl font-black mb-6">Why Choose AV Live for Corporate Event Management, Hybrid Events & Hologram Displays in Pakistan?</h2>
         <p className="text-gray-600 leading-relaxed mb-4">
           AV Live Communications is Pakistan's premier <strong>Event management</strong> and <strong>Corporate event management</strong> engineering partner. We specialize in high-impact corporate <strong>events</strong>, including custom <strong>Hologram Display</strong> stages, immersive 3D projection mapping, and broadcast-grade <strong>hybrid event</strong> production.

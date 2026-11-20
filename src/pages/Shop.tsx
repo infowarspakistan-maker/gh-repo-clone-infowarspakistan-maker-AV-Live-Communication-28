@@ -442,6 +442,8 @@ export function Shop() {
           itemListElement: sortedAndFilteredProducts.slice(0, 24).map((prod, idx) => {
             const prodHref = getProductHref(prod, prod.id);
             const { effectivePrice } = resolveProductPricing(prod);
+            const rawImg = (Array.isArray(prod.images) && prod.images[0]) || prod.imageUrl || (prod as any).image || 'https://avlive.com.pk/og-image.jpg';
+            const absImg = String(rawImg).startsWith('http') ? String(rawImg) : `https://avlive.com.pk${String(rawImg).startsWith('/') ? '' : '/'}${rawImg}`;
             return {
               '@type': 'ListItem',
               position: idx + 1,
@@ -450,13 +452,46 @@ export function Shop() {
               item: {
                 '@type': 'Product',
                 name: prod.productName,
+                image: [absImg],
+                description: prod.shortDescription?.replace(/<[^>]*>?/gm, '') || `${prod.productName} by ${prod.brand || 'AV Live'} in Pakistan.`,
+                sku: prod.mpn || prod.sku || prod.slug,
+                mpn: prod.mpn || prod.sku || prod.slug,
                 url: `https://avlive.com.pk${prodHref}`,
                 brand: { '@type': 'Brand', name: prod.brand || 'AV Live' },
                 offers: {
                   '@type': 'Offer',
+                  url: `https://avlive.com.pk${prodHref}`,
                   priceCurrency: 'PKR',
                   price: effectivePrice.toFixed(2),
+                  validFrom: '2026-01-01',
+                  priceValidUntil: '2027-12-31',
+                  itemCondition: 'https://schema.org/NewCondition',
                   availability: 'https://schema.org/InStock',
+                  shippingDetails: {
+                    '@type': 'OfferShippingDetails',
+                    shippingRate: {
+                      '@type': 'MonetaryAmount',
+                      value: effectivePrice >= 100000 ? '0.00' : '1500.00',
+                      currency: 'PKR',
+                    },
+                    shippingDestination: {
+                      '@type': 'DefinedRegion',
+                      addressCountry: 'PK',
+                    },
+                    deliveryTime: {
+                      '@type': 'ShippingDeliveryTime',
+                      handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+                      transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 5, unitCode: 'DAY' },
+                    },
+                  },
+                  hasMerchantReturnPolicy: {
+                    '@type': 'MerchantReturnPolicy',
+                    applicableCountry: 'PK',
+                    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                    merchantReturnDays: 30,
+                    returnMethod: 'https://schema.org/ReturnByMail',
+                    returnFees: 'https://schema.org/FreeReturn',
+                  },
                 },
               },
             };

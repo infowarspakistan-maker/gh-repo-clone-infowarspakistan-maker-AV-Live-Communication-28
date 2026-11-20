@@ -22,7 +22,7 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     description:
       'End-to-end Corporate event management, executive summit staging, fine-pitch SMD LED video walls, line-array PA sound, and 3D Hologram Display production across Lahore, Karachi, and Islamabad.',
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/3062/3062634.png',
-    imageUrl: 'https://eu.connect.panasonic.com/sites/default/files/media/image/2026-06/pt-rq45kseries-innovationstoeaseeverystep.webp',
+    imageUrl: 'https://avlive.com.pk/images/projects/world-bank-president-stage.webp',
     isActive: true,
     order: 1,
     category: 'Event Production',
@@ -120,7 +120,7 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     description:
       'Broadcast-grade hybrid event engineering combining multi-camera SDI switching, zero-echo acoustic mix-minus, and enterprise Video Conference in Pakistan via Poly X70 and Polycom Group 500.',
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/2991/2991148.png',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1400',
+    imageUrl: 'https://avlive.com.pk/images/projects/meta-values-summit.webp',
     isActive: true,
     order: 2,
     category: 'Hybrid & Broadcast',

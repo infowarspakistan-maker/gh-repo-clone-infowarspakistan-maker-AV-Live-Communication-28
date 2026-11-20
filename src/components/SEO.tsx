@@ -166,7 +166,17 @@ export function SEO({
     cleanupStaticSsrTags('meta[name="twitter:title"]');
     cleanupStaticSsrTags('meta[name="twitter:description"]');
     cleanupStaticSsrTags('meta[name="twitter:image"]');
-  }, [siteTitle, absoluteUrl, clampedDescription, robotsContent]);
+
+    // Remove Wave-1 SSR JSON-LD script tag once Wave-2 React <SEO schema={...}> mounts so Google WRS never merges duplicate @id Product nodes ("Duplicate field brand")
+    if (schema) {
+      const ssrJsonLdNodes = document.head.querySelectorAll('#ssr-route-schema, #ssr-home-schema');
+      ssrJsonLdNodes.forEach((node) => {
+        if (!isReactManaged(node) && node.parentNode) {
+          node.parentNode.removeChild(node);
+        }
+      });
+    }
+  }, [siteTitle, absoluteUrl, clampedDescription, robotsContent, schema]);
 
   return (
     <Helmet htmlAttributes={{ lang: 'en', prefix: 'og: https://ogp.me/ns# fb: https://ogp.me/ns/fb#' }}>

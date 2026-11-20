@@ -97,10 +97,22 @@ export function Reviews() {
               '@id': 'https://avlive.com.pk/reviews#reviews',
               name: 'Verified Enterprise Client Reviews & Testimonials — AV Live Pakistan',
               url: 'https://avlive.com.pk/reviews',
+              about: { '@id': 'https://avlive.com.pk/#organization' },
               mainEntity: {
-                '@type': 'Organization',
-                '@id': 'https://avlive.com.pk/#organization',
+                '@type': 'LocalBusiness',
+                '@id': 'https://avlive.com.pk/reviews#business',
                 name: 'AV Live Communications',
+                image: 'https://avlive.com.pk/images/projects/world-bank-president-stage.webp',
+                priceRange: 'PKR',
+                telephone: '+92-321-4256263',
+                address: {
+                  '@type': 'PostalAddress',
+                  streetAddress: '482 G3 Johar Town',
+                  addressLocality: 'Lahore',
+                  addressRegion: 'Punjab',
+                  postalCode: '54782',
+                  addressCountry: 'PK'
+                },
                 aggregateRating: {
                   '@type': 'AggregateRating',
                   ratingValue: '4.9',

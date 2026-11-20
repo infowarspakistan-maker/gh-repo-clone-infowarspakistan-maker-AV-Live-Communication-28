@@ -1,6 +1,6 @@
 # AV Live Communications (`avlive.com.pk`) — Master Website Structure & Architecture Blueprint
 
-> **Purpose**: This document is the authoritative structural map of the **AV Live Communications** platform (`https://avlive.com.pk`). It documents the complete **156 Deduplicated Canonical Indexable URLs**, the **Hub-and-Spoke Topical Silo Hierarchy**, the **53 Active Enterprise Hardware SKUs** (52 `/product/*` SKUs + flagship `/podium-teleprompter` product showcase with MPNs and direct external image URLs), the **Single-Hop 301 Canonical Redirect Matrix**, and the **Dual-Wave Express SSR + Frame-0 Synchronous Hydration** mechanism so previous progress is permanently preserved.
+> **Purpose**: This document is the authoritative structural map of the **AV Live Communications** platform (`https://avlive.com.pk`). It documents the complete **157 Deduplicated Canonical Indexable URLs**, the **Hub-and-Spoke Topical Silo Hierarchy**, the **53 Active Enterprise Hardware SKUs** (52 `/product/*` SKUs + flagship `/podium-teleprompter` product showcase with MPNs and direct external image URLs), the **Single-Hop 301 Canonical Redirect Matrix**, and the **Dual-Wave Express SSR + Frame-0 Synchronous Hydration** mechanism so previous progress is permanently preserved.
 
 ---
 
@@ -17,9 +17,9 @@
 
 ---
 
-## 2. Complete Canonical URL Inventory (156 Deduplicated Indexable URLs)
+## 2. Complete Canonical URL Inventory (157 Deduplicated Indexable URLs)
 
-### 2.1 Tier 1 — Storefront Core & National Commercial Pillar Hubs (29 URLs)
+### 2.1 Tier 1 — Storefront Core & National Commercial Pillar Hubs (30 URLs)
 1. `/` — Homepage (`Home.tsx`) — *Video Conference in Pakistan | Event Management | AV Live*
 2. `/shop` — Enterprise Hardware Store (`Shop.tsx`) — *All 54 Verified Pro-AV & UC SKUs*
 3. `/brands` — Authorized OEM Brand Directory (`Shop.tsx`) — *25 Global Pro-AV & VoIP Brands*
@@ -37,18 +37,19 @@
 15. `/about` — 15-Year Engineering Authority & PEC Profile (`About.tsx`)
 16. `/contact` — Lahore, Karachi & Islamabad Engineering Hotlines (`Contact.tsx`)
 17. `/sitemap` — Complete Visual Silo & HTML Sitemap Directory (`HtmlSitemap.tsx`)
-18. `/video-conference-in-pakistan` — National Video Conferencing Pillar (`KeywordLandingPage.tsx`)
-19. `/event-management-in-pakistan` — National Event Management Pillar (`KeywordLandingPage.tsx`)
-20. `/video-conferencing` — Video Conferencing Hardware & Codec Hub (`KeywordLandingPage.tsx`)
-21. `/video-conferencing-solutions` — Turnkey Boardroom UC Integration Hub (`KeywordLandingPage.tsx`)
-22. `/corporate-event-management` — Turnkey Corporate Event Production Hub (`KeywordLandingPage.tsx`)
-23. `/conference-room-solutions` — Huddle-to-30-Seat Boardroom Packages (`KeywordLandingPage.tsx`)
-24. `/zoom-rooms` — Certified Zoom Rooms Hardware & Integration Pakistan (`KeywordLandingPage.tsx`)
-25. `/microsoft-teams-rooms` — Certified Microsoft Teams Rooms (MTR) Pakistan (`KeywordLandingPage.tsx`)
-26. `/3d-hologram` — 3D Hologram Display Stages & Holo-Gauze Rental (`KeywordLandingPage.tsx`)
-27. `/projection-mapping` — 3D Architectural & Stage Projection Mapping (`KeywordLandingPage.tsx`)
-28. `/live-streaming-services` — Multi-Cam 4K Broadcast & Hybrid Event Streaming (`KeywordLandingPage.tsx`)
-29. `/av-equipment-rental` — SMD LED Wall, Line-Array Audio & Conference Mic Rental (`KeywordLandingPage.tsx`)
+18. `/video-conference-in-pakistan` — Primary National Video Conferencing Pillar (`KeywordLandingPage.tsx`)
+19. `/event-management-in-pakistan` — Primary National Event Management Pillar (`KeywordLandingPage.tsx`)
+20. `/video-conference` — Exact-Match Video Conference Systems, Protocol Architecture & Interactive PKR Room Configurator (`VideoConferenceHub.tsx`)
+21. `/video-conferencing` — Video Conferencing Hardware & Codec Hub (`KeywordLandingPage.tsx`)
+22. `/video-conferencing-solutions` — Turnkey Boardroom UC Integration Hub (`KeywordLandingPage.tsx`)
+23. `/corporate-event-management` — Turnkey Corporate Event Production Hub (`KeywordLandingPage.tsx`)
+24. `/conference-room-solutions` — Huddle-to-30-Seat Boardroom Packages (`KeywordLandingPage.tsx`)
+25. `/zoom-rooms` — Certified Zoom Rooms Hardware & Integration Pakistan (`KeywordLandingPage.tsx`)
+26. `/microsoft-teams-rooms` — Certified Microsoft Teams Rooms (MTR) Pakistan (`KeywordLandingPage.tsx`)
+27. `/3d-hologram` — 3D Hologram Display Stages & Holo-Gauze Rental (`KeywordLandingPage.tsx`)
+28. `/projection-mapping` — 3D Architectural & Stage Projection Mapping (`KeywordLandingPage.tsx`)
+29. `/live-streaming-services` — Multi-Cam 4K Broadcast & Hybrid Event Streaming (`KeywordLandingPage.tsx`)
+30. `/av-equipment-rental` — SMD LED Wall, Line-Array Audio & Conference Mic Rental (`KeywordLandingPage.tsx`)
 
 ### 2.2 Tier 2 — Regional Geo Hubs, Specialty Verticals, B2B Programs & Trust Policies (18 URLs)
 - **Regional Local SEO Hubs (3 URLs)**:

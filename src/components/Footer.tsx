@@ -100,6 +100,7 @@ export function Footer() {
               <li><Link to="/video-conference-in-pakistan" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Video Conference in Pakistan</Link></li>
               <li><Link to="/event-management-in-pakistan" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Event Management in Pakistan</Link></li>
               <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Corporate Event Management</Link></li>
+              <li><Link to="/video-conference" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Video Conference Systems &amp; Configurator</Link></li>
               <li><Link to="/video-conferencing" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Video Conferencing Room Architecture</Link></li>
               <li><Link to="/events-services" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Event Production &amp; Staging</Link></li>
               <li><Link to="/3d-hologram" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">3D Hologram Displays</Link></li>
@@ -114,7 +115,7 @@ export function Footer() {
               <li><Link to="/rma" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">RMA Service Form</Link></li>
               <li><Link to="/shipping" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Nationwide Shipping Methods</Link></li>
               <li><Link to="/reviews" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Verified Customer Reviews</Link></li>
-              <li><Link to="/sitemap" className="hover:text-[#00B4D8] transition-colors font-bold text-[#00B4D8] inline-flex items-center py-0.5">Complete HTML Sitemap (155 Pages)</Link></li>
+              <li><Link to="/sitemap" className="hover:text-[#00B4D8] transition-colors font-bold text-[#00B4D8] inline-flex items-center py-0.5">Complete HTML Sitemap (157 Pages)</Link></li>
             </ul>
           </div>
 

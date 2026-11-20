@@ -152,7 +152,7 @@ async function runAudit() {
   // Add Navbar Mega-Menu global edges (present on every page via React Navbar + /sitemap)
   const navbarMegaMenuLinks = [
     '/', '/shop', '/services', '/solutions', '/sitemap', '/about', '/contact', '/blog', '/guides',
-    '/video-conference-in-pakistan', '/video-conferencing-solutions', '/corporate-event-management',
+    '/video-conference', '/video-conference-in-pakistan', '/video-conferencing-solutions', '/corporate-event-management',
     '/projection-mapping', '/services/ai-automation', '/services/ai-development', '/services/ai-agents-workers',
     '/voip-service-providers', '/room-designer', '/av-equipment-rental', '/3d-hologram',
     '/category/boardroom-codecs', '/category/projectors', '/category/voip-phone-systems',

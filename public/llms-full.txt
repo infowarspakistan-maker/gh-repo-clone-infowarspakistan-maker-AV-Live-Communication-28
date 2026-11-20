@@ -207,8 +207,8 @@
 | Viewsonic X1 4K PRO | ViewSonic | VS-X1-4K-PRO | 766907014006 | Rs. 465,000 | 4K HDR high-refresh LED smart projector with Harman Kardon speakers for esports & events | https://avlive.com.pk/product/viewsonic-x1-4k-pro-pakistan |
 | Google Meet Hardware License | Google | GOOGLE-MEET-LIC | 840046099008 | Rs. 85,000 | Official annual Google Meet Hardware Room License with cloud device management | https://avlive.com.pk/product/google-meet-hardware-license-pakistan |
 | Yealink Bh70 Headset | Yealink | BH70-DUAL-UC | 841885120878 | Rs. 42,000 | 3-mic AI noise-canceling dual wireless Bluetooth headset with 35-hour talk time | https://avlive.com.pk/product/yealink-bh70-headset-pakistan |
-| Yealink SIP T46s | Yealink | SIP-T46S | 841885102949 | Rs. 46,500 | 16-line executive Gigabit IP phone with 4.3-inch high-resolution color display | https://avlive.com.pk/product/yealink-sip-t46s-pakistan |
-| AV Live Fold-Flat Podium Teleprompter | AV Live | AV-PP-17C | 610807990541 | Rs. 125,000 | Ultra-slim 1.2" fold-flat stealth podium teleprompter with 400+ nit privacy IPS & 60/40 AR glass | https://avlive.com.pk/podium-teleprompter |
+| Yealink SIP T46s | Yealink | SIP-T46S | 841885102942 | Rs. 46,500 | 16-line executive Gigabit IP phone with 4.3-inch high-resolution color display | https://avlive.com.pk/product/yealink-sip-t46s-pakistan |
+| AV Live Fold-Flat Podium Teleprompter | AV Live | AV-PP-17C | 610807990543 | Rs. 125,000 | Ultra-slim 1.2" fold-flat stealth podium teleprompter with 400+ nit privacy IPS & 60/40 AR glass | https://avlive.com.pk/podium-teleprompter |
 
 ## 6. Machine-Readable Feeds & Sitemaps
 - **XML Sitemap**: https://avlive.com.pk/sitemap.xml

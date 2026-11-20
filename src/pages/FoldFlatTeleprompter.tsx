@@ -477,6 +477,8 @@ export function FoldFlatTeleprompter() {
         name: 'AV Live Fold-Flat Podium Teleprompter (17" Compact & 22" Flagship Series)',
         sku: 'AVL-PT-2026',
         mpn: 'AV-PP-17C',
+        gtin12: '610807990543',
+        gtin: '610807990543',
         brand: {
           '@type': 'Brand',
           name: 'AV Live Communication',
@@ -495,8 +497,28 @@ export function FoldFlatTeleprompter() {
           lowPrice: '160000',
           highPrice: '570000',
           offerCount: '7',
+          validFrom: '2026-01-01',
+          priceValidUntil: '2027-12-31',
           availability: 'https://schema.org/InStock',
           url: canonicalUrl,
+          shippingDetails: {
+            '@type': 'OfferShippingDetails',
+            shippingRate: { '@type': 'MonetaryAmount', value: '0', currency: 'PKR' },
+            shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'PK' },
+            deliveryTime: {
+              '@type': 'ShippingDeliveryTime',
+              handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+              transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 5, unitCode: 'DAY' },
+            },
+          },
+          hasMerchantReturnPolicy: {
+            '@type': 'MerchantReturnPolicy',
+            applicableCountry: 'PK',
+            returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+            merchantReturnDays: 30,
+            returnMethod: 'https://schema.org/ReturnByMail',
+            returnFees: 'https://schema.org/FreeReturn',
+          },
         },
       },
       {

@@ -32,6 +32,7 @@ const CORE_PILLAR_LINKS = [
   { path: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan — Polycom Group 500, Poly X70, Cisco & Logitech', tag: 'Top Keyword' },
   { path: '/event-management-in-pakistan', label: 'Event Management in Pakistan — Turnkey Corporate Events, SMD Stages & Concert Sound', tag: 'Top Keyword' },
   { path: '/corporate-event-management', label: 'Corporate Event Management Pakistan — SMD Screens, Hybrid Staging & Holograms', tag: 'Top Keyword' },
+  { path: '/video-conference', label: 'Video Conference Systems, Architecture & Interactive Room Configurator', tag: 'Pillar Hub' },
   { path: '/video-conferencing', label: 'Video Conferencing Room Architecture & H.323/SIP Integration Hub', tag: 'Pillar' },
   { path: '/video-conferencing-solutions', label: 'Turnkey Boardroom Video Conferencing Solutions Pakistan', tag: 'Pillar' },
   { path: '/conference-room-solutions', label: 'Executive Conference Room AV & Acoustic Integration', tag: 'Pillar' },
@@ -252,6 +253,8 @@ export function HtmlSitemap() {
             <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2.5">
               <h3 className="font-black text-[#1A2B4C] text-sm uppercase tracking-wider">Core Services (Pillar Pages)</h3>
               <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/video-conference-in-pakistan" className="hover:underline">Video Conference in Pakistan (Primary Pillar)</Link></li>
+                <li><Link to="/video-conference" className="hover:underline">Video Conference Systems &amp; Room Configurator</Link></li>
                 <li><Link to="/video-conferencing-solutions" className="hover:underline">Video Conferencing Solutions</Link></li>
                 <li><Link to="/corporate-event-management" className="hover:underline">Corporate Event Management</Link></li>
                 <li><Link to="/projection-mapping" className="hover:underline">3D Projection Mapping &amp; Hologram Stages</Link></li>
@@ -321,6 +324,8 @@ export function HtmlSitemap() {
               <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-1.5">
                 <div className="font-black text-[#1A2B4C] uppercase tracking-wider mb-1">Core Business &amp; Brand Anchors</div>
                 <ul className="space-y-1 font-bold text-[#00B4D8]">
+                  <li><Link to="/video-conference-in-pakistan" className="hover:underline">Video Conference in Pakistan (/video-conference-in-pakistan)</Link></li>
+                  <li><Link to="/video-conference" className="hover:underline">Video Conference Systems &amp; Configurator (/video-conference)</Link></li>
                   <li><Link to="/video-conferencing-solutions" className="hover:underline">Video Conferencing in Pakistan (/video-conferencing-solutions)</Link></li>
                   <li><Link to="/corporate-event-management" className="hover:underline">Corporate Event Management (/corporate-event-management)</Link></li>
                   <li><Link to="/services/hybrid-events" className="hover:underline">Hybrid Event Production (/services/hybrid-events)</Link></li>

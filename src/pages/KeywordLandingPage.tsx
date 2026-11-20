@@ -3,6 +3,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import { ArrowRight, Phone, Sparkles, CheckCircle2, ShieldCheck, MapPin, Award, Clock } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { RealProjectsAndClients } from '../components/RealProjectsAndClients';
 
 interface LandingConfig {
   title: string;
@@ -791,6 +792,11 @@ export function KeywordLandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Verified On-Site Project Gallery & Enterprise Client Roster */}
+      <RealProjectsAndClients
+        defaultTab={config.pillar === 'Event Management' ? 'events' : 'video-conference'}
+      />
 
       {/* Silo Rule 1 & Rule 3: Pillar-to-Cluster Hardware Ecosystem Links & 3D Room Designer CTA */}
       <section className="max-w-7xl mx-auto px-4 pb-16">

@@ -1052,7 +1052,7 @@ export const PRODUCT_GMC_METADATA: Record<
       'Yealink BH70 Dual Wireless Bluetooth UC Headset (BH70-DUAL-UC) in Pakistan. Features 3-mic AI noise cancellation, 35-hour talk time, featherlight 147g ergonomics, and Microsoft Teams / Zoom certification.',
   },
   'yealink-sip-t46s-pakistan': {
-    gtin: '841885102949',
+    gtin: '841885102942',
     mpn: 'SIP-T46S',
     brand: 'Yealink',
     color: 'Black',
@@ -1070,7 +1070,7 @@ export const PRODUCT_GMC_METADATA: Record<
       'Yealink SIP-T46S / T46U Executive 16-Line Gigabit IP Phone in Pakistan. Designed for C-suite executives and busy managers with Optima HD Voice, 4.3-inch color display, dual Gigabit PoE, and USB headset/Wi-Fi support.',
   },
   'podium-prompter-17-compact-pakistan': {
-    gtin: '610807990541',
+    gtin: '610807990543',
     mpn: 'AV-PP-17C',
     brand: 'AV Live',
     color: 'Black',

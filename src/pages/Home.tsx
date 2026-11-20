@@ -18,41 +18,42 @@ import { MobileProductCard } from "../components/MobileProductCard";
 import { BlurProductImage } from "../components/BlurProductImage";
 
 const TopBrands = React.lazy(() => import('../components/TopBrands').then(m => ({ default: m.TopBrands })));
+const RealProjectsAndClients = React.lazy(() => import('../components/RealProjectsAndClients').then(m => ({ default: m.RealProjectsAndClients })));
 
 const DEFAULT_HERO_SLIDES = [
   {
     id: 'slide-1',
     title: 'Video Conference in Pakistan | Corporate Event Management | AV Live',
-    subtitle: 'Pakistan’s premier Video Conference in Pakistan & Corporate Event Management company — Poly X70, Cisco Room Kit & 3D Hologram Display with official price PKR warranty.',
+    subtitle: 'Pakistan’s premier Video Conference in Pakistan & Corporate Event Management company — 1,000+ Events & Boardrooms Engineered for Meta, World Bank, Nestlé & USAID.',
     ctaText: 'Explore Catalog',
     ctaLink: '/shop',
-    imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1280&q=75',
+    imageUrl: '/images/projects/world-bank-president-stage.webp',
     mediaType: 'image' as const,
     isActive: true,
     order: 1,
     textAlignment: 'left' as const,
-    overlayOpacity: 30,
+    overlayOpacity: 35,
   },
   {
     id: 'slide-2',
-    title: 'Immersive AV for Events',
-    subtitle: 'From Corporate Expos & 3D Hologram Displays to Hybrid Event Broadcasts.',
+    title: '1,000+ Corporate Events & Hybrid Broadcast Stages Across Pakistan',
+    subtitle: 'In-House P2.5 3840Hz SMD LED Walls, Multi-Cam 4K SDI Broadcast Switchers & 3D Hologram Displays.',
     ctaText: 'Plan Your Event',
-    ctaLink: '/services/corporate-events',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1280&q=75',
+    ctaLink: '/event-management-in-pakistan',
+    imageUrl: '/images/projects/meta-values-summit.webp',
     mediaType: 'image' as const,
     isActive: true,
     order: 2,
     textAlignment: 'left' as const,
-    overlayOpacity: 35,
+    overlayOpacity: 40,
   },
   {
     id: 'slide-3',
-    title: 'AI Automation for Business',
-    subtitle: 'Deploy Autonomous AI Agents & Digital Workers Across Your Enterprise.',
-    ctaText: 'Learn More',
-    ctaLink: '/services/ai-development',
-    imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1280&q=75',
+    title: 'Turnkey Executive Boardrooms & Delegate Conference Systems',
+    subtitle: 'HP Poly Studio X72, Cisco Room Kit Plus, Logitech Rally Bar & VISSONIC Digital Chairman/Delegate Microphones.',
+    ctaText: 'Video Conference Hub',
+    ctaLink: '/video-conference-in-pakistan',
+    imageUrl: '/images/projects/vissonic-delegate-boardroom.webp',
     mediaType: 'image' as const,
     isActive: true,
     order: 3,
@@ -67,15 +68,15 @@ const DEFAULT_HOMEPAGE_DATA: HomepageData = {
   testimonials: [],
   stats: {
     yearsExperience: 15,
-    happyClients: 100,
-    projectsCompleted: 5000,
+    happyClients: 140,
+    projectsCompleted: 1000,
   },
   promoBanner: {
-    headline: 'Ready to Upgrade Your AV?',
-    subheadline: 'Get a free consultation from our experts today.',
+    headline: 'Ready to Upgrade Your Boardroom or Stage Your Next Event?',
+    subheadline: 'Over 1,000 corporate events and executive video conference rooms engineered across Pakistan.',
     ctaText: 'Contact Us',
     ctaLink: '/contact',
-    backgroundImageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1280&q=75',
+    backgroundImageUrl: '/images/projects/hisdu-committee-wall.webp',
     isActive: true,
   },
 };
@@ -1324,6 +1325,7 @@ export function Home() {
       </section>
 
       <React.Suspense fallback={null}>
+        <RealProjectsAndClients defaultTab="all" compact={true} />
         <TopBrands />
       </React.Suspense>
     </div>

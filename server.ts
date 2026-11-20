@@ -1085,7 +1085,7 @@ async function startServer() {
       return `${trimmed}.`;
     };
 
-    const routeMeta: Record<string, { title: string; description: string; keywords?: string; noindex?: boolean; schema?: Record<string, any> }> = {
+    const routeMeta: Record<string, { title: string; description: string; keywords?: string; image?: string; noindex?: boolean; schema?: Record<string, any> }> = {
       '': {
         title: 'Video Conference in Pakistan | Event Management | AV Live',
         description: 'Video Conference in Pakistan, Corporate Event Management by AV Live: Poly X70, Cisco Room Kit, 3D Hologram Display price PKR.'
@@ -1354,6 +1354,8 @@ async function startServer() {
               name: 'AV Live Fold-Flat Podium Teleprompter (17" Compact & 22" Flagship Series)',
               sku: 'AVL-PT-2026',
               mpn: 'AV-PP-17C',
+              gtin12: '610807990543',
+              gtin: '610807990543',
               brand: { '@type': 'Brand', name: 'AV Live Communication' },
               image: [
                 'https://avlive.com.pk/images/teleprompter/slide-01.jpg',
@@ -1367,8 +1369,28 @@ async function startServer() {
                 lowPrice: '160000',
                 highPrice: '570000',
                 offerCount: '7',
+                validFrom: '2026-01-01',
+                priceValidUntil: '2027-12-31',
                 availability: 'https://schema.org/InStock',
-                url: 'https://avlive.com.pk/podium-teleprompter'
+                url: 'https://avlive.com.pk/podium-teleprompter',
+                shippingDetails: {
+                  '@type': 'OfferShippingDetails',
+                  shippingRate: { '@type': 'MonetaryAmount', value: '0', currency: 'PKR' },
+                  shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'PK' },
+                  deliveryTime: {
+                    '@type': 'ShippingDeliveryTime',
+                    handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+                    transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 5, unitCode: 'DAY' }
+                  }
+                },
+                hasMerchantReturnPolicy: {
+                  '@type': 'MerchantReturnPolicy',
+                  applicableCountry: 'PK',
+                  returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                  merchantReturnDays: 30,
+                  returnMethod: 'https://schema.org/ReturnByMail',
+                  returnFees: 'https://schema.org/FreeReturn'
+                }
               }
             },
             {
@@ -1403,6 +1425,56 @@ async function startServer() {
       '/solutions': {
         title: 'Video Conferencing & Hybrid Event Solutions | AV Live',
         description: 'Explore turnkey solutions for Video Conferencing in Pakistan (Poly, Cisco, Logitech), smart boardrooms, hybrid events & 3D Hologram Displays.'
+      },
+      '/video-conference': {
+        title: 'Video Conference Systems & Boardroom Configurator | AV Live',
+        description: 'Enterprise video conference systems in Pakistan: Poly, Cisco & Logitech hardware, SIP/Teams/Zoom design & PKR room calculator.',
+        image: 'https://avlive.com.pk/images/video-conference/boardroom-hero-og.jpg',
+        schema: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Service',
+              '@id': 'https://avlive.com.pk/video-conference#service',
+              name: 'Enterprise Video Conference Systems, Protocol Engineering & Boardroom Integration',
+              serviceType: 'Video Conference Hardware Distribution & Hybrid Room Integration',
+              description: 'Turnkey enterprise video conference deployment in Pakistan covering HP Poly, Cisco Room Kits, Logitech Rally Bar, SIP/H.323 encryption, Zoom Rooms, Microsoft Teams Rooms, and hybrid AGM broadcast staging.',
+              provider: { '@id': 'https://avlive.com.pk/#organization' },
+              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
+              url: 'https://avlive.com.pk/video-conference'
+            },
+            {
+              '@type': 'FAQPage',
+              '@id': 'https://avlive.com.pk/video-conference#faq',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'How much does an enterprise video conference system cost in Pakistan?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Verified video conference hardware in Pakistan starts at PKR 248,000 for a 2–6 person huddle bar (Poly Studio USB Video Bar, MPN 7200-85830-012), ranges from PKR 495,000 to PKR 960,000 for 6–14 seat rooms (Poly Studio X32/X52, Logitech Rally Bar, Cisco Room Bar), and spans PKR 1,165,000 to PKR 2,980,000+ for 15–30+ seat executive boardrooms (Poly Studio X72, Poly G7500, Cisco Room Kit Plus/EQ) including acoustic calibration.'
+                  }
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Should my boardroom run Cloud SaaS (Teams/Zoom), On-Premises SIP/H.323, or Hybrid mode?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Commercial enterprises benefit from Cloud SaaS video bars (Poly Studio X52/X72, Logitech Rally Bar) running native Microsoft Teams Rooms or Zoom Rooms. Banking, defense, and ministry networks requiring data sovereignty deploy on-premises SIP/H.323 hardware codecs (Poly G7500, Cisco Room Kit Plus/EQ, Grandstream UCM6308). Hybrid setups bridge both worlds via HDMI/USB BYOD and SIP gateways.'
+                  }
+                },
+                {
+                  '@type': 'Question',
+                  name: 'How do you eliminate echo and glass-wall reverberation in Pakistani boardrooms?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Glass partitions and marble floors raise RT60 reverberation above 1.0 second. Our acoustics engineers pair hardware Acoustic Echo Cancellation (AEC), Poly NoiseBlockAI / Acoustic Fence, directional table mic pods or Bosch CCS 1000D/ceiling beamforming arrays, and mix-minus DSP routing so far-end callers hear speech clearly.'
+                  }
+                }
+              ]
+            }
+          ]
+        }
       },
       '/video-conference-in-pakistan': {
         title: 'Video Conference in Pakistan | Poly, Cisco & Logitech | AV Live',
@@ -1502,10 +1574,22 @@ async function startServer() {
           '@id': 'https://avlive.com.pk/reviews#reviews',
           name: 'Verified Enterprise Client Reviews & Case Studies — AV Live Pakistan',
           url: 'https://avlive.com.pk/reviews',
+          about: { '@id': 'https://avlive.com.pk/#organization' },
           mainEntity: {
-            '@type': 'Organization',
-            '@id': 'https://avlive.com.pk/#organization',
+            '@type': 'LocalBusiness',
+            '@id': 'https://avlive.com.pk/reviews#business',
             name: 'AV Live Communications',
+            image: 'https://avlive.com.pk/images/projects/world-bank-president-stage.webp',
+            priceRange: 'PKR',
+            telephone: '+92-321-4256263',
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: '482 G3 Johar Town',
+              addressLocality: 'Lahore',
+              addressRegion: 'Punjab',
+              postalCode: '54782',
+              addressCountry: 'PK'
+            },
             aggregateRating: {
               '@type': 'AggregateRating',
               ratingValue: '4.9',
@@ -2039,7 +2123,8 @@ async function startServer() {
                   url: canonicalUrl,
                   priceCurrency: 'PKR',
                   price: effectivePrice.toFixed(2),
-                  priceValidUntil: '2026-12-31',
+                  validFrom: '2026-01-01',
+                  priceValidUntil: '2027-12-31',
                   itemCondition: 'https://schema.org/NewCondition',
                   availability: 'https://schema.org/InStock',
                   seller: { '@type': 'Organization', name: 'AV Live Communications', url: 'https://avlive.com.pk' },
@@ -2686,9 +2771,32 @@ async function startServer() {
             { href: '/room-designer', label: 'Interactive 3D Conference Room Planner' }
           ]
         },
+        '/video-conference': {
+          lead: 'Enterprise video conference systems in Pakistan engineered by AV Live Communications span 20 years of institutional deployment (2006–2026) and 1,000+ boardrooms and hybrid summits across Lahore, Karachi, and Islamabad. Compare Cloud SaaS (Microsoft Teams Rooms, Zoom Rooms, Cisco Webex), Private On-Premises SIP/H.323 codecs, and Hybrid Broadcast architectures with verified PKR pricing from Rs. 248,000 (Poly Studio USB) to Rs. 2,980,000 (Cisco Room Kit EQ).',
+          detail: 'Trusted by Meta (Facebook), World Bank Group, USAID, Asian Development Bank (ADB), Nestlé Pakistan, AkzoNobel (Dulux), Lucky Core Industries (ICI), Berger Paints, Jazz & JazzCash, NIMA & Pakistan Navy, WAPDA, Novo Nordisk, Ferozsons Laboratories, Servier, CitiBank, Deutsche Bank, Allied Bank, OGDCL, LUMS, COMSATS, NETSOL, Adamjee Insurance, and PSHD/HISDU. Use our interactive Video Conference Room Configurator to calculate room acoustics, 120-degree camera FOV coverage, Mix-Minus AEC audio buses, and serialized HP Poly, Cisco, Logitech, Grandstream, and Bosch Bill of Materials (BoM) with FBR GST invoicing, PTA compliance, and a guaranteed 15-minute engineering SLA.',
+          tableCaption: '2026 Enterprise Video Conference Architecture & Verified PKR Hardware Matrix',
+          headers: ['Room Tier & Seating', 'Recommended Video Conference System', 'Protocol & Acoustic Engineering', 'Verified Price (PKR)'],
+          rows: [
+            ['Focus & Huddle Room (2–6 Pax).', 'Poly Studio USB Video Bar (7200-85830-012) / Logitech Rally Bar Mini (960-001336).', 'USB BYOD or Native Teams/Zoom appliance with 120° 4K framing and 4.5m beamforming pickup.', 'Rs. 248,000 – Rs. 620,000.'],
+            ['Medium Conference Room (7–14 Pax).', 'Logitech Rally Bar (960-001308) / Poly Studio X52 (8D8K2AA) / Cisco Room Bar (CS-BAR-T-K9).', 'Dual-sensor 4K AI speaker framing, NoiseBlockAI / RightSound 2, expansion mic pod support.', 'Rs. 715,000 – Rs. 995,000.'],
+            ['Executive Boardroom (15–30 Pax).', 'Poly Studio X72 (842D3AA) / Poly G7500 (7200-85870-001) / Cisco Room Kit Plus (CS-KITPLUS-K9).', 'Dual 4K 20MP optics or 5K Quad Camera, AES-256 SIP/H.323 + Teams/Zoom interop, ceiling/table arrays.', 'Rs. 1,165,000 – Rs. 2,650,000.'],
+            ['Auditorium & Hybrid AGM (30–500+ Pax).', 'Cisco Room Kit EQ (CS-KIT-EQ-K9) + Bosch CCS 1000D + Panasonic PT-RQ45K Laser + Podium Teleprompter.', 'Multi-camera 4K SDI switching, Dante/Mix-Minus AEC bus, bonded fibre + 4G/5G failover streaming.', 'Rs. 2,980,000 – Rs. 5,500,000+.']
+          ],
+          links: [
+            { href: '/product/poly-studio-usb-video-bar-pakistan', label: 'Poly Studio USB Video Bar (Rs. 248,000)' },
+            { href: '/product/logitech-rally-bar-pakistan', label: 'Logitech Rally Bar 4K Optical PTZ (Rs. 845,000)' },
+            { href: '/product/poly-studio-x72-pakistan', label: 'HP Poly Studio X72 Large Room Bar (Rs. 1,165,000)' },
+            { href: '/product/poly-g7500-pakistan', label: 'Poly G7500 Modular 4K Codec (Rs. 1,420,000)' },
+            { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus Quad Camera (Rs. 1,850,000)' },
+            { href: '/podium-teleprompter', label: 'AV Live Fold-Flat Podium Teleprompter (17" & 22")' },
+            { href: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan (National PKR Price Guide)' },
+            { href: '/video-conferencing-solutions', label: 'Turnkey Video Conferencing Solutions Hub' },
+            { href: '/room-designer', label: 'Interactive 3D Conference Room Designer & LED Calculator' }
+          ]
+        },
         '/video-conference-in-pakistan': {
-          lead: 'Pioneering Video Conference in Pakistan since 2011: compare and procure 100% genuine, serialized HP Poly (Polycom Group 500, Studio X52/X70/X72), Logitech Rally Bar, Cisco Room Kit Plus, and Yealink video conferencing systems with official PKR pricing.',
-          detail: 'Unlike general IT box-movers (accsys, kbse, nasco) that ship uncalibrated hardware without acoustic engineering, AV Live maintains local buffer stock in Lahore (Johar Town HQ), Karachi (Clifton), and Islamabad (Blue Area) backed by free RT60 room surveys and a 15-minute technical SLA.',
+          lead: 'Pioneering Video Conference in Pakistan since 2011 with 1,000+ boardrooms and hybrid summits delivered: compare and procure 100% genuine, serialized HP Poly (Polycom Group 500, Studio X52/X70/X72), Logitech Rally Bar, Cisco Room Kit Plus, Yealink, and VISSONIC delegate systems with official PKR pricing.',
+          detail: 'Unlike general IT box-movers (accsys, kbse, nasco) that ship uncalibrated hardware without acoustic engineering, AV Live maintains local buffer stock in Lahore (Johar Town HQ), Karachi (Clifton), and Islamabad (Blue Area) backed by free RT60 room surveys, a 15-minute technical SLA, and verified deployments for Meta (Facebook), World Bank Group, USAID, Asian Development Bank (ADB), Nestlé Pakistan, AkzoNobel, Lucky Core Industries, Berger Paints, Jazz & JazzCash, NIMA & Pakistan Navy, WAPDA, Novo Nordisk, Ferozsons Laboratories, Servier, Allied Bank, CitiBank, Deutsche Bank, OGDCL, LUMS, Adamjee Insurance, Punjab Food Authority, and PSHD/HISDU.',
           tableCaption: '2026 Video Conference in Pakistan — Flagship Hardware & PKR Price Comparison Matrix',
           headers: ['Video Conference System', 'OEM Brand & MPN', 'Room Capacity & Optics', 'Official Pakistan Price (PKR)'],
           rows: [
@@ -2711,8 +2819,8 @@ async function startServer() {
           ]
         },
         '/event-management-in-pakistan': {
-          lead: 'Established in 2011, AV Live Communications is Pakistan’s premier technology-first Event Management company—owning 100% of our in-house P2.5 3840Hz SMD LED video walls, concert line-array sound systems, stage trussing, 3D hologram displays, and 4K SDI multi-camera broadcast rigs across Lahore, Islamabad, and Karachi.',
-          detail: 'Whereas traditional event planners and catering agencies (a2zeventssolutions, gncaterers, blacktieevents) sub-rent audio-visual equipment from third parties at a 30%–40% markup, corporate clients contracting AV Live directly receive warehouse-direct pricing, redundant signal paths, Bosch simultaneous interpretation, and on-site broadcast engineers.',
+          lead: 'Established in 2011 with over 1,000 corporate events, diplomatic summits, and hybrid medical congresses managed nationwide, AV Live Communications is Pakistan’s premier technology-first Event Management company—owning 100% of our in-house P2.5 3840Hz SMD LED video walls, concert line-array sound systems, stage trussing, 3D hologram displays, and 4K SDI multi-camera broadcast rigs across Lahore, Islamabad, and Karachi.',
+          detail: 'Whereas traditional event planners and catering agencies (a2zeventssolutions, gncaterers, blacktieevents) sub-rent audio-visual equipment from third parties at a 30%–40% markup, corporate and multilateral clients including Meta (Facebook), World Bank Group, USAID, United Nations (UNDP / UN Environment), Asian Development Bank, NIMA & Pakistan Navy, WAPDA, Nestlé Pakistan, AkzoNobel, Lucky Core Industries, Berger Paints, Novo Nordisk, Servier, Ferozsons Laboratories, Abbott, Bayer, Jazz & JazzCash, Pakistan Society of Gastroenterology, Pakistan Psychiatric Society, Serena Hotels, Pearl-Continental, and Avari Hotel contract AV Live directly for warehouse-direct pricing, redundant signal paths, Bosch simultaneous interpretation, and on-site broadcast engineers.',
           tableCaption: 'Event Management in Pakistan — AV Live Direct Production vs. Traditional Catering/Decor Agencies',
           headers: ['Event Production Pillar', 'AV Live Turnkey Engineering (In-House Fleet)', 'Traditional Event / Catering Agencies', 'Reference AV Live Package (PKR)'],
           rows: [
@@ -2759,8 +2867,8 @@ async function startServer() {
           ]
         },
         '/corporate-event-management': {
-          lead: 'End-to-end corporate event management, AGM townhall broadcasting, P2.5 SMD LED stage fabrication, and 3D hologram product launches across Lahore, Karachi, and Islamabad.',
-          detail: 'Our event engineering crew manages stage trussing, DMX intelligent lighting, line-array sound reinforcement, and redundant multi-camera live streaming with on-site standby engineers.',
+          lead: 'End-to-end corporate event management, AGM townhall broadcasting, P2.5 SMD LED stage fabrication, and 3D hologram product launches across Lahore, Karachi, and Islamabad—backed by 1,000+ corporate events delivered.',
+          detail: 'Trusted by Meta (Facebook), World Bank Group, USAID, Nestlé Pakistan, Novo Nordisk, Servier, Ferozsons Laboratories, NIMA & Pakistan Navy, WAPDA, and JazzCash. Our event engineering crew manages stage trussing, DMX intelligent lighting, line-array sound reinforcement, and redundant multi-camera live streaming with on-site standby engineers.',
           tableCaption: 'Corporate Event Production Tiers & Technical Scope in Pakistan',
           headers: ['Event Format', 'Visual & Stage Production', 'Audio & Hybrid Broadcast', 'Reference Budget (PKR)'],
           rows: [
@@ -2920,6 +3028,18 @@ async function startServer() {
           /<meta(?:\s+data-rh="true")?\s+name="twitter:description"\s+content="[^"]*"\s*\/>/,
           `<meta data-rh="true" name="twitter:description" content="${safeDescAttr}" />`
         );
+      if (matched.image) {
+        const safeImageAttr = escapeHtmlAttr(matched.image);
+        updated = updated
+          .replace(
+            /<meta(?:\s+data-rh="true")?\s+property="og:image"\s+content="[^"]*"\s*\/>/,
+            `<meta data-rh="true" property="og:image" content="${safeImageAttr}" />`
+          )
+          .replace(
+            /<meta(?:\s+data-rh="true")?\s+name="twitter:image"\s+content="[^"]*"\s*\/>/,
+            `<meta data-rh="true" name="twitter:image" content="${safeImageAttr}" />`
+          );
+      }
       if (matched.noindex) {
         updated = updated.replace(
           /<meta(?:\s+data-rh="true")?\s+name="robots"\s+content="[^"]*"\s*\/>/,
@@ -3016,8 +3136,8 @@ async function startServer() {
     }
 
     if (ssrCustomBodyHtml) {
-      const ssrHeaderHtml = `<header class="ssr-seo-header"><nav aria-label="Primary Header Navigation"><a href="https://avlive.com.pk">AV Live Communications</a> | <a href="https://avlive.com.pk/video-conferencing-solutions">Video Conferencing</a> | <a href="https://avlive.com.pk/corporate-event-management">Corporate Events</a> | <a href="https://avlive.com.pk/shop">Hardware Shop</a> | <a href="https://avlive.com.pk/room-designer">3D Room Designer</a> | <a href="https://avlive.com.pk/contact">Contact (0321-4256263)</a></nav></header>`;
-      const ssrFooterHtml = `<footer class="ssr-seo-footer"><nav aria-label="Footer Directory and Regional Hubs"><a href="https://avlive.com.pk/lahore">AV Live Lahore</a> | <a href="https://avlive.com.pk/karachi">AV Live Karachi</a> | <a href="https://avlive.com.pk/islamabad">AV Live Islamabad</a> | <a href="https://avlive.com.pk/solutions">Industry Solutions</a> | <a href="https://avlive.com.pk/video-conferencing">Video Conferencing Hub</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/esports">Esports Arena Production</a> | <a href="https://avlive.com.pk/sitemap">Complete HTML Sitemap</a> | <a href="https://avlive.com.pk/faqs">FAQs</a> | <a href="https://avlive.com.pk/reviews">Client Reviews</a> | <a href="https://avlive.com.pk/returns">30-Day Returns</a> | <a href="https://avlive.com.pk/shipping">Nationwide Shipping</a> | <a href="https://avlive.com.pk/payment">FBR GST Payment</a> | <a href="https://avlive.com.pk/rma">Warranty &amp; RMA</a> | <a href="https://avlive.com.pk/programs/government-education-pricing">Gov &amp; HEC Pricing</a> | <a href="https://avlive.com.pk/programs/reseller-program">Reseller Program</a> | <a href="https://avlive.com.pk/programs/blind-drop-shipping">Blind Drop Shipping</a> | <a href="https://avlive.com.pk/programs/fulfillment-services">3PL Fulfillment</a> | <a href="https://avlive.com.pk/programs/promotions">Bundles &amp; Rebates</a> | <a href="https://avlive.com.pk/programs/provisioning-services">Zero-Touch Provisioning</a> | <a href="https://avlive.com.pk/privacy-policy">Privacy Policy</a> | <a href="https://avlive.com.pk/terms-of-service">Terms of Service</a></nav></footer>`;
+      const ssrHeaderHtml = `<header class="ssr-seo-header"><nav aria-label="Primary Header Navigation"><a href="https://avlive.com.pk">AV Live Communications</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/video-conference">Video Conference Systems</a> | <a href="https://avlive.com.pk/video-conferencing-solutions">Video Conferencing</a> | <a href="https://avlive.com.pk/corporate-event-management">Corporate Events</a> | <a href="https://avlive.com.pk/shop">Hardware Shop</a> | <a href="https://avlive.com.pk/room-designer">3D Room Designer</a> | <a href="https://avlive.com.pk/contact">Contact (0321-4256263)</a></nav></header>`;
+      const ssrFooterHtml = `<footer class="ssr-seo-footer"><nav aria-label="Footer Directory and Regional Hubs"><a href="https://avlive.com.pk/lahore">AV Live Lahore</a> | <a href="https://avlive.com.pk/karachi">AV Live Karachi</a> | <a href="https://avlive.com.pk/islamabad">AV Live Islamabad</a> | <a href="https://avlive.com.pk/solutions">Industry Solutions</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/video-conference">Video Conference Systems</a> | <a href="https://avlive.com.pk/video-conferencing">Video Conferencing Hub</a> | <a href="https://avlive.com.pk/esports">Esports Arena Production</a> | <a href="https://avlive.com.pk/sitemap">Complete HTML Sitemap</a> | <a href="https://avlive.com.pk/faqs">FAQs</a> | <a href="https://avlive.com.pk/reviews">Client Reviews</a> | <a href="https://avlive.com.pk/returns">30-Day Returns</a> | <a href="https://avlive.com.pk/shipping">Nationwide Shipping</a> | <a href="https://avlive.com.pk/payment">FBR GST Payment</a> | <a href="https://avlive.com.pk/rma">Warranty &amp; RMA</a> | <a href="https://avlive.com.pk/programs/government-education-pricing">Gov &amp; HEC Pricing</a> | <a href="https://avlive.com.pk/programs/reseller-program">Reseller Program</a> | <a href="https://avlive.com.pk/programs/blind-drop-shipping">Blind Drop Shipping</a> | <a href="https://avlive.com.pk/programs/fulfillment-services">3PL Fulfillment</a> | <a href="https://avlive.com.pk/programs/promotions">Bundles &amp; Rebates</a> | <a href="https://avlive.com.pk/programs/provisioning-services">Zero-Touch Provisioning</a> | <a href="https://avlive.com.pk/privacy-policy">Privacy Policy</a> | <a href="https://avlive.com.pk/terms-of-service">Terms of Service</a></nav></footer>`;
       updated = updated.replace(
         /<div id="root">[\s\S]*?<\/div><!--ssr-root-end-->|<div id="root"><\/div>/,
         `<div id="root">${ssrHeaderHtml}${ssrCustomBodyHtml}${ssrFooterHtml}</div><!--ssr-root-end-->`

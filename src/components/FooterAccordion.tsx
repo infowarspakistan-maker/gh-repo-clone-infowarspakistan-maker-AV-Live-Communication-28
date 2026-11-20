@@ -29,10 +29,11 @@ export interface FooterAccordionProps {
 const CORE_PILLAR_SEO_LINKS: SeoFooterLinkItem[] = [
   { path: '/', label: 'AV Live Pakistan Home' },
   { path: '/shop', label: 'All Enterprise AV Hardware (53 SKUs)' },
-  { path: '/sitemap', label: 'Complete HTML Sitemap (156 Pages)' },
+  { path: '/sitemap', label: 'Complete HTML Sitemap (157 Pages)' },
   { path: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan' },
   { path: '/event-management-in-pakistan', label: 'Event Management in Pakistan' },
   { path: '/corporate-event-management', label: 'Corporate Event Management Pakistan' },
+  { path: '/video-conference', label: 'Video Conference Systems & Configurator' },
   { path: '/video-conferencing', label: 'Video Conferencing Room Architecture' },
   { path: '/video-conferencing-solutions', label: 'Turnkey Video Conferencing Solutions' },
   { path: '/conference-room-solutions', label: 'Executive Conference Room Solutions' },

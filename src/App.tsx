@@ -53,6 +53,7 @@ const Cart = React.lazy(() => import('./pages/Cart').then(m => ({ default: m.Car
 const Checkout = React.lazy(() => import('./pages/Checkout').then(m => ({ default: m.Checkout })));
 const HtmlSitemap = React.lazy(() => import('./pages/HtmlSitemap').then(m => ({ default: m.HtmlSitemap })));
 const FoldFlatTeleprompter = React.lazy(() => import('./pages/FoldFlatTeleprompter').then(m => ({ default: m.FoldFlatTeleprompter })));
+const VideoConferenceHub = React.lazy(() => import('./pages/VideoConferenceHub').then(m => ({ default: m.VideoConferenceHub })));
 
 // Lazy-loaded admin panels & setup wizard
 const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout').then(m => ({ default: m.AdminLayout || m.default })));
@@ -318,6 +319,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
             <ul className="space-y-2 text-[12px] text-gray-700 font-bold capitalize tracking-normal whitespace-normal">
               <li><Link to="/video-conference-in-pakistan" className="hover:text-[#00B4D8] transition-colors block">Video Conference in Pakistan (Pillar)</Link></li>
               <li><Link to="/event-management-in-pakistan" className="hover:text-[#00B4D8] transition-colors block">Event Management in Pakistan (Pillar)</Link></li>
+              <li><Link to="/video-conference" className="hover:text-[#00B4D8] transition-colors block">Video Conference Systems &amp; Configurator</Link></li>
               <li><Link to="/video-conferencing-solutions" className="hover:text-[#00B4D8] transition-colors block">Video Conferencing Solutions</Link></li>
               <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors block">Corporate Event Management</Link></li>
               <li><Link to="/projection-mapping" className="hover:text-[#00B4D8] transition-colors block">3D Projection Mapping &amp; Hologram Stages</Link></li>
@@ -347,7 +349,10 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
                 <span>Video Conference in Pakistan — Complete Pillar Hub</span>
                 <ArrowRight size={14} />
               </Link>
-              <Link to="/video-conferencing-solutions" className="font-bold text-[11px] text-[#00B4D8] hover:underline block normal-case">
+              <Link to="/video-conference" className="font-bold text-[11px] text-[#00B4D8] hover:underline block normal-case">
+                Video Conference Systems, Protocol Architecture &amp; Interactive PKR Room Configurator →
+              </Link>
+              <Link to="/video-conferencing-solutions" className="font-semibold text-[11px] text-gray-600 hover:text-[#00B4D8] hover:underline block normal-case">
                 Explore Turnkey Boardroom Solutions (Polycom Group 500, Poly X70, Cisco &amp; Logitech) →
               </Link>
             </div>
@@ -1056,7 +1061,8 @@ function Navbar() {
                   { label: 'Video Conference in Pakistan', path: '/video-conference-in-pakistan', badge: 'VH' },
                   { label: 'Event Management in Pakistan', path: '/event-management-in-pakistan', badge: 'EM' },
                   { label: 'Corporate Event Management', path: '/corporate-event-management', badge: 'CE' },
-                  { label: 'Video Conferencing Solutions', path: '/video-conferencing-solutions', badge: 'VC' },
+                  { label: 'Video Conference Systems & Configurator', path: '/video-conference', badge: 'VC' },
+                  { label: 'Video Conferencing Solutions', path: '/video-conferencing-solutions', badge: 'VS' },
                   { label: '3D Projection Mapping & Holograms', path: '/projection-mapping', badge: '3D' },
                   { label: 'AV Equipment & SMD LED Rental', path: '/av-equipment-rental', badge: 'AV' },
                   { label: 'Live Streaming & Hybrid Events', path: '/live-streaming-services', badge: 'LS' },
@@ -1297,6 +1303,7 @@ export default function App() {
             <Route path="/lahore" element={<KeywordLandingPage />} />
             <Route path="/karachi" element={<KeywordLandingPage />} />
             <Route path="/islamabad" element={<KeywordLandingPage />} />
+            <Route path="/video-conference" element={<VideoConferenceHub />} />
             <Route path="/video-conferencing" element={<KeywordLandingPage />} />
             <Route path="/video-conferencing-solutions" element={<KeywordLandingPage />} />
             <Route path="/video-conference-in-pakistan" element={<KeywordLandingPage />} />

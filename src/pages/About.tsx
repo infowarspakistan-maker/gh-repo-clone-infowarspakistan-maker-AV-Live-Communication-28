@@ -4,6 +4,7 @@ import { Users, Award, ShieldCheck, MapPin, CheckCircle, Loader2, Target, Histor
 import { subscribeToAbout, AboutData } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { RealProjectsAndClients } from '../components/RealProjectsAndClients';
 
 export function About() {
   const [content, setContent] = useState<AboutData | null>(null);
@@ -149,9 +150,13 @@ export function About() {
                <div className="text-gray-600 text-lg leading-relaxed whitespace-pre-wrap space-y-6 font-medium prose prose-lg max-w-none [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: data.history }} />
             </div>
             <div className="relative min-h-[400px]">
-              <img loading="lazy" 
-                src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200" 
-                alt="Office Space" 
+              <img
+                loading="lazy"
+                decoding="async"
+                width={1000}
+                height={750}
+                src="/images/projects/hisdu-committee-wall.webp"
+                alt="HISDU Executive Committee Room multi-panel video wall and gooseneck conference microphone array deployed by AV Live Pakistan"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
@@ -238,6 +243,11 @@ export function About() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Full Verified Real Project Gallery & Institutional Client Roster */}
+      <div className="mt-12">
+        <RealProjectsAndClients defaultTab="all" />
       </div>
     </div>
   );
