@@ -26,20 +26,43 @@ import {
   ChevronUp,
   HelpCircle,
   Play,
-  Phone
+  Phone,
+  ArrowRight
 } from 'lucide-react';
 import { getProduct, getProducts, getCategories, Product, Category } from '../lib/firebase/firestore-helpers';
 import {
   PRODUCT_GMC_METADATA,
   cleanMpn,
+  normalizeGmcImageUrl,
   getCanonicalProductSlug,
+  getProductHref,
   resolveProductPricing,
   buildFallbackProductFromGmcMeta,
   resolveCanonicalProductSlugByIdentifier,
 } from '../lib/gmc-feed';
+import {
+  extractDirectImageUrls,
+  extractVideoUrls,
+  extractYoutubeVideoId,
+  DEFAULT_EXTERNAL_PRODUCT_IMAGE,
+} from '../lib/image-optimize';
 import { addToCart } from '../lib/cart';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+
+function cleanRichTextHtml(rawHtml?: string | null): string {
+  if (!rawHtml) return '';
+  return String(rawHtml)
+    .replace(/(?:&nbsp;|\u00A0)+/gi, ' ')
+    .replace(
+      /\[www\.avlives\.com\]\(https?:\/\/www\.avlives\.com\)\.pk/gi,
+      '<a href="https://avlive.com.pk" class="text-[#00B4D8] font-bold underline">www.avlive.com.pk</a>'
+    )
+    .replace(/https?:\/\/(?:www\.)?avlives\.com(?:\.pk)?/gi, 'https://avlive.com.pk')
+    .replace(/www\.avlives\.com\.pk/gi, 'www.avlive.com.pk')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
 
 export function ProductDetails() {
   const { productId } = useParams<{ productId: string }>();
@@ -67,10 +90,16 @@ export function ProductDetails() {
 
   useEffect(() => {
     let isMounted = true;
+    setActiveImage(0);
     async function fetchProduct() {
       if (!productId) return;
       const syncFallback = buildFallbackProductFromGmcMeta(productId) as Product | null;
       if (syncFallback) {
+        const syncHref = getProductHref(syncFallback, productId);
+        if (!syncHref.startsWith('/product/')) {
+          navigate(syncHref, { replace: true });
+          return;
+        }
         setProduct(syncFallback);
         setLoading(false);
       } else {
@@ -86,6 +115,13 @@ export function ProductDetails() {
         if (!isMounted) return;
 
         const effectiveProduct = data || syncFallback;
+        if (effectiveProduct) {
+          const resolvedHref = getProductHref(effectiveProduct, productId);
+          if (!resolvedHref.startsWith('/product/')) {
+            navigate(resolvedHref, { replace: true });
+            return;
+          }
+        }
         setProduct(effectiveProduct);
 
         let cat: Category | undefined = undefined;
@@ -174,10 +210,33 @@ export function ProductDetails() {
     );
   }
 
-  const productImages = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
-
   const canonicalSlug = getCanonicalProductSlug(product, productId);
   const canonicalProductUrl = `https://avlive.com.pk/product/${canonicalSlug}`;
+  const gmcMetaEarly = PRODUCT_GMC_METADATA[canonicalSlug] || PRODUCT_GMC_METADATA[product.id || ''];
+  const rawExternalImages = extractDirectImageUrls([
+    ...(Array.isArray(product.images) ? product.images : typeof product.images === 'string' ? [product.images] : []),
+    product.image,
+    (product as any).imageUrl,
+  ]);
+  const productVideoUrls = extractVideoUrls(product.images);
+  const youtubeVideoId =
+    productVideoUrls.map((u) => extractYoutubeVideoId(u)).find(Boolean) ||
+    (canonicalSlug === 'podium-prompter-17-compact-pakistan' ? 'aZLEIxOzm24' : null);
+  const metaExternalImages = extractDirectImageUrls(gmcMetaEarly?.images || []);
+  const productImages =
+    rawExternalImages.length > 0
+      ? rawExternalImages
+      : metaExternalImages.length > 0
+      ? metaExternalImages
+      : [DEFAULT_EXTERNAL_PRODUCT_IMAGE];
+  const schemaImages = Array.from(
+    new Set(
+      productImages
+        .map((u) => normalizeGmcImageUrl(u) || u)
+        .filter(Boolean)
+    )
+  );
+
   const { regularPrice: resolvedRegularPrice, salePrice: resolvedSalePrice, effectivePrice } = resolveProductPricing(product);
 
   const getSelectedPrice = () => {
@@ -229,11 +288,17 @@ export function ProductDetails() {
     ((ratingVal * reviewsCountVal + userReviews.reduce((acc, r) => acc + r.rating, 0)) / totalReviewsCount).toFixed(1)
   );
 
-  const gmcMeta = PRODUCT_GMC_METADATA[product.id || ''] || PRODUCT_GMC_METADATA[canonicalSlug];
-  const resolvedGtin = product.gtin || gmcMeta?.gtin || '610807990012';
-  const resolvedMpn = product.mpn || gmcMeta?.mpn || cleanMpn(product.sku, product.id);
+  const gmcMeta = PRODUCT_GMC_METADATA[canonicalSlug] || PRODUCT_GMC_METADATA[product.id || ''];
+  const resolvedGtin = gmcMeta?.gtin || product.gtin || '610807990012';
+  const resolvedMpn = cleanMpn(gmcMeta?.mpn || product.mpn || product.sku, canonicalSlug);
   const resolvedBrand = (product.brand === 'Poly (HP' ? 'HP Poly' : product.brand) || gmcMeta?.brand || 'AV Live';
-  const effectiveSpecsRaw = product.specifications || gmcMeta?.defaultSpecs || '';
+  const rawSpecsStr = String(product.specifications || '');
+  const hasMalformedRawSpecs =
+    !rawSpecsStr ||
+    /Specification\s*:\s*SIP/i.test(rawSpecsStr) ||
+    /SpecificationAV\s*Live/i.test(rawSpecsStr) ||
+    /:\d+:/.test(rawSpecsStr);
+  const effectiveSpecsRaw = (!hasMalformedRawSpecs ? rawSpecsStr : gmcMeta?.defaultSpecs) || gmcMeta?.defaultSpecs || rawSpecsStr;
   const effectiveSpecificationsList = effectiveSpecsRaw ? effectiveSpecsRaw.split(';').filter(Boolean) : specificationsList;
 
   const faqs = [
@@ -356,7 +421,27 @@ export function ProductDetails() {
             "text": f.a
           }
         }))
-      }
+      },
+      ...(youtubeVideoId
+        ? [
+            {
+              "@type": "VideoObject",
+              "@id": `${canonicalProductUrl}#video`,
+              "name": `${product.productName} (${resolvedMpn}) — Live Hardware Demonstration`,
+              "description":
+                product.seoMetaDescription ||
+                gmcMeta?.defaultDescription ||
+                `Official hardware demonstration of ${product.productName} by ${resolvedBrand} in Pakistan.`,
+              "thumbnailUrl": [
+                `https://i.ytimg.com/vi/${youtubeVideoId}/hqdefault.jpg`,
+                ...(schemaImages.length > 0 ? schemaImages : []),
+              ],
+              "uploadDate": "2026-01-15T08:00:00+05:00",
+              "embedUrl": `https://www.youtube-nocookie.com/embed/${youtubeVideoId}`,
+              "contentUrl": `https://www.youtube.com/watch?v=${youtubeVideoId}`,
+            },
+          ]
+        : []),
     ]
   };
 
@@ -459,49 +544,76 @@ export function ProductDetails() {
                className="bg-white rounded-2xl lg:rounded-3xl border border-gray-100 shadow-md overflow-hidden relative w-full aspect-[4/3] max-h-[260px] sm:max-h-[340px] lg:max-h-[380px] max-w-4xl mx-auto group flex items-center justify-center shrink-0"
              >
                {activeVideo ? (
-                 /* Simulated Video Player */
-                 <div className="absolute inset-0 bg-[#0B0F19] text-white flex flex-col justify-between p-6">
-                   <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                     <div className="flex items-center gap-2">
-                       <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
-                       <span className="text-xs font-black uppercase tracking-widest text-[#00B4D8]">Demo Presentation</span>
+                 youtubeVideoId ? (
+                   /* Click-to-Load Privacy-Enhanced YouTube Player (Zero Initial TBT) */
+                   <div className="absolute inset-0 bg-[#0B0F19] text-white flex flex-col">
+                     <div className="flex items-center justify-between px-4 py-2.5 bg-[#0B0F19] border-b border-white/10">
+                       <div className="flex items-center gap-2">
+                         <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                         <span className="text-[11px] font-black uppercase tracking-widest text-[#00B4D8]">
+                           Official Hardware Video Demo
+                         </span>
+                       </div>
+                       <button
+                         onClick={() => setActiveVideo(false)}
+                         className="text-xs bg-white/10 hover:bg-white/20 text-white font-bold px-3 py-1 rounded-full transition-all"
+                       >
+                         Exit Video
+                       </button>
                      </div>
-                     <button 
-                       onClick={() => setActiveVideo(false)} 
-                       className="text-xs bg-white/10 hover:bg-white/20 text-white font-bold px-3 py-1 rounded-full transition-all"
-                     >
-                       Exit Video
-                     </button>
+                     <iframe
+                       src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}?autoplay=1&rel=0`}
+                       title={`${product.productName} Hardware Demonstration Video`}
+                       className="w-full flex-grow border-0"
+                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                       allowFullScreen
+                     />
                    </div>
+                 ) : (
+                   /* Simulated Video Player */
+                   <div className="absolute inset-0 bg-[#0B0F19] text-white flex flex-col justify-between p-6">
+                     <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                       <div className="flex items-center gap-2">
+                         <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+                         <span className="text-xs font-black uppercase tracking-widest text-[#00B4D8]">Demo Presentation</span>
+                       </div>
+                       <button 
+                         onClick={() => setActiveVideo(false)} 
+                         className="text-xs bg-white/10 hover:bg-white/20 text-white font-bold px-3 py-1 rounded-full transition-all"
+                       >
+                         Exit Video
+                       </button>
+                     </div>
 
-                   <div className="flex-grow flex flex-col items-center justify-center text-center p-6 relative">
-                     <PlayCircle size={64} className="text-[#00B4D8] animate-bounce mb-4 cursor-pointer" />
-                     <h3 className="text-xl font-black mb-2 tracking-tight">{product.productName}</h3>
-                     <p className="text-xs text-gray-400 max-w-md mx-auto leading-relaxed font-semibold">
-                       Demonstrating advanced collaboration features, noise-cancellation integration, and rapid PTA-registered deployment configurations across Pakistan.
-                     </p>
-                     
-                     {/* Visual Waveform Effect */}
-                     <div className="flex gap-1 items-end h-12 mt-6">
-                       {['h-3', 'h-6', 'h-9', 'h-4', 'h-11', 'h-7', 'h-9', 'h-5', 'h-2.5', 'h-8', 'h-12', 'h-4', 'h-7', 'h-10', 'h-3.5', 'h-5', 'h-8', 'h-11'].map((hClass, i) => (
-                         <span 
-                           key={i} 
-                           className={`w-1.5 ${hClass} bg-[#00B4D8]/60 rounded-full animate-pulse`}
-                         ></span>
-                       ))}
+                     <div className="flex-grow flex flex-col items-center justify-center text-center p-6 relative">
+                       <PlayCircle size={64} className="text-[#00B4D8] animate-bounce mb-4 cursor-pointer" />
+                       <h3 className="text-xl font-black mb-2 tracking-tight">{product.productName}</h3>
+                       <p className="text-xs text-gray-400 max-w-md mx-auto leading-relaxed font-semibold">
+                         Demonstrating advanced collaboration features, noise-cancellation integration, and rapid PTA-registered deployment configurations across Pakistan.
+                       </p>
+                       
+                       {/* Visual Waveform Effect */}
+                       <div className="flex gap-1 items-end h-12 mt-6">
+                         {['h-3', 'h-6', 'h-9', 'h-4', 'h-11', 'h-7', 'h-9', 'h-5', 'h-2.5', 'h-8', 'h-12', 'h-4', 'h-7', 'h-10', 'h-3.5', 'h-5', 'h-8', 'h-11'].map((hClass, i) => (
+                           <span 
+                             key={i} 
+                             className={`w-1.5 ${hClass} bg-[#00B4D8]/60 rounded-full animate-pulse`}
+                           ></span>
+                         ))}
+                       </div>
                      </div>
-                   </div>
 
-                   <div className="bg-white/5 rounded-2xl p-4 flex flex-col gap-3">
-                     <div className="flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                       <span>0:45 / 3:12</span>
-                       <span>Enterprise Grade HD 1080p</span>
-                     </div>
-                     <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
-                       <div className="bg-[#00B4D8] h-full rounded-full w-[24%]"></div>
+                     <div className="bg-white/5 rounded-2xl p-4 flex flex-col gap-3">
+                       <div className="flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                         <span>0:45 / 3:12</span>
+                         <span>Enterprise Grade HD 1080p</span>
+                       </div>
+                       <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
+                         <div className="bg-[#00B4D8] h-full rounded-full w-[24%]"></div>
+                       </div>
                      </div>
                    </div>
-                 </div>
+                 )
                ) : (
                  /* Standard Image Gallery with Zoom */
                  <div 
@@ -613,7 +725,7 @@ export function ProductDetails() {
                       </p>
                     </div>
 
-                    <div className="text-gray-600 leading-relaxed font-medium text-xs break-words overflow-hidden prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: product.description || gmcMeta?.defaultDescription || '' }} />
+                    <div className="text-gray-600 leading-relaxed font-medium text-xs break-words overflow-hidden prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(product.description || gmcMeta?.defaultDescription || '') }} />
 
                     {/* Semantic HTML Quick-Spec Matrix for Google Featured Snippets & AI Crawlers */}
                     <div className="mt-6 overflow-x-auto rounded-2xl border border-gray-100 not-prose">
@@ -627,16 +739,30 @@ export function ProductDetails() {
                             <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedBrand}</td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Part Number (MPN) / SKU</th>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Product ID / SKU &amp; MPN</th>
                             <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedMpn}</td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">GS1 GTIN / UPC</th>
-                            <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedGtin}</td>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">GS1 GTIN / UPC-12</th>
+                            <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedGtin} (Identifier Exists: Yes)</td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Reference Price (PKR)</th>
-                            <td className="py-2.5 px-4 font-black text-[#00B4D8]">Rs. {effectivePrice.toLocaleString()} (FBR GST Invoice Available)</td>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Condition &amp; Availability</th>
+                            <td className="py-2.5 px-4 font-bold text-emerald-700">
+                              New (Factory Sealed) • {(product.stockQuantity ?? 10) > 0 ? 'In Stock (in_stock)' : 'Out of Stock (out_of_stock)'}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Sale / Regular Price (PKR)</th>
+                            <td className="py-2.5 px-4 font-black text-[#00B4D8]">
+                              Rs. {effectivePrice.toLocaleString()} PKR {resolvedSalePrice < resolvedRegularPrice ? `(List Price: Rs. ${resolvedRegularPrice.toLocaleString()} PKR)` : ''} • FBR GST Invoice Available
+                            </td>
+                          </tr>
+                          <tr>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Product Highlights</th>
+                            <td className="py-2.5 px-4 font-semibold text-gray-700">
+                              {gmcMeta?.highlight || product.shortDescription || `Official ${resolvedBrand} enterprise AV hardware in Pakistan`}
+                            </td>
                           </tr>
                           <tr>
                             <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Warranty &amp; SLA</th>
@@ -819,8 +945,27 @@ export function ProductDetails() {
                 </span>
                 <div 
                   className="text-gray-500 font-semibold leading-relaxed text-sm break-words max-w-none prose prose-sm prose-p:my-1 prose-ul:my-1 prose-li:my-0.5" 
-                  dangerouslySetInnerHTML={{ __html: product.shortDescription || '' }} 
+                  dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(product.shortDescription || gmcMeta?.highlight || '') }} 
                 />
+                {canonicalSlug === 'podium-prompter-17-compact-pakistan' && (
+                  <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center gap-3">
+                    <Link
+                      to="/podium-teleprompter"
+                      className="inline-flex items-center gap-1.5 bg-[#1A2B4C] hover:bg-[#00B4D8] text-white text-xs font-black px-4 py-2 rounded-full transition-colors"
+                    >
+                      <span>Open Interactive 17&Prime; &amp; 22&Prime; Optical Simulator &amp; PKR Configurator</span>
+                      <ArrowRight size={13} />
+                    </Link>
+                    <a
+                      href="/assets/aistudio/AV_Live_Stealth_Teleprompter_4ff82fdb.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-bold text-[#00B4D8] hover:underline"
+                    >
+                      Download Technical PDF
+                    </a>
+                  </div>
+                )}
               </div>
 
                 <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6 w-full h-auto">
@@ -1219,7 +1364,7 @@ export function ProductDetails() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 h-auto">
               {relatedProducts.map(prod => (
                 <Link 
-                 to={`/product/${getCanonicalProductSlug(prod)}`} 
+                 to={getProductHref(prod, prod.id)} 
                  key={prod.id} 
                  className="bg-white group cursor-pointer rounded-3xl overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
                >

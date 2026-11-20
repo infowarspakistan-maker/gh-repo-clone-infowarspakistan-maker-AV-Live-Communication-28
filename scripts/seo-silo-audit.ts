@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { buildDynamicSitemapXml } from '../src/lib/sitemap-generator';
 
 const BASE_URL = 'http://localhost:3000';
@@ -47,11 +49,14 @@ function extractInternalLinks(html: string): string[] {
 }
 
 async function runAudit() {
-  const sitemap = buildDynamicSitemapXml();
+  const diskSitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+  const sitemapXml = fs.existsSync(diskSitemapPath)
+    ? fs.readFileSync(diskSitemapPath, 'utf8')
+    : buildDynamicSitemapXml().xml;
   const locRegex = /<loc>https:\/\/avlive\.com\.pk([^<]*)<\/loc>/g;
   const allPaths: string[] = [];
   let match: RegExpExecArray | null;
-  while ((match = locRegex.exec(sitemap.xml)) !== null) {
+  while ((match = locRegex.exec(sitemapXml)) !== null) {
     const p = match[1] || '/';
     allPaths.push(p);
   }
@@ -261,7 +266,26 @@ async function runAudit() {
     '/about/guarantee': '/about',
     '/services/on-site-standby-engineers': '/services/corporate-events',
     '/services/annual-maintenance-contracts': '/services/boardroom-integration',
-    '/about/compliance': '/programs/government-education-pricing'
+    '/about/compliance': '/programs/government-education-pricing',
+    // GSC v4.4 Single-Hop Normalization, Raw Firestore IDs, Multi-Hop Flattening & Query Canonicalization
+    '/shop/': '/shop',
+    '/Shop': '/shop',
+    '/Brands/Poly/': '/brands/poly',
+    '/shop?brand=polycom': '/brands/poly',
+    '/category/video-conferencing?sub=ptz-cameras': '/category/ptz-cameras',
+    '/shop?sort=price&utm_source=google': '/shop',
+    '/products/about/': '/about',
+    '/category/corporate-events/': '/services/corporate-events',
+    '/product/kl5wGaNLxqQByn3oPd1Z': '/podium-teleprompter',
+    '/Product/kl5wGaNLxqQByn3oPd1Z/': '/podium-teleprompter',
+    '/product/podium-prompter-17-compact-pakistan': '/podium-teleprompter',
+    '/product/T1XLMubVYmFzeIfC7V9B': '/product/polycom-realpresence-group-500-pakistan',
+    '/product/cisco-webex-room-kit-plus-pakistan': '/product/cisco-room-kit-plus-pakistan',
+    '/product/retired-unknown-sku-999': '/shop',
+    '/category/retired-unknown-cat-999': '/shop',
+    '/brands/retired-unknown-brand-999': '/brands',
+    '/services/retired-unknown-service-999': '/services',
+    '/blog/retired-unknown-post-999': '/blog'
   };
 
   let redirectPassCount = 0;
@@ -275,7 +299,7 @@ async function runAudit() {
       console.log(`  Redirect mismatch on ${fromUrl}: status=${res.status}, location=${loc}, expected=${expectedTo}`);
     }
   }
-  console.log(`Internal Link Map Alias 301 Redirects: ${redirectPassCount}/${redirectEntries.length}`);
+  console.log(`Single-Hop 301 Canonical & GSC Redirects: ${redirectPassCount}/${redirectEntries.length}`);
 
   const pagesWithIssues = results.filter(r => r.issues.length > 0);
   if (pagesWithIssues.length > 0) {

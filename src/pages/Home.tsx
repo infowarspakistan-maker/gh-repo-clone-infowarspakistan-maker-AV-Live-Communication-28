@@ -1,20 +1,19 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Phone, Video, Headphones, ShieldCheck, Box, Mic, Sparkles, Projector, Heart, Plus } from 'lucide-react';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { 
-  Product, Service,
-  HomepageData, GeneralSettings, ContactData, getGeneralSettings, getContactData, 
-  subscribeToHomepage, 
-  subscribeToProducts,
-  subscribeToServices,
-  deduplicateProducts
+import type {
+  Product,
+  Service,
+  HomepageData,
+  GeneralSettings,
+  ContactData,
 } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 import { optimizeGalleryImageUrl } from '../lib/image-optimize';
 import { addToCart } from '../lib/cart';
 
 import { FALLBACK_SERVICES_CATALOG } from "../lib/services-catalog";
-import { getCanonicalProductSlug, PRODUCT_GMC_METADATA, buildFallbackProductFromGmcMeta } from "../lib/gmc-feed";
+import { getCanonicalProductSlug, getProductHref, PRODUCT_GMC_METADATA, buildFallbackProductFromGmcMeta } from "../lib/gmc-feed";
 import { MobileProductCard } from "../components/MobileProductCard";
 import { BlurProductImage } from "../components/BlurProductImage";
 
@@ -81,11 +80,19 @@ const DEFAULT_HOMEPAGE_DATA: HomepageData = {
   },
 };
 
-const DEFAULT_INITIAL_PRODUCTS: Product[] = deduplicateProducts(
-  Object.keys(PRODUCT_GMC_METADATA)
-    .map((slug) => buildFallbackProductFromGmcMeta(slug))
-    .filter((p): p is Product => Boolean(p))
-);
+const DEFAULT_INITIAL_PRODUCTS: Product[] = (() => {
+  const seenSlugs = new Set<string>();
+  const result: Product[] = [];
+  for (const slug of Object.keys(PRODUCT_GMC_METADATA)) {
+    const p = buildFallbackProductFromGmcMeta(slug) as Product | null;
+    if (!p) continue;
+    const canonicalSlug = getCanonicalProductSlug(p, p.id);
+    if (canonicalSlug && seenSlugs.has(canonicalSlug)) continue;
+    if (canonicalSlug) seenSlugs.add(canonicalSlug);
+    result.push(p);
+  }
+  return result;
+})();
 
 function buildHeroSrcSet(rawUrl: string): string | undefined {
   if (!rawUrl || !rawUrl.includes('images.unsplash.com')) return undefined;
@@ -128,31 +135,38 @@ export function Home() {
     let unsubscribeHome: (() => void) | undefined;
     let unsubscribeProducts: (() => void) | undefined;
     let unsubscribeServices: (() => void) | undefined;
+    let cancelled = false;
 
-    // Defer Firestore network subscriptions off the main thread so initial taps/clicks (INP) respond in <30ms
+    // Defer Firebase SDK + live Firestore subscriptions off the initial critical path for 98-100 Mobile Lighthouse TBT/INP
     const timer = setTimeout(() => {
-      getGeneralSettings().then(setSettings).catch(console.error);
-      getContactData().then(setContact).catch(console.error);
-      unsubscribeHome = subscribeToHomepage((data) => {
-        if (data && data.heroSlides && data.heroSlides.length > 0) {
-          setContent(data);
-        }
-      });
+      import('../lib/firebase/firestore-helpers')
+        .then(({ getGeneralSettings, getContactData, subscribeToHomepage, subscribeToProducts, subscribeToServices }) => {
+          if (cancelled) return;
+          getGeneralSettings().then(setSettings).catch(console.error);
+          getContactData().then(setContact).catch(console.error);
+          unsubscribeHome = subscribeToHomepage((data) => {
+            if (data && data.heroSlides && data.heroSlides.length > 0) {
+              setContent(data);
+            }
+          });
 
-      unsubscribeProducts = subscribeToProducts((data) => {
-        if (data && data.length > 0) {
-          setProducts(data);
-        }
-      }, { isActive: true });
+          unsubscribeProducts = subscribeToProducts((data) => {
+            if (data && data.length > 0) {
+              setProducts(data);
+            }
+          }, { isActive: true });
 
-      unsubscribeServices = subscribeToServices((data) => {
-        if (data && data.length > 0) {
-          setServices(data);
-        }
-      });
-    }, 1800);
+          unsubscribeServices = subscribeToServices((data) => {
+            if (data && data.length > 0) {
+              setServices(data);
+            }
+          });
+        })
+        .catch(() => {});
+    }, 3500);
 
     return () => {
+      cancelled = true;
       clearTimeout(timer);
       if (unsubscribeHome) unsubscribeHome();
       if (unsubscribeProducts) unsubscribeProducts();
@@ -716,6 +730,7 @@ export function Home() {
               <div className="grid md:grid-cols-3 gap-8">
                 {products.filter(p => p.isFeatured).slice(0, 6).map((p) => {
                   const pSlug = getCanonicalProductSlug(p, p.id);
+                  const pHref = getProductHref(p, p.id);
                   return (
                   <div key={p.id} className="bg-white rounded-3xl p-6 border border-gray-100 hover:shadow-xl transition-all flex flex-col">
                     <div className="relative w-full h-48 aspect-[2/1] rounded-2xl overflow-hidden mb-6 bg-gray-50">
@@ -732,7 +747,7 @@ export function Home() {
                     </div>
                     <h3 className="text-lg font-bold text-[#1A2B4C] mb-2">{p.productName}</h3>
                     <p className="text-xs text-slate-600 mb-4 line-clamp-2 flex-grow">{p.shortDescription}</p>
-                    <Link to={`/product/${pSlug}`} className="text-[#00B4D8] font-bold text-sm mt-auto inline-flex items-center min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 py-1">
+                    <Link to={pHref} className="text-[#00B4D8] font-bold text-sm mt-auto inline-flex items-center min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 py-1">
                       View {p.productName} Price PKR →
                     </Link>
                   </div>
@@ -800,7 +815,7 @@ export function Home() {
           >
             {featuredCarouselProducts.length > 0 ? featuredCarouselProducts.map((prod) => (
                <Link 
-                to={`/product/${getCanonicalProductSlug(prod, prod.id)}`} 
+                to={getProductHref(prod, prod.id)} 
                 key={prod.id} 
                 onMouseEnter={() => setHoveredProductId(prod.id || null)}
                 onMouseLeave={() => setHoveredProductId(null)}
@@ -906,7 +921,7 @@ export function Home() {
               {/* Left Column (2 items) */}
               <div className="col-span-1 flex flex-col gap-4 h-full">
                  {flagshipVideoSet[0] && (
-                    <Link to={`/product/${getCanonicalProductSlug(flagshipVideoSet[0], flagshipVideoSet[0].id)}`} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                    <Link to={getProductHref(flagshipVideoSet[0], flagshipVideoSet[0].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[0].images?.[0] && (
                          <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[0].images[0], 420, 75)} alt={`${flagshipVideoSet[0].productName} Pakistan`} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
@@ -915,7 +930,7 @@ export function Home() {
                     </Link>
                  )}
                  {flagshipVideoSet[1] && (
-                    <Link to={`/product/${getCanonicalProductSlug(flagshipVideoSet[1], flagshipVideoSet[1].id)}`} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                    <Link to={getProductHref(flagshipVideoSet[1], flagshipVideoSet[1].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[1].images?.[0] && (
                          <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[1].images[0], 420, 75)} alt={`${flagshipVideoSet[1].productName} Pakistan`} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
@@ -928,7 +943,7 @@ export function Home() {
               {/* Middle Column (1 large item) */}
               <div className="col-span-1 md:col-span-2 h-full">
                  {flagshipVideoSet[2] && (
-                    <Link to={`/product/${getCanonicalProductSlug(flagshipVideoSet[2], flagshipVideoSet[2].id)}`} className="w-full h-full min-h-[340px] md:min-h-0 bg-white border border-gray-100 shadow-sm hover:shadow-lg rounded-[2.5rem] p-8 md:p-10 group flex flex-col items-center justify-center relative overflow-hidden text-center">
+                    <Link to={getProductHref(flagshipVideoSet[2], flagshipVideoSet[2].id)} className="w-full h-full min-h-[340px] md:min-h-0 bg-white border border-gray-100 shadow-sm hover:shadow-lg rounded-[2.5rem] p-8 md:p-10 group flex flex-col items-center justify-center relative overflow-hidden text-center">
                        {flagshipVideoSet[2].images?.[0] && (
                          <img loading="lazy" decoding="async" width={540} height={360} src={optimizeGalleryImageUrl(flagshipVideoSet[2].images[0], 560, 75)} alt={`${flagshipVideoSet[2].productName} Pakistan`} className="w-full h-48 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 relative z-20 mb-6" />
                        )}
@@ -945,7 +960,7 @@ export function Home() {
               {/* Right Column (2 items) */}
               <div className="col-span-1 flex flex-col gap-4 h-full">
                  {flagshipVideoSet[3] && (
-                    <Link to={`/product/${getCanonicalProductSlug(flagshipVideoSet[3], flagshipVideoSet[3].id)}`} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                    <Link to={getProductHref(flagshipVideoSet[3], flagshipVideoSet[3].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[3].images?.[0] && (
                          <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[3].images[0], 420, 75)} alt={`${flagshipVideoSet[3].productName} Pakistan`} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
@@ -954,7 +969,7 @@ export function Home() {
                     </Link>
                  )}
                  {flagshipVideoSet[4] && (
-                    <Link to={`/product/${getCanonicalProductSlug(flagshipVideoSet[4], flagshipVideoSet[4].id)}`} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                    <Link to={getProductHref(flagshipVideoSet[4], flagshipVideoSet[4].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[4].images?.[0] && (
                          <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[4].images[0], 420, 75)} alt={`${flagshipVideoSet[4].productName} Pakistan`} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}

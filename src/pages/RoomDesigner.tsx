@@ -3,6 +3,7 @@ import { Calculator, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export function RoomDesigner() {
   const [width, setWidth] = useState(4);
@@ -21,10 +22,10 @@ export function RoomDesigner() {
 
   const getPricePerPanel = () => {
     switch (pitch) {
-      case 'P2.5': return 650;
-      case 'P2.9': return 550;
-      case 'P3.9': return 450;
-      default: return 650;
+      case 'P2.5': return 145000;
+      case 'P2.9': return 125000;
+      case 'P3.9': return 105000;
+      default: return 145000;
     }
   };
 
@@ -65,7 +66,7 @@ export function RoomDesigner() {
     doc.text('Estimated Pricing', 20, 126);
     
     doc.setFontSize(12);
-    doc.text('Total Price: USD ' + totalPrice.toLocaleString(), 20, 136);
+    doc.text('Total Estimated Price: Rs. ' + totalPrice.toLocaleString() + ' PKR', 20, 136);
     
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
@@ -107,11 +108,12 @@ export function RoomDesigner() {
         }}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Breadcrumbs items={[{ label: 'Solutions', path: '/solutions' }, { label: 'SMD Room Designer' }]} />
         
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <Link to="/solutions" className="text-[#00B4D8] hover:underline text-xs uppercase tracking-widest font-bold mb-4 inline-block">&larr; Back to Solutions</Link>
-          <h1 className="text-4xl font-bold mb-4 uppercase tracking-tighter">SMD Room Designer</h1>
-          <p className="text-lg text-gray-500 font-medium max-w-2xl mx-auto">Calculate panel requirements and estimated costs for your custom LED wall.</p>
+          <h1 className="text-4xl font-bold mb-4 uppercase tracking-tighter">SMD Room Designer &amp; LED Wall Calculator</h1>
+          <p className="text-lg text-gray-500 font-medium max-w-2xl mx-auto">Calculate 500×500mm SMD cabinet requirements, native pixel resolution, structural weight, and estimated PKR investment for your custom LED video wall.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -186,8 +188,8 @@ export function RoomDesigner() {
                   </span>
                 </div>
                 <div className="flex justify-between items-end pt-4">
-                  <span className="text-gray-400 text-sm font-bold uppercase tracking-wider">Estimated Price</span>
-                  <span className="font-black text-4xl">${totalPrice.toLocaleString()}</span>
+                  <span className="text-gray-400 text-sm font-bold uppercase tracking-wider">Estimated Price (PKR)</span>
+                  <span className="font-black text-3xl sm:text-4xl">Rs. {totalPrice.toLocaleString()}</span>
                 </div>
               </div>
               <button onClick={handleGenerateQuote} className="w-full bg-[#00B4D8] hover:bg-[#009bc2] text-white font-bold py-4 rounded-xl transition-colors uppercase tracking-wider text-sm shadow-lg shadow-[#00B4D8]/20 flex items-center justify-center gap-2">
@@ -222,6 +224,53 @@ export function RoomDesigner() {
             </div>
           </div>
 
+        </div>
+
+        {/* Answer-First SMD Cabinet Engineering Matrix for CSR/SSR Parity */}
+        <div className="mt-12 bg-white rounded-[32px] border border-gray-200 p-8 shadow-sm space-y-4">
+          <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-xl p-4">
+            <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
+              Answer-First SMD Engineering Verdict
+            </span>
+            <p className="text-xs sm:text-sm font-bold text-[#1A2B4C] leading-relaxed">
+              Every AV Live SMD video wall is engineered around precision 500×500mm die-cast aluminum cabinets (7.5 kg per block) with NovaStar 4K video processors, 3840Hz broadcast refresh rates, and turnkey steel trussing across Lahore, Karachi, and Islamabad.
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-2xl border border-gray-100">
+            <table className="w-full text-left border-collapse text-xs sm:text-sm">
+              <caption className="bg-gray-50 text-[#1A2B4C] font-black text-left px-4 py-3 text-xs uppercase tracking-wider border-b border-gray-100">
+                500×500mm SMD LED Cabinet Pixel Pitch &amp; Reference PKR Pricing Matrix
+              </caption>
+              <thead>
+                <tr className="bg-gray-50/60 border-b border-gray-100 text-[11px] font-black uppercase text-gray-500">
+                  <th className="py-3 px-4">Pixel Pitch</th>
+                  <th className="py-3 px-4">Pixels per 500×500mm Cabinet</th>
+                  <th className="py-3 px-4">Optimal Viewing Distance</th>
+                  <th className="py-3 px-4">Reference Cabinet Price (PKR)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                <tr>
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]">P2.5 Indoor Fine-Pitch</td>
+                  <td className="py-3 px-4 font-mono">200 × 200 px (40,000 px)</td>
+                  <td className="py-3 px-4">≥ 2.5 Meters (Boardrooms &amp; Auditoriums)</td>
+                  <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. 145,000 PKR / Cabinet</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]">P2.9 Indoor Broadcast</td>
+                  <td className="py-3 px-4 font-mono">172 × 172 px (29,584 px)</td>
+                  <td className="py-3 px-4">≥ 3.0 Meters (Corporate Stages &amp; Halls)</td>
+                  <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. 125,000 PKR / Cabinet</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 font-black text-[#1A2B4C]">P3.9 High-Bright Event Stage</td>
+                  <td className="py-3 px-4 font-mono">128 × 128 px (16,384 px)</td>
+                  <td className="py-3 px-4">≥ 4.0 Meters (Expos, Concerts &amp; Outdoor)</td>
+                  <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. 105,000 PKR / Cabinet</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

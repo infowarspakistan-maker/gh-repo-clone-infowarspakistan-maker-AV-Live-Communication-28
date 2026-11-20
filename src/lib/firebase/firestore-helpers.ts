@@ -31,8 +31,10 @@ import {
   buildFallbackProductFromGmcMeta,
   getCanonicalProductSlug,
   PRODUCT_GMC_METADATA,
+  PRODUCT_CUSTOM_PAGE_ROUTES,
 } from '../gmc-feed';
 import { FALLBACK_SERVICES_CATALOG } from '../services-catalog';
+import { extractDirectImageUrls, DEFAULT_EXTERNAL_PRODUCT_IMAGE } from '../image-optimize';
 
 const QUOTA_STORAGE_KEY = 'avlive_fs_quota_tripped_until';
 let memoryQuotaTrippedUntil = 0;
@@ -170,15 +172,78 @@ export interface Product {
   seoTags?: string;
   seoMetaDescription?: string;
   imageAltText?: string;
+  customPagePath?: string;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
+}
+
+export function enrichProductImages(p: Product): Product {
+  const canonicalSlug = getCanonicalProductSlug(p, p.id);
+  const meta = PRODUCT_GMC_METADATA[canonicalSlug] || (p.id ? PRODUCT_GMC_METADATA[p.id] : undefined);
+
+  // Extract direct external http(s) URLs from the product document itself (never local file paths)
+  const rawExternalImgs = extractDirectImageUrls([
+    ...(Array.isArray(p.images) ? p.images : typeof p.images === 'string' ? [p.images] : []),
+    p.image,
+    (p as any).imageUrl,
+  ]);
+
+  // Extract external fallback URLs from catalog metadata only if needed
+  const metaExternalImgs = extractDirectImageUrls(meta?.images || []);
+
+  const finalImages =
+    rawExternalImgs.length > 0
+      ? rawExternalImgs
+      : metaExternalImgs.length > 0
+      ? metaExternalImgs
+      : [DEFAULT_EXTERNAL_PRODUCT_IMAGE];
+
+  const rawSlugs = Array.isArray(p.categorySlugs)
+    ? p.categorySlugs
+    : typeof p.categorySlugs === 'string' && p.categorySlugs
+    ? [p.categorySlugs]
+    : [];
+  const normalizedSlugs = Array.from(
+    new Set([
+      ...rawSlugs.map((s) => {
+        const clean = String(s || '').trim().toLowerCase();
+        if (clean === 'video conference' || clean === 'video conferencing') return 'video-conferencing';
+        return clean.replace(/\s+/g, '-');
+      }).filter(Boolean),
+      ...(meta?.categorySlugs || []),
+    ])
+  );
+
+  const mergedCategoryIds = Array.from(
+    new Set([
+      ...(Array.isArray(p.categoryIds) ? p.categoryIds.filter(Boolean) : []),
+      ...(normalizedSlugs.includes('video-conferencing') ? ['cat-video'] : []),
+    ])
+  );
+  const resolvedCustomPagePath =
+    (p.customPagePath && p.customPagePath.startsWith('/') ? p.customPagePath : undefined) ||
+    PRODUCT_CUSTOM_PAGE_ROUTES[canonicalSlug] ||
+    (p.id ? PRODUCT_CUSTOM_PAGE_ROUTES[p.id] : undefined);
+
+  return {
+    ...p,
+    slug: canonicalSlug,
+    ...(resolvedCustomPagePath ? { customPagePath: resolvedCustomPagePath } : {}),
+    sku: (p.sku && p.sku.trim()) || meta?.mpn || p.mpn || '',
+    mpn: (p.mpn && p.mpn.trim()) || meta?.mpn || p.sku || '',
+    categoryIds: mergedCategoryIds,
+    categorySlugs: normalizedSlugs.length > 0 ? normalizedSlugs : p.categorySlugs,
+    images: finalImages,
+    image: finalImages[0],
+  };
 }
 
 export function deduplicateProducts(products: Product[]): Product[] {
   const seenIds = new Set<string>();
   const seenSlugs = new Set<string>();
   const result: Product[] = [];
-  for (const p of products) {
+  for (const rawProd of products) {
+    const p = enrichProductImages(rawProd);
     const idKey = String(p.id || p.slug || p.sku || p.productName || '').trim();
     const canonicalSlug = getCanonicalProductSlug(p, p.id);
     if ((idKey && seenIds.has(idKey)) || (canonicalSlug && seenSlugs.has(canonicalSlug))) {
@@ -961,22 +1026,22 @@ export async function getProduct(idOrSlug: string): Promise<Product | null> {
       const docSnap = await getDoc(doc(db, 'products', mappedId));
       if (docSnap.exists()) {
         const data = docSnap.data() as Product;
-        return {
+        return enrichProductImages({
           id: docSnap.id,
           ...data,
           slug: getCanonicalProductSlug({ ...data, id: docSnap.id }, docSnap.id),
-        };
+        });
       }
 
       if (mappedId !== idOrSlug) {
         const rawSnap = await getDoc(doc(db, 'products', idOrSlug));
         if (rawSnap.exists()) {
           const data = rawSnap.data() as Product;
-          return {
+          return enrichProductImages({
             id: rawSnap.id,
             ...data,
             slug: getCanonicalProductSlug({ ...data, id: rawSnap.id }, rawSnap.id),
-          };
+          });
         }
       }
 
@@ -990,11 +1055,11 @@ export async function getProduct(idOrSlug: string): Promise<Product | null> {
       if (!slugSnap.empty) {
         const firstDoc = slugSnap.docs[0];
         const data = firstDoc.data() as Product;
-        return {
+        return enrichProductImages({
           id: firstDoc.id,
           ...data,
           slug: getCanonicalProductSlug({ ...data, id: firstDoc.id }, firstDoc.id),
-        };
+        });
       }
 
       // Fallback 2: query by sku field in Firestore (e.g., /product/9137161U)
@@ -1007,11 +1072,11 @@ export async function getProduct(idOrSlug: string): Promise<Product | null> {
       if (!skuSnap.empty) {
         const firstDoc = skuSnap.docs[0];
         const data = firstDoc.data() as Product;
-        return {
+        return enrichProductImages({
           id: firstDoc.id,
           ...data,
           slug: getCanonicalProductSlug({ ...data, id: firstDoc.id }, firstDoc.id),
-        };
+        });
       }
     } catch (err) {
       checkAndTripQuota(err);

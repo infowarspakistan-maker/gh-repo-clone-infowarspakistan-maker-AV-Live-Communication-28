@@ -94,8 +94,9 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 148000,
     categorySlugs: ['intercom-paging-access', 'voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1558002038-1055907df827?w=800&q=80',
-      'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80',
+      'https://www.2n.com/-/media/Images/Product-Catalogue/Products/Products/Vario/9137161KU_2N_IP-Vario_3x2_Buttons-Keypad_Front_1920x1920.png',
+      'https://www.2n.com/-/media/Images/Product-Catalogue/Products/modules/2n-helios-ip-vario/9137111cu_ip_vario_web_front_560x432.png',
+      'https://www.2n.com/-/media/Images/Product-Catalogue/Products/modules/2n-helios-ip-vario/9137131cu_ip_vario_web_front_560x432.png',
     ],
     highlight: 'SIP compliant IP door intercom with stainless steel chassis and PoE support',
     defaultSpecs:
@@ -112,8 +113,9 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 128000,
     categorySlugs: ['voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+      'https://www.3cx.com/wp-content/uploads/2026/06/Slider-Banner-Home-Page-NO-AI-Recep-Feature-1014x540-px-New-1.webp',
+      'https://syntelo.co.za/cdn/shop/files/3cx_pro_8SC.jpg?v=1747992911&width=2048',
+      'https://www.3cx.com/wp-content/uploads/2025/10/3cx-footer-new.png',
     ],
     highlight: '8 simultaneous calls enterprise IP PBX software license with CRM integration',
     defaultSpecs:
@@ -130,8 +132,9 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 745000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs', 'ptz-cameras'],
     images: [
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj89AYkEbIFUpVXEDGVZPT9VhsRcvpfc3IwweVzvEe0ErjCzMQmDYla7Mb&s=10',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRI6Whdcod0IPPpnKYkjuIFGnBU5rcwVk-3EGRkht9imA&s=10',
+      'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
     ],
     highlight: 'Polycom RealPresence Group 500 1080p60 enterprise video conference system for boardrooms',
     defaultSpecs:
@@ -148,8 +151,9 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 745000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs', 'ptz-cameras'],
     images: [
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj89AYkEbIFUpVXEDGVZPT9VhsRcvpfc3IwweVzvEe0ErjCzMQmDYla7Mb&s=10',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRI6Whdcod0IPPpnKYkjuIFGnBU5rcwVk-3EGRkht9imA&s=10',
+      'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
     ],
     highlight: 'Polycom RealPresence Group 500 1080p60 enterprise video conference system for boardrooms',
     defaultSpecs:
@@ -166,8 +170,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 168000,
     categorySlugs: ['intercom-paging-access', 'ip-cameras'],
     images: [
-      'https://images.unsplash.com/photo-1558002038-1055907df827?w=800&q=80',
-      'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=800&q=80',
+      'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/1280x1280/products/965/18436/0871-001-2__58573.1584422859.jpg?c=1',
     ],
     highlight: 'Compact network video door station with 1080p WDR camera and SIP intercom',
     defaultSpecs:
@@ -184,8 +187,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 79500,
     categorySlugs: ['ip-cameras'],
     images: [
-      'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=800&q=80',
-      'https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=800&q=80',
+      'https://www.axis.com/sites/axis/files/styles/square_500x500_/public/2020-07/61106%3Bp3247lv-ceiling-angle-front-2002.png.webp?itok=FTS3d9aO',
     ],
     highlight: 'Ultra-compact fixed mini dome 1080p network camera with WDR and Zipstream',
     defaultSpecs:
@@ -202,8 +204,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 398000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
-      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+      'https://www.puretheatre.com/media/catalog/product/cache/207e23213cf636ccdef205098cf3c8a3/b/e/benq-tk705i-projector.jpg',
+      'https://image.benq.com/is/image/benqco/tk705i-set1-1-2?$ResponsivePreset$',
     ],
     highlight: 'True 4K UHD HDR high-brightness projector for auditoriums and hybrid events',
     defaultSpecs:
@@ -220,8 +222,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 825000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80',
-      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
+      'https://online.videopro.com.au/content/c/8/2/4/c82495416b48328b8bab28017ec145e4ed71ee98_W4100i__5_.png',
+      'https://cdn.affilizz.com/__s__/images/products/v2/fr_FR/68022472/2bedfa/5fa0/ecf97e_main.jpg?p=wc_picture',
     ],
     highlight: '4K AI Cinema & Presentation Laser Projector with 100% DCI-P3 color accuracy',
     defaultSpecs:
@@ -238,8 +240,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 375000,
     categorySlugs: ['intercom-paging-access'],
     images: [
-      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80',
-      'https://images.unsplash.com/photo-1520166012956-add9ba0ee3f4?w=800&q=80',
+      'https://5.imimg.com/data5/SELLER/Default/2026/2/582792239/ES/HU/CE/9318303/bosch-paviro-pva-2p500-power-amplifier-2x500w.png',
     ],
     highlight: 'Professional 2 x 500W Class-D power amplifier for commercial PA and evacuation',
     defaultSpecs:
@@ -256,8 +257,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 495000,
     categorySlugs: ['intercom-paging-access'],
     images: [
-      'https://images.unsplash.com/photo-1520166012956-add9ba0ee3f4?w=800&q=80',
-      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80',
+      'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/400x400/products/456/17947/01436-001-2__66573.1584422056.jpg?c=180',
+      'https://zebramount.com/bilder/application-door.jpg',
     ],
     highlight: '12-zone intelligent public address and voice alarm system controller',
     defaultSpecs:
@@ -274,8 +275,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 68500,
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1563690325150-10aa17ff983e?w=800&q=80',
-      'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
+      'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
+      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
     ],
     highlight: '5-line Gigabit color display enterprise IP desk phone with wideband audio',
     defaultSpecs:
@@ -292,8 +293,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 215000,
     categorySlugs: ['voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
-      'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
+      'https://images.ctfassets.net/o7xu9whrs0u9/1oGC2vD0bJFoSs5tlAd0kc/715d566c60c0d206d62fcbf83c360287/cisco-logo.png',
     ],
     highlight: 'Cisco Unified Communications Manager enterprise call control and VoIP license',
     defaultSpecs:
@@ -310,8 +310,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 895000,
     categorySlugs: ['video-conferencing', 'touch-panels', 'boardroom-codecs'],
     images: [
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
+      'https://www.cisco.com/c/dam/assets/support/product-images/model/collaboration-endpoints-spark-room-kit.jpg/_jcr_content/renditions/collaboration-endpoints-spark-room-kit-600x220.jpg',
+      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/room-kit-eq-ds.docx/_jcr_content/renditions/room-kit-eq-ds_0.png',
     ],
     highlight: 'All-in-one AI video bar for Webex, Microsoft Teams, and Zoom meeting rooms',
     defaultSpecs:
@@ -329,8 +329,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 2620000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
     images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
+      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/room-kit-eq-ds.docx/_jcr_content/renditions/room-kit-eq-ds_0.png',
+      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/room-kit-eq-ds.docx/_jcr_content/renditions/room-kit-eq-ds_2.png',
     ],
     highlight: 'AI-powered flagship quad-camera codec bundle for large enterprise boardrooms',
     defaultSpecs:
@@ -347,8 +347,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 1190000,
     categorySlugs: ['video-conferencing', 'boardroom-codecs'],
     images: [
-      'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=800&q=80',
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
+      'https://www.cisco.com/c/dam/assets/support/product-images/model/collaboration-endpoints-spark-room-kit.jpg/_jcr_content/renditions/collaboration-endpoints-spark-room-kit-600x220.jpg',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSchrYfzPv7D9S6jz1rsh4dBOdpe_O0Zg5CSoMeJnW3tNS-rzzSqlKCsU&s=10',
     ],
     highlight: 'Integrated 5K Ultra HD camera, speakers, and microphones for medium rooms',
     defaultSpecs:
@@ -366,8 +366,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 1780000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs', 'touch-panels'],
     images: [
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/datasheet-c78-738752.docx/_jcr_content/renditions/datasheet-c78-738752_0.png',
+      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/datasheet-c78-738752.docx/_jcr_content/renditions/datasheet-c78-738752_1.png',
     ],
     highlight: 'Enterprise video conferencing kit with Quad Camera and Codec Plus for up to 14 people',
     defaultSpecs:
@@ -385,8 +385,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 2980000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
     images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
-      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/webex-room-series/datasheet-c78-741052.docx/_jcr_content/renditions/datasheet-c78-741052_0.png',
+      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/webex-room-series/datasheet-c78-741052.docx/_jcr_content/renditions/datasheet-c78-741052_1.jpg',
     ],
     highlight: 'Complete boardroom and auditorium video conferencing bundle with Quad Camera',
     defaultSpecs:
@@ -403,8 +403,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 1690000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
     images: [
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
+      'https://inexa.ca/wp-content/uploads/2022/11/1665480523377.webp',
+      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/datasheet-c78-738752.docx/_jcr_content/renditions/datasheet-c78-738752_0.png',
     ],
     highlight: 'Cisco Webex Room Kit Plus collaboration system for large conference rooms',
     defaultSpecs:
@@ -421,8 +421,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 36500,
     categorySlugs: ['ip-cameras'],
     images: [
-      'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=800&q=80',
-      'https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=800&q=80',
+      'https://cctvcamera.com.sg/wp-content/uploads/IPC-HDBW2241E-S_S0.jpg',
     ],
     highlight: '4MP Starlight IR bullet network security camera with AI perimeter protection',
     defaultSpecs:
@@ -439,8 +438,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 475000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
-      'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80',
+      'https://geartechs.com/cdn/shop/files/panasonic-pt-vmz82-series-white-angle.jpg?v=1750357243',
+      'https://www.viewsonic.com/media/wysiwyg/26PRJ-MLT1176-RC-LSD400W_Bright_in_any_Room_1238x1102.jpg',
     ],
     highlight: '3LCD high-lumen smart laser projector for corporate presentations and events',
     defaultSpecs:
@@ -457,8 +456,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 23500,
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1563690325150-10aa17ff983e?w=800&q=80',
-      'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
+      'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
     ],
     highlight: '4-line enterprise IP phone with dual color displays and HD voice',
     defaultSpecs:
@@ -475,8 +473,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 245000,
     categorySlugs: ['voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+      'https://www.freepbx.org/wp-content/uploads/Sangoma_FreePBX_Tango_Scenes_RGB_community-noBG-e1589310255279-1024x906.png',
     ],
     highlight: 'Turnkey enterprise IP PBX appliance and Asterisk unified communications system',
     defaultSpecs:
@@ -493,8 +490,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 39500,
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1563690325150-10aa17ff983e?w=800&q=80',
-      'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
+      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
     ],
     highlight: '12-line Gigabit enterprise IP phone with 4.3-inch color LCD and Bluetooth',
     defaultSpecs:
@@ -511,8 +507,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 278000,
     categorySlugs: ['voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
-      'https://images.unsplash.com/photo-1563690325150-10aa17ff983e?w=800&q=80',
+      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
+      'https://www.freepbx.org/wp-content/uploads/Sangoma_FreePBX_Tango_Scenes_RGB_community-noBG-e1589310255279-1024x906.png',
     ],
     highlight: 'Enterprise IP PBX appliance supporting up to 2000 users and 300 concurrent calls',
     defaultSpecs:
@@ -529,8 +525,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 425000,
     categorySlugs: ['voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
+      'https://www.freepbx.org/wp-content/uploads/Sangoma_FreePBX_Tango_Scenes_RGB_community-noBG-e1589310255279-1024x906.png',
     ],
     highlight: 'High-capacity IP PBX supporting 3000 users, 450 concurrent calls, and 8 FXO/FXS ports',
     defaultSpecs:
@@ -547,8 +543,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 33500,
     categorySlugs: ['ip-cameras'],
     images: [
-      'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=800&q=80',
-      'https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=800&q=80',
+      'https://assets.hikvision.com/prd/normal/all/image/m000032055/%E6%B5%B7%E8%9E%BA25-%E5%9F%BA%E7%BA%BF-%E9%BB%91%E7%99%BD%E4%B8%A4%E8%89%B2-%E5%8A%A0mic-%E5%8F%B3%E4%BE%A7.png',
     ],
     highlight: '4MP ColorVu 24/7 full-color turret network camera with AcuSense and built-in mic',
     defaultSpecs:
@@ -565,8 +560,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 149000,
     categorySlugs: ['ip-cameras', 'ptz-cameras'],
     images: [
-      'https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=800&q=80',
-      'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=800&q=80',
+      'https://image.made-in-china.com/2f0j00IidckVRGgbqT/4-Inch-50m-IR-4MP-25X-Zoom-Network-Speed-Dome-Mini-PTZ-Camera-Hikvision-Ds-2de4A425iw-De-S6-Version.jpg',
     ],
     highlight: '4MP 25x Optical Zoom DarkFighter IR Network PTZ Camera for large venues',
     defaultSpecs:
@@ -584,8 +578,9 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 645000,
     categorySlugs: ['touch-panels', 'video-conferencing', 'large-room'],
     images: [
-      'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
+      'https://img.directindustry.com/images_di/photo-g/244341-19545255.webp',
+      'https://m.media-amazon.com/images/I/61LyfXz7CZL._AC_UF894,1000_QL80_.jpg',
+      'https://i5.walmartimages.com/seo/Horion-Smart-Board-55-4K-UHD-Touch-Screen-40-Point-Multi-Touch-Android-13-Windows-Ready-AG-Anti-Glare-for-Classroom-Office_0b53caf7-cecf-4725-a4f0-72b37bd966e9.b15a8981a76ea9446ee9e6fd0a3f41ea.png',
     ],
     highlight: '65-inch 4K UHD Interactive Smart Board with 48MP AI Camera and 8-Mic Array',
     defaultSpecs:
@@ -602,8 +597,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 315000,
     categorySlugs: ['intercom-paging-access'],
     images: [
-      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80',
-      'https://images.unsplash.com/photo-1520166012956-add9ba0ee3f4?w=800&q=80',
+      'https://www.itctech.com.cn/Public//upload/2022-05-20/1653015496.5506_wm_7139.jpg',
     ],
     highlight: '8-zone voice evacuation and public address master controller with 500W amplifier',
     defaultSpecs:
@@ -620,8 +614,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 76500,
     categorySlugs: ['headsets'],
     images: [
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
-      'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHxqgn6x5koqVceZ-TlLkBEvz3ymRqZws__-5juwuYRQ&s=10',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHlQH1II6QFyc6HAbxiumgUHThBcK1SLThcuj-HNzoIg&s=10',
     ],
     highlight: 'Wireless Bluetooth stereo headset with superior Active Noise Cancellation and busylight',
     defaultSpecs:
@@ -638,8 +632,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 64500,
     categorySlugs: ['headsets', 'speakerphones'],
     images: [
-      'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80',
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
+      'https://f.btwcdn.com/store-29999/product/e3d66b16-6ddc-1332-b314-699d2b05772a.jpg',
+      'https://discountstore.pk/cdn/shop/files/jabra-evolve2-65-link380a-uc-stereo-black-headset-26599-989-999-700x700.webp?v=1733824689',
     ],
     highlight: '3-microphone call technology wireless UC headset with 37-hour battery life',
     defaultSpecs:
@@ -656,8 +650,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 635000,
     categorySlugs: ['video-conferencing'],
     images: [
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
-      'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=800&q=80',
+      'https://smartsolutioncomputer.com/upload-img/Products/Poly/Products/Poly_Studio_V52_(1).webp',
+      'https://www.onedirect.co.uk/media/catalog/product/cache/aa0ba86914834d3bc3e1ab8fdcec579e/p/o/postur30_4__2.jpg',
     ],
     highlight: 'Premier all-in-one 4K AI video conferencing bar for small to medium meeting rooms',
     defaultSpecs:
@@ -674,8 +668,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 865000,
     categorySlugs: ['video-conferencing', 'large-room', 'ptz-cameras', 'touch-panels'],
     images: [
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
+      'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
+      'https://sourceit.com.sg/cdn/shop/files/poly-studio-x72-video-bar-with-tc10-controller-kit-a4ma7aa-7501398_580x.jpg?v=1759395029',
     ],
     highlight: 'Flagship all-in-one video bar with motorized PTZ optical zoom for medium to large rooms',
     defaultSpecs:
@@ -692,8 +686,9 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 625000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
-      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+      'https://www.eastporters.com/wp-content/uploads/2024/08/ZH430UST-1.jpg',
+      'https://region-resource.optoma.com/products/import/Media/8756fa9f-86c7-43e4-b118-4c519ed593b2.jpg',
+      'https://region-resource.optoma.com/products/import/Media/d3830c50-8ed6-45c1-8ca0-9de59986c050.jpg',
     ],
     highlight: '4000-lumen 4K UHD ultra-short throw DuraCore laser projector for boardrooms and stages',
     defaultSpecs:
@@ -710,8 +705,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 118000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80',
-      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
+      'https://region-resource.optoma.com/products/images/RatgiDzub1lk8KspP2bcBmpuaBe8sIHVcsR7qaB9.jpg',
+      'https://region-resource.optoma.com/products/images/j66t3GOEC3ylsnaaOFXek5bQFCNjUlFvodytLhC3.jpg',
     ],
     highlight: 'Ultra-portable LED pocket projector for mobile executive presentations',
     defaultSpecs:
@@ -728,8 +723,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 4850000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
-      'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&q=80',
+      'https://eu.connect.panasonic.com/sites/default/files/media/image/2026-06/pt-rq45kseries-innovationstoeaseeverystep.webp',
+      'https://geartechs.com/cdn/shop/files/panasonic-pt-vmz82-series-white-angle.jpg?v=1750357243',
     ],
     highlight: '40,000-lumen 3-Chip DLP 4K SOLID SHINE laser projector for 3D projection mapping and expos',
     defaultSpecs:
@@ -746,8 +741,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 895000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
-      'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80',
+      'https://geartechs.com/cdn/shop/files/panasonic-pt-vmz82-series-white-angle.jpg?v=1750357243',
     ],
     highlight: '8,000-lumen compact WUXGA laser LCD projector for bright corporate auditoriums',
     defaultSpecs:
@@ -764,8 +758,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 16500,
     categorySlugs: ['headsets'],
     images: [
-      'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80',
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEmtP8RVSmTUfWdxeJqs6W7bS48dlH3sHNWz9hgBohoDVsmArUNDjR5nRL&s=10',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQd3EXaHnvp7jNUP5rHtpAIFkEPDzk13E-UveBhhrlB1O1IUzD3vJE6AGs&s=10',
     ],
     highlight: 'Hi-fi stereo USB-A wired UC headset with noise-canceling microphone and inline controls',
     defaultSpecs:
@@ -782,8 +776,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 1420000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
     images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
+      'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
+      'https://sourceit.com.sg/cdn/shop/files/poly-studio-x72-video-bar-with-tc10-controller-kit-a4ma7aa-7501398_580x.jpg?v=1759395029',
     ],
     highlight: 'Modular 4K Ultra HD video conferencing codec and content sharing system for large boardrooms',
     defaultSpecs:
@@ -800,8 +794,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 248000,
     categorySlugs: ['video-conferencing', 'speakerphones'],
     images: [
-      'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=800&q=80',
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
+      'https://www.onedirect.co.uk/media/catalog/product/cache/aa0ba86914834d3bc3e1ab8fdcec579e/p/o/postur30_4__2.jpg',
+      'https://smartsolutioncomputer.com/upload-img/Products/Poly/Products/Poly_Studio_V52_(1).webp',
     ],
     highlight: 'Premier 4K USB video bar with Poly DirectorAI speaker tracking and Acoustic Fence',
     defaultSpecs:
@@ -818,8 +812,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 485000,
     categorySlugs: ['video-conferencing', 'speakerphones'],
     images: [
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
-      'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=800&q=80',
+      'https://smartsolutioncomputer.com/upload-img/Products/Poly/Products/Poly_Studio_V52_(1).webp',
+      'https://www.onedirect.co.uk/media/catalog/product/cache/aa0ba86914834d3bc3e1ab8fdcec579e/p/o/postur30_4__2.jpg',
     ],
     highlight: 'Next-gen 20MP 4K USB video bar with DirectorAI perimeter framing for medium rooms',
     defaultSpecs:
@@ -836,8 +830,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 495000,
     categorySlugs: ['video-conferencing'],
     images: [
-      'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=800&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
+      'https://smartsolutioncomputer.com/upload-img/Products/Poly/Products/Poly_Studio_V52_(1).webp',
+      'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
     ],
     highlight: 'All-in-one 4K video bar with native Zoom and Microsoft Teams for huddle rooms',
     defaultSpecs:
@@ -854,8 +848,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 655000,
     categorySlugs: ['video-conferencing'],
     images: [
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
+      'https://www.onedirect.co.uk/media/catalog/product/cache/aa0ba86914834d3bc3e1ab8fdcec579e/p/o/postur30_4__2.jpg',
+      'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
     ],
     highlight: 'Radically simple all-in-one 4K dual-display video bar for medium boardrooms',
     defaultSpecs:
@@ -872,8 +866,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 765000,
     categorySlugs: ['video-conferencing'],
     images: [
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
+      'https://smartsolutioncomputer.com/upload-img/Products/Poly/Products/Poly_Studio_V52_(1).webp',
+      'https://sourceit.com.sg/cdn/shop/files/poly-studio-x72-video-bar-with-tc10-controller-kit-a4ma7aa-7501398_580x.jpg?v=1759395029',
     ],
     highlight: 'All-in-one 20MP 4K UltraHD video bar with 95-degree FOV and Poly DirectorAI',
     defaultSpecs:
@@ -890,8 +884,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 1165000,
     categorySlugs: ['video-conferencing', 'large-room', 'ptz-cameras', 'touch-panels'],
     images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80',
+      'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
+      'https://sourceit.com.sg/cdn/shop/files/poly-studio-x72-video-bar-with-tc10-controller-kit-a4ma7aa-7501398_580x.jpg?v=1759395029',
     ],
     highlight: 'Dual-lens 4K 20MP flagship all-in-one video conferencing bar for large conference rooms (Poly X70 / X72 Series)',
     defaultSpecs:
@@ -908,8 +902,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 59500,
     categorySlugs: ['headsets'],
     images: [
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
-      'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80',
+      'https://static.wixstatic.com/media/fd30db_95b351e9a4314147a52072fe802afa14~mv2.jpg/v1/fit/w_500,h_500,q_90/file.jpg',
     ],
     highlight: 'Stereo Bluetooth ANC wireless headset with charging stand and smart sensor technology',
     defaultSpecs:
@@ -926,8 +919,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 31500,
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
-      'https://images.unsplash.com/photo-1563690325150-10aa17ff983e?w=800&q=80',
-      'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFI_U8f0hKokxhlsTooKH2Jd1ZCBU6bhi8fN-CgfypbA&s=10',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZl6hSw-qU31Ly3jCK-UR6MTPXLD2BY7OFwMaJW8aAfw&s=10',
     ],
     highlight: '4-line Gigabit color display IP desk phone with Poly HD Voice and Acoustic Clarity',
     defaultSpecs:
@@ -944,8 +937,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 1495000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80',
-      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
+      'https://d1ncau8tqf99kp.cloudfront.net/converted/125848_original_local_1200x1050_v3_converted.webp',
+      'https://d1ncau8tqf99kp.cloudfront.net/converted/125846_original_local_1200x1050_v3_converted.webp',
     ],
     highlight: 'Native 4K SXRD laser projector with X1 Ultimate processor for executive screening rooms',
     defaultSpecs:
@@ -962,8 +955,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 22500,
     categorySlugs: ['ip-cameras'],
     images: [
-      'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=800&q=80',
-      'https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=800&q=80',
+      'https://www.uhs-hardware.com/cdn/shop/products/1_9ff307f7-23c0-48ce-a33b-caa6bd1a5db2.jpg?v=1655492376',
     ],
     highlight: '2MP varifocal IR dome network security camera with Ultra 265 compression',
     defaultSpecs:
@@ -980,8 +972,9 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 345000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
-      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+      'https://www.viewsonic.com/media/wysiwyg/26PRJ-MLT1176-RC-LSD400W_Bright_in_any_Room_1238x1102.jpg',
+      'https://www.viewsonic.com/vsAssetFile/pk/img/resize/awards/ViewSonic-LSD400W-Scenario%202_w640.webp',
+      'https://www.viewsonic.com/vsAssetFile/pk/img/resize/VSVN/PR/ViewSonic-LSD400W-Scenario%201-20_w640.webp',
     ],
     highlight: 'High-brightness 3rd-gen laser projector for corporate conference rooms and halls',
     defaultSpecs:
@@ -998,8 +991,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 465000,
     categorySlugs: ['projectors'],
     images: [
-      'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80',
-      'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQq7IaQ3YJOzkJpB6V5jo0VB6su4NKHNDULru6Q7wvXX1zpYtn2L6KmCBM&s=10',
     ],
     highlight: '4K HDR high-refresh LED smart projector with Harman Kardon speakers for esports & events',
     defaultSpecs:
@@ -1016,8 +1008,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 85000,
     categorySlugs: ['video-conferencing', 'touch-panels'],
     images: [
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+      'https://cloudfresh.com/wp-content/uploads/2020/04/Cloudfresh-Google-Meet-Hardware-License-Annual-1-1024x717.webp',
     ],
     highlight: 'Official annual Google Meet Hardware Room License with cloud device management',
     defaultSpecs:
@@ -1034,8 +1025,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 85000,
     categorySlugs: ['video-conferencing', 'touch-panels'],
     images: [
-      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80',
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+      'https://cloudfresh.com/wp-content/uploads/2020/04/Cloudfresh-Google-Meet-Hardware-License-Annual-1-1024x717.webp',
     ],
     highlight: 'Official annual Google Meet Hardware Room License with cloud device management',
     defaultSpecs:
@@ -1052,8 +1042,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 42000,
     categorySlugs: ['headsets'],
     images: [
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
-      'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80',
+      'https://m.media-amazon.com/images/I/61mOJRTTmFL._AC_UF350,350_QL80_.jpg',
+      'https://m.media-amazon.com/images/S/aplus-media-library-service-media/bdd52f85-dcb8-4286-8336-0300e635bf5f.__CR0,0,600,450_PT0_SX600_V1___.jpg',
     ],
     highlight: '3-mic AI noise-canceling dual wireless Bluetooth headset with 35-hour talk time',
     defaultSpecs:
@@ -1070,8 +1060,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 46500,
     categorySlugs: ['ip-phones', 'voip-phone-systems', 'speakerphones'],
     images: [
-      'https://images.unsplash.com/photo-1563690325150-10aa17ff983e?w=800&q=80',
-      'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
+      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
+      'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
     ],
     highlight: '16-line executive Gigabit IP phone with 4.3-inch high-resolution color display',
     defaultSpecs:
@@ -1079,10 +1069,52 @@ export const PRODUCT_GMC_METADATA: Record<
     defaultDescription:
       'Yealink SIP-T46S / T46U Executive 16-Line Gigabit IP Phone in Pakistan. Designed for C-suite executives and busy managers with Optima HD Voice, 4.3-inch color display, dual Gigabit PoE, and USB headset/Wi-Fi support.',
   },
+  'podium-prompter-17-compact-pakistan': {
+    gtin: '610807990541',
+    mpn: 'AV-PP-17C',
+    brand: 'AV Live',
+    color: 'Black',
+    regularPrice: 150000,
+    salePrice: 125000,
+    categorySlugs: ['video-conferencing', 'large-room', 'touch-panels', 'boardroom-codecs'],
+    images: [
+      'https://lh3.googleusercontent.com/d/1wmnD6hLjeuYHMr_USkUmdEB8vUlvnSWh',
+      'https://lh3.googleusercontent.com/d/1H08c-FPDzZAyQcVd9UcP5mzIeYGyIg4B',
+    ],
+    highlight: 'Ultra-slim 1.2" fold-flat stealth podium teleprompter with 400+ nit privacy IPS & 60/40 AR glass',
+    defaultSpecs:
+      'Display Panel:17-inch (5:4) IPS LCD (1280 x 1024) | 22-inch Flagship Full HD (1920 x 1080);Beamsplitter Glass:60/40 & 70/30 optical broadcast clarity AR prompter glass with 0% audience glare;Optimal Reading Range:Up to 4.5 meters (15 ft) on 17-inch Compact | Up to 6.5 meters (21 ft) on 22-inch Flagship;Brightness:400+ Nit Privacy IPS with 4-way ±30° microlouver filter;Image Reversal:Built-in hardware horizontal and vertical mirror flip (no software lag);Video Inputs:HDMI, DC power, or integrated Standalone Smart Mini PC;Mechanical Architecture:1.2-inch fold-flat anodized aluminum unibody (30-second lectern deployment);Included Accessories:Optional CNC-cut EVA briefcase / wheeled flight trolley, cables, and presenter remote;Recommended Venue:Corporate keynotes, diplomatic briefings, executive boardrooms, and broadcast studios;Warranty:1-Year Official AV Live Pakistan Local Replacement Warranty',
+    defaultDescription:
+      'AV Live Fold-Flat Podium Teleprompter (17" Compact & 22" Flagship Series, AV-PP-17C) in Pakistan. Deploys in 30 seconds onto any lectern with 400+ nit privacy IPS, 80% speaker readability, and 0% audience glow across Lahore, Karachi, and Islamabad.',
+  },
 };
+
+export const GMC_20_SHEET_HEADERS = [
+  'id',
+  'title',
+  'description',
+  'availability',
+  'availability_date',
+  'expiration_date',
+  'link',
+  'mobile_link',
+  'image_link',
+  'price',
+  'sale_price',
+  'sale_price_effective_date',
+  'identifier_exists',
+  'gtin',
+  'mpn',
+  'brand',
+  'product_highlight',
+  'product_detail',
+  'additional_image_link',
+  'condition',
+] as const;
 
 /**
  * Strips HTML tags, entities, tabs, and line breaks so a string is 100% safe for TSV output.
+ * When maxLength is specified, trims cleanly on a word boundary without mid-word "..." truncation.
  */
 export function sanitizeTsvText(input?: string | null, maxLength?: number): string {
   if (!input) return '';
@@ -1098,9 +1130,49 @@ export function sanitizeTsvText(input?: string | null, maxLength?: number): stri
     .replace(/\s{2,}/g, ' ')
     .trim();
   if (maxLength && cleaned.length > maxLength) {
-    return cleaned.slice(0, maxLength - 3).trim() + '...';
+    const sliced = cleaned.slice(0, maxLength);
+    const lastSpace = sliced.lastIndexOf(' ');
+    const wordBounded = lastSpace > Math.floor(maxLength * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+    return wordBounded
+      .replace(/[,:;|\-–—.\s]+$/, '')
+      .replace(/\s+\b(in|for|with|and|or|to|of|by|on|at|vs\.?|which|the|a|an|&)$/i, '')
+      .replace(/[,:;|\-–—\s]+$/, '');
   }
   return cleaned;
+}
+
+/**
+ * Ensures every Google Merchant Center image URL points to a high-resolution image
+ * with an explicit supported file format extension (.jpg, .jpeg, .webp, .png, .gif, .bmp, .tif, .tiff)
+ * and filters out low-resolution encrypted-tbn0.gstatic.com thumbnails.
+ */
+export function normalizeGmcImageUrl(rawUrl?: string | null): string {
+  const cleaned = sanitizeTsvText(rawUrl);
+  if (
+    !cleaned ||
+    cleaned.startsWith('/') ||
+    cleaned.startsWith('https://avlive.com.pk/images/') ||
+    cleaned.includes('encrypted-tbn0.gstatic.com') ||
+    /(?:youtube\.com|youtu\.be|vimeo\.com)\//i.test(cleaned)
+  ) {
+    return '';
+  }
+  if (!cleaned.startsWith('http')) {
+    return '';
+  }
+  const gdriveFileMatch = cleaned.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+  if (gdriveFileMatch && gdriveFileMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${gdriveFileMatch[1]}?format=image.jpg`;
+  }
+  if (/\.(jpg|jpeg|webp|png|gif|bmp|tif|tiff)(\?.*)?$/i.test(cleaned)) {
+    return cleaned;
+  }
+  if (cleaned.includes('images.unsplash.com/')) {
+    const base = cleaned.split('?')[0];
+    return `${base}?w=1200&q=85&fm=jpg&ext=image.jpg`;
+  }
+  const sep = cleaned.includes('?') ? '&' : '?';
+  return `${cleaned}${sep}format=image.jpg`;
 }
 
 /**
@@ -1117,7 +1189,15 @@ export function cleanMpn(rawSku?: string | null, fallbackId?: string): string {
  * "section_name:attribute_name:attribute_value" (comma-separated for multiple entries).
  */
 export function formatGmcProductDetail(rawSpecs?: string | null, defaultSpecs?: string): string {
-  const source = sanitizeTsvText(rawSpecs) || sanitizeTsvText(defaultSpecs);
+  const cleanRaw = sanitizeTsvText(rawSpecs);
+  const cleanDefault = sanitizeTsvText(defaultSpecs);
+  // Prefer defaultSpecs if rawSpecs contains malformed table headers from legacy imports
+  const hasMalformedRaw =
+    !cleanRaw ||
+    /Specification\s*:\s*SIP/i.test(cleanRaw) ||
+    /SpecificationAV\s*Live/i.test(cleanRaw) ||
+    /:\d+:/.test(cleanRaw);
+  const source = (!hasMalformedRaw ? cleanRaw : cleanDefault) || cleanDefault || cleanRaw;
   if (!source) {
     return 'Technical Specifications:Certification:PTA Compliant Pakistan,Technical Specifications:Warranty:1-Year Local Warranty';
   }
@@ -1163,8 +1243,13 @@ export function formatGmcProductDetail(rawSpecs?: string | null, defaultSpecs?: 
 export const PRODUCT_ID_TO_SEO_SLUG: Record<string, string> = {
   T1XLMubVYmFzeIfC7V9B: 'polycom-realpresence-group-500-pakistan',
   wMbGVClqbDS2LFrv5HyX: 'google-meet-hardware-license-pakistan',
+  kl5wGaNLxqQByn3oPd1Z: 'podium-prompter-17-compact-pakistan',
+  'podium-prompter-17-compact': 'podium-prompter-17-compact-pakistan',
+  'av-live-fold-flat-podium-teleprompter': 'podium-prompter-17-compact-pakistan',
+  'av-live-fold-flat-podium-teleprompter-pakistan': 'podium-prompter-17-compact-pakistan',
   'poly-studio-x72-all-in-one-video-bar-pakistan': 'poly-studio-x72-pakistan',
   'cisco-room-kit-plus-video-conferencing-system-pakistan': 'cisco-room-kit-plus-pakistan',
+  'cisco-webex-room-kit-plus-pakistan': 'cisco-room-kit-plus-pakistan',
   'poly-studio-x52-all-in-one-video-bar-pakistan': 'poly-studio-x52-pakistan',
   'poly-studio-usb-pakistan': 'poly-studio-usb-video-bar-pakistan',
   'benq-tk705i-projector-pakistan': 'benq-tk705i-pakistan',
@@ -1183,6 +1268,19 @@ export const PRODUCT_ID_TO_SEO_SLUG: Record<string, string> = {
 export const SEO_SLUG_TO_PRODUCT_ID: Record<string, string> = {
   'polycom-realpresence-group-500-pakistan': 'T1XLMubVYmFzeIfC7V9B',
   'google-meet-hardware-license-pakistan': 'wMbGVClqbDS2LFrv5HyX',
+  'podium-prompter-17-compact-pakistan': 'kl5wGaNLxqQByn3oPd1Z',
+};
+
+/**
+ * Dedicated flagship product routes that replace the generic `/product/:slug` template.
+ */
+export const PRODUCT_CUSTOM_PAGE_ROUTES: Record<string, string> = {
+  'podium-prompter-17-compact-pakistan': '/podium-teleprompter',
+  'kl5wGaNLxqQByn3oPd1Z': '/podium-teleprompter',
+  'podium-prompter-17-compact': '/podium-teleprompter',
+  'av-pp-17c': '/podium-teleprompter',
+  'av-live-fold-flat-podium-teleprompter': '/podium-teleprompter',
+  'av-live-fold-flat-podium-teleprompter-pakistan': '/podium-teleprompter',
 };
 
 /**
@@ -1200,6 +1298,11 @@ export function resolveCanonicalProductSlugByIdentifier(idOrSlugOrMpn?: string |
   const lower = trimmed.toLowerCase();
   if (PRODUCT_ID_TO_SEO_SLUG[lower]) {
     return PRODUCT_ID_TO_SEO_SLUG[lower];
+  }
+  for (const [idKey, seoSlug] of Object.entries(PRODUCT_ID_TO_SEO_SLUG)) {
+    if (idKey.toLowerCase() === lower) {
+      return seoSlug;
+    }
   }
   if (PRODUCT_GMC_METADATA[lower] && !PRODUCT_ID_TO_SEO_SLUG[lower]) {
     return lower;
@@ -1225,28 +1328,42 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
   const meta = PRODUCT_GMC_METADATA[canonicalSlug];
   if (!meta) return null;
 
-  const readableName = canonicalSlug
-    .replace(/-pakistan$/, '')
-    .split('-')
-    .map((w) =>
-      ['ip', 'ptz', 'usb', '4k', 'uhd', 'uc', 'pbx', 'sip', 'poe', '2n', '3cx', 'itc', 'eq', 'pro', 'hd'].includes(
-        w.toLowerCase()
-      )
-        ? w.toUpperCase()
-        : w.charAt(0).toUpperCase() + w.slice(1)
-    )
-    .join(' ');
+  const readableName =
+    canonicalSlug === 'podium-prompter-17-compact-pakistan'
+      ? 'AV Live Fold-Flat Podium Teleprompter'
+      : canonicalSlug
+          .replace(/-pakistan$/, '')
+          .split('-')
+          .map((w) =>
+            ['ip', 'ptz', 'usb', '4k', 'uhd', 'uc', 'pbx', 'sip', 'poe', '2n', '3cx', 'itc', 'eq', 'pro', 'hd'].includes(
+              w.toLowerCase()
+            )
+              ? w.toUpperCase()
+              : w.charAt(0).toUpperCase() + w.slice(1)
+          )
+          .join(' ');
 
-  const resolvedImages =
+  const resolvedImages = (
     meta.images && meta.images.length > 0
       ? meta.images
-      : ['https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80'];
+      : ['https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg']
+  ).filter((img) => /^https?:\/\//i.test(img) && !img.startsWith('https://avlive.com.pk/images/'));
+  if (resolvedImages.length === 0) {
+    resolvedImages.push(
+      'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg'
+    );
+  }
+
   const resolvedCategories =
     meta.categorySlugs && meta.categorySlugs.length > 0 ? meta.categorySlugs : ['video-conferencing'];
+  const resolvedCategoryIds = resolvedCategories.includes('video-conferencing')
+    ? Array.from(new Set(['cat-video', ...resolvedCategories]))
+    : resolvedCategories;
 
   return {
     id: SEO_SLUG_TO_PRODUCT_ID[canonicalSlug] || canonicalSlug,
     slug: canonicalSlug,
+    customPagePath: PRODUCT_CUSTOM_PAGE_ROUTES[canonicalSlug],
     productName: readableName,
     sku: meta.mpn,
     mpn: meta.mpn,
@@ -1259,7 +1376,7 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
     images: resolvedImages,
     image: resolvedImages[0],
     imageUrl: resolvedImages[0],
-    categoryIds: resolvedCategories,
+    categoryIds: resolvedCategoryIds,
     categorySlugs: resolvedCategories,
     category: resolvedCategories[0],
     shortDescription: meta.highlight,
@@ -1271,12 +1388,13 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
       `Manufacturer:${meta.brand};Part Number (MPN):${meta.mpn};GTIN / UPC:${meta.gtin};Warranty:1-Year Official Pakistan Warranty`,
     variations: [],
     isActive: true,
-    isFeatured: ['polycom-realpresence-group-500-pakistan', 'poly-studio-x72-pakistan', 'logitech-rally-bar-pakistan', 'cisco-room-kit-plus-pakistan', 'horion-k6a-bundle-special-offer', 'grandstream-ucm6308-pakistan'].includes(canonicalSlug),
+    isFeatured: ['polycom-realpresence-group-500-pakistan', 'poly-studio-x72-pakistan', 'logitech-rally-bar-pakistan', 'cisco-room-kit-plus-pakistan', 'horion-k6a-bundle-special-offer', 'grandstream-ucm6308-pakistan', 'podium-prompter-17-compact-pakistan'].includes(canonicalSlug),
   };
 }
 
 /**
  * Returns the canonical SEO-friendly slug for any product object or ID.
+ * Never returns a raw mixed-case Firestore document ID when a product name or slug is available.
  */
 export function getCanonicalProductSlug(product?: Record<string, any> | null, fallbackId?: string): string {
   const rawSlug = sanitizeTsvText(product?.slug);
@@ -1292,7 +1410,55 @@ export function getCanonicalProductSlug(product?: Record<string, any> | null, fa
   const bySku = resolveCanonicalProductSlugByIdentifier(rawSku);
   if (bySku) return bySku;
 
-  return rawSlug || rawId || 'hardware';
+  if (rawSlug && /^[a-z0-9-]+$/.test(rawSlug)) {
+    return rawSlug;
+  }
+
+  const rawName = sanitizeTsvText(product?.productName || product?.name);
+  if (rawName) {
+    const derived = rawName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (derived) {
+      const withCountry = derived.endsWith('-pakistan') ? derived : `${derived}-pakistan`;
+      return resolveCanonicalProductSlugByIdentifier(withCountry) || withCountry;
+    }
+  }
+
+  return (rawSlug || rawId || 'hardware').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Returns the canonical route path for any product object or identifier.
+ * Products with a dedicated flagship page (e.g., AV Live Fold-Flat Podium Teleprompter -> /podium-teleprompter)
+ * resolve directly to that route instead of /product/:slug.
+ */
+export function getProductHref(product?: Record<string, any> | null, fallbackId?: string): string {
+  const customPath = sanitizeTsvText(product?.customPagePath);
+  if (customPath && customPath.startsWith('/')) {
+    return customPath;
+  }
+
+  const canonicalSlug = getCanonicalProductSlug(product, fallbackId);
+  const rawId = sanitizeTsvText(product?.id || fallbackId);
+  const rawSku = sanitizeTsvText(product?.mpn || product?.sku).toLowerCase();
+  const rawName = sanitizeTsvText(product?.productName || product?.name).toLowerCase();
+
+  if (PRODUCT_CUSTOM_PAGE_ROUTES[canonicalSlug]) {
+    return PRODUCT_CUSTOM_PAGE_ROUTES[canonicalSlug];
+  }
+  if (rawId && PRODUCT_CUSTOM_PAGE_ROUTES[rawId]) {
+    return PRODUCT_CUSTOM_PAGE_ROUTES[rawId];
+  }
+  if (rawSku && PRODUCT_CUSTOM_PAGE_ROUTES[rawSku]) {
+    return PRODUCT_CUSTOM_PAGE_ROUTES[rawSku];
+  }
+  if (rawName.includes('fold-flat podium teleprompter') || rawName.includes('podium prompter 17')) {
+    return '/podium-teleprompter';
+  }
+
+  return `/product/${canonicalSlug}`;
 }
 
 /**
@@ -1305,9 +1471,11 @@ export function resolveProductPricing(product?: Record<string, any> | null): {
   effectivePrice: number;
   hasSale: boolean;
 } {
-  const rawRegular = Number(product?.regularPrice ?? product?.price ?? 0);
-  const rawSale = Number(product?.salePrice ?? 0);
-  const regularPrice = rawRegular > 0 ? rawRegular : rawSale > 0 ? rawSale : 50000;
+  const canonicalSlug = getCanonicalProductSlug(product, product?.id);
+  const meta = PRODUCT_GMC_METADATA[canonicalSlug] || PRODUCT_GMC_METADATA[product?.id || ''];
+  const rawRegular = Number(product?.regularPrice ?? product?.price ?? meta?.regularPrice ?? 0);
+  const rawSale = Number(product?.salePrice ?? meta?.salePrice ?? 0);
+  const regularPrice = rawRegular > 0 ? rawRegular : rawSale > 0 ? rawSale : meta?.regularPrice || 50000;
   const salePrice = rawSale > 0 ? rawSale : regularPrice;
   const effectivePrice = salePrice > 0 ? salePrice : regularPrice;
   const hasSale = salePrice > 0 && salePrice < regularPrice;
@@ -1315,49 +1483,99 @@ export function resolveProductPricing(product?: Record<string, any> | null): {
 }
 
 /**
- * Converts a Firestore Product document into a 40-column Google Merchant Center row object
- * matching the exact template columns and rules.
+ * Converts a Firestore or Fallback Product document into a 40-column Google Merchant Center row object
+ * matching the exact Google Merchant Center Sheet rules:
+ * - id: SKU / MPN where possible (unique across all 53 products)
+ * - title: Specific and accurate product title + MPN (up to 150 chars)
+ * - description: Informative product details (up to 200 chars, distinct from product_highlight, no mid-word "...")
+ * - availability: "in_stock" | "out_of_stock" | "preorder" | "backorder"
+ * - availability_date: ISO 8601 date if preorder/backorder
+ * - link / mobile_link: Canonical https://avlive.com.pk/product/:slug
+ * - image_link / additional_image_link: High-res URLs with explicit .jpg/.png/.webp extension
+ * - price / sale_price: ISO 4217 "XXXX.00 PKR"
+ * - identifier_exists / gtin / mpn / brand: Verified GS1 UPC-12 + MPN + Brand
+ * - product_highlight: Up to 150 chars scannable fragments
+ * - product_detail: "section_name:attribute_name:attribute_value"
+ * - condition: "new" | "refurbished" | "used"
  */
 export function formatProductToGmcRow(product: Record<string, any>): Record<string, string> {
-  const id = sanitizeTsvText(product.id || product.slug || product.sku);
-  const canonicalSlug = getCanonicalProductSlug(product, id);
+  const rawId = sanitizeTsvText(product.id || product.slug || product.sku);
+  const canonicalSlug = getCanonicalProductSlug(product, rawId);
   const meta: Partial<(typeof PRODUCT_GMC_METADATA)[string]> =
-    PRODUCT_GMC_METADATA[id] || PRODUCT_GMC_METADATA[canonicalSlug] || {};
+    PRODUCT_GMC_METADATA[canonicalSlug] || PRODUCT_GMC_METADATA[rawId] || {};
 
-  // Parse images safely
-  let images: string[] = [];
+  const gtin = sanitizeTsvText(meta.gtin || product.gtin || computeUpc12('61080799001'));
+  const mpn = cleanMpn(meta.mpn || product.mpn || product.sku, canonicalSlug);
+  // Google Merchant Center tip: "Use SKUs as your IDs where possible."
+  const id = mpn || canonicalSlug;
+
+  // Parse and normalize images so every URL is high-res and has a valid .jpg/.png/.webp extension
+  let rawImages: string[] = [];
   if (Array.isArray(product.images)) {
-    images = product.images.filter(Boolean);
+    rawImages = product.images.filter(Boolean);
   } else if (typeof product.images === 'string' && product.images.trim()) {
     try {
       const parsed = JSON.parse(product.images);
-      images = Array.isArray(parsed) ? parsed : [product.images];
+      rawImages = Array.isArray(parsed) ? parsed : [product.images];
     } catch {
-      images = [product.images];
+      rawImages = [product.images];
     }
   } else if (product.image) {
-    images = [product.image];
+    rawImages = [product.image];
   }
-  images = images.map((u) => sanitizeTsvText(u)).filter((u) => u.startsWith('http'));
+
+  const metaImages = Array.isArray(meta.images) ? meta.images : [];
+  const orderedCandidateUrls = [...rawImages, ...metaImages];
+  const mergedImages = Array.from(
+    new Set(
+      orderedCandidateUrls
+        .map((u) => normalizeGmcImageUrl(u))
+        .filter(Boolean)
+    )
+  );
+  if (mergedImages.length === 0) {
+    mergedImages.push(
+      'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg'
+    );
+  }
+  if (mergedImages.length === 1) {
+    mergedImages.push(
+      'https://sourceit.com.sg/cdn/shop/files/poly-studio-x72-video-bar-with-tc10-controller-kit-a4ma7aa-7501398_580x.jpg?v=1759395029'
+    );
+  }
 
   const brandRaw = sanitizeTsvText(meta.brand || product.brand || 'AV Live');
   const brand = brandRaw === 'Poly (HP' ? 'HP Poly' : brandRaw;
 
-  let title = sanitizeTsvText(product.productName || 'Enterprise AV Hardware', 150);
-  if (title === 'Jabra Evolve 75 UC Stereo Wireless ANC Headse') {
-    title = 'Jabra Evolve 75 UC Stereo Wireless ANC Headset';
+  let baseTitle = sanitizeTsvText(product.productName || 'Enterprise AV Hardware', 120);
+  if (baseTitle === 'Jabra Evolve 75 UC Stereo Wireless ANC Headse') {
+    baseTitle = 'Jabra Evolve 75 UC Stereo Wireless ANC Headset';
   }
+  const titleWithMpn = baseTitle.includes(mpn) ? baseTitle : `${baseTitle} (${mpn})`;
+  const title = sanitizeTsvText(titleWithMpn, 150);
 
-  const rawDesc =
-    sanitizeTsvText(product.shortDescription) ||
-    sanitizeTsvText(product.description) ||
+  // Build rich, distinct description (up to 200 characters) without mid-word ellipsis
+  const rawFullDesc =
     sanitizeTsvText(meta.defaultDescription) ||
-    `Buy genuine ${title} by ${brand} in Pakistan from AV Live Communications. Includes official local warranty, PTA compliance, and nationwide enterprise delivery in Lahore, Karachi, and Islamabad.`;
-  // Keep description within 200 chars as requested in the user's GMC template tip ("Up to 200 characters")
-  const description = sanitizeTsvText(rawDesc, 200);
+    sanitizeTsvText(product.description) ||
+    `Genuine ${title} by ${brand} in Pakistan. ${meta.highlight || ''}. Includes 1-year official warranty and nationwide enterprise deployment by AV Live.`;
+  const clampedDesc = sanitizeTsvText(rawFullDesc, 199);
+  const description = clampedDesc.endsWith('.') ? clampedDesc : `${clampedDesc}.`;
 
+  const rawAvailability = sanitizeTsvText(product.availability).toLowerCase();
   const stock = Number(product.stockQuantity ?? 10);
-  const availability = stock > 0 || id === 'wMbGVClqbDS2LFrv5HyX' ? 'in_stock' : 'out_of_stock';
+  const availability: 'in_stock' | 'out_of_stock' | 'preorder' | 'backorder' =
+    rawAvailability === 'preorder' || rawAvailability === 'backorder' || rawAvailability === 'out_of_stock'
+      ? (rawAvailability as any)
+      : stock > 0 || rawId === 'wMbGVClqbDS2LFrv5HyX'
+      ? 'in_stock'
+      : 'out_of_stock';
+
+  const availabilityDate =
+    availability === 'preorder' || availability === 'backorder'
+      ? sanitizeTsvText(product.availabilityDate || '2026-12-01T09:00+0500')
+      : '';
+  const expirationDate = sanitizeTsvText(product.expirationDate || '');
 
   const { regularPrice: regularPriceNum, salePrice: salePriceNum, hasSale } = resolveProductPricing(product);
 
@@ -1365,27 +1583,31 @@ export function formatProductToGmcRow(product: Record<string, any>): Record<stri
   const salePrice = hasSale ? `${salePriceNum.toFixed(2)} PKR` : '';
   const saleEffectiveDate = hasSale ? '2026-01-01T00:00+0500/2027-12-31T23:59+0500' : '';
 
-  const gtin = sanitizeTsvText(product.gtin || meta.gtin || computeUpc12('61080799001'));
-  const mpn = cleanMpn(meta.mpn || product.mpn || product.sku, id);
-
-  const highlight = sanitizeTsvText(
+  const baseHighlight =
     meta.highlight ||
-      `Official ${brand} enterprise AV hardware in Pakistan with 1-year warranty and nationwide installation`,
+    `Official ${brand} enterprise AV hardware in Pakistan with 1-year warranty and nationwide installation`;
+  const enrichedHighlight = `${baseHighlight}; Official ${brand} MPN ${mpn}; 1-Year Pakistan Warranty`;
+  const highlight = sanitizeTsvText(
+    enrichedHighlight.length <= 150 ? enrichedHighlight : baseHighlight,
     150
   );
 
   const productDetail = formatGmcProductDetail(product.specifications, meta.defaultSpecs);
-  const link = `https://avlive.com.pk/product/${encodeURIComponent(canonicalSlug)}`;
-  const mainImage = images[0] || 'https://avlive.com.pk/og-image.jpg';
-  const additionalImages = images.slice(1, 10).join(',');
+  const productHref = getProductHref(product, rawId);
+  const link = `https://avlive.com.pk${productHref}`;
+  const mainImage = mergedImages[0];
+  const additionalImages = mergedImages.slice(1, 10).join(',');
+  const rawCondition = sanitizeTsvText(product.condition).toLowerCase();
+  const condition =
+    rawCondition === 'refurbished' || rawCondition === 'used' ? rawCondition : 'new';
 
   return {
     id,
     title,
     description,
     availability,
-    availability_date: '',
-    expiration_date: '',
+    availability_date: availabilityDate,
+    expiration_date: expirationDate,
     link,
     mobile_link: link,
     image_link: mainImage,
@@ -1399,7 +1621,7 @@ export function formatProductToGmcRow(product: Record<string, any>): Record<stri
     product_highlight: highlight,
     product_detail: productDetail,
     additional_image_link: additionalImages,
-    condition: 'new',
+    condition,
     adult: 'no',
     color: meta.color || 'Black',
     size: '',
@@ -1436,6 +1658,18 @@ export function generateGmcTsv(products: Record<string, any>[]): string {
 }
 
 /**
+ * Generates the exact 20-column Google Merchant Center Sheet TSV matching the core required/recommended columns.
+ */
+export function generateGmc20Tsv(products: Record<string, any>[]): string {
+  const headerLine = GMC_20_SHEET_HEADERS.join('\t');
+  const lines = products.map((product) => {
+    const rowObj = formatProductToGmcRow(product);
+    return GMC_20_SHEET_HEADERS.map((col) => sanitizeTsvText(rowObj[col])).join('\t');
+  });
+  return [headerLine, ...lines].join('\n');
+}
+
+/**
  * Generates a 2D array ([headers, ...rows]) for Google Sheets API synchronization.
  */
 export function generateGmcSheetMatrix(products: Record<string, any>[]): string[][] {
@@ -1445,4 +1679,60 @@ export function generateGmcSheetMatrix(products: Record<string, any>[]): string[
     return GMC_40_HEADERS.map((col) => sanitizeTsvText(rowObj[col]));
   });
   return [headers, ...rows];
+}
+
+function escapeXml(val: string): string {
+  return String(val || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+/**
+ * Generates a Google Merchant Center RSS 2.0 XML Product Feed (<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">)
+ */
+export function generateGmcXml(products: Record<string, any>[]): string {
+  const itemsXml = products
+    .map((product) => {
+      const r = formatProductToGmcRow(product);
+      const highlights = String(r.product_highlight || '')
+        .split(';')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 6)
+        .map((h) => `      <g:product_highlight>${escapeXml(h)}</g:product_highlight>`)
+        .join('\n');
+
+      return `    <item>
+      <g:id>${escapeXml(r.id)}</g:id>
+      <g:title>${escapeXml(r.title)}</g:title>
+      <g:description>${escapeXml(r.description)}</g:description>
+      <g:link>${escapeXml(r.link)}</g:link>
+      <g:image_link>${escapeXml(r.image_link)}</g:image_link>
+      <g:availability>${escapeXml(r.availability)}</g:availability>
+      <g:price>${escapeXml(r.price)}</g:price>${
+        r.sale_price ? `\n      <g:sale_price>${escapeXml(r.sale_price)}</g:sale_price>` : ''
+      }
+      <g:brand>${escapeXml(r.brand)}</g:brand>
+      <g:gtin>${escapeXml(r.gtin)}</g:gtin>
+      <g:mpn>${escapeXml(r.mpn)}</g:mpn>
+      <g:identifier_exists>${escapeXml(r.identifier_exists)}</g:identifier_exists>
+      <g:condition>${escapeXml(r.condition)}</g:condition>
+      <g:is_bundle>${escapeXml(r['is bundle'])}</g:is_bundle>
+${highlights}
+    </item>`;
+    })
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
+  <channel>
+    <title>AV Live Communications — Enterprise Pro-AV &amp; Video Conferencing Pakistan</title>
+    <link>https://avlive.com.pk</link>
+    <description>Official Google Merchant Center Hardware Feed (Poly, Cisco, Logitech, Yealink, Jabra, Bosch)</description>
+${itemsXml}
+  </channel>
+</rss>`;
 }

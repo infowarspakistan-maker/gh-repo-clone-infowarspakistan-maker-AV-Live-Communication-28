@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Plus, Check } from 'lucide-react';
 import { Product } from '../lib/firebase/firestore-helpers';
-import { getCanonicalProductSlug, resolveProductPricing } from '../lib/gmc-feed';
+import { getCanonicalProductSlug, getProductHref, resolveProductPricing } from '../lib/gmc-feed';
 import { optimizeGalleryImageUrl } from '../lib/image-optimize';
 import { BlurProductImage } from './BlurProductImage';
 import { addToCart } from '../lib/cart';
@@ -24,6 +24,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
   const [isFavorite, setIsFavorite] = useState(false);
 
   const canonicalSlug = getCanonicalProductSlug(product, product.id);
+  const productHref = getProductHref(product, product.id);
   const { effectivePrice, regularPrice, hasSale } = resolveProductPricing(product);
 
   const rawImages = Array.isArray(product.images)
@@ -69,7 +70,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
     <article className="bg-white rounded-xl p-2.5 border border-gray-100 shadow-[0_2px_8px_rgba(11,19,43,0.04)] hover:border-[#00B4D8]/40 transition-all flex flex-col justify-between relative group">
       <div className="relative">
         <Link
-          to={`/product/${canonicalSlug}`}
+          to={productHref}
           className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8] rounded-lg"
         >
           <div className="relative aspect-[4/3] rounded-lg bg-[#F8F9FA] overflow-hidden mb-2 flex items-center justify-center p-2">

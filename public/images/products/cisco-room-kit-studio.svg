@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="ciscoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A1428"/>
+      <stop offset="50%" stop-color="#1A2B4C"/>
+      <stop offset="100%" stop-color="#0D1F3A"/>
+    </linearGradient>
+    <linearGradient id="silverChassis" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F1F5F9"/>
+      <stop offset="50%" stop-color="#CBD5E1"/>
+      <stop offset="100%" stop-color="#64748B"/>
+    </linearGradient>
+    <radialGradient id="ciscoLens" cx="45%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="40%" stop-color="#0284C7"/>
+      <stop offset="85%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#ciscoBg)"/>
+  <circle cx="600" cy="400" r="380" fill="#00B4D8" fill-opacity="0.08"/>
+
+  <!-- Header Badges -->
+  <rect x="80" y="60" width="380" height="44" rx="8" fill="#00B4D8" fill-opacity="0.18" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="104" y="88" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" font-weight="bold">CISCO WEBEX ROOM KIT SERIES</text>
+
+  <rect x="840" y="60" width="280" height="44" rx="8" fill="#1E293B" stroke="#475569" stroke-width="1.5"/>
+  <text x="866" y="88" fill="#E2E8F0" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">5K ULTRAHD QUAD CAMERA</text>
+
+  <!-- Cisco Quad Camera Bar (Top Unit) -->
+  <rect x="130" y="210" width="940" height="150" rx="50" fill="url(#silverChassis)" stroke="#94A3B8" stroke-width="3"/>
+  <rect x="150" y="228" width="900" height="114" rx="38" fill="#1E293B" stroke="#475569" stroke-width="2"/>
+
+  <!-- Quad 5K Camera Array in Center -->
+  <rect x="415" y="240" width="370" height="90" rx="26" fill="#090D16" stroke="#00B4D8" stroke-width="2"/>
+  <circle cx="465" cy="285" r="26" fill="url(#ciscoLens)" stroke="#38BDF8" stroke-width="2"/>
+  <circle cx="555" cy="285" r="26" fill="url(#ciscoLens)" stroke="#38BDF8" stroke-width="2"/>
+  <circle cx="645" cy="285" r="26" fill="url(#ciscoLens)" stroke="#38BDF8" stroke-width="2"/>
+  <circle cx="735" cy="285" r="26" fill="url(#ciscoLens)" stroke="#38BDF8" stroke-width="2"/>
+
+  <!-- Cisco Codec Plus / Pro Unit (Bottom Left) -->
+  <rect x="150" y="430" width="490" height="95" rx="22" fill="url(#silverChassis)" stroke="#94A3B8" stroke-width="2.5"/>
+  <rect x="175" y="454" width="440" height="48" rx="10" fill="#0F172A"/>
+  <text x="205" y="485" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" font-weight="bold">CISCO CODEC PLUS • 4K60 ENGINE</text>
+
+  <!-- Cisco Room Navigator Touch 10 Controller (Bottom Right) -->
+  <rect x="700" y="400" width="340" height="185" rx="18" fill="#0F172A" stroke="#38BDF8" stroke-width="3"/>
+  <rect x="720" y="420" width="300" height="145" rx="10" fill="#1E293B"/>
+  <circle cx="780" cy="485" r="28" fill="#10B981"/>
+  <circle cx="870" cy="485" r="28" fill="#00B4D8"/>
+  <circle cx="960" cy="485" r="28" fill="#3B82F6"/>
+  <text x="752" y="545" fill="#E2E8F0" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" font-weight="bold">Cisco Room Navigator Touch Panel</text>
+
+  <!-- Feature Cards -->
+  <rect x="80" y="635" width="320" height="82" rx="12" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="104" y="668" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">5K QUAD CAMERA OPTICS</text>
+  <text x="104" y="696" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">4 Embedded Digital Tracking Lenses</text>
+
+  <rect x="440" y="635" width="320" height="82" rx="12" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="464" y="668" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">WEBEX, TEAMS &amp; H.323/SIP</text>
+  <text x="464" y="696" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">Dual/Triple 4K UHD HDMI Outputs</text>
+
+  <rect x="800" y="635" width="320" height="82" rx="12" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="824" y="668" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">ROOM NAVIGATOR CONTROL</text>
+  <text x="824" y="696" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">One-Touch Join &amp; Room Booking</text>
+
+  <text x="80" y="805" fill="#F8FAFC" font-family="DejaVu Sans, Arial, sans-serif" font-size="28" font-weight="bold">Cisco Room Kit, Room Kit Plus &amp; Room Bar Enterprise Systems</text>
+  <text x="80" y="842" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" font-weight="bold">AV Live Communications Pakistan • Certified Cisco Collaboration Integrator</text>
+</svg>

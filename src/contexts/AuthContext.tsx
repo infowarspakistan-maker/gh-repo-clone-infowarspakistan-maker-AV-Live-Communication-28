@@ -1,15 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  signInWithPopup,
-  User,
-  sendPasswordResetEmail,
-  GoogleAuthProvider,
-} from 'firebase/auth';
-import { doc, getDoc, getDocFromCache, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, googleProvider } from '../lib/firebase/client';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
+import type { User } from 'firebase/auth';
 
 export interface UserProfile {
   uid: string;
@@ -45,123 +35,174 @@ function isAuthorizedAdmin(email: string | null | undefined): boolean {
   return ADMIN_EMAILS.includes(lowerEmail) || lowerEmail.endsWith('@avlive.com.pk');
 }
 
+async function loadFirebaseAuthRuntime() {
+  const [authMod, fsMod, clientMod] = await Promise.all([
+    import('firebase/auth'),
+    import('firebase/firestore'),
+    import('../lib/firebase/client'),
+  ]);
+  return { authMod, fsMod, clientMod };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const isProtectedPath =
+    typeof window !== 'undefined' &&
+    (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/setup-wizard'));
+
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isProtectedPath);
+  const authInitializedRef = useRef(false);
 
-  const fetchUserProfile = async (uid: string): Promise<UserProfile | null> => {
-    try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        // Force admin for the specific email
-        if (isAuthorizedAdmin(data.email) && data.role !== 'admin') {
+  const initAuthListener = useCallback(() => {
+    if (authInitializedRef.current) return () => {};
+    authInitializedRef.current = true;
+    let unsub: (() => void) | undefined;
+    let cancelled = false;
+
+    loadFirebaseAuthRuntime()
+      .then(({ authMod, fsMod, clientMod }) => {
+        if (cancelled) return;
+        const { onAuthStateChanged } = authMod;
+        const { doc, getDoc, getDocFromCache, setDoc, serverTimestamp } = fsMod;
+        const { auth, db } = clientMod;
+
+        const fetchUserProfile = async (uid: string): Promise<UserProfile | null> => {
           try {
-            await setDoc(doc(db, 'users', uid), { role: 'admin' }, { merge: true });
-          } catch (e) {
-            console.warn('Could not write forced admin role to Firestore (offline):', e);
-          }
-          return { ...data, role: 'admin' } as UserProfile;
-        }
-        return data as UserProfile;
-      }
-      return null;
-    } catch (error: any) {
-      // If we are offline, attempt to load from local cache
-      if (error?.message?.includes('offline') || error?.code === 'unavailable') {
-        console.warn('Firestore is offline. Attempting to fetch user profile from local cache...', error.message || error);
-        try {
-          const cachedDoc = await getDocFromCache(doc(db, 'users', uid));
-          if (cachedDoc.exists()) {
-            const data = cachedDoc.data();
-            if (isAuthorizedAdmin(data.email) && data.role !== 'admin') {
-              return { ...data, role: 'admin' } as UserProfile;
+            const userDoc = await getDoc(doc(db, 'users', uid));
+            if (userDoc.exists()) {
+              const data = userDoc.data();
+              if (isAuthorizedAdmin(data.email) && data.role !== 'admin') {
+                try {
+                  await setDoc(doc(db, 'users', uid), { role: 'admin' }, { merge: true });
+                } catch (e) {
+                  console.warn('Could not write forced admin role to Firestore (offline):', e);
+                }
+                return { ...data, role: 'admin' } as UserProfile;
+              }
+              return data as UserProfile;
             }
-            return data as UserProfile;
-          }
-        } catch (cacheError) {
-          console.warn('Failed to retrieve user profile from cache:', cacheError);
-        }
-      } else {
-        console.warn('Error fetching user profile:', error);
-      }
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      try {
-        setUser(currentUser);
-        
-        if (currentUser) {
-          let profile = await fetchUserProfile(currentUser.uid);
-          
-          // If profile doesn't exist, create one (especially for Google login) or fallback
-          if (!profile) {
-            const role = isAuthorizedAdmin(currentUser.email) ? 'admin' : 'customer';
-            profile = {
-              uid: currentUser.uid,
-              email: currentUser.email,
-              displayName: currentUser.displayName,
-              role: role as any,
-              isActive: true,
-              photoURL: currentUser.photoURL
-            };
-            try {
-              await setDoc(doc(db, 'users', currentUser.uid), {
-                ...profile,
-                createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp()
-              });
-            } catch (err) {
-              console.warn('Failed to save profile to Firestore (offline fallback):', err);
+            return null;
+          } catch (error: any) {
+            if (error?.message?.includes('offline') || error?.code === 'unavailable') {
+              try {
+                const cachedDoc = await getDocFromCache(doc(db, 'users', uid));
+                if (cachedDoc.exists()) {
+                  const data = cachedDoc.data();
+                  if (isAuthorizedAdmin(data.email) && data.role !== 'admin') {
+                    return { ...data, role: 'admin' } as UserProfile;
+                  }
+                  return data as UserProfile;
+                }
+              } catch (cacheError) {
+                console.warn('Failed to retrieve user profile from cache:', cacheError);
+              }
+            } else {
+              console.warn('Error fetching user profile:', error);
             }
+            return null;
           }
+        };
 
-          setUserProfile(profile);
-          
+        unsub = onAuthStateChanged(auth, async (currentUser) => {
           try {
-            await setDoc(
-              doc(db, 'users', currentUser.uid),
-              { lastLogin: serverTimestamp() },
-              { merge: true }
-            );
-          } catch (error) {
-            console.warn('Error updating last login:', error);
+            setUser(currentUser);
+            if (currentUser) {
+              let profile = await fetchUserProfile(currentUser.uid);
+              if (!profile) {
+                const role = isAuthorizedAdmin(currentUser.email) ? 'admin' : 'customer';
+                profile = {
+                  uid: currentUser.uid,
+                  email: currentUser.email,
+                  displayName: currentUser.displayName,
+                  role: role as any,
+                  isActive: true,
+                  photoURL: currentUser.photoURL,
+                };
+                try {
+                  await setDoc(doc(db, 'users', currentUser.uid), {
+                    ...profile,
+                    createdAt: serverTimestamp(),
+                    lastLogin: serverTimestamp(),
+                  });
+                } catch (err) {
+                  console.warn('Failed to save profile to Firestore (offline fallback):', err);
+                }
+              }
+
+              setUserProfile(profile);
+
+              try {
+                await setDoc(
+                  doc(db, 'users', currentUser.uid),
+                  { lastLogin: serverTimestamp() },
+                  { merge: true }
+                );
+              } catch (error) {
+                console.warn('Error updating last login:', error);
+              }
+            } else {
+              setUserProfile(null);
+            }
+          } catch (globalErr) {
+            console.error('Error in auth state change subscriber:', globalErr);
+          } finally {
+            setLoading(false);
           }
-        } else {
-          setUserProfile(null);
-        }
-      } catch (globalErr) {
-        console.error('Error in auth state change subscriber:', globalErr);
-      } finally {
+        });
+      })
+      .catch((err) => {
+        console.warn('Deferred Firebase Auth runtime load failed:', err);
         setLoading(false);
-      }
-    });
+      });
 
-    return () => unsubscribe();
+    return () => {
+      cancelled = true;
+      if (unsub) unsub();
+    };
   }, []);
 
+  useEffect(() => {
+    if (isProtectedPath) {
+      return initAuthListener();
+    }
+
+    // On public storefront pages, defer Firebase Auth SDK download & parse until well after FCP/LCP/TBT
+    let cleanupListener: (() => void) | undefined;
+    const timer = setTimeout(() => {
+      cleanupListener = initAuthListener();
+    }, 3800);
+
+    return () => {
+      clearTimeout(timer);
+      if (cleanupListener) cleanupListener();
+    };
+  }, [isProtectedPath, initAuthListener]);
+
   const login = async (email: string, password: string): Promise<User> => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    initAuthListener();
+    const { authMod, clientMod } = await loadFirebaseAuthRuntime();
+    const userCredential = await authMod.signInWithEmailAndPassword(clientMod.auth, email, password);
     return userCredential.user;
   };
 
   const signInWithGoogle = async (): Promise<User> => {
-    const result = await signInWithPopup(auth, googleProvider);
+    initAuthListener();
+    const { authMod, clientMod } = await loadFirebaseAuthRuntime();
+    const result = await authMod.signInWithPopup(clientMod.auth, clientMod.googleProvider);
     return result.user;
   };
 
   const logout = async (): Promise<void> => {
-    await firebaseSignOut(auth);
+    const { authMod, clientMod } = await loadFirebaseAuthRuntime();
+    await authMod.signOut(clientMod.auth);
     setUser(null);
     setUserProfile(null);
   };
 
   const resetPassword = async (email: string): Promise<void> => {
-    await sendPasswordResetEmail(auth, email);
+    const { authMod, clientMod } = await loadFirebaseAuthRuntime();
+    await authMod.sendPasswordResetEmail(clientMod.auth, email);
   };
 
   const userRole = userProfile?.role || null;
@@ -171,20 +212,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      userProfile,
-      userRole,
-      loading,
-      login,
-      signInWithGoogle,
-      logout,
-      resetPassword,
-      isAdmin,
-      isEditor,
-      isSupport,
-      isAuthenticated
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        userProfile,
+        userRole,
+        loading,
+        login,
+        signInWithGoogle,
+        logout,
+        resetPassword,
+        isAdmin,
+        isEditor,
+        isSupport,
+        isAuthenticated,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

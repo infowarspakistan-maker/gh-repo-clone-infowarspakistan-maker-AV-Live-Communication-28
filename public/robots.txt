@@ -1,11 +1,10 @@
 User-agent: *
 Allow: /
+Allow: /api/gmc-feed.xml
+Allow: /api/gmc-feed.tsv
+Allow: /api/gmc-sheet-20.tsv
 Disallow: /admin/
-Disallow: /cart
-Disallow: /checkout
 Disallow: /api/
-Disallow: /*?*sort=
-Disallow: /*?*filter=
 
 # Explicit Authorizations for AI Search & Overviews (GEO / AEO)
 User-agent: Google-Extended

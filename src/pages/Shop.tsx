@@ -19,6 +19,7 @@ import { useCart } from '../contexts/CartContext';
 import { subscribeToProducts, subscribeToCategories, Product, Category } from '../lib/firebase/firestore-helpers';
 import {
   getCanonicalProductSlug,
+  getProductHref,
   resolveProductPricing,
   PRODUCT_GMC_METADATA,
   buildFallbackProductFromGmcMeta,
@@ -439,17 +440,17 @@ export function Shop() {
           '@type': 'ItemList',
           numberOfItems: sortedAndFilteredProducts.length,
           itemListElement: sortedAndFilteredProducts.slice(0, 24).map((prod, idx) => {
-            const slug = getCanonicalProductSlug(prod);
+            const prodHref = getProductHref(prod, prod.id);
             const { effectivePrice } = resolveProductPricing(prod);
             return {
               '@type': 'ListItem',
               position: idx + 1,
-              url: `https://avlive.com.pk/product/${slug}`,
+              url: `https://avlive.com.pk${prodHref}`,
               name: prod.productName,
               item: {
                 '@type': 'Product',
                 name: prod.productName,
-                url: `https://avlive.com.pk/product/${slug}`,
+                url: `https://avlive.com.pk${prodHref}`,
                 brand: { '@type': 'Brand', name: prod.brand || 'AV Live' },
                 offers: {
                   '@type': 'Offer',
@@ -462,6 +463,40 @@ export function Shop() {
           }),
         },
       },
+      ...(activeSingleBrandName
+        ? [
+            {
+              '@type': 'FAQPage',
+              '@id': `${canonicalShopUrl}#faq`,
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: `Is AV Live an authorized ${activeSingleBrandName} partner in Pakistan?`,
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: `Yes. AV Live Communications supplies genuine, factory-sealed ${activeSingleBrandName} hardware in Pakistan with official manufacturer part numbers (MPNs), GS1 GTIN verification, FBR GST tax invoicing, and a 1-to-3 year local warranty.`,
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: `Does AV Live provide ${activeSingleBrandName} installation in Lahore, Karachi, and Islamabad?`,
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: `Yes. Our regional engineering teams in Lahore (Johar Town), Karachi (Clifton), and Islamabad (Blue Area) provide on-site boardroom installation, acoustic tuning, and SLA support for all ${activeSingleBrandName} systems.`,
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: `How quickly can ${activeSingleBrandName} equipment be delivered in Pakistan?`,
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: `In-stock ${activeSingleBrandName} hardware ships within 24 to 72 hours across Lahore, Karachi, and Islamabad via insured logistics, with complimentary shipping on orders above Rs. 100,000 PKR.`,
+                  },
+                },
+              ],
+            },
+          ]
+        : []),
     ],
   };
 
@@ -582,6 +617,23 @@ export function Shop() {
           </div>
         </div>
 
+        {/* Authorized Brand Hub Executive Engineering Summary (SSR-to-CSR Parity on /brands/:brandSlug) */}
+        {activeSingleBrandName && (
+          <div className="mb-4 bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8]">
+                Authorized {activeSingleBrandName} Enterprise Partner &amp; Systems Integrator — Pakistan
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full w-fit">
+                PTA Compliant • FBR GST Invoice • 1–3 Year Local Warranty
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm font-semibold text-[#1A2B4C] leading-relaxed">
+              AV Live Communications supplies genuine <strong>{activeSingleBrandName}</strong> hardware across Lahore, Karachi, and Islamabad. Every unit includes verified OEM MPN and GS1 GTIN identifiers, official local warranty coverage, and turnkey boardroom or network integration by our certified engineering teams.
+            </p>
+          </div>
+        )}
+
         {/* Mobile Brand Pills & Compact Flagship Highlight (< 1024px) */}
         <div className="lg:hidden mb-3.5 space-y-2.5">
           {/* Brand Pill Scroller */}
@@ -626,12 +678,13 @@ export function Shop() {
           {sortedAndFilteredProducts[0] && (() => {
             const heroProd = sortedAndFilteredProducts[0];
             const heroSlug = getCanonicalProductSlug(heroProd);
+            const heroHref = getProductHref(heroProd, heroProd.id);
             const { effectivePrice: heroPrice } = resolveProductPricing(heroProd);
             const rawImgs = Array.isArray(heroProd.images) ? heroProd.images : (typeof heroProd.images === 'string' ? [heroProd.images] : (heroProd.image ? [heroProd.image] : []));
             const heroImg = optimizeGalleryImageUrl(rawImgs[0] || 'https://placehold.co/600x450?text=AV+Live', 360, 75);
             return (
               <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-xs flex items-center gap-3">
-                <Link to={`/product/${heroSlug}`} className="w-20 h-20 rounded-xl bg-[#F8F9FA] p-2 flex items-center justify-center shrink-0 overflow-hidden">
+                <Link to={heroHref} className="w-20 h-20 rounded-xl bg-[#F8F9FA] p-2 flex items-center justify-center shrink-0 overflow-hidden">
                   <BlurProductImage
                     loading="eager"
                     fetchPriority="high"
@@ -653,7 +706,7 @@ export function Shop() {
                       {heroProd.brand || 'Official PK'}
                     </span>
                   </div>
-                  <Link to={`/product/${heroSlug}`} className="text-xs font-black text-[#1A2B4C] line-clamp-1">
+                  <Link to={heroHref} className="text-xs font-black text-[#1A2B4C] line-clamp-1">
                     {heroProd.productName}
                   </Link>
                   <div className="flex items-center justify-between mt-1.5">
@@ -1035,6 +1088,7 @@ export function Shop() {
             <div className={viewMode === 'grid' ? "grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8" : "flex flex-col gap-6"}>
               {visibleProducts.map((product, index) => {
                 const productSlug = getCanonicalProductSlug(product);
+                const productHref = getProductHref(product, product.id);
                 const productKey = product.id || productSlug;
                 const { regularPrice: cardRegularPrice, effectivePrice: cardEffectivePrice, hasSale: cardHasSale } = resolveProductPricing(product);
                 const rawImages = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
@@ -1060,7 +1114,7 @@ export function Shop() {
                     className="hidden lg:flex bg-white group cursor-pointer rounded-3xl overflow-hidden flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
                   >
                     <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
-                      <Link to={`/product/${productSlug}`} className="absolute inset-0 z-0">
+                      <Link to={productHref} className="absolute inset-0 z-0">
                         <BlurProductImage
                           loading={isEagerCard ? 'eager' : 'lazy'}
                           fetchPriority={index < 2 ? 'high' : 'auto'}
@@ -1104,7 +1158,7 @@ export function Shop() {
                     </div>
 
                     <div className="p-3 sm:p-5 lg:p-6 flex flex-col flex-grow bg-white z-10 relative">
-                      <Link to={`/product/${productSlug}`} className="block">
+                      <Link to={productHref} className="block">
                         <h3 className="font-bold text-xs sm:text-base lg:text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-1 lg:mb-2 line-clamp-1">
                           {product.productName}
                         </h3>
@@ -1168,7 +1222,7 @@ export function Shop() {
                     transition={{ delay: Math.min(index, 8) * 0.02 }}
                     className="bg-white group rounded-[2rem] overflow-hidden flex flex-col sm:flex-row border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-xl p-6 gap-6"
                   >
-                    <Link to={`/product/${productSlug}`} className="w-full sm:w-48 h-48 aspect-square bg-gray-50 rounded-2xl overflow-hidden relative shrink-0 block">
+                    <Link to={productHref} className="w-full sm:w-48 h-48 aspect-square bg-gray-50 rounded-2xl overflow-hidden relative shrink-0 block">
                       <BlurProductImage
                         loading={isEagerCard ? 'eager' : 'lazy'}
                         decoding="async"
@@ -1227,7 +1281,7 @@ export function Shop() {
                         <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">4.8 (80+ Reviews)</span>
                       </div>
                       
-                      <Link to={`/product/${productSlug}`}>
+                      <Link to={productHref}>
                         <h3 className="font-black text-lg sm:text-xl text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 leading-tight">
                           {product.productName}
                         </h3>
@@ -1361,7 +1415,7 @@ export function Shop() {
                      <Zap size={16} /> Add to Cart
                    </button>
                    <Link
-                     to={`/product/${getCanonicalProductSlug(quickViewProduct, quickViewProduct.id)}`}
+                     to={getProductHref(quickViewProduct, quickViewProduct.id)}
                      className="w-14 h-14 bg-gray-50 text-[#1A2B4C] rounded-2xl flex items-center justify-center hover:bg-gray-100 transition-colors border border-gray-200"
                    >
                      <ArrowRight size={20} />
@@ -1404,11 +1458,12 @@ export function Shop() {
               <tbody className="divide-y divide-gray-100">
                 {sortedAndFilteredProducts.slice(0, 10).map((prod) => {
                   const slug = getCanonicalProductSlug(prod);
+                  const prodHref = getProductHref(prod, prod.id);
                   const { effectivePrice } = resolveProductPricing(prod);
                   return (
                     <tr key={prod.id || slug} className="hover:bg-gray-50/80 transition-colors">
                       <td className="py-3 px-4 font-black text-[#1A2B4C]">
-                        <Link to={`/product/${slug}`} className="hover:text-[#00B4D8] transition-colors">
+                        <Link to={prodHref} className="hover:text-[#00B4D8] transition-colors">
                           {prod.productName}
                         </Link>
                       </td>

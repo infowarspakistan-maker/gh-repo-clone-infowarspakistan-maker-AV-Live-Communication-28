@@ -5,6 +5,7 @@ import { ArrowRight, Box, Settings, Mic, Video, ShieldCheck, Speaker, Loader2, Z
 import { subscribeToCategories, subscribeToProducts, Product, Category as CategoryType } from '../lib/firebase/firestore-helpers';
 import {
   getCanonicalProductSlug,
+  getProductHref,
   resolveProductPricing,
   PRODUCT_GMC_METADATA,
   buildFallbackProductFromGmcMeta,
@@ -18,10 +19,11 @@ import { BlurProductImage } from '../components/BlurProductImage';
 
 const FALLBACK_PRODUCT_CATEGORIES: Record<
   string,
-  { name: string; description: string; productSlugs: string[] }
+  { name: string; description: string; imageUrl?: string; productSlugs: string[] }
 > = {
   'video-conferencing': {
     name: 'Video Conferencing Systems',
+    imageUrl: 'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
     description:
       'Enterprise Video Conference in Pakistan hardware including Polycom RealPresence Group 500, Poly Studio X70, Logitech Rally Bar, Cisco Room Kits, and Zoom/Teams boardroom solutions.',
     productSlugs: [
@@ -33,13 +35,16 @@ const FALLBACK_PRODUCT_CATEGORIES: Record<
       'poly-studio-usb-video-bar-pakistan',
       'poly-studio-x50-pakistan',
       'logitech-rally-bar-mini-pakistan',
+      'podium-prompter-17-compact-pakistan',
     ],
   },
   'touch-panels': {
     name: 'Boardroom Touch Panels & Room Controllers',
+    imageUrl: 'https://www.cisco.com/c/dam/assets/support/product-images/model/collaboration-endpoints-spark-room-kit.jpg/_jcr_content/renditions/collaboration-endpoints-spark-room-kit-600x220.jpg',
     description:
-      'Dedicated touch-screen room controllers, scheduling panels, and AV automation consoles for Zoom Rooms, Microsoft Teams Rooms, Cisco Webex, and Poly Studio boardrooms in Pakistan.',
+      'Dedicated touch-screen room controllers, scheduling panels, stealth podium teleprompters, and AV automation consoles for Zoom Rooms, Microsoft Teams Rooms, Cisco Webex, and Poly Studio boardrooms in Pakistan.',
     productSlugs: [
+      'podium-prompter-17-compact-pakistan',
       'cisco-room-bar-pakistan',
       'cisco-room-kit-plus-pakistan',
       'poly-studio-x72-pakistan',
@@ -50,8 +55,9 @@ const FALLBACK_PRODUCT_CATEGORIES: Record<
   },
   'large-room': {
     name: 'Large Boardroom Video Conferencing Systems',
+    imageUrl: 'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
     description:
-      'High-capacity dual-camera and PTZ codec systems including Polycom RealPresence Group 500, Poly Studio X70, and Cisco Room Kit Plus for 12–40 seat executive boardrooms in Pakistan.',
+      'High-capacity dual-camera and PTZ codec systems including Polycom RealPresence Group 500, Poly Studio X70, Cisco Room Kit Plus, and Fold-Flat Stealth Podium Teleprompters for 12–40 seat executive boardrooms in Pakistan.',
     productSlugs: [
       'polycom-realpresence-group-500-pakistan',
       'poly-studio-x72-pakistan',
@@ -59,10 +65,12 @@ const FALLBACK_PRODUCT_CATEGORIES: Record<
       'cisco-room-kit-pro-pakistan',
       'poly-g7500-pakistan',
       'logitech-rally-bar-pakistan',
+      'podium-prompter-17-compact-pakistan',
     ],
   },
   speakerphones: {
     name: 'Conference Room Speakerphones & Microphone Arrays',
+    imageUrl: 'https://www.onedirect.co.uk/media/catalog/product/cache/aa0ba86914834d3bc3e1ab8fdcec579e/p/o/postur30_4__2.jpg',
     description:
       '360-degree beamforming conference phones, expansion microphones, and ceiling audio pickup systems from Poly, Jabra, and Yealink in Pakistan.',
     productSlugs: [
@@ -74,6 +82,7 @@ const FALLBACK_PRODUCT_CATEGORIES: Record<
   },
   'boardroom-codecs': {
     name: 'Enterprise H.323 / SIP Boardroom Codecs',
+    imageUrl: 'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/room-kit-eq-ds.docx/_jcr_content/renditions/room-kit-eq-ds_0.png',
     description:
       'Hardware telepresence codecs including Polycom RealPresence Group 500 (7200-64550-001), Poly G7500, and Cisco Room Kit Pro/Plus for standards-based multipoint video conferencing in Pakistan.',
     productSlugs: [
@@ -82,10 +91,12 @@ const FALLBACK_PRODUCT_CATEGORIES: Record<
       'cisco-room-kit-pro-pakistan',
       'cisco-room-kit-plus-pakistan',
       'cisco-room-kit-eq-pakistan',
+      'podium-prompter-17-compact-pakistan',
     ],
   },
   'ptz-cameras': {
     name: '4K Optical PTZ Conferencing & Broadcast Cameras',
+    imageUrl: 'https://image.made-in-china.com/2f0j00IidckVRGgbqT/4-Inch-50m-IR-4MP-25X-Zoom-Network-Speed-Dome-Mini-PTZ-Camera-Hikvision-Ds-2de4A425iw-De-S6-Version.jpg',
     description:
       'Motorized 12x–25x optical zoom PTZ cameras including Polycom EagleEye IV, Logitech Rally PTZ, and Hikvision DarkFighter PTZ systems for boardrooms and hybrid events in Pakistan.',
     productSlugs: [
@@ -121,6 +132,7 @@ const FALLBACK_PRODUCT_CATEGORIES: Record<
   },
   projectors: {
     name: 'Commercial Laser & 4K Projectors',
+    imageUrl: 'https://eu.connect.panasonic.com/sites/default/files/media/image/2026-06/pt-rq45kseries-innovationstoeaseeverystep.webp',
     description:
       'High-lumen 4K UHD and laser installation projectors from Panasonic, BenQ, Epson, Sony, Optoma, and ViewSonic for auditoriums and 3D projection mapping in Pakistan.',
     productSlugs: [
@@ -314,17 +326,17 @@ export function Category() {
                 "@type": "ItemList",
                 "numberOfItems": categoryProducts.length,
                 "itemListElement": categoryProducts.slice(0, 24).map((prod, idx) => {
-                  const slug = getCanonicalProductSlug(prod);
+                  const prodHref = getProductHref(prod, prod.id);
                   const { effectivePrice } = resolveProductPricing(prod);
                   return {
                     "@type": "ListItem",
                     "position": idx + 1,
-                    "url": `https://avlive.com.pk/product/${slug}`,
+                    "url": `https://avlive.com.pk${prodHref}`,
                     "name": prod.productName,
                     "item": {
                       "@type": "Product",
                       "name": prod.productName,
-                      "url": `https://avlive.com.pk/product/${slug}`,
+                      "url": `https://avlive.com.pk${prodHref}`,
                       "brand": { "@type": "Brand", "name": prod.brand || "AV Live" },
                       "offers": {
                         "@type": "Offer",
@@ -440,6 +452,50 @@ export function Category() {
 
           {/* Product Grid (Order 1 on mobile; 2-column compact reference cards on < 1024px) */}
           <div className="order-1 lg:order-2 lg:col-span-3">
+             {['video-conferencing', 'large-room', 'touch-panels', 'boardroom-codecs'].includes(categorySlug || '') && (
+               <div className="mb-5 bg-[#111318] text-white rounded-2xl lg:rounded-3xl overflow-hidden border border-gray-800 grid grid-cols-1 md:grid-cols-12 items-stretch shadow-sm">
+                 <div className="md:col-span-5 bg-[#0b0d11]">
+                   <img
+                     src="/images/teleprompter/slide-02.jpg"
+                     alt='AV Live 17" Compact & 22" Flagship Fold-Flat Stealth Podium Teleprompter'
+                     width={640}
+                     height={360}
+                     loading="eager"
+                     className="w-full h-full object-cover min-h-[170px]"
+                   />
+                 </div>
+                 <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-center">
+                   <p className="text-[11px] font-semibold text-[#00B4D8]">
+                     Featured Executive Podium Series &middot; 17&Prime; Compact &amp; 22&Prime; Flagship
+                   </p>
+                   <h2 className="text-lg sm:text-xl font-black tracking-tight text-white mt-1">
+                     AV Live Fold-Flat Stealth Podium Teleprompter
+                   </h2>
+                   <p className="text-xs sm:text-sm text-gray-300 mt-1.5 leading-relaxed">
+                     Ultra-slim 1.2&Prime; fold-flat aluminium unibody, 400+ nit 4-way &plusmn;30&deg; stealth privacy IPS,
+                     and frameless 70&deg; 60/40 AR optical glass with interactive PKR quote builder (PKR 160,000 – 570,000).
+                   </p>
+                   <div className="mt-4 flex flex-wrap items-center gap-3">
+                     <Link
+                       to="/podium-teleprompter"
+                       className="inline-flex items-center gap-1.5 bg-[#00B4D8] hover:bg-[#0096B4] text-white text-xs font-black px-4 py-2.5 rounded-full transition-colors whitespace-nowrap"
+                     >
+                       <span>Explore Interactive Specs &amp; PKR Configurator</span>
+                       <ArrowRight size={14} />
+                     </Link>
+                     <a
+                       href="/assets/aistudio/AV_Live_Stealth_Teleprompter_4ff82fdb.pdf"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="text-xs font-semibold text-gray-300 hover:text-white underline whitespace-nowrap"
+                     >
+                       View PDF Brochure
+                     </a>
+                   </div>
+                 </div>
+               </div>
+             )}
+
              <div className="flex items-center justify-between mb-3 lg:mb-5">
                 <h2 className="text-sm sm:text-lg font-black tracking-tight">{categoryProducts.length} Active Modules Found</h2>
                 <div className="flex items-center gap-3">
@@ -450,6 +506,7 @@ export function Category() {
              <div className="grid grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-5 lg:gap-6">
                 {categoryProducts.map((product, idx) => {
                   const prodSlug = getCanonicalProductSlug(product);
+                  const prodHref = getProductHref(product, product.id);
                   const { effectivePrice } = resolveProductPricing(product);
                   const imgUrl = (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || 'https://placehold.co/600x600?text=No+Image';
                   return (
@@ -467,7 +524,7 @@ export function Category() {
                     transition={{ delay: idx * 0.05 }}
                     className="hidden lg:flex bg-white group rounded-[2.5rem] overflow-hidden border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-2xl flex-col justify-between"
                   >
-                    <Link to={`/product/${prodSlug}`} className="aspect-[4/3] lg:aspect-square bg-[#F8F9FA] lg:bg-gray-50 overflow-hidden block relative p-2 lg:p-0">
+                    <Link to={prodHref} className="aspect-[4/3] lg:aspect-square bg-[#F8F9FA] lg:bg-gray-50 overflow-hidden block relative p-2 lg:p-0">
                        <BlurProductImage
                          loading={idx < 4 ? 'eager' : 'lazy'}
                          fetchPriority={idx < 2 ? 'high' : 'auto'}
@@ -489,7 +546,7 @@ export function Category() {
                             <span className="text-[9px] lg:text-[10px] text-[#00B4D8] font-black uppercase tracking-widest truncate">{product.brand}</span>
                             <span className="hidden sm:inline text-[10px] text-gray-300 font-black tracking-widest">{product.sku}</span>
                          </div>
-                         <Link to={`/product/${prodSlug}`} className="block">
+                         <Link to={prodHref} className="block">
                             <h3 className="font-black text-xs sm:text-sm lg:text-base text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-1 lg:line-clamp-2 leading-tight mb-2 lg:mb-8 lg:h-10">{product.productName}</h3>
                          </Link>
                        </div>
@@ -565,11 +622,12 @@ export function Category() {
               <tbody className="divide-y divide-gray-100">
                 {categoryProducts.slice(0, 8).map((prod) => {
                   const slug = getCanonicalProductSlug(prod);
+                  const prodHref = getProductHref(prod, prod.id);
                   const { effectivePrice } = resolveProductPricing(prod);
                   return (
                     <tr key={prod.id || slug} className="hover:bg-gray-50/80 transition-colors">
                       <td className="py-3 px-4 font-black text-[#1A2B4C]">
-                        <Link to={`/product/${slug}`} className="hover:text-[#00B4D8] transition-colors">
+                        <Link to={prodHref} className="hover:text-[#00B4D8] transition-colors">
                           {prod.productName}
                         </Link>
                       </td>

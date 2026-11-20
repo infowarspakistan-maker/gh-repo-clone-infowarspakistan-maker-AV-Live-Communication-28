@@ -18,6 +18,7 @@ import { SEO } from '../components/SEO';
 import {
   PRODUCT_GMC_METADATA,
   buildFallbackProductFromGmcMeta,
+  getProductHref,
 } from '../lib/gmc-feed';
 import { FALLBACK_SERVICES_CATALOG } from '../lib/services-catalog';
 import {
@@ -45,6 +46,7 @@ const CORE_PILLAR_LINKS = [
   { path: '/events-services', label: 'Corporate Events, Expos & Hybrid Summit Production Hub', tag: 'Events' },
   { path: '/solutions', label: 'Industry AV & Unified Communications Solutions Matrix', tag: 'Solutions' },
   { path: '/room-designer', label: 'Interactive 3D Conference Room Designer & BOM Calculator', tag: 'Interactive Tool' },
+  { path: '/podium-teleprompter', label: 'AV Live Fold-Flat Podium Teleprompter — 17" Compact & 22" Flagship Stealth IPS', tag: 'Flagship Hardware' },
   { path: '/event-quote', label: '24-Hour Corporate Event & Stage Production Quote Engine', tag: 'Interactive Tool' },
   { path: '/compare', label: 'Side-by-Side Enterprise Video Bar & Codec Comparison Tool', tag: 'Interactive Tool' },
 ];
@@ -632,17 +634,18 @@ export function HtmlSitemap() {
                 {filteredProducts.map((product) => {
                   if (!product) return null;
                   const price = product.salePrice || product.regularPrice || 0;
+                  const productHref = getProductHref(product, product.slug || product.id);
                   return (
                     <tr key={product.slug || product.id} className="hover:bg-[#00B4D8]/5 transition-colors">
                       <td className="py-3 px-4">
                         <Link
-                          to={`/product/${product.slug}`}
+                          to={productHref}
                           className="font-bold text-[#1A2B4C] hover:text-[#00B4D8] block"
                         >
                           {product.productName}
                         </Link>
                         <span className="text-[10px] font-mono text-gray-400">
-                          https://avlive.com.pk/product/{product.slug}
+                          https://avlive.com.pk{productHref}
                         </span>
                       </td>
                       <td className="py-3 px-4 font-bold text-gray-700">{product.brand}</td>

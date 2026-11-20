@@ -1,29 +1,170 @@
+export const DEFAULT_EXTERNAL_PRODUCT_IMAGE =
+  'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg';
+
 /**
- * Optimizes image URLs (especially Unsplash and CDN URLs) for Core Web Vitals (LCP / CLS / Bandwidth).
- * Automatically enforces WebP/AVIF format negotiation (`auto=format`), crop fitting, and target pixel width.
+ * Normalizes an externally hosted image URL for direct rendering in an <img> tag:
+ * - Rejects local filesystem paths (/images/...) so only direct external http(s) URLs are used.
+ * - Converts Google Drive share links (/file/d/<ID>/view or ?id=<ID>) into direct image stream URLs.
+ * - Converts Dropbox share links (?dl=0) into raw image stream URLs (?raw=1).
+ * - Preserves external CDN query parameters and signatures untouched.
+ */
+export function normalizeExternalImageUrl(rawUrl: string | undefined | null): string {
+  if (!rawUrl || typeof rawUrl !== 'string') return '';
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return '';
+
+  // Reject local file paths or domain-prefixed local /images/products/ paths
+  if (
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('./') ||
+    trimmed.startsWith('../') ||
+    trimmed.startsWith('https://avlive.com.pk/images/') ||
+    trimmed.startsWith('http://avlive.com.pk/images/')
+  ) {
+    return '';
+  }
+
+  if (!/^https?:\/\//i.test(trimmed)) {
+    return '';
+  }
+
+  // Reject YouTube or Vimeo video links accidentally placed in image arrays
+  if (/(?:youtube\.com|youtu\.be|vimeo\.com)\//i.test(trimmed)) {
+    return '';
+  }
+
+  // Convert Google Drive file viewer links to direct <img>-compatible stream URLs
+  const gdriveFileMatch = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+  if (gdriveFileMatch && gdriveFileMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${gdriveFileMatch[1]}`;
+  }
+  const gdriveIdMatch = trimmed.match(/drive\.google\.com\/(?:open|uc|thumbnail)\?[^#]*\bid=([a-zA-Z0-9_-]+)/i);
+  if (gdriveIdMatch && gdriveIdMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${gdriveIdMatch[1]}`;
+  }
+
+  // Convert Dropbox preview links (?dl=0) to direct raw image links (?raw=1)
+  if (trimmed.includes('dropbox.com/') && trimmed.includes('dl=0')) {
+    return trimmed.replace('dl=0', 'raw=1');
+  }
+
+  return trimmed;
+}
+
+/**
+ * Extracts a YouTube 11-character video ID from a watch, embed, shorts, or youtu.be URL.
+ */
+export function extractYoutubeVideoId(rawUrl: string | undefined | null): string | null {
+  if (!rawUrl || typeof rawUrl !== 'string') return null;
+  const trimmed = rawUrl.trim();
+  const match = trimmed.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([a-zA-Z0-9_-]{11})/i
+  );
+  return match && match[1] ? match[1] : null;
+}
+
+/**
+ * Extracts any YouTube or Vimeo video links stored inside a product's media array.
+ */
+export function extractVideoUrls(input: unknown): string[] {
+  const rawList: string[] = [];
+  if (Array.isArray(input)) {
+    for (const item of input) {
+      if (typeof item === 'string') rawList.push(item);
+    }
+  } else if (typeof input === 'string' && input.trim()) {
+    rawList.push(...input.trim().split(/[\r\n,]+/));
+  }
+  const videos: string[] = [];
+  for (const item of rawList) {
+    const trimmed = item.trim();
+    if (/^https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be|vimeo\.com)\//i.test(trimmed)) {
+      if (!videos.includes(trimmed)) videos.push(trimmed);
+    }
+  }
+  return videos;
+}
+
+/**
+ * Extracts a clean array of direct external http(s) image URLs from an array or string.
+ * Automatically splits accidentally concatenated URLs (e.g. "https://.../a.webphttps://.../b.webp")
+ * and strips any local file paths.
+ */
+export function extractDirectImageUrls(input: unknown): string[] {
+  const rawList: string[] = [];
+  if (Array.isArray(input)) {
+    for (const item of input) {
+      if (typeof item === 'string') rawList.push(item);
+    }
+  } else if (typeof input === 'string' && input.trim()) {
+    const str = input.trim();
+    if (str.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(str);
+        if (Array.isArray(parsed)) {
+          for (const item of parsed) {
+            if (typeof item === 'string') rawList.push(item);
+          }
+        } else {
+          rawList.push(str);
+        }
+      } catch {
+        rawList.push(...str.split(/[\r\n,]+/));
+      }
+    } else {
+      rawList.push(...str.split(/[\r\n]+/));
+    }
+  }
+
+  const results: string[] = [];
+  const seen = new Set<string>();
+
+  for (const entry of rawList) {
+    // Split accidentally concatenated http(s):// URLs on the same line
+    const segments = entry
+      .split(/(?=https?:\/\/)/i)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    for (const seg of segments) {
+      const normalized = normalizeExternalImageUrl(seg);
+      if (normalized && !seen.has(normalized)) {
+        seen.add(normalized);
+        results.push(normalized);
+      }
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Optimizes image URLs for Core Web Vitals while preserving direct external image host URLs untouched.
+ * Never returns a local file path.
  */
 export function optimizeGalleryImageUrl(
   rawUrl: string | undefined | null,
   width = 480,
   quality = 75
 ): string {
-  if (!rawUrl || typeof rawUrl !== 'string') {
-    return 'https://placehold.co/480x480?text=AV+Live';
+  const externalUrl = normalizeExternalImageUrl(rawUrl);
+  if (!externalUrl) {
+    return DEFAULT_EXTERNAL_PRODUCT_IMAGE;
   }
-  const trimmed = rawUrl.trim();
-  if (!trimmed.includes('images.unsplash.com')) {
-    return trimmed;
+
+  if (!externalUrl.includes('images.unsplash.com')) {
+    return externalUrl;
   }
 
   try {
-    const parsed = new URL(trimmed);
+    const parsed = new URL(externalUrl);
     parsed.searchParams.set('auto', 'format');
     parsed.searchParams.set('fit', 'crop');
     parsed.searchParams.set('w', String(width));
     parsed.searchParams.set('q', String(quality));
     return parsed.toString();
   } catch {
-    return trimmed;
+    return externalUrl;
   }
 }
 

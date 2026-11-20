@@ -15,9 +15,11 @@ const SERVICE_SLUG_ALIASES: Record<string, string> = {
 
 function formatContent(content: string) {
   if (!content) return '';
-  const hasHtml = /<[a-z][\s\S]*>/i.test(content);
+  const youtubeEmbedHtml = `<div class="my-6 aspect-video w-full overflow-hidden rounded-3xl border border-gray-200 bg-black shadow-lg"><iframe class="h-full w-full" src="https://www.youtube-nocookie.com/embed/E6g2YXA9Zys?rel=0" title="AV Live Corporate Event & Expo Production Video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
+  const normalizedContent = content.replace(/<img\b[^>]*>/gi, youtubeEmbedHtml);
+  const hasHtml = /<[a-z][\s\S]*>/i.test(normalizedContent);
   if (hasHtml) {
-    return content;
+    return normalizedContent;
   }
   
   const lines = content.split('\n');

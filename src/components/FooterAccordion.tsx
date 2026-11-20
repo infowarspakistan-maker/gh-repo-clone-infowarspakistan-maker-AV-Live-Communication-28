@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import {
   getCanonicalProductSlug,
+  getProductHref,
   PRODUCT_GMC_METADATA,
   buildFallbackProductFromGmcMeta,
 } from '../lib/gmc-feed';
@@ -139,7 +140,7 @@ export function buildAll155SeoFooterCategories(): SeoFooterCategoryGroup[] {
     seenProductSlugs.add(canonicalSlug);
     const prod = buildFallbackProductFromGmcMeta(canonicalSlug);
     productLinks.push({
-      path: `/product/${canonicalSlug}`,
+      path: getProductHref(prod, canonicalSlug),
       label: prod?.productName || canonicalSlug,
     });
   }

@@ -28,6 +28,8 @@ export function Checkout() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    companyName: '',
+    gstStrn: '',
     email: '',
     phone: '',
     address: '',
@@ -101,7 +103,13 @@ export function Checkout() {
         shippingAddress: `${formData.address}, ${formData.city}, ${formData.zipCode}`,
         billingAddress: `${formData.address}, ${formData.city}, ${formData.zipCode}`,
         paymentMethod: 'bank_transfer' as const,
-        notes: customerType === 'business' ? `NTN: ${ntn}` : undefined,
+        notes: [
+          formData.companyName ? `Company: ${formData.companyName}` : '',
+          formData.gstStrn ? `FBR NTN/STRN: ${formData.gstStrn}` : '',
+          customerType === 'business' && ntn ? `Verified B2B NTN: ${ntn}` : '',
+        ]
+          .filter(Boolean)
+          .join(' | ') || undefined,
       };
 
       await createOrder(orderData);
@@ -188,7 +196,7 @@ export function Checkout() {
                     className="w-full bg-[#F8F9FA] border border-gray-100 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-[#00B4D8] transition-all font-bold text-sm" 
                   />
                 </div>
-                <div className="col-span-2">
+                <div>
                   <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Communication Address (Email)</label>
                   <input 
                     type="email" 
@@ -197,7 +205,37 @@ export function Checkout() {
                     className="w-full bg-[#F8F9FA] border border-gray-100 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-[#00B4D8] transition-all font-bold text-sm" 
                   />
                 </div>
-                <div className="col-span-2">
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Direct Contact / WhatsApp Phone</label>
+                  <input 
+                    type="tel" 
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    placeholder="0321 425 6263"
+                    className="w-full bg-[#F8F9FA] border border-gray-100 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-[#00B4D8] transition-all font-bold text-sm" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Company / Organization Name (Optional)</label>
+                  <input 
+                    type="text" 
+                    value={formData.companyName}
+                    onChange={(e) => setFormData({...formData, companyName: e.target.value})}
+                    placeholder="For corporate PO & FBR tax invoice"
+                    className="w-full bg-[#F8F9FA] border border-gray-100 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-[#00B4D8] transition-all font-bold text-sm" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">FBR NTN / GST STRN Number (Optional)</label>
+                  <input 
+                    type="text" 
+                    value={formData.gstStrn}
+                    onChange={(e) => setFormData({...formData, gstStrn: e.target.value})}
+                    placeholder="e.g. 1234567-8"
+                    className="w-full bg-[#F8F9FA] border border-gray-100 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-[#00B4D8] transition-all font-bold text-sm" 
+                  />
+                </div>
+                <div className="col-span-1 sm:col-span-2">
                   <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Deployment Site (Address)</label>
                   <textarea 
                     rows={3}

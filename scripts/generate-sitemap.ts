@@ -1,8 +1,10 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, setLogLevel } from 'firebase/firestore';
 import fs from 'fs';
 import path from 'path';
-import { buildDynamicSitemapXml, buildLlmsFullTxt } from '../src/lib/sitemap-generator';
+import { buildDynamicSitemapXml, buildLlmsFullTxt, buildLlmsTxt } from '../src/lib/sitemap-generator';
+
+setLogLevel('silent');
 
 let config: any = {};
 try {
@@ -12,7 +14,7 @@ try {
 }
 
 async function generateSitemap() {
-  console.log('Generating canonical sitemap.xml and llms-full.txt...');
+  console.log('Generating canonical sitemap.xml, llms.txt, and llms-full.txt...');
 
   const products: Array<Record<string, any>> = [];
   const categories: Array<Record<string, any>> = [];
@@ -55,6 +57,7 @@ async function generateSitemap() {
       services,
       blogPosts
     });
+    const llmsTxt = buildLlmsTxt();
     const llmsFull = buildLlmsFullTxt();
 
     const publicDir = path.join(process.cwd(), 'public');
@@ -63,10 +66,11 @@ async function generateSitemap() {
     }
 
     fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), xml, 'utf8');
+    fs.writeFileSync(path.join(publicDir, 'llms.txt'), llmsTxt, 'utf8');
     fs.writeFileSync(path.join(publicDir, 'llms-full.txt'), llmsFull, 'utf8');
     console.log(
       `sitemap.xml generated successfully with ${counts.total} canonical URLs ` +
-        `(static: ${counts.staticPages}, products: ${counts.products}, categories: ${counts.categories}, services: ${counts.services}, blogs: ${counts.blogs}) at public/sitemap.xml + public/llms-full.txt`
+        `(static: ${counts.staticPages}, products: ${counts.products}, categories: ${counts.categories}, services: ${counts.services}, blogs: ${counts.blogs}) at public/sitemap.xml + public/llms.txt + public/llms-full.txt`
     );
     process.exit(0);
   } catch (error) {

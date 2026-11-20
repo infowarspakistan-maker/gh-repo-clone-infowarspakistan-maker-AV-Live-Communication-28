@@ -1,5 +1,6 @@
 import {
   getCanonicalProductSlug,
+  getProductHref,
   PRODUCT_GMC_METADATA,
   buildFallbackProductFromGmcMeta,
   resolveProductPricing,
@@ -560,6 +561,7 @@ export const PRIMARY_PILLAR_ROUTES: string[] = [
   '/esports',
   '/voip-service-providers',
   '/room-designer',
+  '/podium-teleprompter',
   '/event-quote',
   '/lahore',
   '/karachi',
@@ -784,17 +786,18 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
     }
   }
 
-  // 4. Active Enterprise Products (/product/*) (Dynamic Firestore Products + Verified GMC Catalog Fallback)
+  // 4. Active Enterprise Products (/product/* or dedicated flagship route) (Dynamic Firestore Products + Verified GMC Catalog Fallback)
   if (Array.isArray(input.products)) {
     for (const prod of input.products) {
       if (prod.isActive === false) continue;
       const canonicalSlug = getCanonicalProductSlug(prod, String(prod.id || prod.slug || ''));
       if (!canonicalSlug) continue;
+      const productHref = getProductHref(prod, String(prod.id || prod.slug || ''));
       const lastmod = formatSitemapDate(prod.updatedAt || prod.createdAt, today);
       appendUrl(
-        `/product/${canonicalSlug}`,
-        canonicalSlug === 'polycom-realpresence-group-500-pakistan' ? '0.9' : '0.8',
-        'products',
+        productHref,
+        canonicalSlug === 'polycom-realpresence-group-500-pakistan' || productHref === '/podium-teleprompter' ? '0.9' : '0.8',
+        productHref.startsWith('/product/') ? 'products' : 'staticPages',
         lastmod,
         'weekly'
       );
@@ -802,10 +805,11 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
   }
   for (const rawKey of Object.keys(PRODUCT_GMC_METADATA)) {
     const canonicalSlug = getCanonicalProductSlug({ slug: rawKey }, rawKey);
+    const productHref = getProductHref({ slug: canonicalSlug }, rawKey);
     appendUrl(
-      `/product/${canonicalSlug}`,
-      canonicalSlug === 'polycom-realpresence-group-500-pakistan' ? '0.9' : '0.8',
-      'products',
+      productHref,
+      canonicalSlug === 'polycom-realpresence-group-500-pakistan' || productHref === '/podium-teleprompter' ? '0.9' : '0.8',
+      productHref.startsWith('/product/') ? 'products' : 'staticPages',
       today,
       'weekly'
     );
@@ -840,6 +844,18 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
   }
 
   // 6. Remaining Static, Brand (/brands/*), B2B Program (/programs/*) & Corporate Trust Routes
+  const policyRoutes = new Set([
+    '/privacy-policy',
+    '/terms-of-service',
+    '/returns',
+    '/shipping',
+    '/payment',
+    '/rma',
+    '/about',
+    '/contact',
+    '/reviews',
+    '/guides',
+  ]);
   for (const route of STATIC_CORE_ROUTES) {
     const priority =
       route === ''
@@ -849,7 +865,13 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
         : route.startsWith('/programs/')
         ? '0.7'
         : '0.8';
-    appendUrl(route, priority, 'staticPages', today, 'weekly');
+    const routeLastMod = policyRoutes.has(route)
+      ? '2026-11-01'
+      : route.startsWith('/programs/')
+      ? '2026-11-10'
+      : today;
+    const freq: 'daily' | 'weekly' | 'monthly' = policyRoutes.has(route) ? 'monthly' : 'weekly';
+    appendUrl(route, priority, 'staticPages', routeLastMod, freq);
   }
 
   const xml = [
@@ -860,6 +882,67 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
   ].join('\n');
 
   return { xml, counts };
+}
+
+/**
+ * Dynamically generates /llms.txt so the concise AI crawler index is 100% synchronized
+ * with /llms-full.txt, /sitemap.xml, and the 156 canonical routes.
+ */
+export function buildLlmsTxt(): string {
+  const lines: string[] = [
+    '# AV Live Communications (avlive.com.pk)',
+    '',
+    "> AV Live Communications is Pakistan's premier enterprise Audio-Visual (AV) systems integrator, Video Conferencing hardware distributor, and Corporate Event Management company. Operating across Lahore, Karachi, Islamabad, and nationwide, AV Live specializes in two primary commercial pillars: (1) Video Conferencing in Pakistan (Polycom Group 500, Poly Studio X70/X72, Logitech Rally Bar, Cisco Room Kits, Yealink, Zoom Rooms, Microsoft Teams Rooms) and (2) Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Displays, and 3D Projection Mapping. All pricing is denominated in Pakistani Rupees (PKR / Rs.) with official FBR GST/NTN invoicing and a 15-minute technical callback SLA.",
+    '',
+    '## Pillar 1: Video Conferencing in Pakistan & Enterprise Hardware Categories',
+    '- [Video Conferencing in Pakistan Hub](https://avlive.com.pk/video-conferencing): Complete boardroom AV design, acoustic calibration, and multi-camera tracking systems.',
+    '- [Video Conferencing Hardware Category](https://avlive.com.pk/category/video-conferencing): Genuine Polycom Group 500 codecs, Poly Studio X70/X72 dual-4K AI video bars, Poly Studio X52/X50, Logitech Rally Bar, and Cisco Room Kits.',
+    '- [Boardroom Codecs](https://avlive.com.pk/category/boardroom-codecs): Standards-based H.323/SIP and native Teams/Zoom room codecs.',
+    '- [Large Room & Auditorium AV](https://avlive.com.pk/category/large-room): 14-to-40+ seat executive boardroom and auditorium video collaboration bundles.',
+    '- [4K Optical PTZ Cameras](https://avlive.com.pk/category/ptz-cameras): Motorized 12x to 25x optical zoom cameras for boardrooms and lecture halls.',
+    '- [Touch Panels & Room Controllers](https://avlive.com.pk/category/touch-panels): 10-inch PoE scheduling panels and interactive 4K flat panels (Horion K6A).',
+    '- [Conference Speakerphones & Ceiling Mics](https://avlive.com.pk/category/speakerphones): Beamforming microphone arrays and daisy-chained table speakerphones.',
+    '- [IP Phones & Executive Desk Endpoints](https://avlive.com.pk/category/ip-phones): Cisco, Yealink, Polycom VVX, Grandstream, and Fanvil Gigabit PoE IP phones.',
+    '- [VoIP Phone Systems & IP PBX Servers](https://avlive.com.pk/category/voip-phone-systems): Grandstream UCM6304/UCM6308, 3CX Pro/Enterprise, FreePBX, and Cisco CUCM.',
+    '- [Enterprise ANC Headsets](https://avlive.com.pk/category/headsets): Jabra Evolve2, HP Poly Blackwire/Voyager, and Yealink BH70 wireless UC headsets.',
+    '- [Commercial Laser Projectors](https://avlive.com.pk/category/projectors): Panasonic 40,000-lumen venue projectors, Epson 3LCD, Sony 4K SXRD, BenQ, Optoma, and ViewSonic.',
+    '- [IP Security Cameras](https://avlive.com.pk/category/ip-cameras): Axis, Hikvision ColorVu, Dahua Starlight, and Uniview NDAA-compliant IP surveillance.',
+    '- [SIP Intercom, Paging & PA Systems](https://avlive.com.pk/category/intercom-paging-access): Bosch PAVIRO EN 54-16 voice evacuation, ITC Audio PA, and 2N SIP intercoms.',
+    '',
+    '## Pillar 2: Corporate Event Management, Hybrid Events & 3D Hologram Displays',
+  ];
+
+  for (const svc of FALLBACK_SERVICES_CATALOG) {
+    if (svc.isActive === false) continue;
+    lines.push(`- [${svc.title}](https://avlive.com.pk/services/${svc.slug}): ${svc.description}`);
+  }
+  lines.push('- [3D Hologram Display Stages Pakistan](https://avlive.com.pk/3d-hologram): Life-size holographic telepresence stages, HoloGauze projection, and 3D floating product displays.');
+  lines.push('- [3D Projection Mapping Pakistan](https://avlive.com.pk/projection-mapping): Architectural facade projection mapping and immersive stage visuals using 20,000 to 40,000 ANSI lumen laser projectors.');
+  lines.push('- [Interactive 3D Room & SMD LED Wall Calculator](https://avlive.com.pk/room-designer): Calculate 500x500mm SMD LED cabinet dimensions, resolution, weight, and instant PKR PDF quotes.');
+  lines.push('- [24-Hour Custom Event & AV Quote](https://avlive.com.pk/event-quote): Fast-track B2B and PPRA government/education proposals with a 15-minute engineer callback SLA.');
+  lines.push('');
+
+  lines.push('## Pillar 3: Complete Engineering Buyer Guides & Comparisons (All 11 Articles)');
+  for (const post of FALLBACK_BLOG_CATALOG) {
+    lines.push(`- [${post.title}](https://avlive.com.pk/blog/${post.slug}): ${post.answerFirstSummary || post.excerpt}`);
+  }
+  lines.push('');
+
+  lines.push('## Regional Experience Centers & Standardized NAP (15-Minute Technical SLA)');
+  lines.push('- **Lahore Experience Center (Head Office)**: Johar Town Block N & DHA Commercial Hub, Lahore, Punjab, Pakistan | Tel: +92 42 3233 4782 | Hotlines: 0321 425 6263 / 0339 0000 921 | Page: https://avlive.com.pk/lahore');
+  lines.push('- **Karachi Regional Office**: Clifton Executive Hub & Shahrah-e-Faisal, Karachi, Sindh, Pakistan | Tel: +92 21 3589 0123 | Hotlines: 0321 425 6263 / 0339 0000 921 | Page: https://avlive.com.pk/karachi');
+  lines.push('- **Islamabad Regional Office**: Blue Area Commercial Hub, Jinnah Avenue, Islamabad, ICT, Pakistan | Tel: +92 51 2890 124 | Hotlines: 0321 425 6263 / 0339 0000 921 | Page: https://avlive.com.pk/islamabad');
+  lines.push('- **Procurement & Tender Desk**: info@avlive.com.pk | sales@avlive.com.pk | Official FBR GST/NTN Invoicing & PPRA Compliance');
+  lines.push('');
+
+  lines.push('## Structured Feeds, Full LLM Catalog & Sitemaps');
+  lines.push('- **Full LLM Hardware & Pricing Knowledge Base**: https://avlive.com.pk/llms-full.txt');
+  lines.push('- **XML Sitemap (156 Canonical URLs)**: https://avlive.com.pk/sitemap.xml');
+  lines.push('- **HTML Sitemap Directory**: https://avlive.com.pk/sitemap');
+  lines.push('- **Google Merchant Center Product Feed (TSV)**: https://avlive.com.pk/feed/google-merchant.tsv');
+  lines.push('');
+
+  return lines.join('\n');
 }
 
 /**
@@ -931,8 +1014,9 @@ export function buildLlmsFullTxt(): string {
     const meta = PRODUCT_GMC_METADATA[canonicalSlug] || PRODUCT_GMC_METADATA[rawKey];
     if (!fallbackProd || !meta) continue;
     const { effectivePrice } = resolveProductPricing(fallbackProd);
+    const productHref = getProductHref(fallbackProd, rawKey);
     lines.push(
-      `| ${fallbackProd.productName} | ${meta.brand} | ${meta.mpn} | ${meta.gtin} | Rs. ${effectivePrice.toLocaleString()} | ${meta.highlight} | https://avlive.com.pk/product/${canonicalSlug} |`
+      `| ${fallbackProd.productName} | ${meta.brand} | ${meta.mpn} | ${meta.gtin} | Rs. ${effectivePrice.toLocaleString()} | ${meta.highlight} | https://avlive.com.pk${productHref} |`
     );
   }
 

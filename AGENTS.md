@@ -52,4 +52,23 @@ All AI Coding Agents modifying routes, components, products, categories, service
   2. An Answer-First direct verdict summary (50–70 words) and semantic HTML `<table>` for specifications/pricing on Product, Category, Brand, Service, and Blog pages.
 - **Goal**: Maximize citations in Google AI Overviews, Featured Snippets, ChatGPT Search, Perplexity, and Google Merchant Center.
 
+## 6. Google Lighthouse 100/100/100/100, Mobile Ergonomics & Flat 2-Click Site Structure Policy
 
+### 6.1 Core Web Vitals & DOM Budget (`Performance = 100`)
+- **Rule**: Maintain $\text{LCP} \le 1.8\text{s}$, $\text{TBT} \le 50\text{ms}$, $\text{INP} \le 100\text{ms}$, and $\text{CLS} = 0.000$.
+  - Use `optimizeGalleryImageUrl(url, 480, 75)` for catalog images, explicit `width`/`height` + `aspect-ratio` on all images, `fetchPriority="high"` + `loading="eager"` strictly on the first 1–2 viewport images, hover-only mounting for 2nd product gallery images (`hoveredProductId`), and `IntersectionObserver` 16-card DOM batching ($<800$ DOM nodes).
+  - Keep compact `16:6` hero containers on Services, Service Detail, and Keyword Pillar pages, and maintain the `54px` mobile sticky header with a full-width live search dropdown (`top-[54px] left-0 right-0`).
+
+### 6.2 WCAG 2.2 AA Accessibility, Best Practices & $\le 2$-Click Crawl Depth
+- **Rule**: Maintain 100/100 Accessibility and Best Practices:
+  - Enforce a single `<h1>` per route, sequential `<h2>`->`<h3>` hierarchy, $\ge 4.5:1$ contrast, $\ge 44\times44\text{px}$ touch targets, and explicit `aria-label` attributes on icon buttons.
+  - Keep `@firebase/firestore` configured with `experimentalAutoDetectLongPolling: true` and `setLogLevel('silent')` so idle gRPC stream resets never log console errors.
+  - Ensure 100% of canonical URLs in `public/sitemap.xml` remain reachable within $\le 2$ clicks via the Header Mega-Menu, Siloed Footer, Breadcrumbs, and `/sitemap` (`src/pages/HtmlSitemap.tsx`).
+
+## 7. 4-Gate Monotonic Self-Updating Skill Protocol ("Updates Itself Without Losing Skills")
+
+- **Rule**: Whenever a new ranking strategy, competitor counter-move, Lighthouse optimization, or route/catalog entity is implemented:
+  1. **Read First**: Read `skills/apex-seo-aeo-engine/SKILL.md` and `seo-policy.md` before making changes.
+  2. **Append-Only Learning**: Append the newly learned rule or route milestone to `skills/apex-seo-aeo-engine/SKILL.md` (Section 9: Learned Rules Ledger) and `seo-policy.md` without deleting or truncating any existing rules.
+  3. **Executable Audit Ratchet**: Run `npx tsx scripts/generate-sitemap.ts`, `npx tsx scripts/seo-silo-audit.ts`, `npm run lint`, and `npm run build` to guarantee zero regressions across all 156+ canonical URLs.
+  4. **Reference Blueprints**: Full architectural documentation resides in `docs/WEBSITE_BUILDING_MECHANISM_REPORT.md`, `docs/AI_AGENT_PROFILES_COMPLETE.md`, and `NICHE_WEBSITE_BLUEPRINT.md` (and interactively at `/admin/blueprint-hub`).

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="holoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040814"/>
+      <stop offset="50%" stop-color="#0D1F3D"/>
+      <stop offset="100%" stop-color="#050B18"/>
+    </linearGradient>
+    <radialGradient id="holoGlow" cx="50%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#00F5D4" stop-opacity="0.45"/>
+      <stop offset="45%" stop-color="#00B4D8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#040814" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beamGrad" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#00F5D4" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#00B4D8" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#holoBg)"/>
+  <circle cx="600" cy="410" r="420" fill="url(#holoGlow)"/>
+
+  <!-- Header Badges -->
+  <rect x="80" y="58" width="410" height="44" rx="8" fill="#00B4D8" fill-opacity="0.2" stroke="#00F5D4" stroke-width="1.5"/>
+  <text x="104" y="86" fill="#00F5D4" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" font-weight="bold">3D HOLOGRAM DISPLAY STAGE PRODUCTION</text>
+
+  <rect x="810" y="58" width="310" height="44" rx="8" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="835" y="86" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">HOLOGAUZE &amp; PEPPER'S GHOST</text>
+
+  <!-- Overhead Laser Projector Truss Rig -->
+  <rect x="180" y="130" width="840" height="22" rx="4" fill="#1E293B" stroke="#475569" stroke-width="2"/>
+  <rect x="550" y="152" width="100" height="36" rx="6" fill="#0F172A" stroke="#00F5D4" stroke-width="2"/>
+  <circle cx="600" cy="188" r="10" fill="#00F5D4"/>
+
+  <!-- Volumetric Hologram Projection Cone -->
+  <polygon points="600,192 270,600 930,600" fill="url(#beamGrad)"/>
+
+  <!-- Floating 3D Volumetric Wireframe Sphere & Polyhedron -->
+  <circle cx="600" cy="400" r="155" fill="none" stroke="#00F5D4" stroke-width="3"/>
+  <ellipse cx="600" cy="400" rx="155" ry="62" fill="none" stroke="#38BDF8" stroke-width="2.5"/>
+  <ellipse cx="600" cy="400" rx="68" ry="155" fill="none" stroke="#38BDF8" stroke-width="2.5"/>
+  <polygon points="600,255 735,355 685,515 515,515 465,355" fill="#00B4D8" fill-opacity="0.18" stroke="#00F5D4" stroke-width="2.5"/>
+  <circle cx="600" cy="400" r="24" fill="#00F5D4"/>
+
+  <!-- Stage Deck & LED Emitter Strip -->
+  <polygon points="160,600 1040,600 1130,665 70,665" fill="#0F172A" stroke="#00B4D8" stroke-width="2.5"/>
+  <ellipse cx="600" cy="600" rx="310" ry="18" fill="#00F5D4" fill-opacity="0.45" stroke="#00F5D4" stroke-width="2"/>
+
+  <!-- Technical Spec Callouts -->
+  <rect x="80" y="685" width="320" height="76" rx="12" fill="#0F172A" stroke="#00F5D4" stroke-width="1.5"/>
+  <text x="104" y="715" fill="#00F5D4" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">40,000-LUMEN 4K LASER RIG</text>
+  <text x="104" y="742" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">Panasonic 3-Chip DLP &amp; HoloGauze</text>
+
+  <rect x="440" y="685" width="320" height="76" rx="12" fill="#0F172A" stroke="#00F5D4" stroke-width="1.5"/>
+  <text x="464" y="715" fill="#00F5D4" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">GLASSES-FREE 3D TELEPRESENCE</text>
+  <text x="464" y="742" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">Live Holographic Keynotes &amp; Reveals</text>
+
+  <rect x="800" y="685" width="320" height="76" rx="12" fill="#0F172A" stroke="#00F5D4" stroke-width="1.5"/>
+  <text x="824" y="715" fill="#00F5D4" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">TURNKEY CORPORATE EVENTS</text>
+  <text x="824" y="742" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">Lahore • Karachi • Islamabad</text>
+
+  <text x="80" y="812" fill="#F8FAFC" font-family="DejaVu Sans, Arial, sans-serif" font-size="28" font-weight="bold">3D Hologram Display Stages &amp; Volumetric Projection Mapping</text>
+  <text x="80" y="848" fill="#00F5D4" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" font-weight="bold">AV Live Communications Pakistan • In-House Holographic Stage Fleet</text>
+</svg>

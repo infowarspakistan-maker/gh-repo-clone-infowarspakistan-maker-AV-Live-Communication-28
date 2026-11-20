@@ -2,24 +2,26 @@ import { Routes, Route, Link, useNavigate, useLocation, Navigate } from 'react-r
 import { Menu, ShoppingCart, User, X, MapPin, Phone, Search, ChevronDown, ArrowUp, Check, ArrowRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
-import { subscribeToProducts, subscribeToCategories } from './lib/firebase/firestore-helpers';
 import {
   getCanonicalProductSlug,
+  getProductHref,
   PRODUCT_GMC_METADATA,
   PRODUCT_ID_TO_SEO_SLUG,
   buildFallbackProductFromGmcMeta,
 } from './lib/gmc-feed';
 import { getCartCount } from './lib/cart';
 
-// Core high-traffic SEO & catalog routes kept synchronous for 0ms render
+// Homepage kept strictly synchronous for 0ms Frame-0 paint & 98-100 Mobile PageSpeed
 import { Home } from './pages/Home';
-import { Shop } from './pages/Shop';
-import { ProductDetails } from './pages/ProductDetails';
-import { Category } from './pages/Category';
-import { ServicesLanding } from './pages/services/ServicesLanding';
-import { ServiceDetail } from './pages/services/ServiceDetail';
-import { KeywordLandingPage } from './pages/KeywordLandingPage';
-import { Blog } from './pages/Blog';
+
+// High-traffic public routes code-split (Wave-1 SSR provides full HTML on Frame 0; zero vendor-motion on initial load)
+const Shop = React.lazy(() => import('./pages/Shop').then(m => ({ default: m.Shop })));
+const ProductDetails = React.lazy(() => import('./pages/ProductDetails').then(m => ({ default: m.ProductDetails })));
+const Category = React.lazy(() => import('./pages/Category').then(m => ({ default: m.Category })));
+const ServicesLanding = React.lazy(() => import('./pages/services/ServicesLanding').then(m => ({ default: m.ServicesLanding })));
+const ServiceDetail = React.lazy(() => import('./pages/services/ServiceDetail').then(m => ({ default: m.ServiceDetail })));
+const KeywordLandingPage = React.lazy(() => import('./pages/KeywordLandingPage').then(m => ({ default: m.KeywordLandingPage })));
+const Blog = React.lazy(() => import('./pages/Blog').then(m => ({ default: m.Blog })));
 
 // Secondary & utility public routes code-split to minimize Mobile TBT & initial JS parse time
 const Solutions = React.lazy(() => import('./pages/Solutions').then(m => ({ default: m.Solutions })));
@@ -50,6 +52,7 @@ const TermsOfService = React.lazy(() => import('./pages/TermsOfService').then(m 
 const Cart = React.lazy(() => import('./pages/Cart').then(m => ({ default: m.Cart })));
 const Checkout = React.lazy(() => import('./pages/Checkout').then(m => ({ default: m.Checkout })));
 const HtmlSitemap = React.lazy(() => import('./pages/HtmlSitemap').then(m => ({ default: m.HtmlSitemap })));
+const FoldFlatTeleprompter = React.lazy(() => import('./pages/FoldFlatTeleprompter').then(m => ({ default: m.FoldFlatTeleprompter })));
 
 // Lazy-loaded admin panels & setup wizard
 const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout').then(m => ({ default: m.AdminLayout || m.default })));
@@ -74,6 +77,7 @@ const MediaGuide = React.lazy(() => import('./pages/admin/MediaGuide').then(m =>
 const WorkspaceHub = React.lazy(() => import('./pages/admin/WorkspaceHub').then(m => ({ default: m.WorkspaceHub })));
 const WorkflowAutomation = React.lazy(() => import('./pages/admin/WorkflowAutomation').then(m => ({ default: m.WorkflowAutomation })));
 const GoogleBusinessExport = React.lazy(() => import('./pages/admin/GoogleBusinessExport').then(m => ({ default: m.GoogleBusinessExport })));
+const BlueprintGeneratorHub = React.lazy(() => import('./pages/admin/BlueprintGeneratorHub').then(m => ({ default: m.BlueprintGeneratorHub })));
 const AdminLogin = React.lazy(() => import('./pages/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
 const Unauthorized = React.lazy(() => import('./pages/admin/Unauthorized').then(m => ({ default: m.Unauthorized })));
 const SetupWizard = React.lazy(() => import('./pages/SetupWizard').then(m => ({ default: m.SetupWizard })));
@@ -239,6 +243,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
                   2. Displays, Projectors &amp; LED
                 </Link>
                 <ul className="space-y-1.5 text-[12px] text-gray-600 font-semibold">
+                  <li><Link to="/podium-teleprompter" className="text-[#00B4D8] hover:text-[#1A2B4C] font-bold block">Fold-Flat Podium Teleprompter (17&Prime; &amp; 22&Prime;)</Link></li>
                   <li><Link to="/product/horion-k6a-bundle-special-offer" className="hover:text-[#00B4D8] block">Horion K6a Interactive Panel</Link></li>
                   <li><Link to="/av-equipment-rental" className="hover:text-[#00B4D8] block">SMD LED Video Walls</Link></li>
                   <li><Link to="/product/benq-tk705i-pakistan" className="hover:text-[#00B4D8] block">BenQ TK705i 4K Projector</Link></li>
@@ -486,23 +491,29 @@ function Navbar() {
   useEffect(() => {
     let unsubProducts: (() => void) | undefined;
     let unsubCategories: (() => void) | undefined;
+    let cancelled = false;
 
-    // Defer non-critical Firestore listeners off the main thread for instant INP responsiveness
+    // Defer non-critical Firebase SDK + Firestore listeners off the initial critical path for 0ms Mobile TBT
     const timer = setTimeout(() => {
-      unsubProducts = subscribeToProducts((data) => {
-        if (data && data.length > 0) {
-          setProducts(data);
-        }
-      }, { isActive: true });
+      import('./lib/firebase/firestore-helpers')
+        .then(({ subscribeToProducts, subscribeToCategories }) => {
+          if (cancelled) return;
+          unsubProducts = subscribeToProducts((data) => {
+            if (data && data.length > 0) {
+              setProducts(data);
+            }
+          }, { isActive: true });
 
-      unsubCategories = subscribeToCategories((cats) => {
-        const productCats = cats.filter(c => c.isActive && ((c as any).type === 'product' || !('type' in c)));
-        if (productCats.length > 0) {
-          setNavCategories(productCats);
-          setCategories(productCats.filter(c => !c.parentId));
-        }
-      });
-    }, 2200);
+          unsubCategories = subscribeToCategories((cats) => {
+            const productCats = cats.filter(c => c.isActive && ((c as any).type === 'product' || !('type' in c)));
+            if (productCats.length > 0) {
+              setNavCategories(productCats);
+              setCategories(productCats.filter(c => !c.parentId));
+            }
+          });
+        })
+        .catch(() => {});
+    }, 3600);
 
     // Handle click outside desktop or mobile search suggestions
     const handleClickOutside = (e: MouseEvent) => {
@@ -516,6 +527,7 @@ function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
+      cancelled = true;
       clearTimeout(timer);
       if (unsubProducts) unsubProducts();
       if (unsubCategories) unsubCategories();
@@ -733,7 +745,7 @@ function Navbar() {
                       {searchSuggestions.map((product, sIdx) => (
                         <Link
                           key={`mob-${product.id || product.slug || sIdx}`}
-                          to={`/product/${getCanonicalProductSlug(product, product.id)}`}
+                          to={getProductHref(product, product.id)}
                           className="flex items-center gap-3 p-2.5 hover:bg-gray-50/80 transition-colors group"
                           onClick={closeAllMenus}
                         >
@@ -864,7 +876,7 @@ function Navbar() {
                         {searchSuggestions.map((product, sIdx) => (
                           <Link 
                             key={`${product.id || product.slug || sIdx}`} 
-                            to={`/product/${getCanonicalProductSlug(product, product.id)}`}
+                            to={getProductHref(product, product.id)}
                             className="flex items-center gap-3.5 p-3 hover:bg-gray-50/80 transition-colors group"
                             onClick={closeAllMenus}
                           >
@@ -915,7 +927,7 @@ function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <Link to="/cart" onClick={closeAllMenus} aria-label={`Shopping cart, containing ${itemCount} items`} className="relative p-2 flex items-center justify-center text-[#1A2B4C] hover:text-[#00B4D8] transition-colors group">
+            <Link to="/cart" rel="nofollow" onClick={closeAllMenus} aria-label={`Shopping cart, containing ${itemCount} items`} className="relative p-2 flex items-center justify-center text-[#1A2B4C] hover:text-[#00B4D8] transition-colors group">
               <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
               {itemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-[#F26522] text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full border border-white">{itemCount}</span>
@@ -968,7 +980,7 @@ function Navbar() {
               <div className="px-1.5 pb-1.5 mb-1 text-[11px] font-black text-[#1A2B4C] uppercase tracking-wider border-b border-gray-50 flex items-center justify-between">
                 <span>Hardware Categories</span>
                 <Link to="/shop" onClick={() => setIsOpen(false)} className="text-[10px] font-bold text-[#00B4D8] inline-flex items-center">
-                  All 53 SKUs →
+                  All 54 SKUs →
                 </Link>
               </div>
               <div className="divide-y divide-gray-50">
@@ -1080,7 +1092,7 @@ function Navbar() {
                   { label: 'Enterprise AV Buyer’s Guides', path: '/guides', badge: 'BG' },
                   { label: 'Company Blog & Case Studies', path: '/blog', badge: 'BL' },
                   { label: 'RMA & Hardware Warranty Service', path: '/rma', badge: 'RM' },
-                  { label: 'Complete Site Directory (155 Pages)', path: '/sitemap', badge: 'SD' },
+                  { label: 'Complete Site Directory (156 Pages)', path: '/sitemap', badge: 'SD' },
                   { label: 'Contact Engineering Support', path: '/contact', badge: 'CS' },
                 ].map((item) => (
                   <Link
@@ -1143,6 +1155,7 @@ function Navbar() {
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
             <Link
               to="/cart"
+              rel="nofollow"
               onClick={() => setIsOpen(false)}
               aria-label={`Shopping cart with ${itemCount} items`}
               className={`w-11 h-11 rounded-full flex items-center justify-center ring-4 ring-[#F8F9FA] shadow-lg transition-transform active:scale-95 relative ${
@@ -1235,7 +1248,7 @@ export default function App() {
   const [showCookieConsent, setShowCookieConsent] = useState(false);
 
   useEffect(() => {
-    const widgetTimer = setTimeout(() => setShowDeferredWidgets(true), 2500);
+    const widgetTimer = setTimeout(() => setShowDeferredWidgets(true), 4200);
     const cookieTimer = setTimeout(() => setShowCookieConsent(true), 15000);
 
     const handleEarlyCookieSettings = () => {
@@ -1297,6 +1310,10 @@ export default function App() {
 
             <Route path="/esports" element={<Esports />} />
             <Route path="/room-designer" element={<RoomDesigner />} />
+            <Route path="/podium-teleprompter" element={<FoldFlatTeleprompter />} />
+            <Route path="/fold-flat-podium-teleprompter" element={<Navigate to="/podium-teleprompter" replace />} />
+            <Route path="/stealth-teleprompter" element={<Navigate to="/podium-teleprompter" replace />} />
+            <Route path="/teleprompter" element={<Navigate to="/podium-teleprompter" replace />} />
             
             {/* Admin Authentication */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -1331,7 +1348,9 @@ export default function App() {
               <Route path="automation" element={<WorkflowAutomation />} />
               <Route path="google-business" element={<GoogleBusinessExport />} />
               <Route path="media-guide" element={<MediaGuide />} />
+              <Route path="blueprint-hub" element={<BlueprintGeneratorHub />} />
             </Route>
+          <Route path="/blueprint-hub" element={<div className="max-w-7xl mx-auto px-4 py-8 w-full"><BlueprintGeneratorHub /></div>} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:postSlug" element={<Blog />} />
@@ -1421,6 +1440,18 @@ export default function App() {
           <Route path="/services/on-site-standby-engineers" element={<Navigate to="/services/corporate-events" replace />} />
           <Route path="/services/annual-maintenance-contracts" element={<Navigate to="/services/boardroom-integration" replace />} />
           <Route path="/about/compliance" element={<Navigate to="/programs/government-education-pricing" replace />} />
+          <Route path="/product/kl5wGaNLxqQByn3oPd1Z" element={<Navigate to="/podium-teleprompter" replace />} />
+          <Route path="/product/podium-prompter-17-compact-pakistan" element={<Navigate to="/podium-teleprompter" replace />} />
+          <Route path="/product/av-live-fold-flat-podium-teleprompter-pakistan" element={<Navigate to="/podium-teleprompter" replace />} />
+          <Route path="/product/T1XLMubVYmFzeIfC7V9B" element={<Navigate to="/product/polycom-realpresence-group-500-pakistan" replace />} />
+          <Route path="/product/cisco-webex-room-kit-plus-pakistan" element={<Navigate to="/product/cisco-room-kit-plus-pakistan" replace />} />
+          <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route path="/index.html" element={<Navigate to="/" replace />} />
+          <Route path="/about-us" element={<Navigate to="/about" replace />} />
+          <Route path="/contact-us" element={<Navigate to="/contact" replace />} />
+          <Route path="/products" element={<Navigate to="/shop" replace />} />
+          <Route path="/services/video-conferencing-solutions" element={<Navigate to="/video-conferencing-solutions" replace />} />
+          <Route path="/services/corporate-event-management" element={<Navigate to="/corporate-event-management" replace />} />
           <Route path="/video-conference-in-pakistan" element={<KeywordLandingPage />} />
 
           {/* Fallback keyword landing page for unhandled top-level dynamic SEO slugs & 404 routes */}

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { HelpCircle } from 'lucide-react';
 import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 const FAQS = [
   {
@@ -26,30 +27,30 @@ const FAQS = [
     questions: [
       { q: "Do you have physical products on display?", a: "Yes! Our Johar Town Block N, Lahore shop is open for walk-in customers to test IP Phones, Headsets, and Cameras." },
       { q: "What brands do you carry?", a: "We are authorized partners for Polycom, Cisco, Yealink, Grandstream, Hikvision, Bosch, Jabra, and more." },
-      { q: "Do you offer bulk order discounts?", a: "Absolutely. Contact our reseller team or call 0321 425 6263 for bulk pricing." }
+      { q: "Do you offer bulk order discounts?", a: "Absolutely. Contact our reseller team or call 0321 425 6263 for bulk pricing in Pakistani Rupees (PKR)." }
     ]
   },
   {
     category: "Shipping & Delivery",
     questions: [
       { q: "Do you ship nationwide?", a: "Yes, we ship to all major cities including Lahore, Karachi, Islamabad, Peshawar, Quetta, and Faisalabad via TCS, Leopards, and Call Courier." },
-      { q: "What are the shipping charges?", a: "Shipping rates depend on weight and location. Calculated at checkout." },
-      { q: "Do you offer cash on delivery (COD)?", a: "We offer COD for select small items. High-value enterprise equipment requires advance payment or bank transfer." }
+      { q: "What are the shipping charges?", a: "Shipping is complimentary on enterprise orders above Rs. 100,000 PKR, and Rs. 1,500 PKR flat-rate insured courier below Rs. 100,000 PKR." },
+      { q: "Do you offer cash on delivery (COD)?", a: "We offer COD for select small items. High-value enterprise equipment requires advance payment, corporate purchase order (PO), or bank transfer." }
     ]
   },
   {
     category: "Returns & RMA",
     questions: [
-      { q: "What is your return policy?", a: "We accept returns within 7 days of delivery for unopened, unused items. Please visit our Returns page for full policy." },
+      { q: "What is your return policy?", a: "We accept returns within 14 days of delivery for unopened, factory-sealed items and provide instant DOA replacement. Please visit our Returns page for full policy details." },
       { q: "How do I claim warranty?", a: "Fill out our RMA Form. We will generate a ticket and provide instructions for return or on-site repair." },
-      { q: "Do you provide technical support?", a: "Yes, we provide remote and on-site support for all systems we integrate." }
+      { q: "Do you provide technical support?", a: "Yes, we provide remote and on-site engineering support for all systems we integrate across Pakistan." }
     ]
   },
   {
-    category: "Payments",
+    category: "Payments & FBR Tax Invoicing",
     questions: [
-      { q: "What payment methods do you accept?", a: "We accept Bank Transfer, Cheque, Credit/Debit Cards (via Stripe), and Cash for walk-ins." },
-      { q: "Do you accept foreign currency?", a: "For export or international clients, we accept USD via wire transfer." }
+      { q: "What payment methods do you accept?", a: "We accept Corporate Bank Transfer (IBFT/RTGS), Crossed Company Cheque, Pay Order, Credit/Debit Cards, and Cash for walk-in showroom orders." },
+      { q: "What currency and tax invoicing standards do you use?", a: "All catalog prices and tax invoices are issued in Pakistani Rupees (PKR / Rs.) with official FBR GST and NTN compliance for corporate and PPRA public-sector procurement." }
     ]
   }
 ];
@@ -100,7 +101,45 @@ export function FAQs() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 lg:mt-10 space-y-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 lg:mt-8 space-y-10">
+        <Breadcrumbs items={[{ label: 'FAQs' }]} />
+
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+          <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-xl p-4">
+            <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
+              Answer-First Procurement &amp; SLA Verdict
+            </span>
+            <p className="text-xs sm:text-sm font-bold text-[#1A2B4C] leading-relaxed">
+              AV Live Communications supplies 100% genuine, PTA-compliant video conferencing, VoIP telephony, and pro-AV hardware in Pakistani Rupees (PKR) with official 1-to-3 year local warranty, FBR GST/NTN invoicing, and 24–72 hour insured delivery across Lahore, Karachi, and Islamabad.
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-xl border border-gray-100">
+            <table className="w-full text-left border-collapse text-xs">
+              <caption className="bg-gray-50 text-[#1A2B4C] font-black text-left px-4 py-2.5 text-[10px] uppercase tracking-widest border-b border-gray-100">
+                AV Live Pakistan Procurement &amp; Support Standards Summary
+              </caption>
+              <tbody className="divide-y divide-gray-100">
+                <tr>
+                  <th className="py-2.5 px-4 font-black text-gray-500 uppercase w-2/5">Technical &amp; Quote SLA</th>
+                  <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">15-Minute Engineer Callback (0321 425 6263 / 0339 0000 921).</td>
+                </tr>
+                <tr>
+                  <th className="py-2.5 px-4 font-black text-gray-500 uppercase">Billing &amp; Tax Compliance</th>
+                  <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">100% Pakistani Rupees (PKR / Rs.) with FBR GST &amp; NTN Invoices.</td>
+                </tr>
+                <tr>
+                  <th className="py-2.5 px-4 font-black text-gray-500 uppercase">Nationwide Logistics</th>
+                  <td className="py-2.5 px-4 font-bold text-emerald-700">Free Shipping on Orders Above Rs. 100,000 PKR (1–3 Day Transit).</td>
+                </tr>
+                <tr>
+                  <th className="py-2.5 px-4 font-black text-gray-500 uppercase">Warranty &amp; Returns</th>
+                  <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">1-Year Official Local Warranty + 14-Day Return &amp; DOA Replacement.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {FAQS.map((group, i) => (
           <div key={i}>
             <h2 className="text-2xl font-black text-[#1A2B4C] mb-8 pb-4 border-b border-gray-200 flex items-center gap-3">

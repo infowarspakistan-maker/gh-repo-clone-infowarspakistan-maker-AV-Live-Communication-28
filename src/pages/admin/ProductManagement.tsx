@@ -14,6 +14,7 @@ import {
   Category,
   getCategories
 } from '../../lib/firebase/firestore-helpers';
+import { extractDirectImageUrls } from '../../lib/image-optimize';
 
 export function ProductManagement() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -23,6 +24,10 @@ export function ProductManagement() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [imageUrlsText, setImageUrlsText] = useState('');
+  const [showBulkImageModal, setShowBulkImageModal] = useState(false);
+  const [bulkImageText, setBulkImageText] = useState('');
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [bulkUpdateResult, setBulkUpdateResult] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     productName: '',
@@ -73,7 +78,12 @@ export function ProductManagement() {
       seoMetaDescription: product.seoMetaDescription || '',
       imageAltText: product.imageAltText || ''
     });
-    setImageUrlsText((Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : [])).join('\n'));
+    const cleanExternalUrls = extractDirectImageUrls([
+      ...(Array.isArray(product.images) ? product.images : typeof product.images === 'string' ? [product.images] : []),
+      product.image,
+      (product as any).imageUrl,
+    ]);
+    setImageUrlsText(cleanExternalUrls.join('\n'));
     setActiveTab('basic');
     setShowForm(true);
   };
@@ -83,10 +93,7 @@ export function ProductManagement() {
     setIsSubmitting(true);
     
     try {
-      let imageUrls = imageUrlsText
-        .split('\n')
-        .map(url => url.trim())
-        .filter(url => url.startsWith('http://') || url.startsWith('https://'));
+      const imageUrls = extractDirectImageUrls(imageUrlsText);
       
       if (selectedFile) {
         const tempId = editingId || `new_${Date.now()}`;
@@ -97,6 +104,8 @@ export function ProductManagement() {
       const productData = {
         ...formData,
         images: imageUrls,
+        image: imageUrls[0] || '',
+        imageUrl: imageUrls[0] || '',
         categoryIds: [],
         variations: [],
         lowStockThreshold: 5
@@ -116,6 +125,77 @@ export function ProductManagement() {
       alert('Failed to save product');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleBulkImageUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bulkImageText.trim()) return;
+    setIsBulkUpdating(true);
+    setBulkUpdateResult(null);
+
+    try {
+      const lines = bulkImageText
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean);
+
+      let updatedCount = 0;
+      const unmatched: string[] = [];
+
+      for (const line of lines) {
+        // Support format: "Product Name or SKU | https://url1, https://url2" or tab/colon separated
+        const urlMatch = line.match(/https?:\/\/\S+/gi);
+        if (!urlMatch || urlMatch.length === 0) continue;
+
+        const firstUrlIdx = line.search(/https?:\/\//i);
+        const identifierPart = line
+          .slice(0, firstUrlIdx)
+          .replace(/[|,\t:;-]+$/, '')
+          .trim()
+          .toLowerCase();
+
+        const urlsPart = line.slice(firstUrlIdx);
+        const extractedUrls = extractDirectImageUrls(urlsPart.split(/[\s,|]+/));
+        if (!identifierPart || extractedUrls.length === 0) continue;
+
+        const matchedProduct = products.find((p) => {
+          const name = (p.productName || '').toLowerCase();
+          const sku = (p.sku || '').toLowerCase();
+          const id = (p.id || '').toLowerCase();
+          const slug = (p.slug || '').toLowerCase();
+          return (
+            name === identifierPart ||
+            sku === identifierPart ||
+            id === identifierPart ||
+            slug === identifierPart ||
+            name.includes(identifierPart) ||
+            identifierPart.includes(name) ||
+            (sku && sku.includes(identifierPart))
+          );
+        });
+
+        if (matchedProduct && matchedProduct.id) {
+          await updateProduct(matchedProduct.id, {
+            images: extractedUrls,
+            image: extractedUrls[0],
+          } as any);
+          updatedCount++;
+        } else {
+          unmatched.push(identifierPart);
+        }
+      }
+
+      setBulkUpdateResult(
+        `Updated ${updatedCount} product(s) with direct external image URLs.${
+          unmatched.length > 0 ? ` Unmatched (${unmatched.length}): ${unmatched.join(', ')}` : ''
+        }`
+      );
+    } catch (err) {
+      console.error('Error in bulk image update:', err);
+      setBulkUpdateResult('Failed to complete bulk update. Check console for details.');
+    } finally {
+      setIsBulkUpdating(false);
     }
   };
 
@@ -159,7 +239,7 @@ export function ProductManagement() {
           <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.2em] mb-1 block">Inventory Control</span>
           <h1 className="text-4xl font-black text-[#1A2B4C] tracking-tight">Product Master</h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Link 
             to="/admin/media-guide" 
             className="hidden sm:flex bg-white hover:bg-gray-50 text-[#1A2B4C] px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-gray-100 shadow-sm items-center gap-2"
@@ -167,6 +247,17 @@ export function ProductManagement() {
             <FileText size={14} className="text-[#00B4D8]" />
             Media URL Guide
           </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setBulkUpdateResult(null);
+              setShowBulkImageModal(true);
+            }}
+            className="bg-white hover:bg-gray-50 text-[#1A2B4C] px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-gray-200 shadow-sm flex items-center gap-2"
+          >
+            <ImageIcon size={14} className="text-[#00B4D8]" />
+            Bulk External Image URLs
+          </button>
           <button 
             onClick={() => {
               setEditingId(null);
@@ -464,8 +555,41 @@ export function ProductManagement() {
                 {activeTab === 'media' && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div>
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">Direct Upload</label>
-                      <div className="border-2 border-dashed border-gray-200 rounded-3xl p-8 text-center hover:border-[#00B4D8] hover:bg-[#00B4D8]/5 transition-all group cursor-pointer bg-gray-50/50 h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
+                      <div className="flex justify-between items-center mb-2 ml-1">
+                        <label className="text-[10px] font-black text-[#1A2B4C] uppercase tracking-widest block">Direct External Image URLs (Recommended)</label>
+                        <span className="text-[9px] text-[#00B4D8] font-bold uppercase tracking-wider">One public https:// URL per line</span>
+                      </div>
+                      <textarea 
+                        rows={5}
+                        placeholder="https://your-image-host.com/product-front.jpg&#10;https://your-image-host.com/product-angle.jpg"
+                        value={imageUrlsText}
+                        onChange={e => setImageUrlsText(e.target.value)}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8] font-mono text-xs text-[#1A2B4C] transition-all resize-none shadow-inner"
+                      />
+                      {extractDirectImageUrls(imageUrlsText).length > 0 && (
+                        <div className="mt-4">
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">Live External &lt;img&gt; Preview ({extractDirectImageUrls(imageUrlsText).length})</span>
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                            {extractDirectImageUrls(imageUrlsText).map((previewUrl, idx) => (
+                              <div key={idx} className="aspect-square rounded-xl border border-gray-200 bg-white p-2 flex flex-col items-center justify-center relative overflow-hidden">
+                                <img
+                                  src={previewUrl}
+                                  alt={`External preview ${idx + 1}`}
+                                  className="w-full h-full object-contain"
+                                />
+                                <span className="absolute top-1.5 left-1.5 bg-[#1A2B4C]/80 text-white text-[8px] font-black px-1.5 py-0.5 rounded">
+                                  #{idx + 1}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">Optional Direct Upload</label>
+                      <div className="border-2 border-dashed border-gray-200 rounded-3xl p-6 text-center hover:border-[#00B4D8] hover:bg-[#00B4D8]/5 transition-all group cursor-pointer bg-gray-50/50 h-[140px] flex flex-col justify-center items-center relative overflow-hidden">
                          <input 
                           type="file" 
                           id="product-image" 
@@ -474,32 +598,18 @@ export function ProductManagement() {
                          />
                          {selectedFile ? (
                             <div className="flex flex-col items-center gap-2">
-                               <Check className="text-emerald-500" size={32} />
-                               <span className="font-bold text-[#1A2B4C]">{selectedFile.name}</span>
-                               <span className="text-xs text-gray-400">Click to change file</span>
+                               <Check className="text-emerald-500" size={28} />
+                               <span className="font-bold text-[#1A2B4C] text-xs">{selectedFile.name}</span>
+                               <span className="text-[10px] text-gray-400">Click to change file</span>
                             </div>
                          ) : (
                             <div className="flex flex-col items-center pointer-events-none">
-                              <ImageIcon className="text-gray-300 group-hover:text-[#00B4D8] transition-colors mb-3" size={36} />
-                              <p className="text-sm font-bold text-[#1A2B4C] mb-1">Drop image here or click to browse</p>
-                              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Supports JPG, PNG, WEBP (Max 5MB)</p>
+                              <ImageIcon className="text-gray-300 group-hover:text-[#00B4D8] transition-colors mb-2" size={28} />
+                              <p className="text-xs font-bold text-[#1A2B4C] mb-1">Drop image here or click to browse</p>
+                              <p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold">Prefer External Image URLs above for permanent deployment persistence</p>
                             </div>
                          )}
                       </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between items-center mb-2 ml-1">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">External Image URLs</label>
-                        <span className="text-[9px] text-gray-400 uppercase tracking-wider">One URL per line</span>
-                      </div>
-                      <textarea 
-                        rows={5}
-                        placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-                        value={imageUrlsText}
-                        onChange={e => setImageUrlsText(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8] font-mono text-xs text-[#1A2B4C] transition-all resize-none shadow-inner"
-                      />
                     </div>
                   </div>
                 )}
@@ -646,6 +756,78 @@ export function ProductManagement() {
                   {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : 'Publish to Catalog'}
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+        {showBulkImageModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-[#1A2B4C]/40 backdrop-blur-sm"
+              onClick={() => setShowBulkImageModal(false)}
+            />
+            <motion.div
+              initial={{ scale: 0.96, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.96, opacity: 0 }}
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden z-10 flex flex-col"
+            >
+              <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div>
+                  <h2 className="text-xl font-black text-[#1A2B4C] tracking-tight">Bulk External Image URL Updater</h2>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                    Paste Product Name or SKU followed by direct external https:// image URL(s)
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowBulkImageModal(false)}
+                  className="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-red-500 transition-all flex items-center justify-center"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleBulkImageUpdate} className="p-8 space-y-5">
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">
+                    One product per line (Format: Product Name or SKU | https://direct-image-url.jpg)
+                  </label>
+                  <textarea
+                    rows={8}
+                    value={bulkImageText}
+                    onChange={(e) => setBulkImageText(e.target.value)}
+                    placeholder={`Poly Studio X72 | https://example.com/poly-x72-front.jpg, https://example.com/poly-x72-side.jpg\nCisco Room Kit EQ | https://example.com/cisco-eq.jpg\nLogitech Rally Bar | https://example.com/rally-bar.jpg`}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#00B4D8] font-mono text-xs text-[#1A2B4C] resize-y"
+                  />
+                </div>
+
+                {bulkUpdateResult && (
+                  <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold">
+                    {bulkUpdateResult}
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkImageModal(false)}
+                    className="px-6 py-3.5 rounded-2xl border border-gray-200 text-[#1A2B4C] font-black text-[10px] uppercase tracking-widest hover:bg-gray-50"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isBulkUpdating}
+                    className="px-8 py-3.5 rounded-2xl bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2"
+                  >
+                    {isBulkUpdating ? <Loader2 className="animate-spin" size={14} /> : null}
+                    Apply External Image URLs
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}

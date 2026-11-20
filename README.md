@@ -8,13 +8,13 @@ Welcome to the **AV Live Communications** source code repository and platform bl
 
 | Endpoint / File | Purpose | Live Count / Status |
 | :--- | :--- | :--- |
-| **`/sitemap.xml`** (`public/sitemap.xml`) | Dynamic XML 1.0 Sitemap synced from Firestore + synchronous fallback catalogs | **156 Canonical URLs** (71 Static/Brand/Geo/Pillar including `/sitemap`, `/video-conference-in-pakistan` & `/event-management-in-pakistan`, 53 Products, 12 Categories, 9 Services, 11 Blogs) |
-| **`/sitemap`** (`src/pages/HtmlSitemap.tsx`) | Human & Googlebot HTML Sitemap & Enterprise Hardware Directory (all 156 URLs within 2 clicks) | Active (Linked in Navbar & Footer) |
+| **`/sitemap.xml`** (`public/sitemap.xml`) | Dynamic XML 1.0 Sitemap synced from Firestore + synchronous fallback catalogs | **157 Canonical URLs** (71 Static/Brand/Geo/Pillar including `/sitemap`, `/video-conference-in-pakistan` & `/event-management-in-pakistan`, 54 Products, 12 Categories, 9 Services, 11 Blogs) |
+| **`/sitemap`** (`src/pages/HtmlSitemap.tsx`) | Human & Googlebot HTML Sitemap & Enterprise Hardware Directory (all 157 URLs within 2 clicks) | Active (Linked in Navbar & Footer) |
 | **`/llms.txt`** (`public/llms.txt`) | Concise AI Search (ChatGPT, Perplexity, Claude, Gemini) index & entity directory | Active (HTTP 200 `text/plain`) |
-| **`/llms-full.txt`** (`public/llms-full.txt`) | Complete 30KB+ Markdown corpus of all 53 SKUs (MPNs, GTINs, real model-specific PKR prices), BoM tables & guides | Active (HTTP 200 `text/plain`) |
-| **`/api/gmc-feed.xml`** | Google Merchant Center RSS 2.0 XML Product Feed (`g:id`, `g:mpn`, `g:gtin`, `g:price` in PKR, multi-angle images, 5+ specs) | **53 Verified Hardware SKUs** |
-| **`/api/gmc-feed.tsv`** | Google Merchant Center Tab-Separated Values (TSV) Feed for Google Sheets scheduled fetch | **53 Verified Hardware SKUs** |
-| **`/robots.txt`** (`public/robots.txt`) | Explicit `Allow: /` for `Googlebot`, `Google-Extended`, `GPTBot`, `OAI-SearchBot`, `PerplexityBot`, `ClaudeBot` | Active (Blocks `/admin/`, `/cart`, `/checkout`, and `?*=` query duplicates) |
+| **`/llms-full.txt`** (`public/llms-full.txt`) | Complete 32KB+ Markdown corpus of all 54 SKUs (MPNs, GTINs, real model-specific PKR prices), BoM tables & guides | Active (HTTP 200 `text/plain`) |
+| **`/api/gmc-feed.xml`** | Google Merchant Center RSS 2.0 XML Product Feed (`g:id`, `g:mpn`, `g:gtin`, `g:price` in PKR, multi-angle images, 5+ specs) | **54 Verified Hardware SKUs** |
+| **`/api/gmc-feed.tsv`** | Google Merchant Center Tab-Separated Values (TSV) Feed for Google Sheets scheduled fetch | **54 Verified Hardware SKUs** |
+| **`/robots.txt`** (`public/robots.txt`) | Explicit `Allow: /` for `Googlebot`, `Google-Extended`, `GPTBot`, `OAI-SearchBot`, `PerplexityBot`, `ClaudeBot` | Active (Blocks `/admin/` & private `/api/`, allows GMC feeds & `X-Robots-Tag: noindex` observation) |
 
 ---
 
@@ -62,8 +62,8 @@ Welcome to the **AV Live Communications** source code repository and platform bl
   - `/blog/av-live-communications-15-years-pakistan`
   - *(Legacy IDs `/blog/1..11` and old Firestore slugs 301-redirect permanently to the canonical slugs above).*
 
-### E. Verified Enterprise Hardware Products (53 URLs — `/product/:slug`)
-- All 53 hardware SKUs defined in `PRODUCT_GMC_METADATA` (`src/lib/gmc-feed.ts`) resolve via canonical `-pakistan` slugs (e.g., `/product/polycom-realpresence-group-500-pakistan`, `/product/poly-studio-x72-pakistan`, `/product/logitech-rally-bar-pakistan`), with 301 server redirects from raw MPNs or legacy Firestore IDs.
+### E. Verified Enterprise Hardware Products (54 URLs — `/product/:slug`)
+- All 54 hardware SKUs defined in `PRODUCT_GMC_METADATA` (`src/lib/gmc-feed.ts`) resolve via canonical `-pakistan` slugs (e.g., `/product/polycom-realpresence-group-500-pakistan`, `/product/poly-studio-x72-pakistan`, `/product/podium-prompter-17-compact-pakistan`), with 1-hop `301` server redirects from raw MPNs or legacy Firestore IDs (`kl5wGaNLxqQByn3oPd1Z`, `T1XLMubVYmFzeIfC7V9B`).
 
 ---
 
@@ -108,5 +108,16 @@ npm run build
 
 > **Governance Reminder**: Always review `AGENTS.md` and `seo-policy.md` before modifying routes, products, categories, or metadata. All 28 shorthand/keyword alias paths from the **AV Live Communications Internal Link Map** (`/products/*`, `/contact/*`, `/support`, `/request-quote`, `/hybrid-event-production`, `/boardroom-av-integration`, etc.) are permanently `301`-redirected in `server.ts` and `<Navigate replace />`-routed in `src/App.tsx` to their canonical URLs.
 
+---
 
+## 5. Self-Evolving AI Agent Skill, Architecture Report & Multi-Niche Blueprints
 
+| File / Route | Purpose |
+| :--- | :--- |
+| **`skills/apex-seo-aeo-engine/SKILL.md`** | World-class installable AI Studio Skill (`v4.0-self-evolving`) enforcing the 6-Tier Order of Resolution, Google Lighthouse 100/100/100/100 matrix, and the 4-Gate Monotonic Self-Updating Skill Protocol. |
+| **`docs/AI_AGENT_PROFILES_COMPLETE.md`** | Dialectical reasoning and standalone system prompts for the **1st Agent** (Systems/SSR/Lighthouse), **2nd Agent** (GSC/Schema/GMC/Site Structure), **3rd Agent** (AEO/GEO/UX/Competitor Outranker), and **Unified Apex Master Agent**. |
+| **`docs/WEBSITE_BUILDING_MECHANISM_REPORT.md`** | Complete engineering report of the Dual-Wave Express SSR + Frame-0 Synchronous Hydration + Hub-and-Spoke Silo + AEO/GEO/GMC mechanism. |
+| **`NICHE_WEBSITE_BLUEPRINT.md`** | Universal parameterized starter blueprint (`{{BRAND_NAME}}`, `{{PRIMARY_DOMAIN}}`, `{{NICHE_INDUSTRY}}`, etc.) to recreate this entire architecture for any new niche. |
+| **`SITE_CHANGE_LOG.md`** | Chronological append-only engineering change log (`v1.0`–`v4.4`), modified files ledger, and deterministic state recovery commands. |
+| **`WEBSITE_STRUCTURE_BLUEPRINT.md`** | Complete 157-route Website Structure Map, 54-SKU inventory, 6-stage SSR/hydration architecture, and Single-Hop 301 Redirect Matrix. |
+| **`/admin/blueprint-hub` & `/blueprint-hub`** | Interactive browser UI (`src/pages/admin/BlueprintGeneratorHub.tsx`) to inspect the mechanism report, evolve `SKILL.md` monotonically, audit GSC link health, and download `SITE_CHANGE_LOG.md` & `WEBSITE_STRUCTURE_BLUEPRINT.md`. |

@@ -45,6 +45,7 @@ export function Sidebar() {
     { id: 'automation', label: 'n8n Workflows', icon: Workflow, path: '/admin/automation', group: 'Automation' },
     { id: 'workspace', label: 'Workspace Hub', icon: Sparkles, path: '/admin/workspace', group: 'Google Workspace' },
     { id: 'google-business', label: 'Google Business Profile', icon: Sparkles, path: '/admin/google-business', group: 'Marketing' },
+    { id: 'blueprint-hub', label: 'AI Agent & Niche Blueprint', icon: Sparkles, path: '/admin/blueprint-hub', group: 'Help & Docs' },
     { id: 'media-guide', label: 'Media URL Guide', icon: FileText, path: '/admin/media-guide', group: 'Help & Docs' },
   ];
 

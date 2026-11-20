@@ -22,7 +22,7 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     description:
       'End-to-end Corporate event management, executive summit staging, fine-pitch SMD LED video walls, line-array PA sound, and 3D Hologram Display production across Lahore, Karachi, and Islamabad.',
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/3062/3062634.png',
-    imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=1400',
+    imageUrl: 'https://eu.connect.panasonic.com/sites/default/files/media/image/2026-06/pt-rq45kseries-innovationstoeaseeverystep.webp',
     isActive: true,
     order: 1,
     category: 'Event Production',
@@ -85,6 +85,7 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     detailedContent: `
       <h2>Turnkey Corporate Event Management in Lahore, Karachi & Islamabad</h2>
       <p>AV Live Communications is Pakistan's premier engineering-led <strong>Corporate event management</strong> partner. Unlike traditional event planners who outsource technical gear, we own and operate an extensive inventory of <strong>SMD LED screen rental for corporate events</strong>, digital line-array audio systems, <strong>3D hologram display stages Pakistan</strong>, and enterprise <strong>Video conference</strong> codecs including the <strong>Polycom Group 500</strong> and <strong>Poly Studio X70 (Poly X70)</strong>.</p>
+      <div class="my-6 aspect-video w-full overflow-hidden rounded-3xl border border-gray-200 bg-black shadow-lg"><iframe class="h-full w-full" src="https://www.youtube-nocookie.com/embed/E6g2YXA9Zys?rel=0" title="AV Live Corporate Event Management & Stage Production Pakistan" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
       <h3>What Our Corporate Event Management Covers:</h3>
       <ul>
         <li><strong>Executive Keynotes & Annual General Meetings (AGMs):</strong> Complete stage design, confidence monitors, motorized podiums, and redundant wireless gooseneck microphones.</li>
@@ -216,7 +217,7 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     description:
       'Turnkey trade show and expo organizing in Pakistan featuring custom 3D exhibition stalls, SMD video walls, interactive kiosks, and 3D Hologram Display attractors at Expo Centre Lahore & Karachi.',
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/1995/1995515.png',
-    imageUrl: 'https://images.unsplash.com/photo-1559223607-a43c990c692c?auto=format&fit=crop&q=80&w=1400',
+    imageUrl: 'https://www.eastporters.com/wp-content/uploads/2024/08/ZH430UST-1.jpg',
     isActive: true,
     order: 3,
     category: 'Exhibitions & Trade Shows',
@@ -279,6 +280,7 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     detailedContent: `
       <h2>Turnkey Exhibition Pavilions & Trade Show Engineering</h2>
       <p>Stand out at Lahore Expo Centre, Karachi Expo Centre, and Pak-China Friendship Centre Islamabad with AV Live's custom <strong>Expo Organizing</strong> and bespoke booth fabrication services.</p>
+      <div class="my-6 aspect-video w-full overflow-hidden rounded-3xl border border-gray-200 bg-black shadow-lg"><iframe class="h-full w-full" src="https://www.youtube-nocookie.com/embed/E6g2YXA9Zys?rel=0" title="AV Live Expo Organizing & Custom Exhibition Pavilions Pakistan" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
       <ul>
         <li><strong>3D Hologram Display Attractors:</strong> Draw maximum foot traffic to your exhibition stall using floating 3D holographic LED fan walls and holographic display pyramids.</li>
         <li><strong>Curved & Corner SMD LED Video Walls:</strong> Seamless P2.5 and P1.8 fine-pitch LED cabinets integrated flush into custom woodwork and aluminum truss structures.</li>
@@ -688,7 +690,7 @@ export const FALLBACK_SERVICES_CATALOG: EnrichedService[] = [
     title: 'Boardroom AV & Video Conferencing Integration',
     description:
       'Turnkey executive boardroom AV design, acoustic calibration, Polycom Group 500 & Poly Studio X70 deployment, and Zoom / Microsoft Teams Rooms integration across Pakistan.',
-    imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200&q=80',
+    imageUrl: 'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/3050/3050525.png',
     isActive: true,
     order: 8,

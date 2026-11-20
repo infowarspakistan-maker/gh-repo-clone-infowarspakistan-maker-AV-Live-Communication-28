@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="podBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#060D1F"/>
+      <stop offset="50%" stop-color="#14284B"/>
+      <stop offset="100%" stop-color="#071226"/>
+    </linearGradient>
+    <radialGradient id="fanGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.5"/>
+      <stop offset="60%" stop-color="#00B4D8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#060D1F" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#podBg)"/>
+
+  <!-- Header -->
+  <rect x="80" y="60" width="430" height="44" rx="8" fill="#00B4D8" fill-opacity="0.2" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="104" y="88" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" font-weight="bold">3D HOLOGRAPHIC LED FAN MATRIX &amp; POD</text>
+
+  <rect x="820" y="60" width="300" height="44" rx="8" fill="#0F172A" stroke="#38BDF8" stroke-width="1.5"/>
+  <text x="845" y="88" fill="#E2E8F0" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">EXPO &amp; BRAND REVEAL DISPLAY</text>
+
+  <!-- Left: 4-Fan Synchronized 3D Hologram LED Wall Matrix -->
+  <rect x="100" y="150" width="470" height="460" rx="22" fill="#0F172A" stroke="#00B4D8" stroke-width="2.5"/>
+  <circle cx="235" cy="285" r="105" fill="url(#fanGlow)" stroke="#38BDF8" stroke-width="2"/>
+  <circle cx="435" cy="285" r="105" fill="url(#fanGlow)" stroke="#38BDF8" stroke-width="2"/>
+  <circle cx="235" cy="475" r="105" fill="url(#fanGlow)" stroke="#38BDF8" stroke-width="2"/>
+  <circle cx="435" cy="475" r="105" fill="url(#fanGlow)" stroke="#38BDF8" stroke-width="2"/>
+  <polygon points="335,215 445,380 335,545 225,380" fill="#00F5D4" fill-opacity="0.22" stroke="#00F5D4" stroke-width="3"/>
+  <circle cx="335" cy="380" r="36" fill="#00B4D8" stroke="#E0F2FE" stroke-width="3"/>
+  <text x="145" y="590" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">Synchronized 4K 3D LED Hologram Rotor Wall</text>
+
+  <!-- Right: 270-Degree 3D Hologram Pyramid Showcase Cabinet -->
+  <rect x="630" y="150" width="470" height="460" rx="22" fill="#0F172A" stroke="#00B4D8" stroke-width="2.5"/>
+  <polygon points="680,220 1050,220 940,480 790,480" fill="#00B4D8" fill-opacity="0.14" stroke="#38BDF8" stroke-width="2.5"/>
+  <polygon points="865,275 935,355 865,435 795,355" fill="#00F5D4" fill-opacity="0.35" stroke="#00F5D4" stroke-width="3"/>
+  <rect x="690" y="485" width="350" height="75" rx="10" fill="#1E293B" stroke="#475569" stroke-width="2"/>
+  <text x="712" y="530" fill="#E2E8F0" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">270° Glass Hologram Showcase Pod</text>
+
+  <!-- Bottom Spec Cards -->
+  <rect x="80" y="645" width="320" height="78" rx="12" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="104" y="676" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">2500-NIT HIGH BRIGHTNESS</text>
+  <text x="104" y="704" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">Daylight-Visible Expo &amp; Retail Pods</text>
+
+  <rect x="440" y="645" width="320" height="78" rx="12" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="464" y="676" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">CUSTOM 3D MOTION GRAPHICS</text>
+  <text x="464" y="704" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">Alpha-Channel Product &amp; Logo Renders</text>
+
+  <rect x="800" y="645" width="320" height="78" rx="12" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="824" y="676" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">RENTAL &amp; PERMANENT INSTALL</text>
+  <text x="824" y="704" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">Expo Centre Lahore, Karachi &amp; ISB</text>
+
+  <text x="80" y="810" fill="#F8FAFC" font-family="DejaVu Sans, Arial, sans-serif" font-size="28" font-weight="bold">3D Hologram Display Cabinets &amp; Synchronized LED Fan Walls</text>
+  <text x="80" y="846" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" font-weight="bold">AV Live Communications Pakistan • Corporate Events &amp; Trade Show Pavilions</text>
+</svg>

@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B1325"/>
+      <stop offset="50%" stop-color="#1A2B4C"/>
+      <stop offset="100%" stop-color="#0F1E38"/>
+    </linearGradient>
+    <linearGradient id="barBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="50%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="cyanGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00B4D8"/>
+      <stop offset="50%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0077B6"/>
+    </linearGradient>
+    <radialGradient id="lensGlass" cx="45%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="35%" stop-color="#0369A1"/>
+      <stop offset="75%" stop-color="#082F49"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Studio Backdrop -->
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <circle cx="600" cy="420" r="390" fill="#00B4D8" fill-opacity="0.08"/>
+  <circle cx="600" cy="420" r="260" fill="#38BDF8" fill-opacity="0.06"/>
+
+  <!-- Architectural Grid Lines -->
+  <line x1="80" y1="140" x2="1120" y2="140" stroke="#00B4D8" stroke-opacity="0.2" stroke-width="1"/>
+  <line x1="80" y1="740" x2="1120" y2="740" stroke="#00B4D8" stroke-opacity="0.25" stroke-width="2"/>
+
+  <!-- Top Header Badge -->
+  <rect x="80" y="62" width="350" height="44" rx="8" fill="#00B4D8" fill-opacity="0.15" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="104" y="90" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" font-weight="bold">HP POLY STUDIO X70 / X72 SERIES</text>
+
+  <rect x="880" y="62" width="240" height="44" rx="8" fill="#1E293B" stroke="#475569" stroke-width="1.5"/>
+  <text x="905" y="90" fill="#E2E8F0" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">DUAL 4K 20MP AI OPTICS</text>
+
+  <!-- Studio Pedestal Shadow -->
+  <ellipse cx="600" cy="595" rx="460" ry="26" fill="#020617" fill-opacity="0.65"/>
+
+  <!-- Mounting Stand -->
+  <rect x="520" y="520" width="160" height="42" rx="6" fill="#1E293B" stroke="#475569" stroke-width="2"/>
+  <rect x="440" y="555" width="320" height="22" rx="10" fill="#334155" stroke="#64748B" stroke-width="2"/>
+
+  <!-- Main Poly Studio X70 / X72 Video Bar Chassis -->
+  <rect x="130" y="340" width="940" height="185" rx="42" fill="url(#barBody)" stroke="#64748B" stroke-width="3"/>
+  <rect x="148" y="356" width="904" height="153" rx="32" fill="#0F172A" stroke="#334155" stroke-width="2"/>
+
+  <!-- Acoustic Fabric SpeakerGrille Left -->
+  <rect x="165" y="368" width="265" height="129" rx="22" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+  <line x1="205" y1="380" x2="205" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="245" y1="380" x2="245" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="285" y1="380" x2="285" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="325" y1="380" x2="325" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="365" y1="380" x2="365" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="405" y1="380" x2="405" y2="485" stroke="#334155" stroke-width="2"/>
+
+  <!-- Acoustic Fabric SpeakerGrille Right -->
+  <rect x="770" y="368" width="265" height="129" rx="22" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+  <line x1="800" y1="380" x2="800" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="840" y1="380" x2="840" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="880" y1="380" x2="880" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="920" y1="380" x2="920" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="960" y1="380" x2="960" y2="485" stroke="#334155" stroke-width="2"/>
+  <line x1="1000" y1="380" x2="1000" y2="485" stroke="#334155" stroke-width="2"/>
+
+  <!-- Central Dual-4K Camera Housing -->
+  <rect x="448" y="364" width="304" height="137" rx="28" fill="#090D16" stroke="#00B4D8" stroke-width="2.5"/>
+
+  <!-- Left 120-deg Wide 4K Lens -->
+  <circle cx="535" cy="432" r="46" fill="#1E293B" stroke="#94A3B8" stroke-width="3"/>
+  <circle cx="535" cy="432" r="34" fill="url(#lensGlass)" stroke="#00B4D8" stroke-width="2"/>
+  <circle cx="524" cy="420" r="8" fill="#E0F2FE" fill-opacity="0.75"/>
+
+  <!-- Right 70-deg Telephoto 4K Lens -->
+  <circle cx="665" cy="432" r="46" fill="#1E293B" stroke="#94A3B8" stroke-width="3"/>
+  <circle cx="665" cy="432" r="34" fill="url(#lensGlass)" stroke="#00B4D8" stroke-width="2"/>
+  <circle cx="654" cy="420" r="8" fill="#E0F2FE" fill-opacity="0.75"/>
+
+  <!-- Status LED Bar -->
+  <rect x="520" y="512" width="160" height="6" rx="3" fill="url(#cyanGlow)"/>
+
+  <!-- Poly Branding Emblem -->
+  <text x="562" y="330" fill="#F8FAFC" font-family="DejaVu Sans, Arial, sans-serif" font-size="26" font-weight="bold">POLY</text>
+
+  <!-- Technical Spec Callouts -->
+  <rect x="80" y="635" width="320" height="82" rx="12" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="104" y="668" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">DUAL 20MP 4K SENSORS</text>
+  <text x="104" y="696" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">120° Wide + 70° Telephoto Lenses</text>
+
+  <rect x="440" y="635" width="320" height="82" rx="12" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="464" y="668" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">POLY DIRECTORAI FRAMING</text>
+  <text x="464" y="696" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">25ft Mic Array • NoiseBlockAI</text>
+
+  <rect x="800" y="635" width="320" height="82" rx="12" fill="#0F172A" stroke="#00B4D8" stroke-width="1.5"/>
+  <text x="824" y="668" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="bold">LARGE BOARDROOMS (26+ PAX)</text>
+  <text x="824" y="696" fill="#CBD5E1" font-family="DejaVu Sans, Arial, sans-serif" font-size="14">Native Zoom &amp; Microsoft Teams</text>
+
+  <!-- Footer Attribution -->
+  <text x="80" y="805" fill="#F8FAFC" font-family="DejaVu Sans, Arial, sans-serif" font-size="28" font-weight="bold">HP Poly Studio X70 / X72 Large Room 4K AI Video Bar</text>
+  <text x="80" y="842" fill="#38BDF8" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" font-weight="bold">AV Live Communications Pakistan • Authorized Enterprise Partner • 1-Year Local Warranty</text>
+</svg>

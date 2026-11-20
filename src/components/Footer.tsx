@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { subscribeToCategories } from '../lib/firebase/firestore-helpers';
-import { EXCLUDED_CATEGORY_SLUGS } from '../lib/sitemap-generator';
-import { FooterAccordion } from './FooterAccordion';
+import React, { useState, useEffect } from 'react';
+
+const FooterAccordion = React.lazy(() =>
+  import('./FooterAccordion').then((m) => ({ default: m.FooterAccordion }))
+);
 
 const DEFAULT_FOOTER_CATEGORIES = [
   { id: 'cat-video', name: 'Video Conferencing', slug: 'video-conferencing', isActive: true, type: 'product' },
@@ -22,23 +23,38 @@ const DEFAULT_FOOTER_CATEGORIES = [
 
 export function Footer() {
   const [categories, setCategories] = useState<any[]>(DEFAULT_FOOTER_CATEGORIES);
+  const [mountMobileAccordion, setMountMobileAccordion] = useState(false);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
+    let cancelled = false;
+    const accordionTimer = setTimeout(() => {
+      if (!cancelled) setMountMobileAccordion(true);
+    }, 1500);
     const timer = setTimeout(() => {
-      unsub = subscribeToCategories((cats) => {
-        const filtered = cats.filter(
-          c =>
-            c.isActive &&
-            !EXCLUDED_CATEGORY_SLUGS.has(c.slug) &&
-            ((c as any).type === 'product' || c.id.startsWith('cat-') || c.id.startsWith('parent-') || c.id.startsWith('child-'))
-        );
-        if (filtered.length > 0) {
-          setCategories(filtered);
-        }
-      });
-    }, 2000);
+      Promise.all([
+        import('../lib/firebase/firestore-helpers'),
+        import('../lib/sitemap-generator'),
+      ])
+        .then(([{ subscribeToCategories }, { EXCLUDED_CATEGORY_SLUGS }]) => {
+          if (cancelled) return;
+          unsub = subscribeToCategories((cats) => {
+            const filtered = cats.filter(
+              c =>
+                c.isActive &&
+                !EXCLUDED_CATEGORY_SLUGS.has(c.slug) &&
+                ((c as any).type === 'product' || c.id.startsWith('cat-') || c.id.startsWith('parent-') || c.id.startsWith('child-'))
+            );
+            if (filtered.length > 0) {
+              setCategories(filtered);
+            }
+          });
+        })
+        .catch(() => {});
+    }, 3600);
     return () => {
+      cancelled = true;
+      clearTimeout(accordionTimer);
       clearTimeout(timer);
       if (unsub) unsub();
     };
@@ -49,8 +65,12 @@ export function Footer() {
       <div className="max-w-[1400px] mx-auto px-3 sm:px-6 md:px-8">
         <h2 className="sr-only">Footer Navigation, Social Media &amp; Contact Directory</h2>
 
-        {/* Collapsible 155-Link SEO Accordion Directory (Mobile < 1024px) */}
-        <FooterAccordion />
+        {/* Collapsible 155-Link SEO Accordion Directory (Mobile < 1024px, deferred below the fold) */}
+        {mountMobileAccordion && (
+          <React.Suspense fallback={null}>
+            <FooterAccordion />
+          </React.Suspense>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8 mb-6 lg:mb-8">
           {/* Shop (Desktop >= 1024px) */}
