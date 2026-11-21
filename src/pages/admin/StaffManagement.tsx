@@ -109,7 +109,7 @@ export function StaffManagement() {
                <div className="flex items-center gap-5 mb-8 relative z-10">
                   <div className="w-16 h-16 rounded-2xl bg-[#1A2B4C] text-[#00B4D8] flex items-center justify-center font-black text-xl shadow-lg border border-white/10 overflow-hidden">
                      {member.photoURL ? (
-                       <img loading="lazy" src={member.photoURL} alt="" className="w-full h-full object-cover" />
+                       <img loading="lazy" src={member.photoURL} alt={member.displayName || member.email || 'Staff member'} title={member.displayName || member.email || 'Staff member'} className="w-full h-full object-cover" />
                      ) : (
                        <span>{(member.displayName || member.email || '?')[0].toUpperCase()}</span>
                      )}

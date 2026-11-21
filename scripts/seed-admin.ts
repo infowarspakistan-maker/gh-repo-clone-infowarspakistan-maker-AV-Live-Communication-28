@@ -101,10 +101,11 @@ const contactData = {
     sunday: 'Closed'
   },
   socialLinks: {
-    facebook: 'https://facebook.com/avlive',
+    facebook: 'https://www.facebook.com/AvLivePakistan',
     linkedin: 'https://linkedin.com/company/avlive',
-    youtube: 'https://youtube.com/avlive',
-    instagram: 'https://instagram.com/avlive',
+    youtube: 'https://www.youtube.com/@AVLivePakistan',
+    instagram: 'https://www.instagram.com/avlive25',
+    tiktok: 'https://www.tiktok.com/@almalikk00',
     twitter: 'https://twitter.com/avlive'
   },
   updatedAt: FieldValue.serverTimestamp(),
@@ -186,9 +187,11 @@ const generalSettings = {
   phone: '0321 425 6263',
   address: 'Shop, Johar Town Block N, Lahore',
   socialLinks: {
-    facebook: 'https://facebook.com/avlive',
+    facebook: 'https://www.facebook.com/AvLivePakistan',
     linkedin: 'https://linkedin.com/company/avlive',
-    youtube: 'https://youtube.com/avlive',
+    youtube: 'https://www.youtube.com/@AVLivePakistan',
+    instagram: 'https://www.instagram.com/avlive25',
+    tiktok: 'https://www.tiktok.com/@almalikk00',
   },
   updatedAt: FieldValue.serverTimestamp(),
 };

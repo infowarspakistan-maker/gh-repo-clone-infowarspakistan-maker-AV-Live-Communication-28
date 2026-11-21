@@ -42,11 +42,12 @@ export async function seedDatabase() {
     "id": "global",
     "phone": "0321 425 6263",
     "socialLinks": {
-      "youtube": "https://youtube.com/@avlive",
+      "youtube": "https://www.youtube.com/@AVLivePakistan",
       "linkedin": "https://linkedin.com/company/avlive",
       "twitter": "https://x.com/avlive",
-      "facebook": "https://facebook.com/avlive",
-      "instagram": "https://instagram.com/avlive"
+      "facebook": "https://www.facebook.com/AvLivePakistan",
+      "instagram": "https://www.instagram.com/avlive25",
+      "tiktok": "https://www.tiktok.com/@almalikk00"
     },
     "taxRate": 0.18,
     "logoUrl": "https://via.placeholder.com/200x60/1A2B4C/FFFFFF?text=AV+Live",
@@ -340,7 +341,7 @@ export async function seedDatabase() {
   }
 
   // 8. Seed Contact Page
-  const contact = [{ "id": "main", "businessHours": { "weekday": "9:00 AM – 6:00 PM", "sunday": "Closed", "saturday": "10:00 AM – 4:00 PM" }, "heroSubheading": "Whether you need a single IP phone...", "heroImageUrl": "https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1920&q=80", "phone": "0321 425 6263", "email": "info@avlive.com.pk", "socialLinks": { "twitter": "", "instagram": "https://instagram.com/avlive", "facebook": "https://facebook.com/avlive", "linkedin": "https://linkedin.com/company/avlive", "youtube": "https://youtube.com/@avlive" }, "address": "Shop, Johar Town Block N, Lahore", "mapEmbedUrl": "https://www.google.com/maps/embed?pb=...", "heroHeading": "Let's Build Your AV Solution Together" }];
+  const contact = [{ "id": "main", "businessHours": { "weekday": "9:00 AM – 6:00 PM", "sunday": "Closed", "saturday": "10:00 AM – 4:00 PM" }, "heroSubheading": "Whether you need a single IP phone...", "heroImageUrl": "https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1920&q=80", "phone": "0321 425 6263", "email": "info@avlive.com.pk", "socialLinks": { "twitter": "", "instagram": "https://www.instagram.com/avlive25", "tiktok": "https://www.tiktok.com/@almalikk00", "facebook": "https://www.facebook.com/AvLivePakistan", "linkedin": "https://linkedin.com/company/avlive", "youtube": "https://www.youtube.com/@AVLivePakistan" }, "address": "Shop, Johar Town Block N, Lahore", "mapEmbedUrl": "https://www.google.com/maps/embed?pb=...", "heroHeading": "Let's Build Your AV Solution Together" }];
   for (const item of contact) {
     const { id, ...data } = item;
     await setDoc(doc(db, "contact", id), { ...data, updatedAt: serverTimestamp() });

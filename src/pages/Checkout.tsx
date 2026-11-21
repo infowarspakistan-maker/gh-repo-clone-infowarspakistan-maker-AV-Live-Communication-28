@@ -5,10 +5,13 @@ import { motion } from 'motion/react';
 import { getCart, getCartTotal, clearCart, CartItem } from '../lib/cart';
 import { createOrder } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { CurrencySelector } from '../components/CurrencySelector';
 
 export function Checkout() {
   const [cartItems, setCartItems] = useState<CartItem[]>(() => getCart());
   const [subtotal, setSubtotal] = useState<number>(() => getCartTotal());
+  const { currency, formatPrice, formatExactPkr } = useCurrency();
 
   useEffect(() => {
     const syncCart = () => {
@@ -107,6 +110,7 @@ export function Checkout() {
           formData.companyName ? `Company: ${formData.companyName}` : '',
           formData.gstStrn ? `FBR NTN/STRN: ${formData.gstStrn}` : '',
           customerType === 'business' && ntn ? `Verified B2B NTN: ${ntn}` : '',
+          currency !== 'PKR' ? `Display Currency: ${currency} (${formatPrice(total)} | Settlement: ${formatExactPkr(total)})` : '',
         ]
           .filter(Boolean)
           .join(' | ') || undefined,
@@ -148,11 +152,12 @@ export function Checkout() {
     <div className="bg-[#F8F9FA] min-h-screen py-16 text-[#1A2B4C]">
       <SEO title="Secure Checkout | AV Live Communications" noindex={true} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
            <div>
              <h1 className="text-4xl font-black tracking-tight">Secure Logistics Portal</h1>
              <p className="text-gray-400 mt-2 font-black uppercase tracking-widest text-[10px]">Finalizing Hardware Acquisition</p>
            </div>
+           <CurrencySelector variant="pill" />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-12">
@@ -311,14 +316,14 @@ export function Checkout() {
                   <div key={item.id} className="flex justify-between items-start gap-4">
                     <div className="flex gap-4">
                        <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100">
-                          <img loading="lazy" src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          <img loading="lazy" src={item.image || '/images/products/poly-x70-studio.webp'} title={`${item.name} — Checkout Order Hardware | AV Live Pakistan`} alt={`${item.name} enterprise AV hardware item in your AV Live Pakistan checkout order summary.`} className="w-full h-full object-cover" />
                        </div>
                        <div className="flex flex-col">
                           <span className="text-xs font-black line-clamp-1">{item.name}</span>
                           <span className="text-[10px] font-bold text-gray-400">{item.quantity} Unit(s)</span>
                        </div>
                     </div>
-                    <span className="font-black text-sm whitespace-nowrap">Rs. {((item.price ?? 0) * item.quantity).toLocaleString()}</span>
+                    <span className="font-black text-sm whitespace-nowrap">{formatPrice((item.price ?? 0) * item.quantity)}</span>
                   </div>
                 ))}
               </div>
@@ -326,7 +331,7 @@ export function Checkout() {
               <div className="space-y-4 mb-10 border-t border-gray-50 pt-10">
                 <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
                   <span>Gross Value</span>
-                  <span className="text-[#1A2B4C]">Rs. {subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                  <span className="text-[#1A2B4C]">{formatPrice(subtotal, { decimals: currency === 'PKR' ? 0 : 2 })}</span>
                 </div>
                 <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
                   <span>Logistics</span>
@@ -337,13 +342,18 @@ export function Checkout() {
                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">GST Protocol</span>
                     <span className="text-[9px] font-black text-[#00B4D8] tracking-[0.2em]">{taxRate === 0 ? 'B2B EXEMPT (0%)' : 'STANDARD (18%)'}</span>
                   </div>
-                  <span className="font-black text-sm">Rs. {taxAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                  <span className="font-black text-sm">{formatPrice(taxAmount, { decimals: currency === 'PKR' ? 0 : 2 })}</span>
                 </div>
               </div>
               
               <div className="flex justify-between items-center border-t border-gray-100 pt-10 mb-10">
-                <span className="font-black text-lg uppercase tracking-widest">Net Total</span>
-                <span className="font-black text-3xl text-[#00B4D8]">Rs. {total.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                <div>
+                  <span className="font-black text-lg uppercase tracking-widest block">Net Total</span>
+                  {currency !== 'PKR' && (
+                    <span className="text-[10px] text-gray-400 font-bold">PKR Invoice: {formatExactPkr(total)}</span>
+                  )}
+                </div>
+                <span className="font-black text-3xl text-[#00B4D8]">{formatPrice(total, { decimals: currency === 'PKR' ? 0 : 2 })}</span>
               </div>
 
               {errorMessage && (

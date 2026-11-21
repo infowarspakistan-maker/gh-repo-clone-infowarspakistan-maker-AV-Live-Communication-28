@@ -4,10 +4,13 @@ import { Trash2, ArrowRight, ShoppingCart, Loader2, Minus, Plus, Zap } from 'luc
 import { motion } from 'motion/react';
 import { getCart, removeFromCart, updateQuantity, getCartTotal } from '../lib/cart';
 import { SEO } from '../components/SEO';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { CurrencySelector } from '../components/CurrencySelector';
 
 export function Cart() {
   const [cartItems, setCartItems] = useState(getCart());
   const [loading, setLoading] = useState(true);
+  const { currency, formatPrice, formatExactPkr } = useCurrency();
   
   useEffect(() => {
     const handleUpdate = () => setCartItems(getCart());
@@ -49,11 +52,12 @@ export function Cart() {
         </div>
 
         {/* Desktop Header (>= 1024px) */}
-        <div className="hidden lg:flex flex-col md:flex-row md:items-center justify-between mb-12">
+        <div className="hidden lg:flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
            <div>
              <h1 className="text-4xl font-black tracking-tight">Project Staging</h1>
              <p className="text-gray-400 mt-2 font-black uppercase tracking-widest text-[10px]">Hardware Ready for Deployment</p>
            </div>
+           <CurrencySelector variant="pill" />
         </div>
 
         {cartItems.length === 0 ? (
@@ -79,7 +83,7 @@ export function Cart() {
                   className="bg-white p-3.5 sm:p-5 lg:p-6 rounded-2xl lg:rounded-[2.5rem] border border-gray-100 flex gap-3.5 sm:gap-6 lg:gap-8 items-center shadow-sm hover:shadow-xl transition-all"
                 >
                   <div className="w-20 h-20 lg:w-24 lg:h-24 bg-[#F8F9FA] lg:bg-gray-50 rounded-2xl overflow-hidden shrink-0 border border-gray-100 p-1.5 lg:p-0">
-                    <img loading="lazy" src={item.image} alt={item.name} className="w-full h-full object-contain lg:object-cover mix-blend-multiply lg:mix-blend-normal" />
+                    <img loading="lazy" src={item.image || '/images/products/poly-x70-studio.webp'} title={`${item.name} — Cart Hardware Item | AV Live Pakistan`} alt={`${item.name} (${item.brand || 'Enterprise AV Hardware'}) selected for purchase in Pakistan from AV Live Communications.`} className="w-full h-full object-contain lg:object-cover mix-blend-multiply lg:mix-blend-normal" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
@@ -97,7 +101,7 @@ export function Cart() {
                     </div>
 
                     <div className="flex items-center justify-between gap-2 mt-2.5 lg:mt-2">
-                      <p className="text-xs sm:text-sm font-black text-[#1A2B4C]">Rs. {(item.price ?? 0).toLocaleString()}</p>
+                      <p className="text-xs sm:text-sm font-black text-[#1A2B4C]">{formatPrice(item.price ?? 0)}</p>
 
                       {/* Mobile Reference Screen-4 Quantity Stepper Pill */}
                       <div className="lg:hidden flex items-center bg-[#F8F9FA] rounded-full px-1 py-0.5 border border-gray-100">
@@ -158,16 +162,16 @@ export function Cart() {
               <div className="lg:hidden bg-white rounded-3xl p-5 border border-gray-100 shadow-sm space-y-3">
                 <div className="flex justify-between items-center text-xs font-semibold text-gray-400">
                   <span>Sub Total</span>
-                  <span className="font-bold text-gray-600">Rs. {subtotal.toLocaleString()}</span>
+                  <span className="font-bold text-gray-600">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs font-semibold text-gray-400">
                   <span>Shipping &amp; Fee</span>
-                  <span className="font-bold text-emerald-600">{subtotal >= 100000 ? 'Free (Insured)' : 'Rs. 1,500'}</span>
+                  <span className="font-bold text-emerald-600">{subtotal >= 100000 ? 'Free (Insured)' : formatPrice(1500)}</span>
                 </div>
                 <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
                   <span className="text-sm font-black text-[#1A2B4C]">Total</span>
                   <span className="text-base font-black text-[#1A2B4C]">
-                    Rs. {(subtotal + (subtotal >= 100000 ? 0 : 1500)).toLocaleString()}
+                    {formatPrice(subtotal + (subtotal >= 100000 ? 0 : 1500))}
                   </span>
                 </div>
                 <Link
@@ -185,7 +189,7 @@ export function Cart() {
                 <div className="space-y-6 mb-10">
                   <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
                     <span>Hardware Value</span>
-                    <span className="text-white">Rs. {subtotal.toLocaleString()}</span>
+                    <span className="text-white">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
                     <span>In-System Storage</span>
@@ -198,8 +202,13 @@ export function Cart() {
                 </div>
                 
                 <div className="flex justify-between items-center border-t border-white/10 pt-10 mb-10">
-                  <span className="font-black text-lg uppercase tracking-widest">Subtotal</span>
-                  <span className="font-black text-3xl text-[#00B4D8]">Rs. {subtotal.toLocaleString()}</span>
+                  <div>
+                    <span className="font-black text-lg uppercase tracking-widest block">Subtotal</span>
+                    {currency !== 'PKR' && (
+                      <span className="text-[10px] text-gray-400 font-semibold">Base: {formatExactPkr(subtotal)}</span>
+                    )}
+                  </div>
+                  <span className="font-black text-3xl text-[#00B4D8]">{formatPrice(subtotal)}</span>
                 </div>
                 
                 <Link to="/checkout" className="w-full bg-white text-[#1A2B4C] py-6 rounded-2xl font-black hover:bg-[#00B4D8] hover:text-white transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-[11px] shadow-2xl active:scale-95">

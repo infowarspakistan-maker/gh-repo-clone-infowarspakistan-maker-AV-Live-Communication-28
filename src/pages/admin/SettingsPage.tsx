@@ -24,6 +24,7 @@ export function SettingsPage() {
       linkedin: '',
       youtube: '',
       instagram: '',
+      tiktok: '',
       twitter: '',
     },
     seo: {
@@ -371,7 +372,18 @@ export function SettingsPage() {
                     className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-mono focus:outline-none focus:border-[#00B4D8] transition-all" 
                   />
                </div>
-               <div className="space-y-3 md:col-span-2">
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block flex items-center gap-2">
+                     <Globe size={12} className="text-gray-900" /> TikTok URL
+                  </label>
+                  <input 
+                    value={formData.socialLinks.tiktok || ''}
+                    onChange={e => updateSocial('tiktok', e.target.value)}
+                    placeholder="https://www.tiktok.com/@almalikk00"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-mono focus:outline-none focus:border-[#00B4D8] transition-all" 
+                  />
+               </div>
+               <div className="space-y-3">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block flex items-center gap-2">
                      <Twitter size={12} className="text-[#1DA1F2]" /> Twitter / X URL
                   </label>

@@ -149,21 +149,47 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 
 export interface Product {
   id?: string;
+  gmcId?: string;
   slug?: string;
   productName: string;
   sku: string;
   gtin?: string;
   mpn?: string;
+  identifierExists?: 'yes' | 'no';
   shortDescription: string;
   description: string;
+  gmcDescription?: string;
+  productUrl?: string;
+  mobileLink?: string;
+  availability?: 'in_stock' | 'out_of_stock' | 'preorder' | 'backorder';
+  condition?: 'new' | 'refurbished' | 'used';
+  priceCurrency?: 'PKR' | 'USD' | 'GBP' | 'AED' | 'EUR';
+  gmcPrice?: number;
+  gmcSalePrice?: number;
   regularPrice: number;
   salePrice: number;
   stockQuantity: number;
   lowStockThreshold: number;
   images: string[];
   image?: string;
+  additionalImages?: string[];
+  videoLink?: string;
   categoryIds: string[];
   categorySlugs: string[];
+  googleProductCategory?: string;
+  productType?: string;
+  customLabel0?: string;
+  customLabel1?: string;
+  customLabel2?: string;
+  customLabel3?: string;
+  customLabel4?: string;
+  shippingWeight?: string;
+  shippingLength?: string;
+  shippingWidth?: string;
+  shippingHeight?: string;
+  returnPolicyLabel?: string;
+  isBundle?: 'yes' | 'no';
+  multipack?: number | null;
   brand: string;
   variations: any[];
   isActive: boolean;
@@ -181,22 +207,26 @@ export function enrichProductImages(p: Product): Product {
   const canonicalSlug = getCanonicalProductSlug(p, p.id);
   const meta = PRODUCT_GMC_METADATA[canonicalSlug] || (p.id ? PRODUCT_GMC_METADATA[p.id] : undefined);
 
-  // Extract direct external http(s) URLs from the product document itself (never local file paths)
+  // Extract direct image URLs from the product document and catalog metadata
   const rawExternalImgs = extractDirectImageUrls([
     ...(Array.isArray(p.images) ? p.images : typeof p.images === 'string' ? [p.images] : []),
     p.image,
     (p as any).imageUrl,
   ]);
-
-  // Extract external fallback URLs from catalog metadata only if needed
   const metaExternalImgs = extractDirectImageUrls(meta?.images || []);
+  const hasCuratedLocalMain = metaExternalImgs.some(
+    (u) => u.startsWith('/images/products/') && !u.includes('/avlive-')
+  );
 
-  const finalImages =
-    rawExternalImgs.length > 0
-      ? rawExternalImgs
-      : metaExternalImgs.length > 0
-      ? metaExternalImgs
-      : [DEFAULT_EXTERNAL_PRODUCT_IMAGE];
+  const mergedImgs = Array.from(
+    new Set(
+      hasCuratedLocalMain
+        ? [...metaExternalImgs, ...rawExternalImgs]
+        : [...rawExternalImgs, ...metaExternalImgs]
+    )
+  );
+
+  const finalImages = mergedImgs.length > 0 ? mergedImgs : [DEFAULT_EXTERNAL_PRODUCT_IMAGE];
 
   const rawSlugs = Array.isArray(p.categorySlugs)
     ? p.categorySlugs
@@ -1681,6 +1711,7 @@ export interface GeneralSettings {
     youtube: string;
     instagram: string;
     twitter: string;
+    tiktok?: string;
   };
   seo: {
     title: string;
@@ -1856,6 +1887,7 @@ export interface ContactData {
     youtube: string;
     instagram: string;
     twitter: string;
+    tiktok?: string;
   };
   updatedAt?: Timestamp;
 }

@@ -16,6 +16,8 @@ import { FALLBACK_SERVICES_CATALOG } from "../lib/services-catalog";
 import { getCanonicalProductSlug, getProductHref, PRODUCT_GMC_METADATA, buildFallbackProductFromGmcMeta } from "../lib/gmc-feed";
 import { MobileProductCard } from "../components/MobileProductCard";
 import { BlurProductImage } from "../components/BlurProductImage";
+import { useCurrency } from "../contexts/CurrencyContext";
+import { buildProductImageSeo, buildEditorialImageSeo } from "../lib/image-seo";
 
 const TopBrands = React.lazy(() => import('../components/TopBrands').then(m => ({ default: m.TopBrands })));
 const RealProjectsAndClients = React.lazy(() => import('../components/RealProjectsAndClients').then(m => ({ default: m.RealProjectsAndClients })));
@@ -76,7 +78,7 @@ const DEFAULT_HOMEPAGE_DATA: HomepageData = {
     subheadline: 'Over 1,000 corporate events and executive video conference rooms engineered across Pakistan.',
     ctaText: 'Contact Us',
     ctaLink: '/contact',
-    backgroundImageUrl: '/images/projects/hisdu-committee-wall.webp',
+    backgroundImageUrl: '/images/projects/vissonic-delegate-boardroom.webp',
     isActive: true,
   },
 };
@@ -113,6 +115,7 @@ export function Home() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const { currency, formatPrice } = useCurrency();
 
   const nextSlide = useCallback(() => {
     if (content?.heroSlides && content.heroSlides.length > 0) {
@@ -268,10 +271,11 @@ export function Home() {
                 "addressCountry": "PK"
               },
               "sameAs": [
-                "https://www.facebook.com/avlivepk",
-                "https://www.instagram.com/avlivepk",
+                "https://www.facebook.com/AvLivePakistan",
+                "https://www.instagram.com/avlive25",
+                "https://www.tiktok.com/@almalikk00",
                 "https://www.linkedin.com/company/avlivepk",
-                "https://www.youtube.com/@avlivepk",
+                "https://www.youtube.com/@AVLivePakistan",
                 "https://x.com/avlivepk",
                 "https://twitter.com/avlivepk"
               ],
@@ -482,16 +486,24 @@ export function Home() {
               </div>
             </div>
             <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 p-1.5 flex items-center justify-center">
-              <img
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                width={96}
-                height={96}
-                src={optimizeGalleryImageUrl(products[0]?.images?.[0] || activeHeroSlide.imageUrl, 240, 75)}
-                alt="Enterprise Video Conferencing System Pakistan"
-                className="w-full h-full object-contain drop-shadow-md"
-              />
+              {(() => {
+                const mobileHeroSeo = products[0]
+                  ? buildProductImageSeo(products[0], products[0].images?.[0], 0)
+                  : buildEditorialImageSeo(activeHeroSlide.title, 'hero');
+                return (
+                  <img
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    width={96}
+                    height={96}
+                    src={optimizeGalleryImageUrl(products[0]?.images?.[0] || activeHeroSlide.imageUrl, 240, 75)}
+                    title={mobileHeroSeo.title}
+                    alt={mobileHeroSeo.alt}
+                    className="w-full h-full object-contain drop-shadow-md"
+                  />
+                );
+              })()}
             </div>
           </div>
           <div className="absolute -right-8 -bottom-10 w-28 h-28 rounded-full bg-[#00B4D8]/15 pointer-events-none" />
@@ -576,18 +588,24 @@ export function Home() {
                 }`}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-[#1A2B4C]/95 via-[#1A2B4C]/75 to-transparent z-10"></div>
-                <img
-                  loading={isFirstSlide ? 'eager' : 'lazy'}
-                  fetchPriority={isFirstSlide ? 'high' : 'low'}
-                  decoding={isFirstSlide ? 'sync' : 'async'}
-                  width={1280}
-                  height={480}
-                  src={slide.imageUrl}
-                  srcSet={buildHeroSrcSet(slide.imageUrl)}
-                  sizes="100vw"
-                  alt={slide.title}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                {(() => {
+                  const slideSeo = buildEditorialImageSeo(slide.title, 'hero', slide.subtitle);
+                  return (
+                    <img
+                      loading={isFirstSlide ? 'eager' : 'lazy'}
+                      fetchPriority={isFirstSlide ? 'high' : 'low'}
+                      decoding={isFirstSlide ? 'sync' : 'async'}
+                      width={1280}
+                      height={480}
+                      src={slide.imageUrl}
+                      srcSet={buildHeroSrcSet(slide.imageUrl)}
+                      sizes="100vw"
+                      title={slideSeo.title}
+                      alt={slideSeo.alt}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  );
+                })()}
               </div>
             );
           })}
@@ -708,7 +726,9 @@ export function Home() {
           <div className="min-h-[340px]">
             {activeIntentTab === 'solutions' ? (
               <div className="grid md:grid-cols-3 gap-5 lg:gap-7">
-                {services.filter(s => s.isActive).slice(0, 9).map((s) => (
+                {services.filter(s => s.isActive).slice(0, 9).map((s) => {
+                  const serviceImgSeo = buildEditorialImageSeo(s.title, 'service', s.description);
+                  return (
                   <div key={s.id} className="bg-gray-50 rounded-3xl p-8 border border-gray-100 hover:shadow-xl transition-all flex flex-col">
                     <img
                       loading="lazy"
@@ -716,7 +736,8 @@ export function Home() {
                       width={480}
                       height={240}
                       src={optimizeGalleryImageUrl(s.imageUrl, 480, 75)}
-                      alt={`${s.title} — AV Live Pakistan`}
+                      title={serviceImgSeo.title}
+                      alt={serviceImgSeo.alt}
                       className="w-full h-48 object-cover rounded-2xl mb-6"
                     />
                     <h3 className="text-xl font-black text-[#1A2B4C] mb-3">{s.title}</h3>
@@ -725,13 +746,15 @@ export function Home() {
                       Explore {s.title} <ArrowRight size={16} />
                     </Link>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="grid md:grid-cols-3 gap-8">
                 {products.filter(p => p.isFeatured).slice(0, 6).map((p) => {
                   const pSlug = getCanonicalProductSlug(p, p.id);
                   const pHref = getProductHref(p, p.id);
+                  const pImgSeo = buildProductImageSeo(p, p.images?.[0], 0);
                   return (
                   <div key={p.id} className="bg-white rounded-3xl p-6 border border-gray-100 hover:shadow-xl transition-all flex flex-col">
                     <div className="relative w-full h-48 aspect-[2/1] rounded-2xl overflow-hidden mb-6 bg-gray-50">
@@ -742,7 +765,8 @@ export function Home() {
                         height={240}
                         src={optimizeGalleryImageUrl(p.images?.[0], 480, 75)}
                         seed={pSlug}
-                        alt={p.productName}
+                        title={pImgSeo.title}
+                        alt={pImgSeo.alt}
                         className="relative z-10 w-full h-full object-cover"
                       />
                     </div>
@@ -826,8 +850,9 @@ export function Home() {
                   <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
                     {(() => {
                        const images = Array.isArray(prod.images) ? prod.images : (typeof prod.images === 'string' ? [prod.images] : (prod.image ? [prod.image] : []));
-                       const firstImage = optimizeGalleryImageUrl(images[0] || 'https://placehold.co/600x600?text=No+Image', 480, 75);
+                       const firstImage = optimizeGalleryImageUrl(images[0] || '/images/products/poly-x70-studio.webp', 480, 75);
                        const prodSlug = getCanonicalProductSlug(prod, prod.id);
+                       const cardSeo = buildProductImageSeo(prod, images[0], 0);
                        return (
                          <BlurProductImage
                            loading="lazy"
@@ -836,7 +861,8 @@ export function Home() {
                            height={300}
                            src={firstImage}
                            seed={prodSlug}
-                           alt={`${prod.productName} — Price PKR in Pakistan`}
+                           title={cardSeo.title}
+                           alt={cardSeo.alt}
                            className="absolute inset-0 z-10 w-full h-full object-cover mix-blend-multiply transition-transform duration-500 ease-in-out group-hover:scale-105"
                          />
                        );
@@ -882,9 +908,9 @@ export function Home() {
                     
                     <div className="mt-auto flex items-end justify-between gap-4 pt-4 border-t border-gray-50">
                       <div className="flex flex-col">
-                        <span className="text-xs font-black text-slate-600 uppercase tracking-widest mb-1">Price PKR</span>
+                        <span className="text-xs font-black text-slate-600 uppercase tracking-widest mb-1">Price ({currency})</span>
                         <div className="flex items-baseline gap-2">
-                          <span className="font-black text-xl text-[#1A2B4C]">PKR { ((prod.salePrice || prod.regularPrice) ?? 0).toLocaleString() }</span>
+                          <span className="font-black text-xl text-[#1A2B4C]">{formatPrice((prod.salePrice || prod.regularPrice) ?? 0)}</span>
                         </div>
                       </div>
                       <span className="bg-[#1A2B4C] text-white px-4 py-2.5 rounded-lg text-xs font-bold group-hover:bg-[#00B4D8] group-hover:text-[#1A2B4C] transition-all shadow-md shrink-0 whitespace-nowrap">
@@ -921,63 +947,78 @@ export function Home() {
            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[580px] h-auto">
               {/* Left Column (2 items) */}
               <div className="col-span-1 flex flex-col gap-4 h-full">
-                 {flagshipVideoSet[0] && (
+                 {flagshipVideoSet[0] && (() => {
+                   const imgSeo = buildProductImageSeo(flagshipVideoSet[0], flagshipVideoSet[0].images?.[0], 0);
+                   return (
                     <Link to={getProductHref(flagshipVideoSet[0], flagshipVideoSet[0].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[0].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[0].images[0], 420, 75)} alt={`${flagshipVideoSet[0].productName} Pakistan`} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[0].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
                        <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[0].productName}</h3>
-                       <p className="text-[#00B4D8] font-black mt-2">PKR {flagshipVideoSet[0].salePrice > 0 ? (flagshipVideoSet[0].salePrice ?? 0).toLocaleString() : (flagshipVideoSet[0].regularPrice ?? 0).toLocaleString()}</p>
+                       <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[0].salePrice > 0 ? (flagshipVideoSet[0].salePrice ?? 0) : (flagshipVideoSet[0].regularPrice ?? 0))}</p>
                     </Link>
-                 )}
-                 {flagshipVideoSet[1] && (
+                   );
+                 })()}
+                 {flagshipVideoSet[1] && (() => {
+                   const imgSeo = buildProductImageSeo(flagshipVideoSet[1], flagshipVideoSet[1].images?.[0], 0);
+                   return (
                     <Link to={getProductHref(flagshipVideoSet[1], flagshipVideoSet[1].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[1].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[1].images[0], 420, 75)} alt={`${flagshipVideoSet[1].productName} Pakistan`} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[1].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
                        <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[1].productName}</h3>
-                       <p className="text-[#00B4D8] font-black mt-2">PKR {flagshipVideoSet[1].salePrice > 0 ? (flagshipVideoSet[1].salePrice ?? 0).toLocaleString() : (flagshipVideoSet[1].regularPrice ?? 0).toLocaleString()}</p>
+                       <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[1].salePrice > 0 ? (flagshipVideoSet[1].salePrice ?? 0) : (flagshipVideoSet[1].regularPrice ?? 0))}</p>
                     </Link>
-                 )}
+                   );
+                 })()}
               </div>
               
               {/* Middle Column (1 large item) */}
               <div className="col-span-1 md:col-span-2 h-full">
-                 {flagshipVideoSet[2] && (
+                 {flagshipVideoSet[2] && (() => {
+                   const imgSeo = buildProductImageSeo(flagshipVideoSet[2], flagshipVideoSet[2].images?.[0], 0);
+                   return (
                     <Link to={getProductHref(flagshipVideoSet[2], flagshipVideoSet[2].id)} className="w-full h-full min-h-[340px] md:min-h-0 bg-white border border-gray-100 shadow-sm hover:shadow-lg rounded-[2.5rem] p-8 md:p-10 group flex flex-col items-center justify-center relative overflow-hidden text-center">
                        {flagshipVideoSet[2].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={540} height={360} src={optimizeGalleryImageUrl(flagshipVideoSet[2].images[0], 560, 75)} alt={`${flagshipVideoSet[2].productName} Pakistan`} className="w-full h-48 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 relative z-20 mb-6" />
+                         <img loading="lazy" decoding="async" width={540} height={360} src={optimizeGalleryImageUrl(flagshipVideoSet[2].images[0], 560, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-48 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 relative z-20 mb-6" />
                        )}
                        <div className="relative z-20">
                           <span className="text-[#00B4D8] font-black uppercase tracking-widest text-xs mb-2 block">Flagship Boardroom Endpoint</span>
                           <h3 className="text-2xl md:text-3xl font-black text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[2].productName}</h3>
-                          <p className="text-[#00B4D8] text-xl font-black mt-2">PKR {flagshipVideoSet[2].salePrice > 0 ? (flagshipVideoSet[2].salePrice ?? 0).toLocaleString() : (flagshipVideoSet[2].regularPrice ?? 0).toLocaleString()}</p>
+                          <p className="text-[#00B4D8] text-xl font-black mt-2">{formatPrice(flagshipVideoSet[2].salePrice > 0 ? (flagshipVideoSet[2].salePrice ?? 0) : (flagshipVideoSet[2].regularPrice ?? 0))}</p>
                           <p className="text-gray-600 mt-3 line-clamp-2 max-w-md mx-auto text-sm">{flagshipVideoSet[2].shortDescription?.replace(/<[^>]*>?/gm, '') || 'Professional video conferencing solution.'}</p>
                        </div>
                     </Link>
-                 )}
+                   );
+                 })()}
               </div>
               
               {/* Right Column (2 items) */}
               <div className="col-span-1 flex flex-col gap-4 h-full">
-                 {flagshipVideoSet[3] && (
+                 {flagshipVideoSet[3] && (() => {
+                   const imgSeo = buildProductImageSeo(flagshipVideoSet[3], flagshipVideoSet[3].images?.[0], 0);
+                   return (
                     <Link to={getProductHref(flagshipVideoSet[3], flagshipVideoSet[3].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[3].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[3].images[0], 420, 75)} alt={`${flagshipVideoSet[3].productName} Pakistan`} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[3].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
                        <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[3].productName}</h3>
-                       <p className="text-[#00B4D8] font-black mt-2">PKR {flagshipVideoSet[3].salePrice > 0 ? (flagshipVideoSet[3].salePrice ?? 0).toLocaleString() : (flagshipVideoSet[3].regularPrice ?? 0).toLocaleString()}</p>
+                       <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[3].salePrice > 0 ? (flagshipVideoSet[3].salePrice ?? 0) : (flagshipVideoSet[3].regularPrice ?? 0))}</p>
                     </Link>
-                 )}
-                 {flagshipVideoSet[4] && (
+                   );
+                 })()}
+                 {flagshipVideoSet[4] && (() => {
+                   const imgSeo = buildProductImageSeo(flagshipVideoSet[4], flagshipVideoSet[4].images?.[0], 0);
+                   return (
                     <Link to={getProductHref(flagshipVideoSet[4], flagshipVideoSet[4].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[4].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[4].images[0], 420, 75)} alt={`${flagshipVideoSet[4].productName} Pakistan`} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[4].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
                        <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[4].productName}</h3>
-                       <p className="text-[#00B4D8] font-black mt-2">PKR {flagshipVideoSet[4].salePrice > 0 ? (flagshipVideoSet[4].salePrice ?? 0).toLocaleString() : (flagshipVideoSet[4].regularPrice ?? 0).toLocaleString()}</p>
+                       <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[4].salePrice > 0 ? (flagshipVideoSet[4].salePrice ?? 0) : (flagshipVideoSet[4].regularPrice ?? 0))}</p>
                     </Link>
-                 )}
+                   );
+                 })()}
               </div>
            </div>
         </section>
@@ -1313,11 +1354,12 @@ export function Home() {
                 Watch live 3D hologram stage reels, boardroom acoustic walkthroughs, and Pakistan corporate event highlights across our official channels:
               </p>
               <div className="flex flex-wrap gap-2.5 text-xs font-bold">
-                <a href="https://www.youtube.com/@avlivepk" target="_blank" rel="noopener" className="px-4 py-2.5 min-w-[48px] min-h-[48px] inline-flex items-center justify-center bg-[#1A2B4C] text-white rounded-xl hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors">YouTube Channel</a>
+                <a href="https://www.youtube.com/@AVLivePakistan" target="_blank" rel="noopener" className="px-4 py-2.5 min-w-[48px] min-h-[48px] inline-flex items-center justify-center bg-[#1A2B4C] text-white rounded-xl hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors">YouTube (@AVLivePakistan)</a>
+                <a href="https://www.instagram.com/avlive25" target="_blank" rel="noopener" className="px-4 py-2.5 min-w-[48px] min-h-[48px] inline-flex items-center justify-center bg-[#1A2B4C] text-white rounded-xl hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors">Instagram (@avlive25)</a>
+                <a href="https://www.tiktok.com/@almalikk00" target="_blank" rel="noopener" className="px-4 py-2.5 min-w-[48px] min-h-[48px] inline-flex items-center justify-center bg-[#1A2B4C] text-white rounded-xl hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors">TikTok (@almalikk00)</a>
                 <a href="https://x.com/avlivepk" target="_blank" rel="noopener" className="px-4 py-2.5 min-w-[48px] min-h-[48px] inline-flex items-center justify-center bg-[#1A2B4C] text-white rounded-xl hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors">X (Twitter)</a>
                 <a href="https://www.linkedin.com/company/avlivepk" target="_blank" rel="noopener" className="px-4 py-2.5 min-w-[48px] min-h-[48px] inline-flex items-center justify-center bg-[#1A2B4C] text-white rounded-xl hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors">LinkedIn Company</a>
-                <a href="https://www.instagram.com/avlivepk" target="_blank" rel="noopener" className="px-4 py-2.5 min-w-[48px] min-h-[48px] inline-flex items-center justify-center bg-[#1A2B4C] text-white rounded-xl hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors">Instagram</a>
-                <a href="https://www.facebook.com/avlivepk" target="_blank" rel="noopener" className="px-4 py-2.5 min-w-[48px] min-h-[48px] inline-flex items-center justify-center bg-[#1A2B4C] text-white rounded-xl hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors">Facebook Page</a>
+                <a href="https://www.facebook.com/AvLivePakistan" target="_blank" rel="noopener" className="px-4 py-2.5 min-w-[48px] min-h-[48px] inline-flex items-center justify-center bg-[#1A2B4C] text-white rounded-xl hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors">Facebook (@AvLivePakistan)</a>
               </div>
             </div>
           </div>

@@ -68,11 +68,12 @@ export function Contact() {
       sunday: content?.businessHours?.sunday || 'Closed',
     },
     socialLinks: {
-      facebook: content?.socialLinks?.facebook || '',
-      linkedin: content?.socialLinks?.linkedin || '',
-      youtube: content?.socialLinks?.youtube || '',
-      instagram: content?.socialLinks?.instagram || '',
-      twitter: content?.socialLinks?.twitter || '',
+      facebook: content?.socialLinks?.facebook || 'https://www.facebook.com/AvLivePakistan',
+      linkedin: content?.socialLinks?.linkedin || 'https://www.linkedin.com/company/avlivepk',
+      youtube: content?.socialLinks?.youtube || 'https://www.youtube.com/@AVLivePakistan',
+      instagram: content?.socialLinks?.instagram || 'https://www.instagram.com/avlive25',
+      tiktok: content?.socialLinks?.tiktok || 'https://www.tiktok.com/@almalikk00',
+      twitter: content?.socialLinks?.twitter || 'https://x.com/avlivepk',
     },
   };
 
@@ -196,12 +197,12 @@ export function Contact() {
               className="bg-[#1A2B4C] p-8 rounded-[2.5rem] shadow-xl text-white"
             >
                <h4 className="text-sm font-black uppercase tracking-[0.2em] mb-6 text-center text-gray-400">Social Connectivity</h4>
-               <div className="flex justify-center gap-4">
+               <div className="flex flex-wrap justify-center gap-3">
                   {[
-                    { icon: Facebook, url: data.socialLinks.facebook, color: 'hover:bg-[#1877F2]' },
-                    { icon: Linkedin, url: data.socialLinks.linkedin, color: 'hover:bg-[#0A66C2]' },
-                    { icon: Youtube, url: data.socialLinks.youtube, color: 'hover:bg-[#FF0000]' },
-                    { icon: Instagram, url: data.socialLinks.instagram, color: 'hover:bg-[#E4405F]' }
+                    { label: 'Facebook (@AvLivePakistan)', icon: Facebook, url: data.socialLinks.facebook, color: 'hover:bg-[#1877F2]' },
+                    { label: 'LinkedIn', icon: Linkedin, url: data.socialLinks.linkedin, color: 'hover:bg-[#0A66C2]' },
+                    { label: 'YouTube (@AVLivePakistan)', icon: Youtube, url: data.socialLinks.youtube, color: 'hover:bg-[#FF0000]' },
+                    { label: 'Instagram (@avlive25)', icon: Instagram, url: data.socialLinks.instagram, color: 'hover:bg-[#E4405F]' }
                   ].map((social, idx) => (
                     social.url && (
                       <a 
@@ -209,12 +210,28 @@ export function Contact() {
                         href={social.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        aria-label={social.label}
+                        title={social.label}
                         className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-all ${social.color} group`}
                       >
                         <social.icon size={20} className="text-gray-400 group-hover:text-white transition-colors" />
                       </a>
                     )
                   ))}
+                  {data.socialLinks.tiktok && (
+                    <a
+                      href={data.socialLinks.tiktok}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="TikTok (@almalikk00)"
+                      title="TikTok (@almalikk00)"
+                      className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-all hover:bg-black group"
+                    >
+                      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-gray-400 group-hover:fill-white transition-colors" aria-hidden="true">
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                      </svg>
+                    </a>
+                  )}
                   {Object.values(data.socialLinks).every(v => !v) && (
                     <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest py-2">No Social Links Configured</div>
                   )}

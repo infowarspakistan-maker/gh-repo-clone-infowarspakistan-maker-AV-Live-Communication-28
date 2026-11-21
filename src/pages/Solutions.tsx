@@ -157,7 +157,7 @@ export function Solutions() {
               </div>
             </div>
             <div className="flex-1 bg-gray-100 rounded-3xl aspect-video overflow-hidden border border-gray-200 relative">
-              <img loading="lazy" src="https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=800&q=80" alt="Video Conference in Pakistan - Polycom Group 500 and Poly X70 Boardroom Integration" className="w-full h-full object-cover mix-blend-multiply" />
+              <img loading="lazy" src="/images/video-conference/boardroom-hero.webp" title="Enterprise Video Conference Boardroom — Poly & Cisco Integration | AV Live Pakistan" alt="Turnkey enterprise video conference boardroom in Pakistan engineered by AV Live featuring dual 4K commercial displays, HP Poly Studio X70, Polycom Group 500, and Cisco Room Kit hardware across Lahore, Karachi, and Islamabad." className="w-full h-full object-cover" />
             </div>
           </motion.div>
 
@@ -188,7 +188,7 @@ export function Solutions() {
               </div>
             </div>
             <div className="flex-1 bg-gray-100 rounded-3xl aspect-video overflow-hidden border border-gray-200 relative">
-              <img loading="lazy" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80" alt="3D Hologram Display and SMD LED Wall Solutions in Pakistan" className="w-full h-full object-cover mix-blend-multiply" />
+              <img loading="lazy" src="/images/products/3d-hologram-stage.webp" title="3D Hologram Stage Projection & Fine-Pitch SMD LED Wall Solutions | AV Live Pakistan" alt="3D Hologram stage projection, HoloGauze mesh, and fine-pitch SMD LED video wall engineered by AV Live Communications for corporate product launches and auditoriums in Pakistan." className="w-full h-full object-cover" />
             </div>
           </motion.div>
 
@@ -221,7 +221,7 @@ export function Solutions() {
               </div>
             </div>
             <div className="flex-1 bg-gray-100 rounded-3xl aspect-video overflow-hidden border border-gray-200 relative">
-              <img loading="lazy" src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&q=80" alt="Corporate Event Management and Hybrid Events in Pakistan" className="w-full h-full object-cover mix-blend-multiply" />
+              <img loading="lazy" src="/images/projects/world-bank-president-stage.webp" title="Corporate Event Management & National Hybrid Broadcast Stage | AV Live Pakistan" alt="Turnkey national corporate event management and hybrid broadcast stage with seamless P2.5 SMD LED wall and multi-camera SDI switching executed by AV Live across Lahore, Karachi, and Islamabad." className="w-full h-full object-cover" />
             </div>
           </motion.div>
         </div>

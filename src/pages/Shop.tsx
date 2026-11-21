@@ -30,6 +30,8 @@ import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { MobileProductCard } from '../components/MobileProductCard';
 import { BlurProductImage } from '../components/BlurProductImage';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { buildProductImageSeo } from '../lib/image-seo';
 
 const INITIAL_FALLBACK_SHOP_PRODUCTS: Product[] = (() => {
   const seen = new Set<string>();
@@ -61,6 +63,7 @@ const FALLBACK_SHOP_CATEGORIES: Category[] = [
 
 export function Shop() {
   const { addToCart } = useCart();
+  const { currency, formatPrice } = useCurrency();
   const { brandSlug } = useParams<{ brandSlug?: string }>();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -716,7 +719,8 @@ export function Shop() {
             const heroHref = getProductHref(heroProd, heroProd.id);
             const { effectivePrice: heroPrice } = resolveProductPricing(heroProd);
             const rawImgs = Array.isArray(heroProd.images) ? heroProd.images : (typeof heroProd.images === 'string' ? [heroProd.images] : (heroProd.image ? [heroProd.image] : []));
-            const heroImg = optimizeGalleryImageUrl(rawImgs[0] || 'https://placehold.co/600x450?text=AV+Live', 360, 75);
+            const heroImg = optimizeGalleryImageUrl(rawImgs[0] || '/images/products/poly-x70-studio.webp', 360, 75);
+            const heroSeo = buildProductImageSeo(heroProd, rawImgs[0], 0);
             return (
               <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-xs flex items-center gap-3">
                 <Link to={heroHref} className="w-20 h-20 rounded-xl bg-[#F8F9FA] p-2 flex items-center justify-center shrink-0 overflow-hidden">
@@ -728,7 +732,8 @@ export function Shop() {
                     height={160}
                     src={heroImg}
                     seed={heroSlug}
-                    alt={heroProd.productName}
+                    title={heroSeo.title}
+                    alt={heroSeo.alt}
                     className="relative z-10 w-full h-full object-contain mix-blend-multiply"
                   />
                 </Link>
@@ -1127,8 +1132,10 @@ export function Shop() {
                 const productKey = product.id || productSlug;
                 const { regularPrice: cardRegularPrice, effectivePrice: cardEffectivePrice, hasSale: cardHasSale } = resolveProductPricing(product);
                 const rawImages = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
-                const firstImage = optimizeGalleryImageUrl(rawImages[0] || 'https://placehold.co/600x600?text=No+Image', 480, 75);
+                const firstImage = optimizeGalleryImageUrl(rawImages[0] || '/images/products/poly-x70-studio.webp', 480, 75);
                 const secondImage = rawImages[1] ? optimizeGalleryImageUrl(rawImages[1], 480, 75) : null;
+                const primarySeo = buildProductImageSeo(product, rawImages[0], 0);
+                const secondarySeo = secondImage ? buildProductImageSeo(product, rawImages[1], 1) : null;
                 const isEagerCard = index < 4;
 
                 return viewMode === 'grid' ? (
@@ -1158,17 +1165,19 @@ export function Shop() {
                           height={360}
                           src={firstImage}
                           seed={productSlug}
-                          alt={`Professional AV equipment: ${product.productName} by ${product.brand}`}
+                          title={primarySeo.title}
+                          alt={primarySeo.alt}
                           className={`absolute inset-0 z-10 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out ${secondImage ? 'group-hover:opacity-0' : ''}`}
                         />
-                        {secondImage && hoveredProductId === productKey && (
+                        {secondImage && secondarySeo && hoveredProductId === productKey && (
                           <img
                             loading="lazy"
                             decoding="async"
                             width={480}
                             height={360}
                             src={secondImage}
-                            alt={`Alternate view of ${product.productName}`}
+                            title={secondarySeo.title}
+                            alt={secondarySeo.alt}
                             className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 scale-105"
                           />
                         )}
@@ -1218,9 +1227,9 @@ export function Shop() {
                         <div className="flex flex-col min-w-0">
                           <span className="hidden lg:block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Price</span>
                           <div className="flex items-baseline gap-1.5 lg:gap-2 flex-wrap">
-                            <span className="font-black text-xs sm:text-base lg:text-xl text-[#1A2B4C]">Rs. {cardEffectivePrice.toLocaleString()}</span>
+                            <span className="font-black text-xs sm:text-base lg:text-xl text-[#1A2B4C]">{formatPrice(cardEffectivePrice)}</span>
                             {cardHasSale && (
-                              <span className="hidden sm:inline text-[10px] text-gray-400 line-through font-bold">{cardRegularPrice.toLocaleString()}</span>
+                              <span className="hidden sm:inline text-[10px] text-gray-400 line-through font-bold">{formatPrice(cardRegularPrice)}</span>
                             )}
                           </div>
                         </div>
@@ -1265,7 +1274,8 @@ export function Shop() {
                         height={320}
                         src={firstImage}
                         seed={productSlug}
-                        alt={product.productName}
+                        title={primarySeo.title}
+                        alt={primarySeo.alt}
                         className="relative z-10 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
                       {cardHasSale && (
@@ -1326,9 +1336,9 @@ export function Shop() {
                       
                       <div className="flex flex-wrap items-center justify-between pt-4 border-t border-gray-50 mt-auto gap-4">
                         <div className="flex items-baseline gap-2">
-                          <span className="font-black text-xl text-[#1A2B4C]">Rs. {cardEffectivePrice.toLocaleString()}</span>
+                          <span className="font-black text-xl text-[#1A2B4C]">{formatPrice(cardEffectivePrice)}</span>
                           {cardHasSale && (
-                            <span className="text-xs text-gray-400 line-through font-bold">Rs. {cardRegularPrice.toLocaleString()}</span>
+                            <span className="text-xs text-gray-400 line-through font-bold">{formatPrice(cardRegularPrice)}</span>
                           )}
                         </div>
                         <button 
@@ -1405,11 +1415,17 @@ export function Shop() {
             </button>
             
             <div className="w-full md:w-1/2 h-64 md:h-auto bg-gray-50 flex items-center justify-center p-8 shrink-0">
-               <img 
-                 src={quickViewProduct.images?.[0] || 'https://placehold.co/600x600?text=No+Image'} 
-                 alt={quickViewProduct.productName}
-                 className="w-full h-full object-contain drop-shadow-xl"
-               />
+               {(() => {
+                 const qvSeo = buildProductImageSeo(quickViewProduct, quickViewProduct.images?.[0], 0);
+                 return (
+                   <img 
+                     src={quickViewProduct.images?.[0] || '/images/products/poly-x70-studio.webp'} 
+                     title={qvSeo.title}
+                     alt={qvSeo.alt}
+                     className="w-full h-full object-contain drop-shadow-xl"
+                   />
+                 );
+               })()}
             </div>
             
             <div className="p-8 md:p-10 flex flex-col flex-grow overflow-y-auto">
@@ -1427,9 +1443,9 @@ export function Shop() {
                
                <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col gap-6">
                  <div className="flex items-baseline gap-3">
-                   <span className="font-black text-3xl text-[#1A2B4C]">Rs. {quickViewProduct.salePrice?.toLocaleString()}</span>
+                   <span className="font-black text-3xl text-[#1A2B4C]">{formatPrice(quickViewProduct.salePrice || quickViewProduct.regularPrice || 0)}</span>
                    {quickViewProduct.salePrice < quickViewProduct.regularPrice && (
-                     <span className="text-sm text-gray-400 line-through font-bold">Rs. {quickViewProduct.regularPrice?.toLocaleString()}</span>
+                     <span className="text-sm text-gray-400 line-through font-bold">{formatPrice(quickViewProduct.regularPrice || 0)}</span>
                    )}
                  </div>
                  
@@ -1486,7 +1502,7 @@ export function Shop() {
                   <th className="py-3 px-4">Hardware Model</th>
                   <th className="py-3 px-4">Brand</th>
                   <th className="py-3 px-4">Part Number (SKU/MPN)</th>
-                  <th className="py-3 px-4">Reference Price (PKR)</th>
+                  <th className="py-3 px-4">Reference Price ({currency})</th>
                   <th className="py-3 px-4">Pakistan Warranty</th>
                 </tr>
               </thead>
@@ -1504,7 +1520,7 @@ export function Shop() {
                       </td>
                       <td className="py-3 px-4 font-bold text-gray-600">{prod.brand}</td>
                       <td className="py-3 px-4 font-mono text-xs text-gray-500">{prod.sku || prod.mpn || 'Official OEM'}</td>
-                      <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. {effectivePrice.toLocaleString()}</td>
+                      <td className="py-3 px-4 font-black text-[#00B4D8]">{formatPrice(effectivePrice)}</td>
                       <td className="py-3 px-4 font-bold text-emerald-600">1-Year Official Local Warranty</td>
                     </tr>
                   );

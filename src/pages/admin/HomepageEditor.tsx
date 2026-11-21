@@ -166,7 +166,7 @@ function HeroSliderManager({ slides, onUpdate }: HeroSliderManagerProps) {
 
             <div className="w-40 h-24 rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
               {slide.imageUrl ? (
-                <img loading="lazy" src={slide.imageUrl} alt={slide.title} className="w-full h-full object-cover" />
+                <img loading="lazy" src={slide.imageUrl} alt={slide.title || 'Homepage hero slide'} title={slide.title || 'Homepage hero slide'} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-300">
                   <ImageIcon size={24} />
@@ -416,7 +416,7 @@ function BrandManager({ brands, onUpdate }: BrandManagerProps) {
             </div>
             <div className="h-16 w-full flex items-center justify-center mb-4">
               {brand.logoUrl ? (
-                <img loading="lazy" src={brand.logoUrl} alt={brand.name} className="max-h-full max-w-full object-contain grayscale group-hover:grayscale-0 transition-all" />
+                <img loading="lazy" src={brand.logoUrl} alt={brand.name} title={brand.name} className="max-h-full max-w-full object-contain grayscale group-hover:grayscale-0 transition-all" />
               ) : (
                 <ImageIcon className="text-gray-200" size={32} />
               )}
@@ -522,7 +522,7 @@ function TestimonialManager({ testimonials, onUpdate }: TestimonialManagerProps)
              </div>
              <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden border border-gray-50 flex-shrink-0">
-                  {t.avatarUrl ? <img loading="lazy" src={t.avatarUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300"><Users size={20} /></div>}
+                  {t.avatarUrl ? <img loading="lazy" src={t.avatarUrl} alt={t.name || 'Client testimonial avatar'} title={t.name || 'Client testimonial avatar'} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300"><Users size={20} /></div>}
                 </div>
                 <div>
                    <div className="text-sm font-black text-[#1A2B4C]">{t.name}</div>

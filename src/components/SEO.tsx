@@ -157,6 +157,7 @@ export function SEO({
     cleanupStaticSsrTags('meta[property="og:title"]');
     cleanupStaticSsrTags('meta[property="og:description"]');
     cleanupStaticSsrTags('meta[property="og:image"]');
+    cleanupStaticSsrTags('meta[property="og:image:alt"]');
     cleanupStaticSsrTags('meta[property="og:type"]');
     cleanupStaticSsrTags('meta[property="og:site_name"]');
     cleanupStaticSsrTags('meta[property="og:locale"]');
@@ -166,6 +167,7 @@ export function SEO({
     cleanupStaticSsrTags('meta[name="twitter:title"]');
     cleanupStaticSsrTags('meta[name="twitter:description"]');
     cleanupStaticSsrTags('meta[name="twitter:image"]');
+    cleanupStaticSsrTags('meta[name="twitter:image:alt"]');
 
     // Remove Wave-1 SSR JSON-LD script tag once Wave-2 React <SEO schema={...}> mounts so Google WRS never merges duplicate @id Product nodes ("Duplicate field brand")
     if (schema) {

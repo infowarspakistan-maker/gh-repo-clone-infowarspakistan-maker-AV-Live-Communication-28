@@ -7,6 +7,7 @@ import { optimizeGalleryImageUrl } from '../../lib/image-optimize';
 import { DeepQueryModal } from '../../components/DeepQueryModal';
 import { SEO } from '../../components/SEO';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
+import { buildEditorialImageSeo, buildImageObjectSchema } from '../../lib/image-seo';
 
 const SERVICE_SLUG_ALIASES: Record<string, string> = {
   'video-conferencing-solutions': 'boardroom-integration',
@@ -132,6 +133,8 @@ export function ServiceDetail() {
     }
   ];
 
+  const serviceImgSeo = buildEditorialImageSeo(service.localizedH1 || service.title, 'service', service.description);
+
   const serviceSchema = {
     "@context": "https://schema.org",
     "@graph": [
@@ -145,6 +148,15 @@ export function ServiceDetail() {
         },
         "areaServed": ["Lahore", "Karachi", "Islamabad", "Pakistan"],
         "description": service.description?.replace(/<[^>]*>?/gm, ''),
+        ...(service.imageUrl ? {
+          "image": buildImageObjectSchema({
+            url: service.imageUrl,
+            title: serviceImgSeo.title,
+            alt: serviceImgSeo.alt,
+            width: 1400,
+            height: 525,
+          })
+        } : {}),
         "url": canonicalUrl
       },
       {
@@ -168,8 +180,8 @@ export function ServiceDetail() {
         title={`${service.title} | AV Live Communications Pakistan`}
         description={service.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Professional ${service.title} enterprise deployment and support by AV Live Communications.`}
         keywords={service.keywords || `${service.title}, Corporate event management, Event management, hybrid event, Hologram Display, events, Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70`}
-        image={service.imageUrl || 'https://avlive.com.pk/og-image.jpg'}
-        imageAlt={`${service.title} - AV Live Communications`}
+        image={service.imageUrl || 'https://avlive.com.pk/images/projects/world-bank-president-stage.webp'}
+        imageAlt={serviceImgSeo.alt}
         url={canonicalUrl}
         type="website"
         schema={serviceSchema}
@@ -187,7 +199,8 @@ export function ServiceDetail() {
                width={1400}
                height={525}
                src={optimizeGalleryImageUrl(service.imageUrl, 1400, 80)}
-               alt={service.localizedH1 || service.title}
+               title={serviceImgSeo.title}
+               alt={serviceImgSeo.alt}
                className="w-full h-full object-cover mix-blend-overlay opacity-30"
              />
            </div>

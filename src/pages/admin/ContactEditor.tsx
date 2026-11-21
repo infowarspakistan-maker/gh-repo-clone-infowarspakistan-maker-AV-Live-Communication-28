@@ -26,10 +26,11 @@ export function ContactEditor() {
             sunday: 'Closed',
           },
           socialLinks: {
-            facebook: '',
+            facebook: 'https://www.facebook.com/AvLivePakistan',
             linkedin: '',
-            youtube: '',
-            instagram: '',
+            youtube: 'https://www.youtube.com/@AVLivePakistan',
+            instagram: 'https://www.instagram.com/avlive25',
+            tiktok: 'https://www.tiktok.com/@almalikk00',
             twitter: '',
           },
         };
@@ -237,6 +238,17 @@ export function ContactEditor() {
               <input 
                 value={formData.socialLinks.instagram}
                 onChange={e => handleSocialChange('instagram', e.target.value)}
+                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-mono focus:outline-none focus:border-[#00B4D8]"
+              />
+            </div>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block flex items-center gap-2">
+                <Globe size={12} className="text-gray-900" /> TikTok URL
+              </label>
+              <input 
+                value={formData.socialLinks.tiktok || ''}
+                onChange={e => handleSocialChange('tiktok', e.target.value)}
+                placeholder="https://www.tiktok.com/@almalikk00"
                 className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-mono focus:outline-none focus:border-[#00B4D8]"
               />
             </div>

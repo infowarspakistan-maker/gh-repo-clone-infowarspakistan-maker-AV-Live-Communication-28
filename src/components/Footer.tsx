@@ -164,13 +164,31 @@ export function Footer() {
               <div className="text-[10px] font-bold uppercase tracking-wider text-gray-300 mb-2">Official Channels</div>
               <div className="flex flex-wrap gap-1.5">
                 <a
-                  href="https://www.youtube.com/@avlivepk"
+                  href="https://www.youtube.com/@AVLivePakistan"
                   target="_blank"
                   rel="noopener"
-                  aria-label="AV Live on YouTube"
+                  aria-label="AV Live on YouTube (@AVLivePakistan)"
                   className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
                 >
                   YouTube
+                </a>
+                <a
+                  href="https://www.instagram.com/avlive25"
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="AV Live on Instagram (@avlive25)"
+                  className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
+                >
+                  Instagram
+                </a>
+                <a
+                  href="https://www.tiktok.com/@almalikk00"
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="AV Live on TikTok (@almalikk00)"
+                  className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
+                >
+                  TikTok
                 </a>
                 <a
                   href="https://x.com/avlivepk"
@@ -191,19 +209,10 @@ export function Footer() {
                   LinkedIn
                 </a>
                 <a
-                  href="https://www.instagram.com/avlivepk"
+                  href="https://www.facebook.com/AvLivePakistan"
                   target="_blank"
                   rel="noopener"
-                  aria-label="AV Live on Instagram"
-                  className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
-                >
-                  Instagram
-                </a>
-                <a
-                  href="https://www.facebook.com/avlivepk"
-                  target="_blank"
-                  rel="noopener"
-                  aria-label="AV Live on Facebook"
+                  aria-label="AV Live on Facebook (@AvLivePakistan)"
                   className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
                 >
                   Facebook

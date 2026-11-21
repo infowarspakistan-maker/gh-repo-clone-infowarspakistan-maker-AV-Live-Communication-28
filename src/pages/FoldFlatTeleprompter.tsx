@@ -17,6 +17,9 @@ import {
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { addToCart } from '../lib/cart';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { TELEPROMPTER_SLIDES_SEO, buildImageObjectSchema } from '../lib/image-seo';
+import { CurrencySelector } from '../components/CurrencySelector';
 
 type ViewerPosition = 'speaker' | 'audience' | 'wings';
 type HingeAngle = 68 | 70 | 78 | 0;
@@ -37,6 +40,7 @@ const WORKFLOW_STEPS: Record<
     geometry: string;
     speakerFit: string;
     image: string;
+    imageTitle: string;
     imageAlt: string;
   }
 > = {
@@ -51,8 +55,9 @@ const WORKFLOW_STEPS: Record<
       'The 1.2" unibody conceals the recessed IPS LCD behind the podium rim and matte-black velvet baffle. Audience members and front broadcast cameras see only a low-profile lectern surface.',
     geometry: 'Folded: 0° · 1.2" profile',
     speakerFit: '16.0"×13.5" (17") / 22.0"×15.0" (22")',
-    image: '/images/teleprompter/slide-06.webp',
-    imageAlt: 'AV Live 1.2-inch ultra-slim fold-flat aluminium unibody deployed vs folded flat for transport',
+    image: TELEPROMPTER_SLIDES_SEO[5].src,
+    imageTitle: TELEPROMPTER_SLIDES_SEO[5].title,
+    imageAlt: TELEPROMPTER_SLIDES_SEO[5].alt,
   },
   2: {
     step: 2,
@@ -65,8 +70,9 @@ const WORKFLOW_STEPS: Record<
       'Dual front precision micro-hinges lock cleanly at 68°, 70°–73°, or 78° so presenters from 5\'0" to 6\'5" maintain direct eye contact without neck tilt.',
     geometry: '3-Stop Detent: 68° / 70°–73° / 78°',
     speakerFit: 'Fits speakers 5\'0"–6\'5"',
-    image: '/images/teleprompter/slide-05.webp',
-    imageAlt: 'Precision 70-degree micro-hinge geometry and speaker sightline elevation diagram',
+    image: TELEPROMPTER_SLIDES_SEO[4].src,
+    imageTitle: TELEPROMPTER_SLIDES_SEO[4].title,
+    imageAlt: TELEPROMPTER_SLIDES_SEO[4].alt,
   },
   3: {
     step: 3,
@@ -79,8 +85,9 @@ const WORKFLOW_STEPS: Record<
       'Standard editions connect via single-cable HDMI + DC to any FOH switcher. Standalone Smart editions boot an integrated Mini PC pre-configured for dark-mode prompting.',
     geometry: 'I/O: HDMI+DC or Mini PC',
     speakerFit: '400+ nit IPS · Dark-mode UI',
-    image: '/images/teleprompter/slide-08.webp',
-    imageAlt: 'Comparison of 17-inch Standard HDMI FOH Edition vs 17-inch Standalone Smart Mini PC Edition',
+    image: TELEPROMPTER_SLIDES_SEO[7].src,
+    imageTitle: TELEPROMPTER_SLIDES_SEO[7].title,
+    imageAlt: TELEPROMPTER_SLIDES_SEO[7].alt,
   },
 };
 
@@ -188,65 +195,12 @@ const PACKAGES: Record<
   },
 };
 
-const PDF_GALLERY_SLIDES = [
-  {
-    src: '/images/teleprompter/slide-01.webp',
-    label: 'Stage Overview',
-    caption: 'AV Live 17" Compact Stealth Podium Teleprompter — Engineered for the Spotlight, Invisible to the Audience.',
-  },
-  {
-    src: '/images/teleprompter/slide-02.webp',
-    label: '400+ Nit Privacy IPS',
-    caption: 'Ultra-Bright 400+ nit flush IPS display with 4-way ±30° microlouver privacy filter and 0% audience reflection.',
-  },
-  {
-    src: '/images/teleprompter/slide-03.webp',
-    label: 'Speaker vs Audience',
-    caption: '80% high-clarity full-color slides exclusively for the presenter vs 0% visible text for audience and cameras.',
-  },
-  {
-    src: '/images/teleprompter/slide-04.webp',
-    label: '3-Layer Optical Stack',
-    caption: 'Exploded view: Layer 1 (60/40 AR Glass), Layer 2 (17" Recessed IPS LCD), Layer 3 (Matte-Black Velvet Stealth Baffle).',
-  },
-  {
-    src: '/images/teleprompter/slide-05.webp',
-    label: '70° Micro-Hinge Geometry',
-    caption: '3-stop ergonomic friction lock (68° / 70°–73° / 78°) with 4.4" inward overhang and 12.2" rise for speakers 5\'0"–6\'5".',
-  },
-  {
-    src: '/images/teleprompter/slide-06.webp',
-    label: '1.2" Fold-Flat Unibody',
-    caption: '1:1 fold-flat aluminium unibody nests optical glass cleanly at 0° inside the 16.0" × 13.5" × 1.2" perimeter.',
-  },
-  {
-    src: '/images/teleprompter/slide-07.webp',
-    label: 'Deployment Scenarios',
-    caption: 'Built for Executive Keynotes, Government Briefings, Live Multi-Camera Broadcasts, and Product Launches.',
-  },
-  {
-    src: '/images/teleprompter/slide-08.webp',
-    label: 'Standard vs Smart Edition',
-    caption: 'Choose single-cable HDMI FOH connectivity or Standalone Smart Edition with integrated dark-mode Mini PC.',
-  },
-  {
-    src: '/images/teleprompter/slide-09.webp',
-    label: 'CNC EVA Flight Case',
-    caption: 'Optional hard aluminium briefcase (17") and wheeled trolley flight case (22") with custom CNC-cut EVA foam.',
-  },
-  {
-    src: '/images/teleprompter/slide-10.webp',
-    label: 'PKR Investment & QA',
-    caption: 'Transparent PKR turnkey pricing backed by full stage-light optical quality assurance prior to handover.',
-  },
-];
-
-function formatPKR(num: number): string {
-  return `PKR ${Math.round(num).toLocaleString('en-GB')}`;
-}
+const PDF_GALLERY_SLIDES = TELEPROMPTER_SLIDES_SEO;
 
 export function FoldFlatTeleprompter() {
   const navigate = useNavigate();
+  const { currency, rates, formatPrice } = useCurrency();
+  const formatPKR = (num: number) => formatPrice(num);
 
   // Workflow & Gallery State
   const [workflowStep, setWorkflowStep] = useState<1 | 2 | 3>(1);
@@ -385,7 +339,7 @@ export function FoldFlatTeleprompter() {
     const advance = Math.round(total * 0.7);
     const balance = total - advance;
     return { total, advance, balance, lines, cartName, cartSku };
-  }, [quoteMode, packageOption, packageCases, singleModel, singleQty, singleCase]);
+  }, [quoteMode, packageOption, packageCases, singleModel, singleQty, singleCase, currency, rates]);
 
   const handleDownloadQuote = () => {
     const detailLine =
@@ -432,7 +386,7 @@ export function FoldFlatTeleprompter() {
         id: quoteSummary.cartSku,
         name: quoteSummary.cartName,
         price: unitPrice,
-        image: '/images/teleprompter/slide-02.jpg',
+        image: TELEPROMPTER_SLIDES_SEO[1].jpgSrc,
         brand: 'AV Live Communication',
         sku: quoteSummary.cartSku,
       },
@@ -483,12 +437,7 @@ export function FoldFlatTeleprompter() {
           '@type': 'Brand',
           name: 'AV Live Communication',
         },
-        image: [
-          'https://avlive.com.pk/images/teleprompter/slide-01.jpg',
-          'https://avlive.com.pk/images/teleprompter/slide-02.jpg',
-          'https://avlive.com.pk/images/teleprompter/slide-03.jpg',
-          'https://avlive.com.pk/images/teleprompter/slide-04.jpg',
-        ],
+        image: TELEPROMPTER_SLIDES_SEO.slice(0, 4).map((s) => `https://avlive.com.pk${s.jpgSrc}`),
         description:
           'Ultra-slim 1.2-inch matte-black aluminium fold-flat podium teleprompter with a flush 400+ nit IPS panel, 4-way ±30° stealth privacy microlouver, and frameless 70° 60/40 AR optical beam-splitter glass.',
         offers: {
@@ -551,6 +500,16 @@ export function FoldFlatTeleprompter() {
           },
         ],
       },
+      ...TELEPROMPTER_SLIDES_SEO.map((slide) =>
+        buildImageObjectSchema({
+          url: slide.src,
+          title: slide.title,
+          alt: slide.alt,
+          caption: slide.caption,
+          width: slide.width,
+          height: slide.height,
+        })
+      ),
     ],
   };
 
@@ -560,8 +519,8 @@ export function FoldFlatTeleprompter() {
         title='AV Live Fold-Flat Podium Teleprompter | 17" & 22" Stealth IPS'
         description='Ultra-slim 1.2" fold-flat podium teleprompter by AV Live. 30-sec setup, 400+ nit IPS, 4-way ±30° privacy filter & PKR packages.'
         url={canonicalUrl}
-        image="https://avlive.com.pk/images/teleprompter/slide-01.jpg"
-        imageAlt='AV Live 17" Compact & 22" Flagship Fold-Flat Stealth Podium Teleprompter'
+        image={`https://avlive.com.pk${TELEPROMPTER_SLIDES_SEO[0].jpgSrc}`}
+        imageAlt={TELEPROMPTER_SLIDES_SEO[0].alt}
         type="product"
         schema={pageSchema}
       />
@@ -654,7 +613,8 @@ export function FoldFlatTeleprompter() {
             <div className="relative aspect-[16/9] w-full bg-[#111318]">
               <img
                 src={activeSlide.src}
-                alt={activeSlide.caption}
+                title={activeSlide.title}
+                alt={activeSlide.alt}
                 width={1280}
                 height={720}
                 fetchPriority="high"
@@ -704,7 +664,8 @@ export function FoldFlatTeleprompter() {
                   >
                     <img
                       src={slide.src}
-                      alt={slide.label}
+                      title={slide.title}
+                      alt={slide.alt}
                       width={96}
                       height={54}
                       loading="lazy"
@@ -802,6 +763,7 @@ export function FoldFlatTeleprompter() {
             <div className="lg:col-span-5 bg-[#111318]">
               <img
                 src={activeWorkflow.image}
+                title={activeWorkflow.imageTitle}
                 alt={activeWorkflow.imageAlt}
                 width={800}
                 height={450}
@@ -859,8 +821,9 @@ export function FoldFlatTeleprompter() {
             </div>
             <div className="lg:col-span-5 bg-[#111318] rounded-2xl overflow-hidden border border-[#e5e5ea]">
               <img
-                src="/images/teleprompter/slide-07.webp"
-                alt="Deployment scenarios: Executive Keynotes, Live Broadcasts, Government Briefings, and Product Launches"
+                src={TELEPROMPTER_SLIDES_SEO[6].src}
+                title={TELEPROMPTER_SLIDES_SEO[6].title}
+                alt={TELEPROMPTER_SLIDES_SEO[6].alt}
                 width={800}
                 height={450}
                 loading="lazy"
@@ -1069,8 +1032,9 @@ export function FoldFlatTeleprompter() {
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             <figure className="bg-white rounded-2xl overflow-hidden border border-[#e5e5ea]">
               <img
-                src="/images/teleprompter/slide-03.webp"
-                alt="The Speaker's World (80% High-Clarity Readability) vs The Audience's World (0% Visible Text)"
+                src={TELEPROMPTER_SLIDES_SEO[2].src}
+                title={TELEPROMPTER_SLIDES_SEO[2].title}
+                alt={TELEPROMPTER_SLIDES_SEO[2].alt}
                 width={800}
                 height={450}
                 loading="lazy"
@@ -1084,8 +1048,9 @@ export function FoldFlatTeleprompter() {
 
             <figure className="bg-white rounded-2xl overflow-hidden border border-[#e5e5ea]">
               <img
-                src="/images/teleprompter/slide-04.webp"
-                alt="3-Layer Optical Stack: 60/40 AR Glass, 17-inch Recessed IPS LCD, and Matte-Black Velvet Stealth Baffle"
+                src={TELEPROMPTER_SLIDES_SEO[3].src}
+                title={TELEPROMPTER_SLIDES_SEO[3].title}
+                alt={TELEPROMPTER_SLIDES_SEO[3].alt}
                 width={800}
                 height={450}
                 loading="lazy"
@@ -1324,9 +1289,12 @@ export function FoldFlatTeleprompter() {
       <section id="pricing" className="py-14 sm:py-16 bg-[#fbfbfd]" aria-labelledby="pricing-title">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-10">
-            <p className="text-xs sm:text-sm font-semibold text-[#bf4800] mb-2">
-              Proposal Ref: AVL-PT-2026 &middot; Currency: PKR
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-2">
+              <p className="text-xs sm:text-sm font-semibold text-[#bf4800]">
+                Proposal Ref: AVL-PT-2026 &middot; Currency: {currency}
+              </p>
+              <CurrencySelector variant="topbar" />
+            </div>
             <h2
               id="pricing-title"
               className="text-2xl sm:text-4xl font-bold tracking-[-0.025em] text-[#1d1d1f] [text-wrap:balance]"
@@ -1457,8 +1425,9 @@ export function FoldFlatTeleprompter() {
               {/* Touring Case PDF Reference Visual */}
               <div className="bg-white rounded-2xl overflow-hidden border border-[#e5e5ea] grid grid-cols-1 sm:grid-cols-12 items-center">
                 <img
-                  src="/images/teleprompter/slide-09.webp"
-                  alt="Hard Aluminium EVA Flight Case with Custom CNC-Cut Foam Interior"
+                  src={TELEPROMPTER_SLIDES_SEO[8].src}
+                  title={TELEPROMPTER_SLIDES_SEO[8].title}
+                  alt={TELEPROMPTER_SLIDES_SEO[8].alt}
                   width={600}
                   height={338}
                   loading="lazy"

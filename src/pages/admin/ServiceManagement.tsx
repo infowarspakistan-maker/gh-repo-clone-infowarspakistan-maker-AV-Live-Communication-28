@@ -303,7 +303,7 @@ export function ServiceManagement() {
             <div key={service.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-6 group hover:border-[#00B4D8]/30 transition-all">
               <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100">
                 {service.iconUrl ? (
-                  <img loading="lazy" src={service.iconUrl} alt={service.imageAltText || service.title} className="w-8 h-8 object-contain" />
+                  <img loading="lazy" src={service.iconUrl} alt={service.imageAltText || service.title} title={service.title} className="w-8 h-8 object-contain" />
                 ) : (
                   <ImageIcon className="text-gray-400" size={24} />
                 )}

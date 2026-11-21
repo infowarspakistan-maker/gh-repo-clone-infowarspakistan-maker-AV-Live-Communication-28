@@ -8,6 +8,15 @@ export async function getSheetsClient(accessToken: string) {
 
 export async function updateSheetData(spreadsheetId: string, range: string, values: any[][], accessToken: string) {
   const sheets = await getSheetsClient(accessToken);
+  const sheetName = range.includes('!') ? range.split('!')[0] : 'Sheet1';
+  try {
+    await sheets.spreadsheets.values.clear({
+      spreadsheetId,
+      range: `${sheetName}!A1:AZ1000`,
+    });
+  } catch {
+    // Proceed with update even if clear range falls back
+  }
   await sheets.spreadsheets.values.update({
     spreadsheetId,
     range,

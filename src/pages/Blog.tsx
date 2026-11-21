@@ -5,6 +5,7 @@ import { Link, useParams, Navigate } from 'react-router-dom';
 import { SEO } from '../components/SEO';
 import { subscribeToBlogPosts } from '../lib/firebase/firestore-helpers';
 import { FALLBACK_BLOG_CATALOG, BlogCatalogEntry, resolveCanonicalBlogSlug } from '../lib/sitemap-generator';
+import { buildEditorialImageSeo } from '../lib/image-seo';
 
 const CATEGORIES = [
   'All',
@@ -173,11 +174,17 @@ export function Blog() {
                 </p>
               </div>
 
-              <img
-                src={matchedPost.image}
-                alt={matchedPost.title}
-                className="w-full h-72 sm:h-96 object-cover rounded-2xl mb-8"
-              />
+              {(() => {
+                const blogImgSeo = buildEditorialImageSeo(matchedPost.title, 'blog', matchedPost.excerpt);
+                return (
+                  <img
+                    src={matchedPost.image}
+                    title={blogImgSeo.title}
+                    alt={blogImgSeo.alt}
+                    className="w-full h-72 sm:h-96 object-cover rounded-2xl mb-8"
+                  />
+                );
+              })()}
 
               {/* Semantic HTML Comparison & Specification Matrix */}
               {matchedPost.comparisonTable && (
@@ -360,7 +367,12 @@ export function Blog() {
               className="bg-white rounded-3xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all group flex flex-col"
             >
               <div className="h-48 relative overflow-hidden">
-                <img loading="lazy" src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                {(() => {
+                  const cardBlogSeo = buildEditorialImageSeo(post.title, 'blog', post.excerpt);
+                  return (
+                    <img loading="lazy" src={post.image} title={cardBlogSeo.title} alt={cardBlogSeo.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  );
+                })()}
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-[#1A2B4C]">
                   {post.category}
                 </div>

@@ -4,11 +4,14 @@ import { Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { CurrencySelector } from '../components/CurrencySelector';
 
 export function RoomDesigner() {
   const [width, setWidth] = useState(4);
   const [height, setHeight] = useState(2.5);
   const [pitch, setPitch] = useState('P2.5');
+  const { currency, formatPrice, formatExactPkr } = useCurrency();
 
   // SMD Panel Specs
   const panelWidth = 0.5; // meters (500mm)
@@ -66,7 +69,11 @@ export function RoomDesigner() {
     doc.text('Estimated Pricing', 20, 126);
     
     doc.setFontSize(12);
-    doc.text('Total Estimated Price: Rs. ' + totalPrice.toLocaleString() + ' PKR', 20, 136);
+    const quotePriceLine =
+      currency === 'PKR'
+        ? `Total Estimated Price: ${formatExactPkr(totalPrice)} PKR`
+        : `Total Estimated Price: ${formatPrice(totalPrice, { withCode: true })} (Base Settlement: ${formatExactPkr(totalPrice)} PKR)`;
+    doc.text(quotePriceLine, 20, 136);
     
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
@@ -187,9 +194,17 @@ export function RoomDesigner() {
                     {pitch === 'P2.5' ? `${cols * 200}x${rows * 200}` : pitch === 'P2.9' ? `${Math.floor(cols * 172)}x${Math.floor(rows * 172)}` : `${Math.floor(cols * 128)}x${Math.floor(rows * 128)}`}
                   </span>
                 </div>
-                <div className="flex justify-between items-end pt-4">
-                  <span className="text-gray-400 text-sm font-bold uppercase tracking-wider">Estimated Price (PKR)</span>
-                  <span className="font-black text-3xl sm:text-4xl">Rs. {totalPrice.toLocaleString()}</span>
+                <div className="flex flex-wrap items-end justify-between gap-4 pt-4">
+                  <div>
+                    <span className="text-gray-400 text-sm font-bold uppercase tracking-wider block">Estimated Price ({currency})</span>
+                    {currency !== 'PKR' && (
+                      <span className="text-xs text-gray-400 font-semibold">Base: {formatExactPkr(totalPrice)}</span>
+                    )}
+                  </div>
+                  <span className="font-black text-3xl sm:text-4xl">{formatPrice(totalPrice)}</span>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <CurrencySelector variant="pill" />
                 </div>
               </div>
               <button onClick={handleGenerateQuote} className="w-full bg-[#00B4D8] hover:bg-[#009bc2] text-white font-bold py-4 rounded-xl transition-colors uppercase tracking-wider text-sm shadow-lg shadow-[#00B4D8]/20 flex items-center justify-center gap-2">
@@ -246,7 +261,7 @@ export function RoomDesigner() {
                   <th className="py-3 px-4">Pixel Pitch</th>
                   <th className="py-3 px-4">Pixels per 500×500mm Cabinet</th>
                   <th className="py-3 px-4">Optimal Viewing Distance</th>
-                  <th className="py-3 px-4">Reference Cabinet Price (PKR)</th>
+                  <th className="py-3 px-4">Reference Cabinet Price ({currency})</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -254,19 +269,19 @@ export function RoomDesigner() {
                   <td className="py-3 px-4 font-black text-[#1A2B4C]">P2.5 Indoor Fine-Pitch</td>
                   <td className="py-3 px-4 font-mono">200 × 200 px (40,000 px)</td>
                   <td className="py-3 px-4">≥ 2.5 Meters (Boardrooms &amp; Auditoriums)</td>
-                  <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. 145,000 PKR / Cabinet</td>
+                  <td className="py-3 px-4 font-black text-[#00B4D8]">{formatPrice(145000)} / Cabinet</td>
                 </tr>
                 <tr>
                   <td className="py-3 px-4 font-black text-[#1A2B4C]">P2.9 Indoor Broadcast</td>
                   <td className="py-3 px-4 font-mono">172 × 172 px (29,584 px)</td>
                   <td className="py-3 px-4">≥ 3.0 Meters (Corporate Stages &amp; Halls)</td>
-                  <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. 125,000 PKR / Cabinet</td>
+                  <td className="py-3 px-4 font-black text-[#00B4D8]">{formatPrice(125000)} / Cabinet</td>
                 </tr>
                 <tr>
                   <td className="py-3 px-4 font-black text-[#1A2B4C]">P3.9 High-Bright Event Stage</td>
                   <td className="py-3 px-4 font-mono">128 × 128 px (16,384 px)</td>
                   <td className="py-3 px-4">≥ 4.0 Meters (Expos, Concerts &amp; Outdoor)</td>
-                  <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. 105,000 PKR / Cabinet</td>
+                  <td className="py-3 px-4 font-black text-[#00B4D8]">{formatPrice(105000)} / Cabinet</td>
                 </tr>
               </tbody>
             </table>

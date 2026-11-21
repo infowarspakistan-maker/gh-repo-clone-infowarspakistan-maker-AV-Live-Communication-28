@@ -58,7 +58,13 @@ export function About() {
       {/* Compact 16:6 Hero Section */}
       <div className="relative aspect-[16/9] sm:aspect-[16/6] min-h-[220px] max-h-[300px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img loading="lazy" src={data.heroImageUrl} alt="About AV Live Communications Pakistan" className="w-full h-full object-cover" />
+          <img
+            loading="lazy"
+            src={data.heroImageUrl}
+            title="About AV Live Communications Pakistan — 1,000+ Corporate Events & Boardrooms Since 2011"
+            alt="AV Live Communications Pakistan engineering showcase covering over 1,000 corporate events, SMD LED stages, and enterprise video conferencing boardrooms across Lahore, Karachi, and Islamabad."
+            className="w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-[#1A2B4C]/85 mix-blend-multiply"></div>
         </div>
         
@@ -155,8 +161,9 @@ export function About() {
                 decoding="async"
                 width={1000}
                 height={750}
-                src="/images/projects/hisdu-committee-wall.webp"
-                alt="HISDU Executive Committee Room multi-panel video wall and gooseneck conference microphone array deployed by AV Live Pakistan"
+                src="/images/projects/vissonic-delegate-boardroom.webp"
+                title="VISSONIC Digital Delegate Microphone & 4K Video Conference Boardroom in Islamabad | AV Live Pakistan"
+                alt="24-seat U-shaped executive council room in Islamabad fitted with VISSONIC digital gooseneck delegate microphones, 4K confidence display, and PTZ video conferencing deployed by AV Live Pakistan"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
@@ -188,7 +195,12 @@ export function About() {
                 <div className="flex -space-x-4">
                   {[1,2,3,4].map(i => (
                     <div key={i} className="w-12 h-12 rounded-full border-4 border-[#00B4D8] bg-gray-200 overflow-hidden shadow-lg">
-                       <img loading="lazy" src={`https://i.pravatar.cc/150?u=${i}`} alt="Team" />
+                       <img
+                         loading="lazy"
+                         src={`https://i.pravatar.cc/150?u=${i}`}
+                         title={`AV Live Communications Pakistan Certified AV Systems Engineer ${i}`}
+                         alt={`Certified enterprise AV and video conferencing systems engineer ${i} at AV Live Communications Pakistan`}
+                       />
                     </div>
                   ))}
                 </div>

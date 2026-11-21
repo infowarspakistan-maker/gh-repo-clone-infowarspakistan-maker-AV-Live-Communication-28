@@ -162,7 +162,7 @@ function CategoryNodeItem({
         {/* Category Image/Icon */}
         <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 overflow-hidden">
           {category.imageUrl ? (
-            <img loading="lazy" src={category.imageUrl} alt={category.name} className="w-full h-full object-cover" />
+            <img loading="lazy" src={category.imageUrl} alt={category.name} title={category.name} className="w-full h-full object-cover" />
           ) : (
             hasChildren ? (
               isCollapsed ? <Folder size={18} className="text-[#00B4D8]" /> : <FolderOpen size={18} className="text-[#00B4D8]" />

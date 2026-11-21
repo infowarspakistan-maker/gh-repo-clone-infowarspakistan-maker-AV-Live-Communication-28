@@ -22,6 +22,13 @@ import {
   getProductHref,
 } from '../lib/gmc-feed';
 import { optimizeGalleryImageUrl } from '../lib/image-optimize';
+import {
+  VIDEO_CONFERENCE_MEDIA_SEO,
+  buildImageObjectSchema,
+  buildProductImageSeo,
+} from '../lib/image-seo';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { CurrencySelector } from '../components/CurrencySelector';
 
 type ProtocolKey = 'cloud' | 'onprem' | 'hybrid';
 type RoomTypeKey = 'huddle' | 'medium' | 'boardroom' | 'auditorium';
@@ -238,10 +245,6 @@ const VIDEO_CONFERENCE_FAQS = [
   },
 ];
 
-function formatPkr(amount: number): string {
-  return `Rs. ${Number(amount).toLocaleString('en-PK')}`;
-}
-
 function getRecommendation(
   room: RoomTypeKey,
   protocol: ProtocolKey,
@@ -353,6 +356,8 @@ function getRecommendation(
 }
 
 export function VideoConferenceHub() {
+  const { currency, formatPrice } = useCurrency();
+  const formatPkr = (amount: number) => formatPrice(amount);
   const [activeYearIdx, setActiveYearIdx] = useState<number>(HISTORY_SERIES.length - 1);
   const [protocolTab, setProtocolTab] = useState<ProtocolKey>('cloud');
   const [signalNodeIdx, setSignalNodeIdx] = useState<number>(0);
@@ -599,6 +604,17 @@ export function VideoConferenceHub() {
             },
           })),
         },
+        ...['/images/video-conference/boardroom-hero.webp', '/images/video-conference/hybrid-summit.webp', '/images/video-conference/huddle-space.webp'].map((path) => {
+          const meta = VIDEO_CONFERENCE_MEDIA_SEO[path];
+          return buildImageObjectSchema({
+            url: path,
+            title: meta.title,
+            alt: meta.alt,
+            caption: meta.caption,
+            width: meta.width,
+            height: meta.height,
+          });
+        }),
       ],
     }),
     [featuredProducts]
@@ -678,7 +694,8 @@ export function VideoConferenceHub() {
               <div className="h-full rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
                 <img
                   src="/images/video-conference/boardroom-hero.webp"
-                  alt="Flagship executive video conference boardroom with dual 4K commercial displays, beamforming microphones, and touch controller engineered by AV Live Pakistan"
+                  title={VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/boardroom-hero.webp'].title}
+                  alt={VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/boardroom-hero.webp'].alt}
                   width={1200}
                   height={675}
                   loading="eager"
@@ -934,7 +951,8 @@ export function VideoConferenceHub() {
             <div className="lg:col-span-5 rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
               <img
                 src="/images/video-conference/hybrid-summit.webp"
-                alt="Hybrid AGM and multi-city enterprise video conference auditorium with curved SMD LED backdrop and optical PTZ broadcast cameras"
+                title={VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/hybrid-summit.webp'].title}
+                alt={VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/hybrid-summit.webp'].alt}
                 width={1200}
                 height={675}
                 loading="lazy"
@@ -1267,7 +1285,8 @@ export function VideoConferenceHub() {
             <div className="lg:col-span-4 bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col">
               <img
                 src="/images/video-conference/huddle-space.webp"
-                alt="6-person acoustically treated corporate huddle room with 75-inch 4K display, all-in-one video conference bar, and tabletop touch controller"
+                title={VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/huddle-space.webp'].title}
+                alt={VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/huddle-space.webp'].alt}
                 width={960}
                 height={720}
                 loading="lazy"
@@ -1648,11 +1667,14 @@ export function VideoConferenceHub() {
                   </span>
                 </div>
 
-                <div className="flex items-baseline justify-between gap-4 pt-1">
+                <div className="flex flex-wrap items-baseline justify-between gap-4 pt-1">
                   <span className="font-bold text-[#1A2B4C]">Verified Hardware BoM (Excl. GST)</span>
-                  <span className="text-2xl font-bold font-mono text-[#0077B6] tabular-nums whitespace-nowrap">
-                    {formatPkr(bomTotal)}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-bold font-mono text-[#0077B6] tabular-nums whitespace-nowrap">
+                      {formatPkr(bomTotal)}
+                    </span>
+                    <CurrencySelector variant="topbar" />
+                  </div>
                 </div>
               </div>
 
@@ -1710,21 +1732,27 @@ export function VideoConferenceHub() {
                       className="block aspect-[4/3] bg-slate-50 border-b border-slate-100 p-4 overflow-hidden"
                     >
                       {imgSrc ? (
-                        <img
-                          src={imgSrc}
-                          alt={`${prod.productName} (${prod.sku}) — Enterprise video conference system price in Pakistan`}
-                          width={480}
-                          height={360}
-                          loading="lazy"
-                          decoding="async"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.onerror = null;
-                            target.src = '/images/video-conference/huddle-space.webp';
-                          }}
-                          className="w-full h-full object-contain"
-                        />
+                        (() => {
+                          const cardImgSeo = buildProductImageSeo(prod, imgSrc, 0);
+                          return (
+                            <img
+                              src={imgSrc}
+                              title={cardImgSeo.title}
+                              alt={cardImgSeo.alt}
+                              width={480}
+                              height={360}
+                              loading="lazy"
+                              decoding="async"
+                              referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                target.onerror = null;
+                                target.src = '/images/video-conference/huddle-space.webp';
+                              }}
+                              className="w-full h-full object-contain"
+                            />
+                          );
+                        })()
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-400">
                           <Video size={36} aria-hidden="true" />
@@ -1845,7 +1873,7 @@ export function VideoConferenceHub() {
                     <th className="px-4 py-3.5 font-semibold">Vendor</th>
                     <th className="px-4 py-3.5 font-semibold">MPN</th>
                     <th className="px-4 py-3.5 font-semibold">Primary Role</th>
-                    <th className="px-4 py-3.5 font-semibold text-right">Reference Price (PKR)</th>
+                    <th className="px-4 py-3.5 font-semibold text-right">Reference Price ({currency})</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">

@@ -124,7 +124,7 @@ export function ServicesEditor() {
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
                       formData.serviceIds.includes(service.id!) ? 'bg-[#1A2B4C] text-[#00B4D8]' : 'bg-white text-gray-400'
                     }`}>
-                      {service.iconUrl ? <img loading="lazy" src={service.iconUrl} className="w-6 h-6" alt="" /> : <Briefcase size={20} />}
+                      {service.iconUrl ? <img loading="lazy" src={service.iconUrl} className="w-6 h-6" alt={service.title} title={service.title} /> : <Briefcase size={20} />}
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-black text-[#1A2B4C]">{service.title}</p>

@@ -8,18 +8,33 @@ export const DEFAULT_EXTERNAL_PRODUCT_IMAGE =
  * - Converts Dropbox share links (?dl=0) into raw image stream URLs (?raw=1).
  * - Preserves external CDN query parameters and signatures untouched.
  */
+const VERIFIED_LOCAL_IMAGE_PREFIX = /^\/images\/(products|projects|teleprompter|video-conference)\//i;
+
 export function normalizeExternalImageUrl(rawUrl: string | undefined | null): string {
   if (!rawUrl || typeof rawUrl !== 'string') return '';
   const trimmed = rawUrl.trim();
   if (!trimmed) return '';
 
-  // Reject local file paths or domain-prefixed local /images/products/ paths
+  // Allow verified local static /images/ assets and rewrite domain-prefixed URLs to relative paths for instant local serving
+  if (
+    trimmed.startsWith('https://avlive.com.pk/images/') ||
+    trimmed.startsWith('http://avlive.com.pk/images/')
+  ) {
+    const rel = trimmed.replace(/^https?:\/\/avlive\.com\.pk/i, '');
+    if (VERIFIED_LOCAL_IMAGE_PREFIX.test(rel) && !rel.includes('/avlive-')) {
+      return rel;
+    }
+    return '';
+  }
+
+  if (VERIFIED_LOCAL_IMAGE_PREFIX.test(trimmed) && !trimmed.includes('/avlive-')) {
+    return trimmed;
+  }
+
   if (
     trimmed.startsWith('/') ||
     trimmed.startsWith('./') ||
-    trimmed.startsWith('../') ||
-    trimmed.startsWith('https://avlive.com.pk/images/') ||
-    trimmed.startsWith('http://avlive.com.pk/images/')
+    trimmed.startsWith('../')
   ) {
     return '';
   }

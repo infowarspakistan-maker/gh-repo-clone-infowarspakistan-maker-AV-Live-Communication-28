@@ -4,8 +4,10 @@ import { Heart, Plus, Check } from 'lucide-react';
 import { Product } from '../lib/firebase/firestore-helpers';
 import { getCanonicalProductSlug, getProductHref, resolveProductPricing } from '../lib/gmc-feed';
 import { optimizeGalleryImageUrl } from '../lib/image-optimize';
+import { buildProductImageSeo } from '../lib/image-seo';
 import { BlurProductImage } from './BlurProductImage';
 import { addToCart } from '../lib/cart';
+import { useCurrency } from '../contexts/CurrencyContext';
 
 export interface MobileProductCardProps {
   product: Product;
@@ -22,6 +24,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
 }) => {
   const [justAdded, setJustAdded] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const { formatPrice } = useCurrency();
 
   const canonicalSlug = getCanonicalProductSlug(product, product.id);
   const productHref = getProductHref(product, product.id);
@@ -36,12 +39,13 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
         : [];
 
   const imageUrl = optimizeGalleryImageUrl(
-    rawImages[0] || 'https://placehold.co/400x300?text=AV+Live',
+    rawImages[0] || '/images/products/poly-x70-studio.webp',
     360,
     75
   );
 
   const brandName = product.brand || 'AV Live';
+  const imgSeo = buildProductImageSeo(product, imageUrl, 0);
   const stockLabel =
     subtitle ||
     ((product.stockQuantity ?? 10) > 0 ? 'In Stock' : 'Built to Order');
@@ -82,7 +86,8 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
               height={180}
               src={imageUrl}
               seed={canonicalSlug}
-              alt={`${product.productName} by ${brandName}`}
+              title={imgSeo.title}
+              alt={imgSeo.alt}
               className="relative z-10 w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
             />
           </div>
@@ -118,11 +123,11 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
       <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-gray-50 gap-1">
         <div className="min-w-0">
           <span className="block text-[11px] sm:text-xs font-black text-[#1A2B4C] truncate">
-            Rs. {effectivePrice.toLocaleString()}
+            {formatPrice(effectivePrice)}
           </span>
           {hasSale && regularPrice > effectivePrice && (
             <span className="block text-[9px] text-gray-400 line-through font-bold truncate">
-              Rs. {regularPrice.toLocaleString()}
+              {formatPrice(regularPrice)}
             </span>
           )}
         </div>

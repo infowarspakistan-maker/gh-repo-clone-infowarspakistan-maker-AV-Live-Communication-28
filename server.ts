@@ -19,6 +19,7 @@ import {
   generateGmcTsv,
   generateGmc20Tsv,
   generateGmcXml,
+  generateGmcCsv,
   generateGmcSheetMatrix,
   getCanonicalProductSlug,
   getProductHref,
@@ -36,6 +37,17 @@ import {
   FALLBACK_BLOG_CATALOG,
   resolveCanonicalBlogSlug,
 } from './src/lib/sitemap-generator';
+import {
+  DEFAULT_PKR_PER_UNIT,
+  PkrPerUnitRates,
+  normalizeSupportedCurrency,
+} from './src/lib/currency';
+import {
+  TELEPROMPTER_SLIDE_LEGACY_MAP,
+  TELEPROMPTER_SLIDES_SEO,
+  VIDEO_CONFERENCE_MEDIA_SEO,
+  buildImageObjectSchema,
+} from './src/lib/image-seo';
 
 // Silence noisy Node.js @firebase/firestore GrpcConnection idle 'Listen' stream disconnect messages
 setClientFirestoreLogLevel('silent');
@@ -503,16 +515,96 @@ async function startServer() {
       console.warn('Firestore read fallback for GMC feed:', dbErr);
     }
     return Object.keys(PRODUCT_GMC_METADATA)
-      .filter((slug) => !PRODUCT_ID_TO_SEO_SLUG[slug])
-      .map((slug) => buildFallbackProductFromGmcMeta(slug))
+      .filter((slug) => slug !== 'T1XLMubVYmFzeIfC7V9B' && slug !== 'wMbGVClqbDS2LFrv5HyX')
+      .map((slug) => {
+        const fb = buildFallbackProductFromGmcMeta(slug);
+        if (fb && slug === 'cisco-webex-room-kit-plus-pakistan') {
+          return { ...fb, id: 'cisco-webex-room-kit-plus-pakistan' };
+        }
+        return fb;
+      })
       .filter(Boolean) as Record<string, any>[];
   };
 
-  // Live Google Merchant Center RSS 2.0 XML Feed Endpoint
+  // Cached Live PKR Exchange Rates (6-hour TTL + verified offline baseline fallback)
+  let cachedRatesPayload: {
+    base: 'PKR';
+    pkrPerUnit: PkrPerUnitRates;
+    source: 'live' | 'fallback';
+    updatedAt: number;
+  } = {
+    base: 'PKR',
+    pkrPerUnit: { ...DEFAULT_PKR_PER_UNIT },
+    source: 'fallback',
+    updatedAt: 0,
+  };
+
+  async function getLiveExchangeRates() {
+    const now = Date.now();
+    if (cachedRatesPayload.updatedAt > 0 && now - cachedRatesPayload.updatedAt < 6 * 60 * 60 * 1000) {
+      return cachedRatesPayload;
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2500);
+      const response = await fetch('https://open.er-api.com/v6/latest/PKR', {
+        signal: controller.signal,
+        headers: { Accept: 'application/json' },
+      });
+      clearTimeout(timeout);
+
+      if (response.ok) {
+        const data = (await response.json()) as { result?: string; rates?: Record<string, number> };
+        if (data?.result === 'success' && data.rates) {
+          const usd = Number(data.rates.USD);
+          const gbp = Number(data.rates.GBP);
+          const aed = Number(data.rates.AED);
+          const eur = Number(data.rates.EUR);
+          cachedRatesPayload = {
+            base: 'PKR',
+            pkrPerUnit: {
+              PKR: 1,
+              USD: usd > 0 ? Number((1 / usd).toFixed(2)) : DEFAULT_PKR_PER_UNIT.USD,
+              GBP: gbp > 0 ? Number((1 / gbp).toFixed(2)) : DEFAULT_PKR_PER_UNIT.GBP,
+              AED: aed > 0 ? Number((1 / aed).toFixed(2)) : DEFAULT_PKR_PER_UNIT.AED,
+              EUR: eur > 0 ? Number((1 / eur).toFixed(2)) : DEFAULT_PKR_PER_UNIT.EUR,
+            },
+            source: 'live',
+            updatedAt: now,
+          };
+          return cachedRatesPayload;
+        }
+      }
+    } catch {
+      // Retain fallback or previous cache gracefully on timeout/network failure
+    }
+
+    cachedRatesPayload = {
+      ...cachedRatesPayload,
+      updatedAt: cachedRatesPayload.updatedAt || now,
+    };
+    return cachedRatesPayload;
+  }
+
+  app.get('/api/exchange-rates', async (_req, res) => {
+    const payload = await getLiveExchangeRates();
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    return res.json(payload);
+  });
+
+  // Live Google Merchant Center RSS 2.0 XML Feed Endpoint (Supports optional ?currency=USD|GBP|AED|EUR)
   app.get(['/feed/google-merchant.xml', '/api/gmc-feed.xml', '/api/feeds/google-merchant.xml'], async (req, res) => {
     try {
       const productList = await getGmcProductsWithFallback();
-      const xml = generateGmcXml(productList);
+      const targetCurrency = normalizeSupportedCurrency(
+        typeof req.query.currency === 'string' ? req.query.currency : 'PKR'
+      );
+      const rateData = targetCurrency === 'PKR' ? null : await getLiveExchangeRates();
+      const xml = generateGmcXml(productList, {
+        currency: targetCurrency,
+        pkrPerUnit: rateData?.pkrPerUnit,
+      });
       res.setHeader('Content-Type', 'application/xml; charset=utf-8');
       res.setHeader('Cache-Control', 'public, max-age=3600');
       return res.send(xml);
@@ -522,11 +614,40 @@ async function startServer() {
     }
   });
 
+  // Live Google Merchant Center Exact 30-Column CSV Feed Endpoint (Supports optional ?currency=USD|GBP|AED|EUR)
+  app.get(['/feed/google-merchant.csv', '/api/gmc-feed.csv', '/api/feeds/google-merchant.csv'], async (req, res) => {
+    try {
+      const productList = await getGmcProductsWithFallback();
+      const targetCurrency = normalizeSupportedCurrency(
+        typeof req.query.currency === 'string' ? req.query.currency : 'PKR'
+      );
+      const rateData = targetCurrency === 'PKR' ? null : await getLiveExchangeRates();
+      const csv = generateGmcCsv(productList, {
+        currency: targetCurrency,
+        pkrPerUnit: rateData?.pkrPerUnit,
+      });
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'inline; filename="google_merchant_feed.csv"');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return res.send(csv);
+    } catch (error) {
+      console.error('Error generating GMC CSV feed:', error);
+      res.status(500).send('Error generating GMC CSV feed');
+    }
+  });
+
   // Live Google Merchant Center Exact 20-Column Sheet TSV Endpoint
   app.get(['/feed/google-merchant-20.tsv', '/api/gmc-sheet-20.tsv'], async (req, res) => {
     try {
       const productList = await getGmcProductsWithFallback();
-      const tsv20 = generateGmc20Tsv(productList);
+      const targetCurrency = normalizeSupportedCurrency(
+        typeof req.query.currency === 'string' ? req.query.currency : 'PKR'
+      );
+      const rateData = targetCurrency === 'PKR' ? null : await getLiveExchangeRates();
+      const tsv20 = generateGmc20Tsv(productList, {
+        currency: targetCurrency,
+        pkrPerUnit: rateData?.pkrPerUnit,
+      });
       res.setHeader('Content-Type', 'text/tab-separated-values; charset=utf-8');
       res.setHeader('Content-Disposition', 'inline; filename="google_merchant_sheet_20col.tsv"');
       return res.send(tsv20);
@@ -540,8 +661,15 @@ async function startServer() {
   app.get(['/feed/google-merchant.tsv', '/api/gmc-feed.tsv'], async (req, res) => {
     try {
       const productList = await getGmcProductsWithFallback();
+      const targetCurrency = normalizeSupportedCurrency(
+        typeof req.query.currency === 'string' ? req.query.currency : 'PKR'
+      );
+      const rateData = targetCurrency === 'PKR' ? null : await getLiveExchangeRates();
       if (productList.length > 0) {
-        const tsv = generateGmcTsv(productList);
+        const tsv = generateGmcTsv(productList, {
+          currency: targetCurrency,
+          pkrPerUnit: rateData?.pkrPerUnit,
+        });
         res.setHeader('Content-Type', 'text/tab-separated-values; charset=utf-8');
         res.setHeader('Content-Disposition', 'inline; filename="google_merchant_feed.tsv"');
         return res.send(tsv);
@@ -1085,7 +1213,7 @@ async function startServer() {
       return `${trimmed}.`;
     };
 
-    const routeMeta: Record<string, { title: string; description: string; keywords?: string; image?: string; noindex?: boolean; schema?: Record<string, any> }> = {
+    const routeMeta: Record<string, { title: string; description: string; keywords?: string; image?: string; imageAlt?: string; noindex?: boolean; schema?: Record<string, any> }> = {
       '': {
         title: 'Video Conference in Pakistan | Event Management | AV Live',
         description: 'Video Conference in Pakistan, Corporate Event Management by AV Live: Poly X70, Cisco Room Kit, 3D Hologram Display price PKR.'
@@ -1345,6 +1473,8 @@ async function startServer() {
       '/podium-teleprompter': {
         title: 'AV Live Fold-Flat Podium Teleprompter | 17" & 22" Stealth IPS',
         description: 'Ultra-slim 1.2" fold-flat podium teleprompter by AV Live. 30-sec setup, 400+ nit IPS, 4-way ±30° privacy filter & PKR packages.',
+        image: `https://avlive.com.pk${TELEPROMPTER_SLIDES_SEO[0].src}`,
+        imageAlt: TELEPROMPTER_SLIDES_SEO[0].alt,
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -1357,11 +1487,16 @@ async function startServer() {
               gtin12: '610807990543',
               gtin: '610807990543',
               brand: { '@type': 'Brand', name: 'AV Live Communication' },
-              image: [
-                'https://avlive.com.pk/images/teleprompter/slide-01.jpg',
-                'https://avlive.com.pk/images/teleprompter/slide-02.jpg',
-                'https://avlive.com.pk/images/teleprompter/slide-03.jpg'
-              ],
+              image: TELEPROMPTER_SLIDES_SEO.slice(0, 4).map((slide) =>
+                buildImageObjectSchema({
+                  url: slide.src,
+                  title: slide.title,
+                  alt: slide.alt,
+                  caption: slide.caption,
+                  width: slide.width,
+                  height: slide.height,
+                })
+              ),
               description: 'Ultra-slim 1.2-inch matte-black aluminium fold-flat podium teleprompter with a flush 400+ nit IPS panel, 4-way ±30° stealth privacy microlouver, and frameless 70° 60/40 AR optical beam-splitter glass.',
               offers: {
                 '@type': 'AggregateOffer',
@@ -1430,6 +1565,7 @@ async function startServer() {
         title: 'Video Conference Systems & Boardroom Configurator | AV Live',
         description: 'Enterprise video conference systems in Pakistan: Poly, Cisco & Logitech hardware, SIP/Teams/Zoom design & PKR room calculator.',
         image: 'https://avlive.com.pk/images/video-conference/boardroom-hero-og.jpg',
+        imageAlt: VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/boardroom-hero.webp'].alt,
         schema: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -1439,6 +1575,20 @@ async function startServer() {
               name: 'Enterprise Video Conference Systems, Protocol Engineering & Boardroom Integration',
               serviceType: 'Video Conference Hardware Distribution & Hybrid Room Integration',
               description: 'Turnkey enterprise video conference deployment in Pakistan covering HP Poly, Cisco Room Kits, Logitech Rally Bar, SIP/H.323 encryption, Zoom Rooms, Microsoft Teams Rooms, and hybrid AGM broadcast staging.',
+              image: [
+                buildImageObjectSchema({
+                  url: '/images/video-conference/boardroom-hero.webp',
+                  ...VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/boardroom-hero.webp'],
+                }),
+                buildImageObjectSchema({
+                  url: '/images/video-conference/huddle-space.webp',
+                  ...VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/huddle-space.webp'],
+                }),
+                buildImageObjectSchema({
+                  url: '/images/video-conference/hybrid-summit.webp',
+                  ...VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/hybrid-summit.webp'],
+                }),
+              ],
               provider: { '@id': 'https://avlive.com.pk/#organization' },
               areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan'],
               url: 'https://avlive.com.pk/video-conference'
@@ -1584,7 +1734,7 @@ async function startServer() {
             telephone: '+92-321-4256263',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: '482 G3 Johar Town',
+              streetAddress: 'Johar Town Block N',
               addressLocality: 'Lahore',
               addressRegion: 'Punjab',
               postalCode: '54782',
@@ -3030,14 +3180,23 @@ async function startServer() {
         );
       if (matched.image) {
         const safeImageAttr = escapeHtmlAttr(matched.image);
+        const safeImageAltAttr = escapeHtmlAttr((matched as any).imageAlt || clampedTitle);
         updated = updated
           .replace(
             /<meta(?:\s+data-rh="true")?\s+property="og:image"\s+content="[^"]*"\s*\/>/,
             `<meta data-rh="true" property="og:image" content="${safeImageAttr}" />`
           )
           .replace(
+            /<meta(?:\s+data-rh="true")?\s+property="og:image:alt"\s+content="[^"]*"\s*\/>/,
+            `<meta data-rh="true" property="og:image:alt" content="${safeImageAltAttr}" />`
+          )
+          .replace(
             /<meta(?:\s+data-rh="true")?\s+name="twitter:image"\s+content="[^"]*"\s*\/>/,
             `<meta data-rh="true" name="twitter:image" content="${safeImageAttr}" />`
+          )
+          .replace(
+            /<meta(?:\s+data-rh="true")?\s+name="twitter:image:alt"\s+content="[^"]*"\s*\/>/,
+            `<meta data-rh="true" name="twitter:image:alt" content="${safeImageAltAttr}" />`
           );
       }
       if (matched.noindex) {
@@ -3062,17 +3221,18 @@ async function startServer() {
             telephone: '+92-321-4256263',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: '454 G3, Block G3 Phase 2 Johar Town',
+              streetAddress: 'Johar Town Block N',
               addressLocality: 'Lahore',
               addressRegion: 'Punjab',
               postalCode: '54782',
               addressCountry: 'PK'
             },
             sameAs: [
-              'https://www.facebook.com/avlivepk',
-              'https://www.instagram.com/avlivepk',
+              'https://www.facebook.com/AvLivePakistan',
+              'https://www.instagram.com/avlive25',
+              'https://www.tiktok.com/@almalikk00',
               'https://www.linkedin.com/company/avlivepk',
-              'https://www.youtube.com/@avlivepk',
+              'https://www.youtube.com/@AVLivePakistan',
               'https://x.com/avlivepk',
               'https://twitter.com/avlivepk'
             ]
@@ -3475,6 +3635,18 @@ async function startServer() {
       return next();
     }
     const p = req.path;
+
+    // Permanent 301 redirects for SEO-renamed teleprompter slide image URLs
+    const teleprompterSlideMatch = p.match(/^\/images\/teleprompter\/(slide-(?:0[1-9]|1[01]))\.(webp|jpg)$/i);
+    if (teleprompterSlideMatch) {
+      const legacyStem = teleprompterSlideMatch[1].toLowerCase();
+      const ext = teleprompterSlideMatch[2].toLowerCase();
+      const canonicalStem = TELEPROMPTER_SLIDE_LEGACY_MAP[legacyStem];
+      if (canonicalStem) {
+        return res.redirect(301, `/images/teleprompter/${canonicalStem}.${ext}`);
+      }
+    }
+
     if (
       p.startsWith('/api/') ||
       p.startsWith('/src/') ||

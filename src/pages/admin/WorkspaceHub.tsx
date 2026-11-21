@@ -962,7 +962,7 @@ export function WorkspaceHub() {
                       <div key={contact.resourceName} className="p-5 border border-gray-100 rounded-3xl bg-gray-50/30 flex gap-4 items-center">
                         <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-gradient-to-tr from-[#1A2B4C] to-[#00B4D8] flex items-center justify-center text-white font-black">
                           {contact.photos?.[0]?.url && !contact.photos[0].default ? (
-                            <img loading="lazy" src={contact.photos[0].url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            <img loading="lazy" src={contact.photos[0].url} alt={contact.names?.[0]?.displayName || 'Workspace contact avatar'} title={contact.names?.[0]?.displayName || 'Workspace contact avatar'} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                           ) : (
                             contact.names?.[0]?.displayName?.substring(0, 2).toUpperCase() || 'UN'
                           )}

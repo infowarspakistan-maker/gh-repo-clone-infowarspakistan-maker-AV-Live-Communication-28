@@ -4,6 +4,7 @@ import { getProductBlurDataUri, getProductBlurHash } from '../lib/image-optimize
 export interface BlurProductImageProps {
   src: string;
   alt: string;
+  title?: string;
   width: number;
   height: number;
   seed?: string;
@@ -16,11 +17,12 @@ export interface BlurProductImageProps {
 
 /**
  * CLS-Zero Product Listing Image with synchronous low-resolution base64 data-URI
- * placeholder (BlurHash LQIP) and locked intrinsic dimensions.
+ * placeholder (BlurHash LQIP), locked intrinsic dimensions, and SEO title/alt attributes.
  */
 export const BlurProductImage: React.FC<BlurProductImageProps> = ({
   src,
   alt,
+  title,
   width,
   height,
   seed,
@@ -61,6 +63,7 @@ export const BlurProductImage: React.FC<BlurProductImageProps> = ({
         ref={imgRef}
         src={src}
         alt={alt}
+        title={title || alt}
         width={width}
         height={height}
         loading={loading}

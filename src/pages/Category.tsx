@@ -16,6 +16,8 @@ import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { MobileProductCard } from '../components/MobileProductCard';
 import { BlurProductImage } from '../components/BlurProductImage';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { TELEPROMPTER_SLIDES_SEO, buildEditorialImageSeo, buildProductImageSeo } from '../lib/image-seo';
 
 const FALLBACK_PRODUCT_CATEGORIES: Record<
   string,
@@ -239,6 +241,8 @@ export function Category() {
     return <Navigate to={NON_PRODUCT_CATEGORY_REDIRECTS[categorySlug]} replace />;
   }
 
+  const { currency, formatPrice } = useCurrency();
+
   const fallbackCat = categorySlug ? FALLBACK_PRODUCT_CATEGORIES[categorySlug] : undefined;
   const currentCategory: CategoryType | undefined =
     categories.find(c => c.slug === categorySlug && !EXCLUDED_CATEGORY_SLUGS.has(c.slug)) ||
@@ -414,9 +418,12 @@ export function Category() {
               animate={{ opacity: 1, scale: 1 }}
               className="hidden sm:flex w-12 h-12 lg:w-16 lg:h-16 bg-[#1A2B4C] text-[#00B4D8] rounded-2xl items-center justify-center shrink-0 shadow-md"
             >
-              {currentCategory.imageUrl ? (
-                <img fetchPriority="high" src={currentCategory.imageUrl} alt={currentCategory.name} className="w-full h-full object-cover rounded-2xl" />
-              ) : (
+              {currentCategory.imageUrl ? (() => {
+                const catImgSeo = buildEditorialImageSeo(currentCategory.name, 'category', currentCategory.description);
+                return (
+                  <img fetchPriority="high" src={currentCategory.imageUrl} title={catImgSeo.title} alt={catImgSeo.alt} className="w-full h-full object-cover rounded-2xl" />
+                );
+              })() : (
                 <Layers size={26} />
               )}
             </motion.div>
@@ -491,8 +498,9 @@ export function Category() {
                <div className="mb-5 bg-[#111318] text-white rounded-2xl lg:rounded-3xl overflow-hidden border border-gray-800 grid grid-cols-1 md:grid-cols-12 items-stretch shadow-sm">
                  <div className="md:col-span-5 bg-[#0b0d11]">
                    <img
-                     src="/images/teleprompter/slide-02.jpg"
-                     alt='AV Live 17" Compact & 22" Flagship Fold-Flat Stealth Podium Teleprompter'
+                     src={TELEPROMPTER_SLIDES_SEO[1].src}
+                     title={TELEPROMPTER_SLIDES_SEO[1].title}
+                     alt={TELEPROMPTER_SLIDES_SEO[1].alt}
                      width={640}
                      height={360}
                      loading="eager"
@@ -543,7 +551,8 @@ export function Category() {
                   const prodSlug = getCanonicalProductSlug(product);
                   const prodHref = getProductHref(product, product.id);
                   const { effectivePrice } = resolveProductPricing(product);
-                  const imgUrl = (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || 'https://placehold.co/600x600?text=No+Image';
+                  const imgUrl = (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || '/images/products/poly-x70-studio.webp';
+                  const prodImgSeo = buildProductImageSeo(product, imgUrl, 0);
                   return (
                   <React.Fragment key={product.id}>
                     <div className="lg:hidden">
@@ -568,7 +577,8 @@ export function Category() {
                          height={400}
                          src={imgUrl}
                          seed={prodSlug}
-                         alt={product.productName}
+                         title={prodImgSeo.title}
+                         alt={prodImgSeo.alt}
                          className="relative z-10 w-full h-full object-contain lg:object-cover mix-blend-multiply lg:mix-blend-normal group-hover:scale-105 transition-transform duration-700"
                        />
                        <span className="lg:hidden absolute top-2 right-2 w-6 h-6 rounded-full bg-white/90 text-rose-500 flex items-center justify-center shadow-sm">
@@ -586,7 +596,7 @@ export function Category() {
                          </Link>
                        </div>
                        <div className="flex items-center justify-between pt-2.5 lg:pt-6 border-t border-gray-50">
-                          <span className="text-xs sm:text-base lg:text-xl font-black">Rs. {effectivePrice.toLocaleString()}</span>
+                          <span className="text-xs sm:text-base lg:text-xl font-black">{formatPrice(effectivePrice)}</span>
                           <button 
                             onClick={() => addToCart({
                               id: product.id!,
@@ -650,7 +660,7 @@ export function Category() {
                   <th className="py-3 px-4">Hardware Model</th>
                   <th className="py-3 px-4">Brand</th>
                   <th className="py-3 px-4">Part Number (SKU/MPN)</th>
-                  <th className="py-3 px-4">Reference Price (PKR)</th>
+                  <th className="py-3 px-4">Reference Price ({currency})</th>
                   <th className="py-3 px-4">Warranty &amp; Availability</th>
                 </tr>
               </thead>
@@ -668,7 +678,7 @@ export function Category() {
                       </td>
                       <td className="py-3 px-4 font-bold text-gray-600">{prod.brand}</td>
                       <td className="py-3 px-4 font-mono text-xs text-gray-500">{prod.sku || prod.mpn || 'Official OEM'}</td>
-                      <td className="py-3 px-4 font-black text-[#00B4D8]">Rs. {effectivePrice.toLocaleString()}</td>
+                      <td className="py-3 px-4 font-black text-[#00B4D8]">{formatPrice(effectivePrice)}</td>
                       <td className="py-3 px-4 font-bold text-emerald-600">In Stock • 1-Yr Official PK Warranty</td>
                     </tr>
                   );

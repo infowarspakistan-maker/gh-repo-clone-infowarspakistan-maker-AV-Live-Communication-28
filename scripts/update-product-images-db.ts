@@ -29,20 +29,32 @@ async function main() {
       const slug = getCanonicalProductSlug(raw, raw.id);
       const meta = PRODUCT_GMC_METADATA[slug] || PRODUCT_GMC_METADATA[raw.id];
 
-      // Extract clean direct external URLs from raw document (strips any /images/products/ paths, splits concatenated URLs, converts Google Drive /view links, and filters YouTube/Vimeo links)
+      // Extract clean direct URLs from raw document and metadata
       const directFromDoc = extractDirectImageUrls([raw.images, raw.image, (raw as any).imageUrl]).filter(
         (u) => !/unsplash\.com/i.test(u)
       );
       const directFromMeta = extractDirectImageUrls(meta?.images);
+      const hasCuratedAvLiveMain = directFromMeta.some((u) =>
+        /^\/images\/(products|projects|teleprompter|video-conference)\//i.test(u) &&
+        !/^\/images\/products\/avlive-/i.test(u)
+      );
 
-      // If raw document only had local /images/products/ paths, Unsplash placeholders, or had none, use direct external URLs from PRODUCT_GMC_METADATA
-      const finalImages = directFromDoc.length > 0 ? directFromDoc : directFromMeta;
+      const finalImages = Array.from(
+        new Set(
+          hasCuratedAvLiveMain
+            ? [...directFromMeta, ...directFromDoc]
+            : directFromDoc.length > 0
+            ? [...directFromDoc, ...directFromMeta]
+            : directFromMeta
+        )
+      );
       const primaryImage = finalImages[0] || '';
 
       const rawImagesArr = Array.isArray(raw.images) ? raw.images : [];
       const isPodiumPrompter = d.id === 'kl5wGaNLxqQByn3oPd1Z' || slug === 'podium-prompter-17-compact-pakistan';
       const needsFirestoreUpdate =
         isPodiumPrompter ||
+        hasCuratedAvLiveMain ||
         raw.image !== primaryImage ||
         JSON.stringify(rawImagesArr) !== JSON.stringify(finalImages);
 
@@ -53,6 +65,9 @@ async function main() {
             image: primaryImage,
             imageUrl: primaryImage,
           };
+          if (meta?.shippingWeight) {
+            patch.shippingWeight = meta.shippingWeight;
+          }
           if (isPodiumPrompter && meta) {
             patch.slug = slug;
             patch.sku = meta.mpn;
@@ -85,36 +100,39 @@ async function main() {
     console.log(`[INFO] Firestore read fallback active (${err?.code || 'quota/offline'})`);
   }
 
-  // Merge with all canonical PRODUCT_GMC_METADATA products so all 53 SKUs are present
-  const bySlug = new Map<string, Record<string, any>>();
+  // Preserve every distinct Firestore product document ID so all 53 GMC Item IDs match 1-to-1
+  const byId = new Map<string, Record<string, any>>();
+  const coveredSlugs = new Set<string>();
   for (const p of firestoreProducts) {
-    const slug = getCanonicalProductSlug(p, p.id);
-    bySlug.set(slug, p);
+    const idKey = p.id || getCanonicalProductSlug(p);
+    byId.set(idKey, enrichProductImages(p as Product));
+    coveredSlugs.add(getCanonicalProductSlug(p, p.id));
   }
   for (const slugKey of Object.keys(PRODUCT_GMC_METADATA)) {
     const canonical = getCanonicalProductSlug({ slug: slugKey }, slugKey);
-    if (!bySlug.has(canonical)) {
+    if (!coveredSlugs.has(canonical) && !byId.has(slugKey)) {
       const fb = buildFallbackProductFromGmcMeta(canonical);
-      if (fb) bySlug.set(canonical, fb);
-    } else {
-      const existing = bySlug.get(canonical)!;
-      bySlug.set(canonical, enrichProductImages(existing as Product));
+      if (fb) {
+        byId.set(fb.id || canonical, fb);
+        coveredSlugs.add(canonical);
+      }
     }
   }
 
-  const allProducts = Array.from(bySlug.values());
+  const allProducts = Array.from(byId.values());
   const tsv40 = generateGmcTsv(allProducts);
   const tsvPath = path.resolve(process.cwd(), 'public/google_merchant_feed.tsv');
   fs.writeFileSync(tsvPath, tsv40, 'utf8');
 
-  const localPathRows = allProducts
-    .map((p) => formatProductToGmcRow(p))
-    .filter((r) => r.image_link.includes('/images/products/') || !r.image_link.startsWith('https://'));
+  const gmcRows = allProducts.map((p) => formatProductToGmcRow(p));
+  const invalidImageRows = gmcRows.filter((r) => !r.image_link.startsWith('https://'));
+  const missingWeightRows = gmcRows.filter((r) => !r.shipping_weight);
 
-  console.log(`=== DIRECT EXTERNAL PRODUCT IMAGE VERIFICATION SUMMARY ===`);
+  console.log(`=== GMC FEED & PRODUCT IMAGE VERIFICATION SUMMARY ===`);
   console.log(`Total Catalog Products Verified: ${allProducts.length}`);
-  console.log(`Firestore Live Docs Updated to Clean External URLs: ${updatedInFirestore}`);
-  console.log(`Products with Local File Paths Remaining: ${localPathRows.length}`);
+  console.log(`Firestore Live Docs Updated: ${updatedInFirestore}`);
+  console.log(`GMC Rows Missing https:// image_link: ${invalidImageRows.length}`);
+  console.log(`GMC Rows Missing shipping_weight: ${missingWeightRows.length}`);
   process.exit(0);
 }
 

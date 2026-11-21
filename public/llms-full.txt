@@ -210,8 +210,15 @@
 | Yealink SIP T46s | Yealink | SIP-T46S | 841885102942 | Rs. 46,500 | 16-line executive Gigabit IP phone with 4.3-inch high-resolution color display | https://avlive.com.pk/product/yealink-sip-t46s-pakistan |
 | AV Live Fold-Flat Podium Teleprompter | AV Live | AV-PP-17C | 610807990543 | Rs. 125,000 | Ultra-slim 1.2" fold-flat stealth podium teleprompter with 400+ nit privacy IPS & 60/40 AR glass | https://avlive.com.pk/podium-teleprompter |
 
-## 6. Machine-Readable Feeds & Sitemaps
+## 6. Official Social Channels, Machine-Readable Feeds & Sitemaps
+- **Facebook**: https://www.facebook.com/AvLivePakistan
+- **Instagram**: https://www.instagram.com/avlive25
+- **TikTok**: https://www.tiktok.com/@almalikk00
+- **YouTube**: https://www.youtube.com/@AVLivePakistan
+- **LinkedIn**: https://www.linkedin.com/company/avlivepk
 - **XML Sitemap**: https://avlive.com.pk/sitemap.xml
 - **Concise LLM Index**: https://avlive.com.pk/llms.txt
 - **Full LLM Catalog**: https://avlive.com.pk/llms-full.txt
+- **Google Merchant Center XML Feed**: https://avlive.com.pk/feed/google-merchant.xml
+- **Google Merchant Center 30-Column CSV Feed**: https://avlive.com.pk/feed/google-merchant.csv
 - **Google Merchant Center 40-Column TSV Feed**: https://avlive.com.pk/feed/google-merchant.tsv

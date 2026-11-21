@@ -40,7 +40,7 @@ export function Esports() {
       />
       <div className="relative h-[400px] overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 z-0">
-          <img loading="lazy" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1920&q=80" alt="e-Sports Arena" className="w-full h-full object-cover opacity-20" />
+          <img loading="lazy" src="/images/projects/novo-nordisk-arena-wide-stage.webp" title="Esports Tournament Arena SMD LED Stage & Live Broadcast Rig | AV Live Pakistan" alt="High-refresh-rate P2.5 SMD LED arena stage, multi-camera broadcast desk, and concert PA production engineered by AV Live Communications for esports tournaments in Pakistan." className="w-full h-full object-cover opacity-25" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#1A2B4C] to-transparent"></div>
         </div>
         <div className="relative z-10 text-center px-4">
@@ -105,9 +105,10 @@ export function Esports() {
           <div className="flex-1 w-full">
             <div className="aspect-video bg-gray-100 rounded-2xl overflow-hidden relative">
               <img loading="lazy" 
-                src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80" 
-                alt="Esports Arena" 
-                className="w-full h-full object-cover opacity-80 mix-blend-multiply" 
+                src="/images/projects/foh-broadcast-control.webp" 
+                title="Esports FOH Broadcast Switching & Zero-Latency Tournament Control | AV Live Pakistan"
+                alt="Front-of-House multi-camera SDI broadcast control desk and low-latency network switching engineered by AV Live for live esports championships in Lahore, Karachi, and Islamabad." 
+                className="w-full h-full object-cover" 
               />
             </div>
           </div>

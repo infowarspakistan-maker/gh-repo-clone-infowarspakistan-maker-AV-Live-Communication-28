@@ -51,8 +51,17 @@
 - **Islamabad Regional Office**: Blue Area Commercial Hub, Jinnah Avenue, Islamabad, ICT, Pakistan | Tel: +92 51 2890 124 | Hotlines: 0321 425 6263 / 0339 0000 921 | Page: https://avlive.com.pk/islamabad
 - **Procurement & Tender Desk**: info@avlive.com.pk | sales@avlive.com.pk | Official FBR GST/NTN Invoicing & PPRA Compliance
 
+## Official Social Media Channels
+- **Facebook**: https://www.facebook.com/AvLivePakistan
+- **Instagram**: https://www.instagram.com/avlive25
+- **TikTok**: https://www.tiktok.com/@almalikk00
+- **YouTube**: https://www.youtube.com/@AVLivePakistan
+- **LinkedIn**: https://www.linkedin.com/company/avlivepk
+
 ## Structured Feeds, Full LLM Catalog & Sitemaps
 - **Full LLM Hardware & Pricing Knowledge Base**: https://avlive.com.pk/llms-full.txt
-- **XML Sitemap (156 Canonical URLs)**: https://avlive.com.pk/sitemap.xml
+- **XML Sitemap (157 Canonical URLs)**: https://avlive.com.pk/sitemap.xml
 - **HTML Sitemap Directory**: https://avlive.com.pk/sitemap
+- **Google Merchant Center Product Feed (XML)**: https://avlive.com.pk/feed/google-merchant.xml
+- **Google Merchant Center Product Feed (CSV)**: https://avlive.com.pk/feed/google-merchant.csv
 - **Google Merchant Center Product Feed (TSV)**: https://avlive.com.pk/feed/google-merchant.tsv

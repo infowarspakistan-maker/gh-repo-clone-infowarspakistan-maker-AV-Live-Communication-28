@@ -141,7 +141,7 @@ export function AdminLogin() {
               disabled={loading}
               className="w-full bg-white border border-gray-100 text-[#1A2B4C] py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-gray-50 transition-all shadow-sm flex items-center justify-center gap-3"
             >
-              <img loading="lazy" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
+              <img loading="lazy" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Sign in with Google" title="Sign in with Google" />
               Sign In With Google
             </button>
           </form>

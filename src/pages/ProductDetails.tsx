@@ -49,6 +49,9 @@ import {
 import { addToCart } from '../lib/cart';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { CurrencySelector } from '../components/CurrencySelector';
+import { buildProductImageSeo, buildImageObjectSchema } from '../lib/image-seo';
 
 function cleanRichTextHtml(rawHtml?: string | null): string {
   if (!rawHtml) return '';
@@ -67,6 +70,7 @@ function cleanRichTextHtml(rawHtml?: string | null): string {
 export function ProductDetails() {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  const { currency, formatPrice, formatExactPkr } = useCurrency();
   const initialFallbackProduct = (productId ? buildFallbackProductFromGmcMeta(productId) : null) as Product | null;
   const [product, setProduct] = useState<Product | null>(initialFallbackProduct);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -218,17 +222,26 @@ export function ProductDetails() {
     product.image,
     (product as any).imageUrl,
   ]);
-  const productVideoUrls = extractVideoUrls(product.images);
+  const productVideoUrls = extractVideoUrls([
+    ...(Array.isArray(product.images) ? product.images : typeof product.images === 'string' ? [product.images] : []),
+    ...(product.videoLink ? [product.videoLink] : []),
+  ]);
   const youtubeVideoId =
     productVideoUrls.map((u) => extractYoutubeVideoId(u)).find(Boolean) ||
     (canonicalSlug === 'podium-prompter-17-compact-pakistan' ? 'aZLEIxOzm24' : null);
   const metaExternalImages = extractDirectImageUrls(gmcMetaEarly?.images || []);
+  const hasCuratedLocalMain = metaExternalImages.some(
+    (u) => u.startsWith('/images/products/') || u.startsWith('https://avlive.com.pk/images/products/')
+  );
+  const mergedProductImages = Array.from(
+    new Set(
+      hasCuratedLocalMain
+        ? [...metaExternalImages, ...rawExternalImages]
+        : [...rawExternalImages, ...metaExternalImages]
+    )
+  );
   const productImages =
-    rawExternalImages.length > 0
-      ? rawExternalImages
-      : metaExternalImages.length > 0
-      ? metaExternalImages
-      : [DEFAULT_EXTERNAL_PRODUCT_IMAGE];
+    mergedProductImages.length > 0 ? mergedProductImages : [DEFAULT_EXTERNAL_PRODUCT_IMAGE];
   const schemaImages = Array.from(
     new Set(
       productImages
@@ -289,9 +302,27 @@ export function ProductDetails() {
   );
 
   const gmcMeta = PRODUCT_GMC_METADATA[canonicalSlug] || PRODUCT_GMC_METADATA[product.id || ''];
-  const resolvedGtin = gmcMeta?.gtin || product.gtin || '610807990017';
-  const resolvedMpn = cleanMpn(gmcMeta?.mpn || product.mpn || product.sku, canonicalSlug);
+  const hasIdentifiers = product.identifierExists !== false;
+  const resolvedGtin = hasIdentifiers ? (product.gtin || gmcMeta?.gtin || '610807990017') : '';
+  const resolvedMpn = cleanMpn(product.mpn || gmcMeta?.mpn || product.sku, canonicalSlug);
   const resolvedBrand = (product.brand === 'Poly (HP' ? 'HP Poly' : product.brand) || gmcMeta?.brand || 'AV Live';
+  const schemaConditionMap: Record<string, string> = {
+    new: 'https://schema.org/NewCondition',
+    refurbished: 'https://schema.org/RefurbishedCondition',
+    used: 'https://schema.org/UsedCondition',
+  };
+  const schemaAvailabilityMap: Record<string, string> = {
+    in_stock: 'https://schema.org/InStock',
+    out_of_stock: 'https://schema.org/OutOfStock',
+    preorder: 'https://schema.org/PreOrder',
+    backorder: 'https://schema.org/BackOrder',
+  };
+  const resolvedSchemaCondition = schemaConditionMap[product.condition || 'new'] || 'https://schema.org/NewCondition';
+  const resolvedSchemaAvailability = product.availability
+    ? (schemaAvailabilityMap[product.availability] || 'https://schema.org/InStock')
+    : (product.stockQuantity ?? 10) > 0
+      ? 'https://schema.org/InStock'
+      : 'https://schema.org/OutOfStock';
   const rawSpecsStr = String(product.specifications || '');
   const hasMalformedRawSpecs =
     !rawSpecsStr ||
@@ -330,9 +361,8 @@ export function ProductDetails() {
         "image": schemaImages.length > 0 ? schemaImages : ["https://avlive.com.pk/og-image.jpg"],
         "description": product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '') || gmcMeta?.defaultDescription || `Buy ${product.productName} by ${resolvedBrand} for Video Conference in Pakistan.`,
         "sku": resolvedMpn,
-        "mpn": resolvedMpn,
-        "gtin12": resolvedGtin,
-        "gtin": resolvedGtin,
+        ...(hasIdentifiers ? { "mpn": resolvedMpn } : {}),
+        ...(hasIdentifiers && resolvedGtin ? { "gtin12": resolvedGtin, "gtin": resolvedGtin } : {}),
         "brand": {
           "@type": "Brand",
           "name": resolvedBrand
@@ -367,8 +397,8 @@ export function ProductDetails() {
           "price": effectivePrice.toFixed(2),
           "validFrom": "2026-01-01",
           "priceValidUntil": "2027-12-31",
-          "itemCondition": "https://schema.org/NewCondition",
-          "availability": (product.stockQuantity ?? 10) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          "itemCondition": resolvedSchemaCondition,
+          "availability": resolvedSchemaAvailability,
           "seller": {
             "@type": "Organization",
             "name": "AV Live Communications",
@@ -443,8 +473,32 @@ export function ProductDetails() {
             },
           ]
         : []),
+      ...productImages.slice(0, 5).map((imgUrl, idx) => {
+        const imgSeo = buildProductImageSeo(
+          { ...product, brand: resolvedBrand, mpn: resolvedMpn },
+          imgUrl,
+          idx
+        );
+        return buildImageObjectSchema({
+          url: imgUrl,
+          title: imgSeo.title,
+          alt: imgSeo.alt,
+          caption: imgSeo.caption,
+        });
+      }),
     ]
   };
+
+  const primaryProductImageSeo = buildProductImageSeo(
+    { ...product, brand: resolvedBrand, mpn: resolvedMpn },
+    productImages[0] || product.image,
+    0
+  );
+  const activeProductImageSeo = buildProductImageSeo(
+    { ...product, brand: resolvedBrand, mpn: resolvedMpn },
+    productImages[activeImage] || productImages[0] || product.image,
+    activeImage
+  );
 
   const candidateTitleWithMpn = `${product.productName} (${resolvedMpn}) Pakistan | AV Live`;
   const candidateTitleShort = `${product.productName} Price in Pakistan | AV Live`;
@@ -461,7 +515,7 @@ export function ProductDetails() {
         description={product.seoMetaDescription || `${product.productName} (${resolvedMpn}) in Pakistan: Rs. ${effectivePrice.toLocaleString()}. ${gmcMeta?.highlight || product.shortDescription?.replace(/<[^>]*>?/gm, '').substring(0, 90) || `Official ${resolvedBrand} hardware`}. Official ${resolvedBrand} warranty.`}
         keywords={`${product.productName}, ${resolvedBrand}, ${resolvedMpn}, ${product.productName} price in Pakistan, ${resolvedBrand} Pakistan, official dealer AV Live`}
         image={productImages[0] || product.image}
-        imageAlt={`${product.productName} (${resolvedMpn}) by ${resolvedBrand} Price in Pakistan`}
+        imageAlt={primaryProductImageSeo.alt}
         url={canonicalProductUrl}
         type="product"
         price={effectivePrice}
@@ -486,7 +540,7 @@ export function ProductDetails() {
              ]} />
            </div>
            <div className="hidden md:flex items-center gap-3">
-              <span className="font-black text-sm text-[#1A2B4C]">Rs. {getSelectedPrice().toLocaleString()}</span>
+              <span className="font-black text-sm text-[#1A2B4C]">{formatPrice(getSelectedPrice())}</span>
               <button 
                 onClick={handleAddToCart}
                 className="bg-[#00B4D8] text-white px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-[#1A2B4C] transition-all"
@@ -626,7 +680,7 @@ export function ProductDetails() {
                    <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
                      {product.salePrice < product.regularPrice && (
                        <div className="bg-[#00B4D8] text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full shadow-lg">
-                         Save Rs. {((product.regularPrice || 0) - (product.salePrice || 0)).toLocaleString()}
+                         Save {formatPrice((product.regularPrice || 0) - (product.salePrice || 0))}
                        </div>
                      )}
                      {product.stockQuantity < 5 && product.stockQuantity > 0 && (
@@ -652,9 +706,11 @@ export function ProductDetails() {
                        animate={{ opacity: 1 }}
                        exit={{ opacity: 0 }}
                        transition={{ duration: 0.2 }}
-                       loading="lazy" 
-                       src={productImages[activeImage] || 'https://placehold.co/800x800?text=No+Image'} 
-                       alt={`${product.productName} by ${product.brand} - Close-up angle ${activeImage + 1}`} 
+                       loading="eager"
+                       fetchPriority="high"
+                       src={productImages[activeImage] || '/images/products/poly-x70-studio.webp'} 
+                       title={activeProductImageSeo.title}
+                       alt={activeProductImageSeo.alt}
                        className={`w-full h-full object-contain transition-transform duration-200 ${isZooming ? 'scale-[2]' : 'scale-100'}`}
                        style={isZooming ? {
                          transformOrigin: `${mousePos.x}% ${mousePos.y}%`
@@ -667,19 +723,26 @@ export function ProductDetails() {
 
              {/* Thumbnail Strip with video demo thumb */}
              <div className="flex gap-4 overflow-x-auto w-full shrink-0 no-scrollbar py-2 items-center justify-start md:justify-center">
-               {productImages.map((img, idx) => (
+               {productImages.map((img, idx) => {
+                 const thumbSeo = buildProductImageSeo(
+                   { ...product, brand: resolvedBrand, mpn: resolvedMpn },
+                   img,
+                   idx
+                 );
+                 return (
                  <button 
                    key={idx}
                    onClick={() => {
                      setActiveImage(idx);
                      setActiveVideo(false);
                    }}
-                   aria-label={`View product image ${idx + 1}`}
+                   aria-label={`Inspect ${thumbSeo.title}`}
                    className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 transition-all shrink-0 bg-white ${(!activeVideo && activeImage === idx) ? 'border-[#00B4D8] shadow-md scale-95' : 'border-transparent hover:border-gray-200 opacity-60 hover:opacity-100'}`}
                  >
-                   <img loading="lazy" src={img} alt={`${product.productName} technical angle ${idx + 1}`} className="w-full h-full object-contain p-2" />
+                   <img loading="lazy" src={img} title={thumbSeo.title} alt={thumbSeo.alt} className="w-full h-full object-contain p-2" />
                  </button>
-               ))}
+                 );
+               })}
                
                {/* Video Demo Thumbnail Button */}
                <button 
@@ -722,7 +785,7 @@ export function ProductDetails() {
                         Answer-First Hardware Verdict
                       </span>
                       <p className="text-xs sm:text-sm font-bold text-[#1A2B4C] leading-relaxed">
-                        The <strong>{product.productName}</strong> (Official MPN: <strong>{resolvedMpn}</strong>, GTIN: {resolvedGtin}) by <strong>{resolvedBrand}</strong> is an enterprise-grade solution priced at <strong>Rs. {effectivePrice.toLocaleString()}</strong> in Pakistan. {gmcMeta?.highlight ? `${gmcMeta.highlight}. ` : ''}Includes a 1-year official local replacement warranty, PTA compliance, and nationwide deployment across Lahore, Karachi, and Islamabad.
+                        The <strong>{product.productName}</strong> (Official MPN: <strong>{resolvedMpn}</strong>, GTIN: {resolvedGtin}) by <strong>{resolvedBrand}</strong> is an enterprise-grade solution priced at <strong>{formatPrice(effectivePrice)}</strong>{currency !== 'PKR' ? ` (${formatExactPkr(effectivePrice)})` : ''} in Pakistan. {gmcMeta?.highlight ? `${gmcMeta.highlight}. ` : ''}Includes a 1-year official local replacement warranty, PTA compliance, and nationwide deployment across Lahore, Karachi, and Islamabad.
                       </p>
                     </div>
 
@@ -754,9 +817,9 @@ export function ProductDetails() {
                             </td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Sale / Regular Price (PKR)</th>
+                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Sale / Regular Price ({currency})</th>
                             <td className="py-2.5 px-4 font-black text-[#00B4D8]">
-                              Rs. {effectivePrice.toLocaleString()} PKR {resolvedSalePrice < resolvedRegularPrice ? `(List Price: Rs. ${resolvedRegularPrice.toLocaleString()} PKR)` : ''} • FBR GST Invoice Available
+                              {formatPrice(effectivePrice)} {currency !== 'PKR' ? `(${formatExactPkr(effectivePrice)}) ` : ''}{resolvedSalePrice < resolvedRegularPrice ? `(List Price: ${formatPrice(resolvedRegularPrice)})` : ''} • FBR GST Invoice Available
                             </td>
                           </tr>
                           <tr>
@@ -906,9 +969,9 @@ export function ProductDetails() {
                         <tbody className="divide-y divide-gray-50 text-gray-600">
                           <tr>
                             <td className="py-3 px-2 font-black text-gray-400 uppercase tracking-wider">Selling Price</td>
-                            <td className="py-3 px-2 font-black text-[#1A2B4C]">Rs. {effectivePrice.toLocaleString()}</td>
-                            <td className="py-3 px-2 font-bold">Rs. {Math.round(effectivePrice * 0.85).toLocaleString()}</td>
-                            <td className="py-3 px-2 font-bold">Rs. {Math.round(effectivePrice * 1.35).toLocaleString()}</td>
+                            <td className="py-3 px-2 font-black text-[#1A2B4C]">{formatPrice(effectivePrice)}</td>
+                            <td className="py-3 px-2 font-bold">{formatPrice(Math.round(effectivePrice * 0.85))}</td>
+                            <td className="py-3 px-2 font-bold">{formatPrice(Math.round(effectivePrice * 1.35))}</td>
                           </tr>
                           <tr>
                             <td className="py-3 px-2 font-black text-gray-400 uppercase tracking-wider">Pakistan Certification</td>
@@ -970,18 +1033,22 @@ export function ProductDetails() {
               </div>
 
                 <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6 w-full h-auto">
-                  <div className="flex items-center justify-between border-b border-gray-100 pb-6">
+                  <div className="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 pb-6">
                     <div className="flex flex-col">
-                      <span className="text-[30px] font-black text-[#1A2B4C] tracking-tight">Rs. {getSelectedPrice().toLocaleString()}</span>
+                      <span className="text-[30px] font-black text-[#1A2B4C] tracking-tight">{formatPrice(getSelectedPrice())}</span>
+                      {currency !== 'PKR' && (
+                        <span className="text-[11px] font-bold text-gray-400 mt-0.5">Base PKR Rate: {formatExactPkr(getSelectedPrice())}</span>
+                      )}
                       {product.salePrice < product.regularPrice && (
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-sm text-gray-400 line-through font-bold">Rs. {(product.regularPrice + (deploymentVariant === 'enterprise' ? 15000 : 0) + (warrantyVariant === '3year' ? 25000 : 0)).toLocaleString()}</span>
+                          <span className="text-sm text-gray-400 line-through font-bold">{formatPrice(product.regularPrice + (deploymentVariant === 'enterprise' ? 15000 : 0) + (warrantyVariant === '3year' ? 25000 : 0))}</span>
                           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-1 rounded">
                             {Math.round(((product.regularPrice - product.salePrice) / product.regularPrice) * 100)}% OFF
                           </span>
                         </div>
                       )}
                     </div>
+                    <CurrencySelector variant="pill" />
                   </div>
 
                   {/* Variant Selectors (Deployment & Warranty Options) */}
@@ -1004,7 +1071,7 @@ export function ProductDetails() {
                           className={`border-2 p-3 rounded-xl text-left transition-all ${deploymentVariant === 'enterprise' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
                         >
                           <span className="block text-xs font-black text-[#1A2B4C]">Enterprise Deployment</span>
-                          <span className="block text-[9px] text-[#00B4D8] font-black uppercase mt-1">+ Rs. 15,000</span>
+                          <span className="block text-[9px] text-[#00B4D8] font-black uppercase mt-1">+ {formatPrice(15000)}</span>
                         </button>
                       </div>
                     </div>
@@ -1027,7 +1094,7 @@ export function ProductDetails() {
                           className={`border-2 p-3 rounded-xl text-left transition-all ${warrantyVariant === '3year' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
                         >
                           <span className="block text-xs font-black text-[#1A2B4C]">3-Year Extended</span>
-                          <span className="block text-[9px] text-[#00B4D8] font-black uppercase mt-1">+ Rs. 25,000</span>
+                          <span className="block text-[9px] text-[#00B4D8] font-black uppercase mt-1">+ {formatPrice(25000)}</span>
                         </button>
                       </div>
                     </div>
@@ -1048,7 +1115,7 @@ export function ProductDetails() {
                         )}
                      </div>
                      <div className="text-[10px] text-gray-500 font-semibold space-y-1 pl-6 leading-relaxed">
-                       <div>• Delivery: <strong className="text-gray-700">2-3 Business Days</strong> nationwide (Free over Rs. 100,000).</div>
+                       <div>• Delivery: <strong className="text-gray-700">2-3 Business Days</strong> nationwide (Free over {formatPrice(100000)}).</div>
                        <div>• Policy: <strong className="text-gray-700">7-Day Local Replacement Warranty</strong>.</div>
                        <div>• Authenticity: <strong className="text-gray-700">100% Genuine Certified Hardware</strong>.</div>
                      </div>
@@ -1372,18 +1439,22 @@ export function ProductDetails() {
                   <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
                     {(() => {
                        const images = Array.isArray(prod.images) ? prod.images : (typeof prod.images === 'string' ? [prod.images] : (prod.image ? [prod.image] : []));
-                       const firstImage = images[0] || 'https://placehold.co/600x600?text=No+Image';
+                       const firstImage = images[0] || '/images/products/poly-x70-studio.webp';
                        const secondImage = images[1] || firstImage;
+                       const firstSeo = buildProductImageSeo(prod, firstImage, 0);
+                       const secondSeo = buildProductImageSeo(prod, secondImage, 1);
                        return (
                          <>
                            <img loading="lazy" 
                              src={firstImage} 
-                             alt={prod.productName} 
+                             title={firstSeo.title}
+                             alt={firstSeo.alt} 
                              className="absolute inset-0 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out group-hover:opacity-0"
                            />
                            <img loading="lazy" 
                              src={secondImage} 
-                             alt={prod.productName} 
+                             title={secondSeo.title}
+                             alt={secondSeo.alt} 
                              className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 scale-105"
                            />
                          </>
@@ -1424,7 +1495,7 @@ export function ProductDetails() {
                       <div className="flex flex-col">
                         <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Price</span>
                         <div className="flex items-baseline gap-2">
-                          <span className="font-black text-lg text-[#1A2B4C]">Rs. { ((prod.salePrice || prod.regularPrice) ?? 0).toLocaleString() }</span>
+                          <span className="font-black text-lg text-[#1A2B4C]">{formatPrice((prod.salePrice || prod.regularPrice) ?? 0)}</span>
                         </div>
                       </div>
                     </div>
@@ -1444,12 +1515,12 @@ export function ProductDetails() {
               {product.productName}
             </span>
             <span className="block text-xs sm:text-sm font-black text-[#1A2B4C]">
-              Rs. {getSelectedPrice().toLocaleString()}
+              {formatPrice(getSelectedPrice())}
             </span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <a
-              href={`https://wa.me/923214256263?text=${encodeURIComponent(`Hi AV Live, I need a 15-minute corporate quote for ${product.productName} (MPN: ${resolvedMpn}) listed at Rs. ${getSelectedPrice().toLocaleString()}.`)}`}
+              href={`https://wa.me/923214256263?text=${encodeURIComponent(`Hi AV Live, I need a 15-minute corporate quote for ${product.productName} (MPN: ${resolvedMpn}) listed at ${formatPrice(getSelectedPrice())} (${formatExactPkr(getSelectedPrice())}).`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-3 py-2 min-w-[44px] min-h-[40px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm"

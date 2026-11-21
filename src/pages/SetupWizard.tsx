@@ -848,7 +848,7 @@ export function SetupWizard() {
                     {currentRecommended.items.map((item) => (
                       <div key={item.id} className="py-6 first:pt-0 last:pb-0 flex flex-col sm:flex-row gap-6">
                         <div className="w-full sm:w-28 h-28 rounded-2xl bg-gray-50 overflow-hidden shrink-0 border border-gray-100">
-                          <img loading="lazy" src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          <img loading="lazy" src={item.image || '/images/products/poly-x70-studio.webp'} title={`${item.brand} ${item.name} (${item.model}) — Boardroom Bundle Component | AV Live Pakistan`} alt={`${item.brand} ${item.name} ${item.model} recommended boardroom AV hardware component engineered for Pakistan offices by AV Live Communications.`} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-grow min-w-0">
                           <div className="flex items-center gap-1.5 mb-1">

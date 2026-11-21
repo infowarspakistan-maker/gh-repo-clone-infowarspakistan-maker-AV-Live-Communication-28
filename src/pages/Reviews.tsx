@@ -107,7 +107,7 @@ export function Reviews() {
                 telephone: '+92-321-4256263',
                 address: {
                   '@type': 'PostalAddress',
-                  streetAddress: '482 G3 Johar Town',
+                  streetAddress: 'Johar Town Block N',
                   addressLocality: 'Lahore',
                   addressRegion: 'Punjab',
                   postalCode: '54782',

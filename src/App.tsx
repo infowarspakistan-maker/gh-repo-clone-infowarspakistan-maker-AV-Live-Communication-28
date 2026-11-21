@@ -10,6 +10,8 @@ import {
   buildFallbackProductFromGmcMeta,
 } from './lib/gmc-feed';
 import { getCartCount } from './lib/cart';
+import { CurrencyProvider, useCurrency } from './contexts/CurrencyContext';
+import { CurrencySelector } from './components/CurrencySelector';
 
 // Homepage kept strictly synchronous for 0ms Frame-0 paint & 98-100 Mobile PageSpeed
 import { Home } from './pages/Home';
@@ -455,6 +457,7 @@ function Navbar() {
   const mobileSearchRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const { itemCount } = useCart();
+  const { formatPrice } = useCurrency();
 
   const { user, userProfile, logout, isAuthenticated, isAdmin, isEditor, isSupport } = useAuth();
 
@@ -590,14 +593,16 @@ function Navbar() {
           <a href="tel:+923214256263" className="inline-flex items-center gap-1.5 hover:text-[#00B4D8] transition-colors py-0.5 font-semibold text-[#1A2B4C] sm:font-medium sm:text-gray-600"><Phone size={12} className="text-[#00B4D8] shrink-0" /> 0321 425 6263</a>
           <span className="hidden sm:flex items-center gap-1.5"><MapPin size={12} className="text-[#00B4D8]" /> Johar Town Block N, Lahore</span>
           <div className="hidden xl:flex items-center gap-3 text-[11px] text-slate-600 border-l border-gray-200 pl-4">
-            <a href="https://www.youtube.com/@avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">YouTube</a>
+            <a href="https://www.youtube.com/@AVLivePakistan" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">YouTube</a>
+            <a href="https://www.instagram.com/avlive25" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">Instagram</a>
+            <a href="https://www.tiktok.com/@almalikk00" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">TikTok</a>
             <a href="https://x.com/avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">X</a>
             <a href="https://www.linkedin.com/company/avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">LinkedIn</a>
-            <a href="https://www.instagram.com/avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">Instagram</a>
-            <a href="https://www.facebook.com/avlivepk" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">Facebook</a>
+            <a href="https://www.facebook.com/AvLivePakistan" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">Facebook</a>
           </div>
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
+          <CurrencySelector variant="topbar" />
           <Link to="/sitemap" className="hidden md:inline-flex items-center hover:text-[#00B4D8] transition-colors font-semibold text-[#1A2B4C] py-0.5">Site Directory</Link>
           <Link to="/contact" className="hidden xs:inline-flex sm:inline-flex items-center hover:text-[#00B4D8] transition-colors py-0.5">Contact Us</Link>
           <Link to="/blog" className="hidden sm:inline-flex items-center hover:text-[#00B4D8] transition-colors py-0.5">Blog</Link>
@@ -608,7 +613,8 @@ function Navbar() {
                 {userProfile?.photoURL || user?.photoURL ? (
                   <img
                     src={userProfile?.photoURL || user?.photoURL || undefined}
-                    alt={userProfile?.displayName || user?.displayName || 'User'}
+                    title={`${userProfile?.displayName || user?.displayName || 'AV Live Member'} Account Avatar`}
+                    alt={`${userProfile?.displayName || user?.displayName || 'AV Live Member'} profile photo`}
                     className="w-4 h-4 rounded-full object-cover border border-[#00B4D8]"
                     referrerPolicy="no-referrer"
                   />
@@ -756,8 +762,9 @@ function Navbar() {
                         >
                           <div className="w-10 h-10 bg-white rounded-lg border border-gray-100 overflow-hidden shrink-0 flex items-center justify-center">
                             <img
-                              src={product.images?.[0] || 'https://via.placeholder.com/48'}
-                              alt={product.productName}
+                              src={product.images?.[0] || '/images/products/poly-x70-studio.webp'}
+                              title={`${product.productName} Price in Pakistan | AV Live`}
+                              alt={`${product.productName} by ${product.brand || 'AV Live'} — enterprise AV hardware in Pakistan`}
                               className="w-full h-full object-contain p-1"
                             />
                           </div>
@@ -771,7 +778,7 @@ function Navbar() {
                           </div>
                           <div className="shrink-0 text-right">
                             <div className="text-xs font-black text-[#1A2B4C]">
-                              {product.salePrice ? `Rs. ${product.salePrice.toLocaleString()}` : 'Quote'}
+                              {product.salePrice ? formatPrice(product.salePrice) : 'Quote'}
                             </div>
                           </div>
                         </Link>
@@ -887,8 +894,9 @@ function Navbar() {
                           >
                             <div className="w-10 h-10 bg-white rounded-xl border border-gray-100 overflow-hidden shrink-0 flex items-center justify-center shadow-xs">
                               <img 
-                                src={product.images?.[0] || 'https://via.placeholder.com/48'} 
-                                alt={product.productName} 
+                                src={product.images?.[0] || '/images/products/poly-x70-studio.webp'} 
+                                title={`${product.productName} Price in Pakistan | AV Live`}
+                                alt={`${product.productName} by ${product.brand || 'AV Live'} — enterprise AV hardware in Pakistan`} 
                                 className="w-full h-full object-contain p-1" 
                               />
                             </div>
@@ -902,7 +910,7 @@ function Navbar() {
                             </div>
                             <div className="shrink-0 text-right">
                               <div className="text-xs font-black text-[#1A2B4C]">
-                                {product.salePrice ? `Rs. ${product.salePrice.toLocaleString()}` : 'Contact for Price'}
+                                {product.salePrice ? formatPrice(product.salePrice) : 'Contact for Price'}
                               </div>
                               {product.stockQuantity > 0 ? (
                                 <span className="inline-block text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full mt-0.5">In Stock</span>
@@ -979,6 +987,9 @@ function Navbar() {
                 </Link>
               </div>
             </div>
+
+            {/* Display Currency Switcher */}
+            <CurrencySelector variant="drawer" />
 
             {/* Card Group 1: Hardware Catalog & Categories */}
             <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-xs">
@@ -1272,8 +1283,9 @@ export default function App() {
 
   return (
     <SettingsProvider>
-      <CartProvider>
-        <AuthProvider>
+      <CurrencyProvider>
+        <CartProvider>
+          <AuthProvider>
           <ScrollToTop />
           <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-[#1A2B4C] font-sans selection:bg-[#00B4D8] selection:text-white">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[110] bg-[#00B4D8] text-white px-4 py-2 rounded-full font-bold shadow-lg transition-all">
@@ -1481,8 +1493,9 @@ export default function App() {
       )}
       <BackToTop />
       </div>
-        </AuthProvider>
-      </CartProvider>
+          </AuthProvider>
+        </CartProvider>
+      </CurrencyProvider>
     </SettingsProvider>
   );
 }

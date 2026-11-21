@@ -937,10 +937,20 @@ export function buildLlmsTxt(): string {
   lines.push('- **Procurement & Tender Desk**: info@avlive.com.pk | sales@avlive.com.pk | Official FBR GST/NTN Invoicing & PPRA Compliance');
   lines.push('');
 
+  lines.push('## Official Social Media Channels');
+  lines.push('- **Facebook**: https://www.facebook.com/AvLivePakistan');
+  lines.push('- **Instagram**: https://www.instagram.com/avlive25');
+  lines.push('- **TikTok**: https://www.tiktok.com/@almalikk00');
+  lines.push('- **YouTube**: https://www.youtube.com/@AVLivePakistan');
+  lines.push('- **LinkedIn**: https://www.linkedin.com/company/avlivepk');
+  lines.push('');
+
   lines.push('## Structured Feeds, Full LLM Catalog & Sitemaps');
   lines.push('- **Full LLM Hardware & Pricing Knowledge Base**: https://avlive.com.pk/llms-full.txt');
-  lines.push('- **XML Sitemap (156 Canonical URLs)**: https://avlive.com.pk/sitemap.xml');
+  lines.push('- **XML Sitemap (157 Canonical URLs)**: https://avlive.com.pk/sitemap.xml');
   lines.push('- **HTML Sitemap Directory**: https://avlive.com.pk/sitemap');
+  lines.push('- **Google Merchant Center Product Feed (XML)**: https://avlive.com.pk/feed/google-merchant.xml');
+  lines.push('- **Google Merchant Center Product Feed (CSV)**: https://avlive.com.pk/feed/google-merchant.csv');
   lines.push('- **Google Merchant Center Product Feed (TSV)**: https://avlive.com.pk/feed/google-merchant.tsv');
   lines.push('');
 
@@ -1023,10 +1033,17 @@ export function buildLlmsFullTxt(): string {
   }
 
   lines.push('');
-  lines.push('## 6. Machine-Readable Feeds & Sitemaps');
+  lines.push('## 6. Official Social Channels, Machine-Readable Feeds & Sitemaps');
+  lines.push('- **Facebook**: https://www.facebook.com/AvLivePakistan');
+  lines.push('- **Instagram**: https://www.instagram.com/avlive25');
+  lines.push('- **TikTok**: https://www.tiktok.com/@almalikk00');
+  lines.push('- **YouTube**: https://www.youtube.com/@AVLivePakistan');
+  lines.push('- **LinkedIn**: https://www.linkedin.com/company/avlivepk');
   lines.push('- **XML Sitemap**: https://avlive.com.pk/sitemap.xml');
   lines.push('- **Concise LLM Index**: https://avlive.com.pk/llms.txt');
   lines.push('- **Full LLM Catalog**: https://avlive.com.pk/llms-full.txt');
+  lines.push('- **Google Merchant Center XML Feed**: https://avlive.com.pk/feed/google-merchant.xml');
+  lines.push('- **Google Merchant Center 30-Column CSV Feed**: https://avlive.com.pk/feed/google-merchant.csv');
   lines.push('- **Google Merchant Center 40-Column TSV Feed**: https://avlive.com.pk/feed/google-merchant.tsv');
   lines.push('');
 

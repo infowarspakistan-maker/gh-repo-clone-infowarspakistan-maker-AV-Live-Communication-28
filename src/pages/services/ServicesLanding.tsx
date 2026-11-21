@@ -6,6 +6,7 @@ import { subscribeToServicesPage, ServicePageData, getAllServices } from '../../
 import { FALLBACK_SERVICES_CATALOG, mergeWithFallbackServices, EnrichedService } from '../../lib/services-catalog';
 import { SEO } from '../../components/SEO';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
+import { buildEditorialImageSeo } from '../../lib/image-seo';
 
 export function ServicesLanding() {
   const [pageData, setPageData] = useState<ServicePageData | null>(null);
@@ -95,7 +96,13 @@ export function ServicesLanding() {
       {/* Compact 16:6 Hero Section */}
       <div className="relative aspect-[16/9] sm:aspect-[16/6] min-h-[230px] max-h-[320px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img fetchPriority="high" src={data.heroImageUrl} alt="Corporate Event Management and Video Conferencing Services in Pakistan" className="w-full h-full object-cover" />
+          <img
+            fetchPriority="high"
+            src={data.heroImageUrl}
+            title="Turnkey Corporate Event Management & Enterprise Video Conferencing Services | AV Live Pakistan"
+            alt="Turnkey corporate event management, SMD LED stage production, and enterprise video conferencing services delivered nationwide across Lahore, Karachi, and Islamabad by AV Live Communications."
+            className="w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-[#1A2B4C]/85 mix-blend-multiply"></div>
         </div>
         
@@ -138,7 +145,9 @@ export function ServicesLanding() {
 
         {/* Dynamic Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-           {displayedServices.map((service, idx) => (
+           {displayedServices.map((service, idx) => {
+             const svcImgSeo = buildEditorialImageSeo(service.title, 'service', service.description);
+             return (
              <motion.div 
                key={service.id}
                initial={{ opacity: 0, y: 20 }}
@@ -147,10 +156,10 @@ export function ServicesLanding() {
                className="bg-white rounded-2xl lg:rounded-3xl overflow-hidden border border-gray-100 shadow-xs hover:shadow-xl transition-all group flex flex-col"
              >
                 <div className="aspect-[16/9] h-36 sm:h-40 relative overflow-hidden">
-                   <img loading="lazy" src={service.imageUrl} alt={service.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                   <img loading="lazy" src={service.imageUrl} title={svcImgSeo.title} alt={svcImgSeo.alt} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                    <div className="absolute top-3 left-3">
                       <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-md">
-                         <img loading="lazy" src={service.iconUrl} alt="icon" className="w-5 h-5" />
+                         <img loading="lazy" src={service.iconUrl} title={`${service.title} Icon | AV Live Pakistan`} alt={`${service.title} service category emblem — AV Live Pakistan`} className="w-5 h-5" />
                       </div>
                    </div>
                 </div>
@@ -162,7 +171,8 @@ export function ServicesLanding() {
                    </Link>
                 </div>
              </motion.div>
-           ))}
+             );
+           })}
         </div>
 
         {/* Answer-First Verdict & Semantic Service SLA Comparison Table */}
