@@ -18,6 +18,7 @@ import { MobileProductCard } from "../components/MobileProductCard";
 import { BlurProductImage } from "../components/BlurProductImage";
 import { useCurrency } from "../contexts/CurrencyContext";
 import { buildProductImageSeo, buildEditorialImageSeo } from "../lib/image-seo";
+import { cleanRichTextHtml } from "../lib/html-sanitize";
 
 const TopBrands = React.lazy(() => import('../components/TopBrands').then(m => ({ default: m.TopBrands })));
 const RealProjectsAndClients = React.lazy(() => import('../components/RealProjectsAndClients').then(m => ({ default: m.RealProjectsAndClients })));
@@ -83,6 +84,28 @@ const DEFAULT_HOMEPAGE_DATA: HomepageData = {
   },
 };
 
+const FLAGSHIP_HOME_ORDER = [
+  'poly-studio-x72-pakistan',
+  'polycom-realpresence-group-500-pakistan',
+  'cisco-room-kit-eq-pakistan',
+  'logitech-rally-bar-pakistan',
+  'podium-prompter-17-compact-pakistan',
+  'horion-k6a-bundle-special-offer',
+  'poly-studio-x52-pakistan',
+  'cisco-room-kit-plus-pakistan',
+];
+
+function sortProductsForShowcase(list: Product[]): Product[] {
+  const rankMap = new Map(FLAGSHIP_HOME_ORDER.map((slug, idx) => [slug, idx]));
+  return [...list].sort((a, b) => {
+    const slugA = getCanonicalProductSlug(a, a.id);
+    const slugB = getCanonicalProductSlug(b, b.id);
+    const rankA = rankMap.has(slugA) ? rankMap.get(slugA)! : 999;
+    const rankB = rankMap.has(slugB) ? rankMap.get(slugB)! : 999;
+    return rankA - rankB;
+  });
+}
+
 const DEFAULT_INITIAL_PRODUCTS: Product[] = (() => {
   const seenSlugs = new Set<string>();
   const result: Product[] = [];
@@ -94,8 +117,67 @@ const DEFAULT_INITIAL_PRODUCTS: Product[] = (() => {
     if (canonicalSlug) seenSlugs.add(canonicalSlug);
     result.push(p);
   }
-  return result;
+  return sortProductsForShowcase(result);
 })();
+
+const LOCAL_SLIDE_FALLBACKS = [
+  '/images/projects/world-bank-president-stage.webp',
+  '/images/projects/meta-values-summit.webp',
+  '/images/projects/vissonic-delegate-boardroom.webp',
+];
+
+function sanitizeHomepagePayload(data: HomepageData): HomepageData {
+  const cleanSlides = (data.heroSlides || [])
+    .filter((slide) => slide && slide.isActive !== false)
+    .map((slide, idx) => {
+      const rawImg = String(slide.imageUrl || '').trim();
+      const isBrokenImg =
+        !rawImg ||
+        rawImg.includes('mfpgroup.co.za') ||
+        rawImg.includes('encrypted-tbn0.gstatic.com') ||
+        rawImg.includes('via.placeholder.com');
+
+      let safeLink = String(slide.ctaLink || '/shop').trim();
+      if (safeLink.startsWith('/products/')) {
+        safeLink = safeLink.replace('/products/', '/category/');
+      }
+
+      const rawTitle = String(slide.title || DEFAULT_HERO_SLIDES[idx % DEFAULT_HERO_SLIDES.length].title);
+      const rawSub = String(slide.subtitle || '')
+        .replace(/Intelligen and Intelligent/gi, 'Intelligent')
+        .replace(/Mirroringt/gi, 'Mirroring');
+
+      return {
+        ...slide,
+        title: rawTitle,
+        subtitle: rawSub,
+        ctaLink: safeLink,
+        imageUrl: isBrokenImg ? LOCAL_SLIDE_FALLBACKS[idx % LOCAL_SLIDE_FALLBACKS.length] : rawImg,
+      };
+    });
+
+  const promoBg = String(data.promoBanner?.backgroundImageUrl || '');
+  const safePromoBg =
+    !promoBg || promoBg.includes('images.unsplash.com') || promoBg.includes('via.placeholder.com')
+      ? '/images/projects/vissonic-delegate-boardroom.webp'
+      : promoBg;
+
+  return {
+    ...data,
+    heroSlides: cleanSlides.length > 0 ? cleanSlides : DEFAULT_HERO_SLIDES,
+    stats: {
+      yearsExperience: Math.max(15, Number(data.stats?.yearsExperience) || 15),
+      happyClients: Math.max(140, Number(data.stats?.happyClients) || 140),
+      projectsCompleted: Math.max(1000, Number(data.stats?.projectsCompleted) || 1000),
+    },
+    promoBanner: data.promoBanner
+      ? {
+          ...data.promoBanner,
+          backgroundImageUrl: safePromoBg,
+        }
+      : DEFAULT_HOMEPAGE_DATA.promoBanner,
+  };
+}
 
 function buildHeroSrcSet(rawUrl: string): string | undefined {
   if (!rawUrl || !rawUrl.includes('images.unsplash.com')) return undefined;
@@ -150,13 +232,13 @@ export function Home() {
           getContactData().then(setContact).catch(console.error);
           unsubscribeHome = subscribeToHomepage((data) => {
             if (data && data.heroSlides && data.heroSlides.length > 0) {
-              setContent(data);
+              setContent(sanitizeHomepagePayload(data));
             }
           });
 
           unsubscribeProducts = subscribeToProducts((data) => {
             if (data && data.length > 0) {
-              setProducts(data);
+              setProducts(sortProductsForShowcase(data));
             }
           }, { isActive: true });
 
@@ -621,7 +703,7 @@ export function Home() {
 
              <div 
                className="text-xs sm:text-sm text-white/90 mb-3.5 max-w-xl drop-shadow-sm font-medium leading-relaxed line-clamp-2 prose prose-p:m-0 prose-invert" 
-               dangerouslySetInnerHTML={{ __html: activeHeroSlide.subtitle || '' }} 
+               dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(activeHeroSlide.subtitle || '') }} 
              />
              
              <div className="flex flex-row flex-wrap gap-2.5">
@@ -767,7 +849,7 @@ export function Home() {
                         seed={pSlug}
                         title={pImgSeo.title}
                         alt={pImgSeo.alt}
-                        className="relative z-10 w-full h-full object-cover"
+                        className="relative z-10 w-full h-full object-contain p-3 mix-blend-multiply"
                       />
                     </div>
                     <h3 className="text-lg font-bold text-[#1A2B4C] mb-2">{p.productName}</h3>
@@ -863,7 +945,7 @@ export function Home() {
                            seed={prodSlug}
                            title={cardSeo.title}
                            alt={cardSeo.alt}
-                           className="absolute inset-0 z-10 w-full h-full object-cover mix-blend-multiply transition-transform duration-500 ease-in-out group-hover:scale-105"
+                           className="absolute inset-0 z-10 w-full h-full object-contain p-3 mix-blend-multiply transition-transform duration-500 ease-in-out group-hover:scale-105"
                          />
                        );
                     })()}
@@ -904,7 +986,7 @@ export function Home() {
                        )}
                     </div>
 
-                    <div className="text-slate-600 text-xs font-medium leading-relaxed line-clamp-2 mb-6" dangerouslySetInnerHTML={{ __html: prod.shortDescription || 'Professional unified communications equipment.' }} />
+                    <div className="text-slate-600 text-xs font-medium leading-relaxed line-clamp-2 mb-6" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(prod.shortDescription || 'Professional unified communications equipment.') }} />
                     
                     <div className="mt-auto flex items-end justify-between gap-4 pt-4 border-t border-gray-50">
                       <div className="flex flex-col">
@@ -952,7 +1034,7 @@ export function Home() {
                    return (
                     <Link to={getProductHref(flagshipVideoSet[0], flagshipVideoSet[0].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[0].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[0].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[0].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
                        <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[0].productName}</h3>
                        <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[0].salePrice > 0 ? (flagshipVideoSet[0].salePrice ?? 0) : (flagshipVideoSet[0].regularPrice ?? 0))}</p>
@@ -964,7 +1046,7 @@ export function Home() {
                    return (
                     <Link to={getProductHref(flagshipVideoSet[1], flagshipVideoSet[1].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[1].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[1].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[1].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
                        <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[1].productName}</h3>
                        <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[1].salePrice > 0 ? (flagshipVideoSet[1].salePrice ?? 0) : (flagshipVideoSet[1].regularPrice ?? 0))}</p>
@@ -980,7 +1062,7 @@ export function Home() {
                    return (
                     <Link to={getProductHref(flagshipVideoSet[2], flagshipVideoSet[2].id)} className="w-full h-full min-h-[340px] md:min-h-0 bg-white border border-gray-100 shadow-sm hover:shadow-lg rounded-[2.5rem] p-8 md:p-10 group flex flex-col items-center justify-center relative overflow-hidden text-center">
                        {flagshipVideoSet[2].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={540} height={360} src={optimizeGalleryImageUrl(flagshipVideoSet[2].images[0], 560, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-48 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 relative z-20 mb-6" />
+                         <img loading="lazy" decoding="async" width={540} height={360} src={optimizeGalleryImageUrl(flagshipVideoSet[2].images[0], 560, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-48 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 relative z-20 mb-6" />
                        )}
                        <div className="relative z-20">
                           <span className="text-[#00B4D8] font-black uppercase tracking-widest text-xs mb-2 block">Flagship Boardroom Endpoint</span>
@@ -1000,7 +1082,7 @@ export function Home() {
                    return (
                     <Link to={getProductHref(flagshipVideoSet[3], flagshipVideoSet[3].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[3].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[3].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[3].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
                        <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[3].productName}</h3>
                        <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[3].salePrice > 0 ? (flagshipVideoSet[3].salePrice ?? 0) : (flagshipVideoSet[3].regularPrice ?? 0))}</p>
@@ -1012,7 +1094,7 @@ export function Home() {
                    return (
                     <Link to={getProductHref(flagshipVideoSet[4], flagshipVideoSet[4].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[4].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[4].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[4].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
                        )}
                        <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[4].productName}</h3>
                        <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[4].salePrice > 0 ? (flagshipVideoSet[4].salePrice ?? 0) : (flagshipVideoSet[4].regularPrice ?? 0))}</p>

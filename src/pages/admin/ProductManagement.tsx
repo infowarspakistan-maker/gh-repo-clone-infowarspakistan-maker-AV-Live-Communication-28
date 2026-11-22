@@ -22,23 +22,39 @@ import {
   Truck,
   Sliders,
   Globe,
+  Cloud,
+  Archive,
+  Upload,
+  Star,
+  Save,
 } from 'lucide-react';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RichTextEditor } from '../../components/admin/RichTextEditor';
 import { GoogleCategoryAutocomplete } from '../../components/admin/GoogleCategoryAutocomplete';
+import { ProductsStorageBrowserModal } from '../../components/admin/ProductsStorageBrowserModal';
+import { ProductBackupsModal } from '../../components/admin/ProductBackupsModal';
 import { Link } from 'react-router-dom';
 import {
   subscribeToProducts,
   createProduct,
   updateProduct,
   deleteProduct,
-  uploadProductImage,
   Product,
   Category,
   getCategories,
 } from '../../lib/firebase/firestore-helpers';
 import { extractDirectImageUrls } from '../../lib/image-optimize';
+import {
+  uploadToProductsStorage,
+  deleteFromProductsStorage,
+  isProductsStorageBucketUrl,
+  formatStorageSavingsSummary,
+  PRODUCTS_STORAGE_BUCKET,
+} from '../../lib/firebase/products-storage';
+import {
+  formatFileSizeKb,
+} from '../../lib/client-image-compressor';
 import {
   generateGmcCsv,
   generateGmcXml,
@@ -212,7 +228,141 @@ export function ProductManagement() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isOptimizingUpload, setIsOptimizingUpload] = useState(false);
+  const [uploadOptimizationNote, setUploadOptimizationNote] = useState<string | null>(null);
   const [formData, setFormData] = useState<ProductFormState>(buildDefaultFormState);
+
+  const [showStorageBrowserModal, setShowStorageBrowserModal] = useState(false);
+  const [showBackupsModal, setShowBackupsModal] = useState(false);
+  const [isSavingImagesOnly, setIsSavingImagesOnly] = useState(false);
+  const [storageBusyUrl, setStorageBusyUrl] = useState<string | null>(null);
+
+  const normalizeProductImageUrl = (raw: string): string => {
+    const trimmed = String(raw || '').trim();
+    if (!trimmed) return '';
+    if (trimmed.startsWith('/images/')) return `https://avlive.com.pk${trimmed}`;
+    return trimmed;
+  };
+
+  const handleOptimizedDirectUpload = async (
+    file: File,
+    targetSlot: 'auto' | 'main' | 'additional' = 'auto'
+  ) => {
+    setSelectedFile(file);
+    setIsOptimizingUpload(true);
+    setUploadOptimizationNote(null);
+    try {
+      const slugBase = formData.productName || formData.gmcId || file.name;
+      const uploaded = await uploadToProductsStorage(file, {
+        slugHint: slugBase,
+        includeGmcJpg: true,
+        allowSiteVaultFallback: true,
+      });
+
+      const finalUrl = normalizeProductImageUrl(uploaded.gmcJpgUrl || uploaded.downloadUrl);
+      if (finalUrl) {
+        setFormData((prev) => {
+          const useMain = targetSlot === 'main' || (targetSlot === 'auto' && !prev.mainImageUrl.trim());
+          if (useMain) {
+            const oldMain = prev.mainImageUrl.trim();
+            const nextAdditional =
+              targetSlot === 'main' && oldMain && oldMain !== finalUrl && !prev.additionalImageUrls.includes(oldMain)
+                ? [oldMain, ...prev.additionalImageUrls].slice(0, 10)
+                : prev.additionalImageUrls;
+            return {
+              ...prev,
+              mainImageUrl: finalUrl,
+              additionalImageUrls: nextAdditional,
+            };
+          }
+          return {
+            ...prev,
+            additionalImageUrls: prev.additionalImageUrls.includes(finalUrl)
+              ? prev.additionalImageUrls
+              : [...prev.additionalImageUrls.filter(Boolean).slice(0, 9), finalUrl],
+          };
+        });
+        setSelectedFile(null);
+        const summary = formatStorageSavingsSummary(uploaded);
+        setUploadOptimizationNote(summary);
+        showNotice(`Uploaded ${formatFileSizeKb(uploaded.sizeBytes)} (${uploaded.savingsPercent}% lighter)!`);
+      }
+    } catch (err: any) {
+      setUploadOptimizationNote(err?.message || 'Upload failed — check Storage authorization.');
+      showNotice(err?.message || 'Image upload failed.', 'error');
+    } finally {
+      setIsOptimizingUpload(false);
+    }
+  };
+
+  const handleDeleteStorageFileForUrl = async (
+    url: string,
+    slotType: 'main' | 'additional',
+    index?: number
+  ) => {
+    const clean = url.trim();
+    if (!clean) return;
+    setStorageBusyUrl(clean);
+    try {
+      const res = await deleteFromProductsStorage(clean);
+      if (res.authRequired) {
+        showNotice(res.reason || 'Click "Storage: Products/" to authorize Google Storage first.', 'error');
+        return;
+      }
+      if (slotType === 'main') {
+        setFormData((prev) => {
+          const nextMain = prev.additionalImageUrls[0] || '';
+          return {
+            ...prev,
+            mainImageUrl: nextMain,
+            additionalImageUrls: nextMain ? prev.additionalImageUrls.slice(1) : prev.additionalImageUrls,
+          };
+        });
+      } else if (typeof index === 'number') {
+        removeAdditionalImageSlot(index);
+      }
+      showNotice(
+        res.deleted
+          ? 'Deleted image file from Storage and removed from product.'
+          : 'Removed image URL from product.'
+      );
+    } catch (err: any) {
+      showNotice(err?.message || 'Could not delete image file.', 'error');
+    } finally {
+      setStorageBusyUrl(null);
+    }
+  };
+
+  const handleSaveImagesOnly = async () => {
+    if (!editingId) return;
+    setIsSavingImagesOnly(true);
+    try {
+      const mainImg = normalizeProductImageUrl(formData.mainImageUrl);
+      const extraImgs = formData.additionalImageUrls
+        .map(normalizeProductImageUrl)
+        .filter((u) => /^https?:\/\//i.test(u) && u !== mainImg)
+        .slice(0, 10);
+      const allImages = Array.from(new Set([mainImg, ...extraImgs].filter((u) => /^https?:\/\//i.test(u))));
+
+      await updateProduct(editingId, {
+        image: allImages[0] || '',
+        images: allImages,
+        additionalImages: allImages.slice(1, 11),
+        imagesCustomized: true,
+      });
+
+      setFormData((prev) => ({
+        ...prev,
+        mainImageUrl: allImages[0] || '',
+        additionalImageUrls: allImages.slice(1, 11),
+      }));
+      showNotice('Product images saved (previous version backed up automatically).');
+    } catch (err: any) {
+      showNotice(err?.message || 'Failed to save product images.', 'error');
+    } finally {
+      setIsSavingImagesOnly(false);
+    }
+  };
 
   // Search, Filter & Exporter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -333,11 +483,7 @@ export function ProductManagement() {
       (product as any).imageUrl,
     ]);
     const mainImage = allImages[0] || '';
-    const extraImages = (
-      Array.isArray(product.additionalImages) && product.additionalImages.length > 0
-        ? product.additionalImages
-        : allImages.slice(1)
-    ).slice(0, 10);
+    const extraImages = allImages.filter((u) => u !== mainImage).slice(0, 10);
 
     const parsedWeight = parseMeasurement(product.shippingWeight);
     const parsedLength = parseMeasurement(product.shippingLength);
@@ -482,18 +628,21 @@ export function ProductManagement() {
     setIsSubmitting(true);
 
     try {
-      let mainImage = formData.mainImageUrl.trim();
+      let mainImage = normalizeProductImageUrl(formData.mainImageUrl);
       if (selectedFile) {
-        const tempId = editingId || `new_${Date.now()}`;
-        const uploadedUrl = await uploadProductImage(selectedFile, tempId);
+        const uploaded = await uploadToProductsStorage(selectedFile, {
+          slugHint: formData.productName || formData.gmcId || selectedFile.name,
+          includeGmcJpg: true,
+          allowSiteVaultFallback: true,
+        });
         if (!mainImage) {
-          mainImage = uploadedUrl;
+          mainImage = normalizeProductImageUrl(uploaded.gmcJpgUrl || uploaded.downloadUrl);
         }
       }
 
       const cleanedAdditionalImages = formData.additionalImageUrls
-        .map((u) => u.trim())
-        .filter((u) => /^https?:\/\//i.test(u))
+        .map(normalizeProductImageUrl)
+        .filter((u) => /^https?:\/\//i.test(u) && u !== mainImage)
         .slice(0, 10);
 
       const allImages = Array.from(new Set([mainImage, ...cleanedAdditionalImages].filter(Boolean)));
@@ -561,6 +710,7 @@ export function ProductManagement() {
         images: allImages,
         image: mainImage,
         additionalImages: cleanedAdditionalImages,
+        imagesCustomized: true,
         videoLink: formData.videoLink.trim(),
         categoryIds: [],
         categorySlugs:
@@ -683,9 +833,13 @@ export function ProductManagement() {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteProduct(id);
+      const res = await deleteProduct(id);
       setConfirmDeleteId(null);
-      showNotice('Product removed from catalog.');
+      showNotice(
+        res.backupId
+          ? 'Product archived to Backups & removed from catalog. Open "Backups & Restore" anytime to recover it.'
+          : 'Product removed from catalog.'
+      );
     } catch (error) {
       console.error('Error deleting product:', error);
       showNotice('Failed to delete product.', 'error');
@@ -784,6 +938,22 @@ export function ProductManagement() {
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setShowStorageBrowserModal(true)}
+            className="bg-sky-50 hover:bg-sky-100 text-[#0077B6] px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-sky-200 shadow-sm flex items-center gap-2"
+          >
+            <Cloud size={14} className="text-[#00B4D8]" />
+            Storage: Products/
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowBackupsModal(true)}
+            className="bg-white hover:bg-gray-50 text-[#1A2B4C] px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-gray-200 shadow-sm flex items-center gap-2"
+          >
+            <Archive size={14} className="text-amber-600" />
+            Backups &amp; Restore
+          </button>
           <Link
             to="/admin/media-guide"
             className="hidden sm:flex bg-white hover:bg-gray-50 text-[#1A2B4C] px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-gray-200 shadow-sm items-center gap-2"
@@ -1345,26 +1515,62 @@ export function ProductManagement() {
 
                     {/* image_link */}
                     <div className="sm:col-span-2">
-                      <label
-                        htmlFor="gmc-image-link"
-                        className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5"
-                      >
-                        Main Image URL <span className="text-red-500">*</span>{' '}
-                        <span className="font-mono text-gray-400 normal-case">
-                          (image_link — Clear product photo, white background, no watermarks)
-                        </span>
-                      </label>
-                      <div className="flex gap-3 items-start">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                        <label
+                          htmlFor="gmc-image-link"
+                          className="text-[10px] font-black text-gray-500 uppercase tracking-widest"
+                        >
+                          Main Image URL <span className="text-red-500">*</span>{' '}
+                          <span className="font-mono text-gray-400 normal-case">
+                            (image_link — Stored in gs://{PRODUCTS_STORAGE_BUCKET}/Products)
+                          </span>
+                        </label>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <label className="cursor-pointer inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1A2B4C] hover:bg-[#00B4D8] text-white text-[10px] font-black uppercase tracking-wider transition-colors">
+                            <Upload size={11} /> Upload Main
+                            <input
+                              type="file"
+                              accept="image/*"
+                              disabled={isOptimizingUpload}
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleOptimizedDirectUpload(file, 'main');
+                                e.target.value = '';
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setShowStorageBrowserModal(true)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0077B6] border border-sky-200 text-[10px] font-black uppercase tracking-wider"
+                          >
+                            <Cloud size={11} /> Browse Products/
+                          </button>
+                          {editingId && (
+                            <button
+                              type="button"
+                              disabled={isSavingImagesOnly}
+                              onClick={handleSaveImagesOnly}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-wider disabled:opacity-60"
+                            >
+                              {isSavingImagesOnly ? <Loader2 size={11} className="animate-spin" /> : <Save size={11} />}
+                              Save Images
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2.5 items-center">
                         <div className="flex-1">
                           <input
                             id="gmc-image-link"
                             name="image_link"
                             type="url"
                             required={!selectedFile}
-                            placeholder="https://avlive.com.pk/images/products/poly-x70-studio.jpg"
+                            placeholder="https://firebasestorage.googleapis.com/... or https://avlive.com.pk/images/products/..."
                             value={formData.mainImageUrl}
                             onChange={(e) =>
-                              setFormData({ ...formData, mainImageUrl: e.target.value })
+                              setFormData({ ...formData, mainImageUrl: normalizeProductImageUrl(e.target.value) })
                             }
                             className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 focus:outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8] font-mono text-xs text-[#1A2B4C]"
                           />
@@ -1377,6 +1583,44 @@ export function ProductManagement() {
                               title={`${formData.productName || 'Product'} main image preview`}
                               className="w-full h-full object-contain"
                             />
+                          </div>
+                        )}
+                        {formData.mainImageUrl && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  mainImageUrl: prev.additionalImageUrls[0] || '',
+                                  additionalImageUrls: prev.additionalImageUrls.slice(1),
+                                }))
+                              }
+                              title="Remove main image from product"
+                              aria-label="Remove main image from product"
+                              className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                            >
+                              <X size={14} />
+                            </button>
+                            {(isProductsStorageBucketUrl(formData.mainImageUrl) ||
+                              formData.mainImageUrl.includes('/images/')) && (
+                              <button
+                                type="button"
+                                disabled={storageBusyUrl === formData.mainImageUrl}
+                                onClick={() =>
+                                  handleDeleteStorageFileForUrl(formData.mainImageUrl, 'main')
+                                }
+                                title="Delete image file from Storage & remove"
+                                aria-label="Delete main image file from Storage"
+                                className="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-colors disabled:opacity-50"
+                              >
+                                {storageBusyUrl === formData.mainImageUrl ? (
+                                  <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                  <Trash2 size={14} />
+                                )}
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1964,21 +2208,44 @@ export function ProductManagement() {
 
                   {/* Additional Images (Up to 10 URL inputs) */}
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-wrap justify-between items-center gap-2">
                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
                         Additional Images{' '}
                         <span className="font-mono text-gray-400 normal-case">
                           (additional_image_link — {formData.additionalImageUrls.length}/10)
                         </span>
                       </label>
-                      <button
-                        type="button"
-                        disabled={formData.additionalImageUrls.length >= 10}
-                        onClick={addAdditionalImageSlot}
-                        className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl bg-[#1A2B4C] text-white hover:bg-[#00B4D8] disabled:opacity-40 transition-colors"
-                      >
-                        <Plus size={12} /> Add Image URL
-                      </button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <label className="cursor-pointer inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-[#0077B6] border border-sky-200 transition-colors">
+                          <Upload size={12} /> Upload Photo
+                          <input
+                            type="file"
+                            accept="image/*"
+                            disabled={isOptimizingUpload || formData.additionalImageUrls.length >= 10}
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleOptimizedDirectUpload(file, 'additional');
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowStorageBrowserModal(true)}
+                          className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[#1A2B4C] hover:border-[#00B4D8] transition-colors"
+                        >
+                          <Cloud size={12} className="text-[#00B4D8]" /> Pick from Products/
+                        </button>
+                        <button
+                          type="button"
+                          disabled={formData.additionalImageUrls.length >= 10}
+                          onClick={addAdditionalImageSlot}
+                          className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl bg-[#1A2B4C] text-white hover:bg-[#00B4D8] disabled:opacity-40 transition-colors"
+                        >
+                          <Plus size={12} /> Add Image URL
+                        </button>
+                      </div>
                     </div>
 
                     {formData.additionalImageUrls.length === 0 ? (
@@ -1994,66 +2261,140 @@ export function ProductManagement() {
                       </div>
                     ) : (
                       <div className="space-y-2.5">
-                        {formData.additionalImageUrls.map((imgUrl, idx) => (
-                          <div key={idx} className="flex items-center gap-2.5">
-                            <span className="w-7 text-center text-[10px] font-mono font-bold text-gray-400">
-                              #{idx + 1}
-                            </span>
-                            <input
-                              type="url"
-                              name={`additional_image_link_${idx}`}
-                              placeholder="https://avlive.com.pk/images/products/poly-x70-boardroom.jpg"
-                              value={imgUrl}
-                              onChange={(e) => updateAdditionalImageSlot(idx, e.target.value)}
-                              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#00B4D8] font-mono text-xs text-[#1A2B4C]"
-                            />
-                            {/^https?:\/\//i.test(imgUrl) && (
-                              <img
-                                src={imgUrl}
-                                alt={`${formData.productName || 'Product'} additional image ${idx + 1}`}
-                                title={`${formData.productName || 'Product'} additional image ${idx + 1}`}
-                                className="w-9 h-9 rounded-lg border border-gray-200 object-contain bg-white p-0.5 shrink-0"
+                        {formData.additionalImageUrls.map((imgUrl, idx) => {
+                          const canDeleteStorageFile =
+                            isProductsStorageBucketUrl(imgUrl) || imgUrl.includes('/images/');
+                          return (
+                            <div key={idx} className="flex items-center gap-2">
+                              <span className="w-7 text-center text-[10px] font-mono font-bold text-gray-400">
+                                #{idx + 1}
+                              </span>
+                              <input
+                                type="url"
+                                name={`additional_image_link_${idx}`}
+                                placeholder="https://firebasestorage.googleapis.com/... or https://avlive.com.pk/images/products/..."
+                                value={imgUrl}
+                                onChange={(e) =>
+                                  updateAdditionalImageSlot(idx, normalizeProductImageUrl(e.target.value))
+                                }
+                                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#00B4D8] font-mono text-xs text-[#1A2B4C]"
                               />
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => removeAdditionalImageSlot(idx)}
-                              aria-label={`Remove additional image ${idx + 1}`}
-                              className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                            >
-                              <X size={15} />
-                            </button>
-                          </div>
-                        ))}
+                              {/^https?:\/\//i.test(imgUrl) && (
+                                <img
+                                  src={imgUrl}
+                                  alt={`${formData.productName || 'Product'} additional image ${idx + 1}`}
+                                  title={`${formData.productName || 'Product'} additional image ${idx + 1}`}
+                                  className="w-9 h-9 rounded-lg border border-gray-200 object-contain bg-white p-0.5 shrink-0"
+                                />
+                              )}
+                              {imgUrl.trim() && (
+                                <button
+                                  type="button"
+                                  title="Make this the Main Image"
+                                  onClick={() => {
+                                    const promoted = imgUrl.trim();
+                                    setFormData((prev) => {
+                                      const oldMain = prev.mainImageUrl.trim();
+                                      const remaining = prev.additionalImageUrls.filter((_, i) => i !== idx);
+                                      const nextAdditional =
+                                        oldMain && oldMain !== promoted
+                                          ? [oldMain, ...remaining].slice(0, 10)
+                                          : remaining;
+                                      return {
+                                        ...prev,
+                                        mainImageUrl: promoted,
+                                        additionalImageUrls: nextAdditional,
+                                      };
+                                    });
+                                  }}
+                                  className="px-2 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0077B6] text-[9px] font-black uppercase tracking-wider shrink-0"
+                                >
+                                  <Star size={11} className="inline mr-0.5" /> Main
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => removeAdditionalImageSlot(idx)}
+                                aria-label={`Remove additional image ${idx + 1}`}
+                                title="Remove from product"
+                                className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                              >
+                                <X size={15} />
+                              </button>
+                              {canDeleteStorageFile && (
+                                <button
+                                  type="button"
+                                  disabled={storageBusyUrl === imgUrl}
+                                  onClick={() =>
+                                    handleDeleteStorageFileForUrl(imgUrl, 'additional', idx)
+                                  }
+                                  aria-label={`Delete additional image ${idx + 1} from Storage`}
+                                  title="Delete file from Storage"
+                                  className="p-2 rounded-xl text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                                >
+                                  {storageBusyUrl === imgUrl ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <Trash2 size={14} />
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
 
-                  {/* Optional Direct Upload */}
+                  {/* Auto-Optimized Lightweight Image Upload */}
                   <div>
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1.5">
-                      Optional Direct Image Upload (Firebase Storage)
-                    </label>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        Fast Upload to gs://{PRODUCTS_STORAGE_BUCKET}/Products (Auto-Compressed ~50–90 KB WebP)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowStorageBrowserModal(true)}
+                        className="text-[10px] font-black text-[#00B4D8] hover:text-[#1A2B4C] uppercase tracking-wider inline-flex items-center gap-1"
+                      >
+                        Manage Products/ Bucket <ExternalLink size={11} />
+                      </button>
+                    </div>
                     <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center hover:border-[#00B4D8] hover:bg-[#00B4D8]/5 transition-all cursor-pointer bg-gray-50/50 relative overflow-hidden">
                       <input
                         type="file"
                         accept="image/*"
                         id="product-image-upload"
+                        disabled={isOptimizingUpload}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleOptimizedDirectUpload(file, 'auto');
+                          }
+                          e.target.value = '';
+                        }}
                       />
-                      {selectedFile ? (
+                      {isOptimizingUpload ? (
+                        <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#00B4D8]">
+                          <Loader2 size={16} className="animate-spin" />
+                          <span>Compressing to lightweight WebP &amp; uploading to Products/...</span>
+                        </div>
+                      ) : selectedFile ? (
                         <div className="flex items-center justify-center gap-2 text-xs font-bold text-emerald-700">
                           <Check size={16} />
-                          <span>{selectedFile.name}</span>
+                          <span>{selectedFile.name} (queued)</span>
                         </div>
                       ) : (
                         <div className="flex items-center justify-center gap-2 text-xs font-semibold text-gray-500 pointer-events-none">
                           <ImageIcon size={16} className="text-gray-400" />
-                          <span>Drop image file or click to upload (Direct HTTPS URLs preferred for GMC)</span>
+                          <span>Drop any raw photo here — auto-compressed to ~50–90 KB &amp; saved to Products/</span>
                         </div>
                       )}
                     </div>
+                    {uploadOptimizationNote && (
+                      <p className="text-[11px] font-bold text-emerald-700 mt-1.5">{uploadOptimizationNote}</p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -2603,6 +2944,44 @@ export function ProductManagement() {
             </motion.div>
           </div>
         )}
+
+        <ProductsStorageBrowserModal
+          isOpen={showStorageBrowserModal}
+          onClose={() => setShowStorageBrowserModal(false)}
+          defaultSlugHint={formData.productName || formData.gmcId}
+          hasActiveProductForm={showForm}
+          onSelectAsMain={(url) => {
+            setFormData((prev) => {
+              const oldMain = prev.mainImageUrl.trim();
+              const nextAdditional =
+                oldMain && oldMain !== url && !prev.additionalImageUrls.includes(oldMain)
+                  ? [oldMain, ...prev.additionalImageUrls].slice(0, 10)
+                  : prev.additionalImageUrls;
+              return {
+                ...prev,
+                mainImageUrl: url,
+                additionalImageUrls: nextAdditional,
+              };
+            });
+          }}
+          onAddToAdditional={(url) => {
+            setFormData((prev) => ({
+              ...prev,
+              additionalImageUrls:
+                prev.additionalImageUrls.includes(url) || prev.mainImageUrl === url
+                  ? prev.additionalImageUrls
+                  : [...prev.additionalImageUrls.filter(Boolean).slice(0, 9), url],
+            }));
+          }}
+          onNotify={showNotice}
+        />
+
+        <ProductBackupsModal
+          isOpen={showBackupsModal}
+          onClose={() => setShowBackupsModal(false)}
+          products={products}
+          onNotify={showNotice}
+        />
       </AnimatePresence>
     </div>
   );

@@ -5,6 +5,7 @@ import { subscribeToAbout, AboutData } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { RealProjectsAndClients } from '../components/RealProjectsAndClients';
+import { cleanRichTextHtml } from '../lib/html-sanitize';
 
 export function About() {
   const [content, setContent] = useState<AboutData | null>(null);
@@ -89,7 +90,7 @@ export function About() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="text-xs sm:text-sm md:text-base text-white/90 max-w-3xl mx-auto leading-relaxed prose prose-invert max-w-none [&_*]:break-words"
-            dangerouslySetInnerHTML={{ __html: data.heroSubheading }}
+            dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.heroSubheading) }}
           />
         </div>
       </div>
@@ -130,7 +131,7 @@ export function About() {
             </div>
             <div>
               <h3 className="text-2xl font-black text-[#1A2B4C] mb-4">Our Mission</h3>
-              <div className="text-gray-600 leading-relaxed text-lg prose prose-lg max-w-none [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: data.mission }} />
+              <div className="text-gray-600 leading-relaxed text-lg prose prose-lg max-w-none [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.mission) }} />
             </div>
           </motion.div>
           <motion.div 
@@ -142,7 +143,7 @@ export function About() {
             </div>
             <div>
               <h3 className="text-2xl font-black text-white mb-4">Our Vision</h3>
-              <div className="text-gray-300 leading-relaxed text-lg prose prose-lg prose-invert max-w-none [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: data.vision }} />
+              <div className="text-gray-300 leading-relaxed text-lg prose prose-lg prose-invert max-w-none [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.vision) }} />
             </div>
           </motion.div>
         </div>
@@ -153,7 +154,7 @@ export function About() {
             <div className="p-12 md:p-16 flex flex-col justify-center">
                <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.3em] mb-4 block">Established 2010</span>
                <h2 className="text-4xl font-black text-[#1A2B4C] mb-8 tracking-tight">Bridging the Communication Gap</h2>
-               <div className="text-gray-600 text-lg leading-relaxed whitespace-pre-wrap space-y-6 font-medium prose prose-lg max-w-none [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: data.history }} />
+               <div className="text-gray-600 text-lg leading-relaxed whitespace-pre-wrap space-y-6 font-medium prose prose-lg max-w-none [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.history) }} />
             </div>
             <div className="relative min-h-[400px]">
               <img
@@ -190,7 +191,7 @@ export function About() {
         <div className="mt-16 bg-[#00B4D8] rounded-[4rem] p-12 md:p-16 text-white flex flex-col lg:flex-row items-center gap-12 relative overflow-hidden">
           <div className="relative z-10 lg:w-2/3">
              <h2 className="text-4xl font-black mb-8 tracking-tight">Driven by Human Intelligence</h2>
-             <div className="text-xl text-white/90 leading-relaxed font-medium prose prose-invert max-w-none [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: data.teamDescription }} />
+             <div className="text-xl text-white/90 leading-relaxed font-medium prose prose-invert max-w-none [&_*]:break-words [&_*]:whitespace-normal" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.teamDescription) }} />
              <div className="mt-12 flex items-center gap-6">
                 <div className="flex -space-x-4">
                   {[1,2,3,4].map(i => (

@@ -33,15 +33,20 @@ export const BlurProductImage: React.FC<BlurProductImageProps> = ({
   placeholderClassName = 'absolute inset-0 w-full h-full object-cover',
 }) => {
   const [loaded, setLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
+  const effectiveSrc = hasError ? '/images/products/poly-x70-studio.jpg' : src;
   const lookupSeed = seed || src;
   const blurDataUri = getProductBlurDataUri(lookupSeed, 32, 24);
   const blurHash = getProductBlurHash(lookupSeed);
 
   useEffect(() => {
+    setHasError(false);
     if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
       setLoaded(true);
+    } else {
+      setLoaded(false);
     }
   }, [src]);
 
@@ -61,7 +66,7 @@ export const BlurProductImage: React.FC<BlurProductImageProps> = ({
       />
       <img
         ref={imgRef}
-        src={src}
+        src={effectiveSrc}
         alt={alt}
         title={title || alt}
         width={width}
@@ -70,7 +75,13 @@ export const BlurProductImage: React.FC<BlurProductImageProps> = ({
         fetchPriority={fetchPriority}
         decoding={decoding}
         onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(true)}
+        onError={() => {
+          if (!hasError) {
+            setHasError(true);
+          } else {
+            setLoaded(true);
+          }
+        }}
         className={`${className} transition-opacity duration-300 ${
           loaded ? 'opacity-100' : 'opacity-0'
         }`}

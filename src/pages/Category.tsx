@@ -42,7 +42,7 @@ const FALLBACK_PRODUCT_CATEGORIES: Record<
   },
   'touch-panels': {
     name: 'Boardroom Touch Panels & Room Controllers',
-    imageUrl: 'https://www.cisco.com/c/dam/assets/support/product-images/model/collaboration-endpoints-spark-room-kit.jpg/_jcr_content/renditions/collaboration-endpoints-spark-room-kit-600x220.jpg',
+    imageUrl: '/images/products/cisco-room-kit-studio.jpg',
     description:
       'Dedicated touch-screen room controllers, scheduling panels, stealth podium teleprompters, and AV automation consoles for Zoom Rooms, Microsoft Teams Rooms, Cisco Webex, and Poly Studio boardrooms in Pakistan.',
     productSlugs: [
@@ -84,7 +84,7 @@ const FALLBACK_PRODUCT_CATEGORIES: Record<
   },
   'boardroom-codecs': {
     name: 'Enterprise H.323 / SIP Boardroom Codecs',
-    imageUrl: 'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/room-kit-eq-ds.docx/_jcr_content/renditions/room-kit-eq-ds_0.png',
+    imageUrl: '/images/products/cisco-room-kit-eq.jpg',
     description:
       'Hardware telepresence codecs including Polycom RealPresence Group 500 (7200-64550-001), Poly G7500, and Cisco Room Kit Pro/Plus for standards-based multipoint video conferencing in Pakistan.',
     productSlugs: [

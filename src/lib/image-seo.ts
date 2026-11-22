@@ -215,6 +215,18 @@ export const VIDEO_CONFERENCE_MEDIA_SEO: Record<string, ImageSeoMetadata> = {
     width: 1200,
     height: 800,
   },
+  '/images/products/polycom-group-500-eagleeye-iv.webp': {
+    title: 'Polycom RealPresence Group 500 Video Conferencing Codec & EagleEye IV 12x PTZ Camera | AV Live Pakistan',
+    alt: 'Polycom RealPresence Group 500 HD video conferencing codec chassis paired with the EagleEye IV 12x optical zoom PTZ camera and tabletop microphone array, supplied across Pakistan by AV Live.',
+    width: 1200,
+    height: 900,
+  },
+  '/images/products/polycom-group-500-eagleeye-iv.jpg': {
+    title: 'Polycom RealPresence Group 500 Video Conferencing Codec & EagleEye IV 12x PTZ Camera | AV Live Pakistan',
+    alt: 'Polycom RealPresence Group 500 HD video conferencing codec chassis paired with the EagleEye IV 12x optical zoom PTZ camera and tabletop microphone array, supplied across Pakistan by AV Live.',
+    width: 1200,
+    height: 900,
+  },
   '/images/products/poly-x70-studio.webp': {
     title: 'HP Poly Studio X70 / X72 Dual-4K Lens Video Conferencing Bar — Studio View | AV Live Pakistan',
     alt: 'HP Poly Studio X70 and X72 flagship dual-4K 20MP all-in-one video conferencing bar with Poly DirectorAI speaker tracking, supplied with official warranty in Pakistan by AV Live.',

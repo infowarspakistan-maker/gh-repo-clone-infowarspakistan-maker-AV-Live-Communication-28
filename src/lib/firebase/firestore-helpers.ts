@@ -18,12 +18,13 @@ import {
   arrayUnion,
 } from 'firebase/firestore';
 import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
-import { db, storage, auth } from './client';
+  arrayRemove,
+} from 'firebase/firestore';
+import { db, auth, testFirestoreConnection } from './client';
+import {
+  uploadToProductsStorage,
+  deleteFromProductsStorage,
+} from './products-storage';
 import { v4 as uuidv4 } from 'uuid';
 import {
   SEO_SLUG_TO_PRODUCT_ID,
@@ -198,35 +199,89 @@ export interface Product {
   seoTags?: string;
   seoMetaDescription?: string;
   imageAltText?: string;
+  imagesCustomized?: boolean;
   customPagePath?: string;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
+}
+
+export interface ProductBackup {
+  id?: string;
+  originalProductId: string;
+  gmcId?: string;
+  productName: string;
+  brand?: string;
+  sku?: string;
+  reason: 'before_delete' | 'before_image_update' | 'manual_snapshot';
+  backedUpBy: string;
+  images: string[];
+  productSnapshot: Record<string, any>;
+  createdAt?: Timestamp | string;
+}
+
+function stripUndefinedDeep<T>(val: T): T {
+  if (Array.isArray(val)) {
+    return val.map((item) => stripUndefinedDeep(item)) as unknown as T;
+  }
+  if (val && typeof val === 'object' && Object.getPrototypeOf(val) === Object.prototype) {
+    const clean: Record<string, any> = {};
+    for (const [k, v] of Object.entries(val as Record<string, any>)) {
+      if (v !== undefined) {
+        clean[k] = stripUndefinedDeep(v);
+      }
+    }
+    return clean as T;
+  }
+  return val;
+}
+
+function serializeSnapshotForBackup(prod: Record<string, any>): Record<string, any> {
+  const clean: Record<string, any> = {};
+  for (const [k, v] of Object.entries(prod || {})) {
+    if (v === undefined) continue;
+    if (v && typeof (v as any).toDate === 'function') {
+      clean[k] = (v as any).toDate().toISOString();
+    } else if (v && typeof v === 'object' && Object.getPrototypeOf(v) === Object.prototype) {
+      clean[k] = serializeSnapshotForBackup(v);
+    } else {
+      clean[k] = v;
+    }
+  }
+  return clean;
 }
 
 export function enrichProductImages(p: Product): Product {
   const canonicalSlug = getCanonicalProductSlug(p, p.id);
   const meta = PRODUCT_GMC_METADATA[canonicalSlug] || (p.id ? PRODUCT_GMC_METADATA[p.id] : undefined);
 
-  // Extract direct image URLs from the product document and catalog metadata
+  // Extract direct image URLs from the product document
   const rawExternalImgs = extractDirectImageUrls([
-    ...(Array.isArray(p.images) ? p.images : typeof p.images === 'string' ? [p.images] : []),
     p.image,
+    ...(Array.isArray(p.images) ? p.images : typeof p.images === 'string' ? [p.images] : []),
+    ...(Array.isArray(p.additionalImages) ? p.additionalImages : []),
     (p as any).imageUrl,
   ]);
-  const metaExternalImgs = extractDirectImageUrls(meta?.images || []);
-  const hasCuratedLocalMain = metaExternalImgs.some(
-    (u) => u.startsWith('/images/products/') && !u.includes('/avlive-')
-  );
 
-  const mergedImgs = Array.from(
-    new Set(
-      hasCuratedLocalMain
-        ? [...metaExternalImgs, ...rawExternalImgs]
-        : [...rawExternalImgs, ...metaExternalImgs]
-    )
-  );
+  let finalImages: string[];
+  if (p.imagesCustomized === true) {
+    // Respect explicit admin image additions, ordering, and deletions without re-injecting catalog metadata images
+    finalImages = rawExternalImgs;
+  } else {
+    const metaExternalImgs = extractDirectImageUrls(meta?.images || []);
+    const hasCuratedLocalMain = metaExternalImgs.some(
+      (u) => u.startsWith('/images/products/') && !u.includes('/avlive-')
+    );
 
-  const finalImages = mergedImgs.length > 0 ? mergedImgs : [DEFAULT_EXTERNAL_PRODUCT_IMAGE];
+    const mergedImgs = Array.from(
+      new Set(
+        hasCuratedLocalMain
+          ? [...metaExternalImgs, ...rawExternalImgs]
+          : [...rawExternalImgs, ...metaExternalImgs]
+      )
+    );
+
+    finalImages = mergedImgs.length > 0 ? mergedImgs : [DEFAULT_EXTERNAL_PRODUCT_IMAGE];
+  }
 
   const rawSlugs = Array.isArray(p.categorySlugs)
     ? p.categorySlugs
@@ -264,7 +319,8 @@ export function enrichProductImages(p: Product): Product {
     categoryIds: mergedCategoryIds,
     categorySlugs: normalizedSlugs.length > 0 ? normalizedSlugs : p.categorySlugs,
     images: finalImages,
-    image: finalImages[0],
+    image: finalImages[0] || '',
+    additionalImages: finalImages.slice(1, 11),
   };
 }
 
@@ -286,11 +342,39 @@ export function deduplicateProducts(products: Product[]): Product[] {
   return result;
 }
 
+let memoryDeletedCatalogIds = new Set<string>();
+
+function isProductTombstoned(p: Partial<Product>, tombstones: Set<string>): boolean {
+  if (tombstones.size === 0) return false;
+  const canonical = getCanonicalProductSlug(p, p.id);
+  return Boolean(
+    (p.id && tombstones.has(p.id)) ||
+    (p.slug && tombstones.has(p.slug)) ||
+    (canonical && tombstones.has(canonical))
+  );
+}
+
+async function fetchDeletedCatalogIds(): Promise<Set<string>> {
+  if (isFirestoreQuotaExhausted()) return memoryDeletedCatalogIds;
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'catalog_tombstones'));
+    if (snap.exists()) {
+      const ids = Array.isArray(snap.data()?.deletedIds) ? snap.data().deletedIds : [];
+      memoryDeletedCatalogIds = new Set(ids.map((x: any) => String(x)));
+    }
+  } catch {
+    // ignore read failures
+  }
+  return memoryDeletedCatalogIds;
+}
+
 function getFallbackFilteredProducts(filter?: { isActive?: boolean; categoryId?: string }): Product[] {
   let products = Object.keys(PRODUCT_GMC_METADATA)
     .map((slug) => buildFallbackProductFromGmcMeta(slug))
     .filter(Boolean) as Product[];
-  products = deduplicateProducts(products);
+  products = deduplicateProducts(products).filter(
+    (p) => !isProductTombstoned(p, memoryDeletedCatalogIds)
+  );
   if (filter?.isActive !== undefined) {
     products = products.filter((p) => Boolean(p.isActive) === filter.isActive);
   }
@@ -304,6 +388,11 @@ function getFallbackFilteredProducts(filter?: { isActive?: boolean; categoryId?:
   return products;
 }
 
+// Validate Firestore connectivity once at startup
+if (typeof window !== 'undefined') {
+  testFirestoreConnection().catch(() => {});
+}
+
 export function subscribeToProducts(
   callback: (products: Product[]) => void,
   filter?: { isActive?: boolean; categoryId?: string }
@@ -313,41 +402,74 @@ export function subscribeToProducts(
     return () => {};
   }
 
+  let latestFirestoreProducts: Product[] = [];
+  let hasInitialProducts = false;
+
+  const emitCombined = () => {
+    let list =
+      latestFirestoreProducts.length > 0
+        ? [...latestFirestoreProducts]
+        : (Object.keys(PRODUCT_GMC_METADATA)
+            .map((slug) => buildFallbackProductFromGmcMeta(slug))
+            .filter(Boolean) as Product[]);
+
+    list = deduplicateProducts(list).filter(
+      (p) => !isProductTombstoned(p, memoryDeletedCatalogIds)
+    );
+    if (filter?.isActive !== undefined) {
+      list = list.filter((p) => Boolean(p.isActive) === filter.isActive);
+    }
+    if (filter?.categoryId) {
+      list = list.filter(
+        (p) =>
+          p.categoryIds?.includes(filter.categoryId!) ||
+          p.categorySlugs?.includes(filter.categoryId!)
+      );
+    }
+    list.sort((a, b) => {
+      const timeA = typeof a.createdAt?.toMillis === 'function' ? a.createdAt.toMillis() : 0;
+      const timeB = typeof b.createdAt?.toMillis === 'function' ? b.createdAt.toMillis() : 0;
+      return timeB - timeA;
+    });
+    callback(list);
+  };
+
+  const unsubTombstones = onSnapshot(
+    doc(db, 'settings', 'catalog_tombstones'),
+    (snap) => {
+      const ids = snap.exists() && Array.isArray(snap.data()?.deletedIds)
+        ? snap.data().deletedIds
+        : [];
+      memoryDeletedCatalogIds = new Set(ids.map((x: any) => String(x)));
+      if (hasInitialProducts) emitCombined();
+    },
+    () => {
+      // Ignore tombstone listener errors cleanly
+    }
+  );
+
   const q = query(collection(db, 'products'));
 
-  return onSnapshot(
+  const unsubProducts = onSnapshot(
     q,
     (snapshot) => {
-      let products: Product[] = [];
+      hasInitialProducts = true;
+      latestFirestoreProducts = [];
       snapshot.forEach((docSnap) => {
-        products.push({ id: docSnap.id, ...docSnap.data() } as Product);
+        latestFirestoreProducts.push({ id: docSnap.id, ...docSnap.data() } as Product);
       });
-      if (products.length === 0) {
-        products = Object.keys(PRODUCT_GMC_METADATA).map(slug => buildFallbackProductFromGmcMeta(slug)).filter(Boolean) as Product[];
-      }
-      products = deduplicateProducts(products);
-      if (filter?.isActive !== undefined) {
-        products = products.filter((p) => Boolean(p.isActive) === filter.isActive);
-      }
-      if (filter?.categoryId) {
-        products = products.filter(
-          (p) =>
-            p.categoryIds?.includes(filter.categoryId!) ||
-            p.categorySlugs?.includes(filter.categoryId!)
-        );
-      }
-      products.sort((a, b) => {
-        const timeA = typeof a.createdAt?.toMillis === 'function' ? a.createdAt.toMillis() : 0;
-        const timeB = typeof b.createdAt?.toMillis === 'function' ? b.createdAt.toMillis() : 0;
-        return timeB - timeA;
-      });
-      callback(products);
+      emitCombined();
     },
     (error) => {
       checkAndTripQuota(error);
       callback(getFallbackFilteredProducts(filter));
     }
   );
+
+  return () => {
+    unsubProducts();
+    unsubTombstones();
+  };
 }
 
 async function uploadBase64ImagesInHtml(html: string, productId: string): Promise<string> {
@@ -391,6 +513,107 @@ async function uploadBase64ImagesInHtml(html: string, productId: string): Promis
   return updatedHtml;
 }
 
+export async function saveProductBackupSnapshot(
+  product: Partial<Product> & { id: string },
+  reason: ProductBackup['reason']
+): Promise<string> {
+  const backupId = `${reason}_${product.id}_${Date.now()}`;
+  const snapshotObj = serializeSnapshotForBackup(product);
+  const imgs = Array.from(
+    new Set([
+      ...(Array.isArray(product.images) ? product.images : []),
+      ...(product.image ? [product.image] : []),
+      ...(Array.isArray(product.additionalImages) ? product.additionalImages : []),
+    ].filter(Boolean))
+  );
+
+  try {
+    await setDoc(doc(db, 'product_backups', backupId), {
+      originalProductId: product.id,
+      gmcId: product.gmcId || product.id,
+      productName: product.productName || 'Untitled Product',
+      brand: product.brand || '',
+      sku: product.sku || '',
+      reason,
+      backedUpBy: auth.currentUser?.email || 'admin',
+      images: imgs,
+      productSnapshot: snapshotObj,
+      createdAt: serverTimestamp(),
+    });
+  } catch (err) {
+    console.warn('Could not save product backup snapshot:', err);
+  }
+  return backupId;
+}
+
+export async function listProductBackups(): Promise<ProductBackup[]> {
+  if (isFirestoreQuotaExhausted()) return [];
+  try {
+    const q = query(
+      collection(db, 'product_backups'),
+      orderBy('createdAt', 'desc'),
+      firestoreLimit(100)
+    );
+    const snap = await getDocs(q);
+    const backups: ProductBackup[] = [];
+    snap.forEach((docSnap) => {
+      backups.push({ id: docSnap.id, ...docSnap.data() } as ProductBackup);
+    });
+    return backups;
+  } catch (err) {
+    checkAndTripQuota(err);
+    return [];
+  }
+}
+
+export async function restoreProductFromBackup(backupId: string): Promise<string> {
+  const backupRef = doc(db, 'product_backups', backupId);
+  const backupSnap = await getDoc(backupRef);
+  if (!backupSnap.exists()) {
+    throw new Error('Backup record not found.');
+  }
+  const backupData = backupSnap.data() as ProductBackup;
+  const snapObj = stripUndefinedDeep({ ...(backupData.productSnapshot || {}) });
+  const targetId = String(backupData.originalProductId || snapObj.id || uuidv4());
+  delete snapObj.id;
+  delete snapObj.createdAt;
+  delete snapObj.updatedAt;
+
+  // Clear tombstone markers if previously deleted
+  const canonicalSlug = getCanonicalProductSlug({ ...snapObj, id: targetId }, targetId);
+  memoryDeletedCatalogIds.delete(targetId);
+  if (canonicalSlug) memoryDeletedCatalogIds.delete(canonicalSlug);
+  try {
+    await setDoc(
+      doc(db, 'settings', 'catalog_tombstones'),
+      {
+        deletedIds: arrayRemove(targetId, ...(canonicalSlug ? [canonicalSlug] : [])),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch {
+    // non-fatal if tombstone doc doesn't exist yet
+  }
+
+  await setDoc(
+    doc(db, 'products', targetId),
+    {
+      ...snapObj,
+      isActive: snapObj.isActive ?? true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
+
+  return targetId;
+}
+
+export async function deleteProductBackup(backupId: string): Promise<void> {
+  await deleteDoc(doc(db, 'product_backups', backupId));
+}
+
 export async function createProduct(
   data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<string> {
@@ -408,10 +631,20 @@ export async function createProduct(
     console.error('Error pre-processing description base64 images:', err);
   }
 
-  await setDoc(docRef, {
+  const hasExplicitImages =
+    data.images !== undefined ||
+    data.image !== undefined ||
+    data.additionalImages !== undefined;
+
+  const cleanData = stripUndefinedDeep({
     ...data,
+    ...(hasExplicitImages ? { imagesCustomized: true } : {}),
     description: processedDescription,
     specifications: processedSpecifications,
+  });
+
+  await setDoc(docRef, {
+    ...cleanData,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -420,7 +653,8 @@ export async function createProduct(
 
 export async function updateProduct(
   id: string,
-  data: Partial<Product>
+  data: Partial<Product>,
+  options?: { skipBackup?: boolean }
 ): Promise<void> {
   const docRef = doc(db, 'products', id);
 
@@ -438,37 +672,108 @@ export async function updateProduct(
     console.error('Error pre-processing description base64 images in update:', err);
   }
 
-  const updateData: any = {
-    ...data,
-    updatedAt: serverTimestamp(),
-  };
+  const touchesImages =
+    data.images !== undefined ||
+    data.image !== undefined ||
+    data.additionalImages !== undefined ||
+    data.imagesCustomized !== undefined;
 
-  if (processedDescription !== undefined) {
-    updateData.description = processedDescription;
-  }
-  if (processedSpecifications !== undefined) {
-    updateData.specifications = processedSpecifications;
-  }
+  // Snapshot existing state before image edits so no URL or metadata is ever lost
+  const existingSnap = await getDoc(docRef).catch(() => null);
+  const existingData = existingSnap?.exists() ? (existingSnap.data() as Product) : null;
 
-  await updateDoc(docRef, updateData);
-}
-
-export async function deleteProduct(id: string): Promise<void> {
-  const productDoc = await getDoc(doc(db, 'products', id));
-  if (productDoc.exists()) {
-    const product = productDoc.data() as Product;
-    if (product.images) {
-      for (const imageUrl of product.images) {
-        try {
-          const imageRef = ref(storage, imageUrl);
-          await deleteObject(imageRef);
-        } catch (error) {
-          console.error('Error deleting image:', error);
-        }
-      }
+  if (touchesImages && !options?.skipBackup) {
+    const prevProduct = existingData
+      ? { ...existingData, id }
+      : await getProduct(id).catch(() => null);
+    if (prevProduct) {
+      await saveProductBackupSnapshot({ ...prevProduct, id }, 'before_image_update');
     }
   }
-  await deleteDoc(doc(db, 'products', id));
+
+  const updateData = stripUndefinedDeep({
+    ...data,
+    ...(touchesImages && data.imagesCustomized === undefined ? { imagesCustomized: true } : {}),
+    ...(processedDescription !== undefined ? { description: processedDescription } : {}),
+    ...(processedSpecifications !== undefined ? { specifications: processedSpecifications } : {}),
+    updatedAt: serverTimestamp(),
+  });
+
+  if (existingData) {
+    await updateDoc(docRef, updateData);
+  } else {
+    // Upsert catalog fallback product cleanly if it was not persisted as its own Firestore document yet
+    const fallbackProd = await getProduct(id).catch(() => null);
+    const baseData = fallbackProd
+      ? stripUndefinedDeep(serializeSnapshotForBackup({ ...fallbackProd }))
+      : {};
+    delete (baseData as any).id;
+    delete (baseData as any).createdAt;
+    delete (baseData as any).updatedAt;
+
+    await setDoc(
+      docRef,
+      {
+        ...baseData,
+        ...updateData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  }
+
+  // Ensure edited product is not marked deleted
+  memoryDeletedCatalogIds.delete(id);
+}
+
+export async function deleteProduct(
+  id: string,
+  options?: { deleteStorageImages?: boolean }
+): Promise<{ backupId?: string }> {
+  const docRef = doc(db, 'products', id);
+  const productSnap = await getDoc(docRef).catch(() => null);
+  const existingProd = productSnap?.exists()
+    ? ({ id: productSnap.id, ...productSnap.data() } as Product)
+    : await getProduct(id).catch(() => null);
+
+  let backupId: string | undefined;
+  if (existingProd) {
+    backupId = await saveProductBackupSnapshot({ ...existingProd, id }, 'before_delete');
+  }
+
+  const canonicalSlug = existingProd
+    ? getCanonicalProductSlug(existingProd, id)
+    : id;
+  memoryDeletedCatalogIds.add(id);
+  if (canonicalSlug) memoryDeletedCatalogIds.add(canonicalSlug);
+
+  try {
+    await setDoc(
+      doc(db, 'settings', 'catalog_tombstones'),
+      {
+        deletedIds: arrayUnion(id, ...(canonicalSlug && canonicalSlug !== id ? [canonicalSlug] : [])),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch (err) {
+    console.warn('Could not persist catalog tombstone:', err);
+  }
+
+  if (options?.deleteStorageImages && existingProd?.images) {
+    for (const imageUrl of existingProd.images) {
+      await deleteFromProductsStorage(imageUrl).catch((err) =>
+        console.warn('Optional storage delete skipped:', err)
+      );
+    }
+  }
+
+  if (productSnap?.exists()) {
+    await deleteDoc(docRef);
+  }
+
+  return { backupId };
 }
 
 // ============================================
@@ -479,19 +784,18 @@ export async function uploadProductImage(
   file: File,
   productId: string
 ): Promise<string> {
-  const ext = file.name.split('.').pop();
-  const fileName = `${productId}/${uuidv4()}.${ext}`;
-  const storageRef = ref(storage, `products/${fileName}`);
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
+  const result = await uploadToProductsStorage(file, {
+    slugHint: `${productId}-${file.name}`,
+    includeGmcJpg: true,
+    allowSiteVaultFallback: true,
+  });
+  return result.downloadUrl;
 }
 
 export async function deleteProductImage(imageUrl: string): Promise<void> {
-  try {
-    const imageRef = ref(storage, imageUrl);
-    await deleteObject(imageRef);
-  } catch (error) {
-    console.error('Error deleting image:', error);
+  const res = await deleteFromProductsStorage(imageUrl);
+  if (!res.deleted && res.authRequired) {
+    throw new Error(res.reason || 'Google Storage authorization required to delete this file.');
   }
 }
 
@@ -1051,6 +1355,11 @@ export async function getProduct(idOrSlug: string): Promise<Product | null> {
   const canonicalSlug = resolveCanonicalProductSlugByIdentifier(idOrSlug) || idOrSlug;
   const mappedId = SEO_SLUG_TO_PRODUCT_ID[canonicalSlug] || SEO_SLUG_TO_PRODUCT_ID[idOrSlug] || canonicalSlug;
 
+  const tombstones = await fetchDeletedCatalogIds();
+  if (tombstones.has(idOrSlug) || tombstones.has(canonicalSlug) || tombstones.has(mappedId)) {
+    return null;
+  }
+
   if (!isFirestoreQuotaExhausted()) {
     try {
       const docSnap = await getDoc(doc(db, 'products', mappedId));
@@ -1124,6 +1433,7 @@ export async function getProduct(idOrSlug: string): Promise<Product | null> {
 
 export async function getProducts(): Promise<Product[]> {
   let products: Product[] = [];
+  const tombstones = await fetchDeletedCatalogIds();
   if (!isFirestoreQuotaExhausted()) {
     try {
       const snapshot = await getDocs(collection(db, 'products'));
@@ -1137,7 +1447,7 @@ export async function getProducts(): Promise<Product[]> {
   if (products.length === 0) {
     products = Object.keys(PRODUCT_GMC_METADATA).map(slug => buildFallbackProductFromGmcMeta(slug)).filter(Boolean) as Product[];
   }
-  return deduplicateProducts(products);
+  return deduplicateProducts(products).filter((p) => !isProductTombstoned(p, tombstones));
 }
 
 export async function addStockHistory(

@@ -183,7 +183,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 745000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs', 'ptz-cameras'],
     images: [
-      'https://avlive.com.pk/images/products/poly-x70-boardroom.jpg',
+      'https://avlive.com.pk/images/products/polycom-group-500-eagleeye-iv.jpg',
       'https://avlive.com.pk/images/projects/vissonic-delegate-boardroom.webp',
       'https://avlive.com.pk/images/projects/multicity-teams-boardrooms.webp',
       'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
@@ -204,7 +204,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 745000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs', 'ptz-cameras'],
     images: [
-      'https://avlive.com.pk/images/products/poly-x70-boardroom.jpg',
+      'https://avlive.com.pk/images/products/polycom-group-500-eagleeye-iv.jpg',
       'https://avlive.com.pk/images/projects/vissonic-delegate-boardroom.webp',
       'https://avlive.com.pk/images/projects/multicity-teams-boardrooms.webp',
       'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
@@ -258,7 +258,6 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 398000,
     categorySlugs: ['projectors'],
     images: [
-      'https://www.puretheatre.com/media/catalog/product/cache/207e23213cf636ccdef205098cf3c8a3/b/e/benq-tk705i-projector.jpg',
       'https://image.benq.com/is/image/benqco/tk705i-set1-1-2?$ResponsivePreset$',
     ],
     highlight: 'True 4K UHD HDR high-brightness projector for auditoriums and hybrid events',
@@ -330,7 +329,6 @@ export const PRODUCT_GMC_METADATA: Record<
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
       'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
-      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
     ],
     highlight: '5-line Gigabit color display enterprise IP desk phone with wideband audio',
     defaultSpecs:
@@ -389,7 +387,6 @@ export const PRODUCT_GMC_METADATA: Record<
     images: [
       'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
-      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/room-kit-eq-ds.docx/_jcr_content/renditions/room-kit-eq-ds_0.png',
       'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
     ],
     highlight: 'AI-powered flagship quad-camera codec bundle for large enterprise boardrooms',
@@ -432,7 +429,6 @@ export const PRODUCT_GMC_METADATA: Record<
     images: [
       'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
-      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/datasheet-c78-738752.docx/_jcr_content/renditions/datasheet-c78-738752_0.png',
       'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
     ],
     highlight: 'Enterprise video conferencing kit with Quad Camera and Codec Plus for up to 14 people',
@@ -453,7 +449,6 @@ export const PRODUCT_GMC_METADATA: Record<
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
     images: [
       'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
-      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/webex-room-series/datasheet-c78-741052.docx/_jcr_content/renditions/datasheet-c78-741052_0.png',
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
       'https://avlive.com.pk/images/video-conference/hybrid-summit.webp',
     ],
@@ -475,7 +470,6 @@ export const PRODUCT_GMC_METADATA: Record<
     images: [
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
       'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
-      'https://www.cisco.com/c/dam/en/us/products/collateral/collaboration-endpoints/spark-room-kit-series/datasheet-c78-738752.docx/_jcr_content/renditions/datasheet-c78-738752_0.png',
       'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
     ],
     highlight: 'Cisco Webex Room Kit Plus collaboration system for large conference rooms',
@@ -545,7 +539,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 245000,
     categorySlugs: ['voip-phone-systems'],
     images: [
-      'https://www.freepbx.org/wp-content/uploads/Sangoma_FreePBX_Tango_Scenes_RGB_community-noBG-e1589310255279-1024x906.png',
+      'https://syntelo.co.za/cdn/shop/files/3cx_pro_8SC.jpg?v=1747992911&width=2048',
     ],
     highlight: 'Turnkey enterprise IP PBX appliance and Asterisk unified communications system',
     defaultSpecs:
@@ -562,7 +556,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 39500,
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
-      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
+      'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
     ],
     highlight: '12-line Gigabit enterprise IP phone with 4.3-inch color LCD and Bluetooth',
     defaultSpecs:
@@ -579,8 +573,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 278000,
     categorySlugs: ['voip-phone-systems'],
     images: [
-      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
-      'https://www.freepbx.org/wp-content/uploads/Sangoma_FreePBX_Tango_Scenes_RGB_community-noBG-e1589310255279-1024x906.png',
+      'https://syntelo.co.za/cdn/shop/files/3cx_pro_8SC.jpg?v=1747992911&width=2048',
     ],
     highlight: 'Enterprise IP PBX appliance supporting up to 2000 users and 300 concurrent calls',
     defaultSpecs:
@@ -597,8 +590,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 425000,
     categorySlugs: ['voip-phone-systems'],
     images: [
-      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
-      'https://www.freepbx.org/wp-content/uploads/Sangoma_FreePBX_Tango_Scenes_RGB_community-noBG-e1589310255279-1024x906.png',
+      'https://syntelo.co.za/cdn/shop/files/3cx_pro_8SC.jpg?v=1747992911&width=2048',
     ],
     highlight: 'High-capacity IP PBX supporting 3000 users, 450 concurrent calls, and 8 FXO/FXS ports',
     defaultSpecs:
@@ -760,8 +752,6 @@ export const PRODUCT_GMC_METADATA: Record<
     categorySlugs: ['projectors'],
     images: [
       'https://www.eastporters.com/wp-content/uploads/2024/08/ZH430UST-1.jpg',
-      'https://region-resource.optoma.com/products/import/Media/8756fa9f-86c7-43e4-b118-4c519ed593b2.jpg',
-      'https://region-resource.optoma.com/products/import/Media/d3830c50-8ed6-45c1-8ca0-9de59986c050.jpg',
     ],
     highlight: '4000-lumen 4K UHD ultra-short throw DuraCore laser projector for boardrooms and stages',
     defaultSpecs:
@@ -778,8 +768,7 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 118000,
     categorySlugs: ['projectors'],
     images: [
-      'https://region-resource.optoma.com/products/images/RatgiDzub1lk8KspP2bcBmpuaBe8sIHVcsR7qaB9.jpg',
-      'https://region-resource.optoma.com/products/images/j66t3GOEC3ylsnaaOFXek5bQFCNjUlFvodytLhC3.jpg',
+      'https://www.viewsonic.com/media/wysiwyg/26PRJ-MLT1176-RC-LSD400W_Bright_in_any_Room_1238x1102.jpg',
     ],
     highlight: 'Ultra-portable LED pocket projector for mobile executive presentations',
     defaultSpecs:
@@ -1015,7 +1004,6 @@ export const PRODUCT_GMC_METADATA: Record<
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
       'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
-      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
     ],
     highlight: '4-line Gigabit color display IP desk phone with Poly HD Voice and Acoustic Clarity',
     defaultSpecs:
@@ -1105,7 +1093,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 85000,
     categorySlugs: ['video-conferencing', 'touch-panels'],
     images: [
-      'https://cloudfresh.com/wp-content/uploads/2020/04/Cloudfresh-Google-Meet-Hardware-License-Annual-1-1024x717.webp',
+      'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
+      'https://avlive.com.pk/images/video-conference/huddle-space.webp',
     ],
     highlight: 'Official annual Google Meet Hardware Room License with cloud device management',
     defaultSpecs:
@@ -1122,7 +1111,8 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 85000,
     categorySlugs: ['video-conferencing', 'touch-panels'],
     images: [
-      'https://cloudfresh.com/wp-content/uploads/2020/04/Cloudfresh-Google-Meet-Hardware-License-Annual-1-1024x717.webp',
+      'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
+      'https://avlive.com.pk/images/video-conference/huddle-space.webp',
     ],
     highlight: 'Official annual Google Meet Hardware Room License with cloud device management',
     defaultSpecs:
@@ -1157,7 +1147,6 @@ export const PRODUCT_GMC_METADATA: Record<
     salePrice: 46500,
     categorySlugs: ['ip-phones', 'voip-phone-systems', 'speakerphones'],
     images: [
-      'https://shop.tekkpak.com/cdn/shop/files/gtU6abiiEqqJpMYPtJO4-Ac_3_gps_generated.png?v=1765463662&width=1445',
       'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
     ],
     highlight: '16-line executive Gigabit IP phone with 4.3-inch high-resolution color display',
@@ -1532,9 +1521,11 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
       (img.startsWith('/images/products/') && !img.includes('/avlive-')) ||
       img.startsWith('/images/projects/') ||
       img.startsWith('/images/video-conference/') ||
+      img.startsWith('/images/uploads/') ||
       (img.startsWith('https://avlive.com.pk/images/products/') && !img.includes('/avlive-')) ||
       img.startsWith('https://avlive.com.pk/images/projects/') ||
       img.startsWith('https://avlive.com.pk/images/video-conference/') ||
+      img.startsWith('https://avlive.com.pk/images/uploads/') ||
       (/^https?:\/\//i.test(img) && !img.startsWith('https://avlive.com.pk/images/'))
   );
   if (resolvedImages.length === 0) {

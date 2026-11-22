@@ -32,6 +32,7 @@ import { MobileProductCard } from '../components/MobileProductCard';
 import { BlurProductImage } from '../components/BlurProductImage';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { buildProductImageSeo } from '../lib/image-seo';
+import { cleanRichTextHtml } from '../lib/html-sanitize';
 
 const INITIAL_FALLBACK_SHOP_PRODUCTS: Product[] = (() => {
   const seen = new Set<string>();
@@ -1221,7 +1222,7 @@ export function Shop() {
                          )}
                       </div>
 
-                      <div className="hidden lg:block text-gray-500 text-xs font-medium leading-relaxed line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.' }} />
+                      <div className="hidden lg:block text-gray-500 text-xs font-medium leading-relaxed line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.') }} />
                       
                       <div className="mt-auto flex items-end justify-between gap-2 lg:gap-4 pt-2.5 lg:pt-4 border-t border-gray-50">
                         <div className="flex flex-col min-w-0">
@@ -1332,7 +1333,7 @@ export function Shop() {
                         </h3>
                       </Link>
                       
-                      <div className="text-gray-500 text-xs font-semibold line-clamp-3 mb-4" dangerouslySetInnerHTML={{ __html: product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.' }} />
+                      <div className="text-gray-500 text-xs font-semibold line-clamp-3 mb-4" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.') }} />
                       
                       <div className="flex flex-wrap items-center justify-between pt-4 border-t border-gray-50 mt-auto gap-4">
                         <div className="flex items-baseline gap-2">

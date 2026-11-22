@@ -7,6 +7,7 @@ import { FALLBACK_SERVICES_CATALOG, mergeWithFallbackServices, EnrichedService }
 import { SEO } from '../../components/SEO';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import { buildEditorialImageSeo } from '../../lib/image-seo';
+import { cleanRichTextHtml } from '../../lib/html-sanitize';
 
 export function ServicesLanding() {
   const [pageData, setPageData] = useState<ServicePageData | null>(null);
@@ -126,7 +127,7 @@ export function ServicesLanding() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="text-xs sm:text-sm md:text-base text-white/90 max-w-3xl mx-auto leading-relaxed font-medium line-clamp-3 prose prose-invert max-w-none [&_*]:break-words [&_*]:whitespace-normal"
-            dangerouslySetInnerHTML={{ __html: data.heroSubheading }}
+            dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.heroSubheading) }}
           />
         </div>
       </div>
@@ -137,7 +138,7 @@ export function ServicesLanding() {
            <div className="hidden sm:flex w-12 h-12 lg:w-14 lg:h-14 bg-blue-50 text-[#00B4D8] rounded-2xl items-center justify-center shrink-0">
               <Sparkles size={24} />
            </div>
-           <div className="text-sm sm:text-base lg:text-lg font-black text-[#1A2B4C] leading-snug flex-grow prose max-w-none [&_*]:break-words [&_*]:whitespace-normal text-center md:text-left" dangerouslySetInnerHTML={{ __html: data.introText }} />
+           <div className="text-sm sm:text-base lg:text-lg font-black text-[#1A2B4C] leading-snug flex-grow prose max-w-none [&_*]:break-words [&_*]:whitespace-normal text-center md:text-left" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.introText) }} />
            <Link to={data.ctaLink} className="bg-[#1A2B4C] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#00B4D8] transition-all flex items-center gap-2 whitespace-nowrap shrink-0">
               {data.ctaText} <ArrowRight size={15} />
            </Link>
@@ -165,7 +166,7 @@ export function ServicesLanding() {
                 </div>
                 <div className="p-5 lg:p-6 flex flex-col flex-1">
                    <h3 className="text-base lg:text-lg font-black text-[#1A2B4C] mb-2 group-hover:text-[#00B4D8] transition-colors">{service.title}</h3>
-                   <div className="text-gray-500 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-3 font-medium prose prose-sm prose-p:m-0 max-w-none flex-1" dangerouslySetInnerHTML={{ __html: service.description || '' }} />
+                   <div className="text-gray-500 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-3 font-medium prose prose-sm prose-p:m-0 max-w-none flex-1" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(service.description || '') }} />
                    <Link to={`/services/${service.slug}`} className="flex items-center gap-1.5 text-[#00B4D8] font-black uppercase tracking-widest text-[10px] group-hover:gap-3 transition-all mt-auto pt-2">
                       Explore Integration <ArrowRight size={13} />
                    </Link>

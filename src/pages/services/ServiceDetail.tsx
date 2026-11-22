@@ -8,6 +8,7 @@ import { DeepQueryModal } from '../../components/DeepQueryModal';
 import { SEO } from '../../components/SEO';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import { buildEditorialImageSeo, buildImageObjectSchema } from '../../lib/image-seo';
+import { cleanRichTextHtml } from '../../lib/html-sanitize';
 
 const SERVICE_SLUG_ALIASES: Record<string, string> = {
   'video-conferencing-solutions': 'boardroom-integration',
@@ -20,7 +21,7 @@ function formatContent(content: string) {
   const normalizedContent = content.replace(/<img\b[^>]*>/gi, youtubeEmbedHtml);
   const hasHtml = /<[a-z][\s\S]*>/i.test(normalizedContent);
   if (hasHtml) {
-    return normalizedContent;
+    return cleanRichTextHtml(normalizedContent);
   }
   
   const lines = content.split('\n');
@@ -61,7 +62,7 @@ function formatContent(content: string) {
     html += '</ul>';
   }
 
-  return html;
+  return cleanRichTextHtml(html);
 }
 
 export function ServiceDetail() {

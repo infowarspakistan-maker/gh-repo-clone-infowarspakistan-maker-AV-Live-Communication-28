@@ -10,17 +10,26 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
-    
+
     function isEmailVerified() {
       return isSignedIn() && request.auth.token.email_verified == true;
     }
 
+    function userRole() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : null;
+    }
+
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.email == 'infowarspakistan@gmail.com' ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+        (request.auth.token.email == 'infowarspakistan@gmail.com' && isEmailVerified()) ||
+        userRole() == 'admin'
       );
+    }
+
+    function isStaffEditor() {
+      return isAdmin() || (isSignedIn() && userRole() in ['admin', 'editor']);
     }
 
     function isOwner(userId) {
@@ -28,7 +37,7 @@ service cloud.firestore {
     }
 
     function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
     function incoming() {
@@ -43,151 +52,277 @@ service cloud.firestore {
     function isValidQuoteRequest(data) {
       return data.keys().hasAll(['fullName', 'companyName', 'email', 'phone', 'projectTypes', 'budget', 'timeline', 'details', 'status', 'createdAt'])
         && data.keys().size() == 10
-        && data.fullName is string && data.fullName.size() <= 200
+        && data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 200
         && data.companyName is string && data.companyName.size() <= 200
-        && data.email is string && data.email.size() <= 200
-        && data.phone is string && data.phone.size() <= 50
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.phone is string && data.phone.size() >= 3 && data.phone.size() <= 50
         && data.projectTypes is list && data.projectTypes.size() <= 20
         && data.budget is string && data.budget.size() <= 100
         && data.timeline is string && data.timeline.size() <= 100
         && data.details is string && data.details.size() <= 2000
-        && data.status in ['pending', 'responded', 'closed']
-        && data.createdAt is timestamp;
+        && data.status == 'pending'
+        && data.createdAt == request.time;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll([
+          'orderNumber', 'customerName', 'customerEmail', 'items',
+          'subtotal', 'tax', 'shippingCost', 'total',
+          'orderStatus', 'paymentStatus', 'shippingAddress', 'billingAddress',
+          'paymentMethod', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'orderNumber', 'customerId', 'customerName', 'customerEmail', 'customerPhone',
+          'items', 'subtotal', 'tax', 'shippingCost', 'total',
+          'orderStatus', 'paymentStatus', 'shippingAddress', 'billingAddress',
+          'paymentMethod', 'notes', 'createdAt', 'updatedAt'
+        ])
+        && data.orderNumber is string && data.orderNumber.size() >= 3 && data.orderNumber.size() <= 40
+        && data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 200
+        && data.customerEmail is string && data.customerEmail.size() >= 3 && data.customerEmail.size() <= 200
+        && (!('customerId' in data) || (data.customerId is string && data.customerId.size() <= 200))
+        && (!('customerPhone' in data) || (data.customerPhone is string && data.customerPhone.size() <= 50))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+        && data.items is list && data.items.size() >= 1 && data.items.size() <= 100
+        && data.subtotal is number && data.subtotal >= 0 && data.subtotal <= 500000000
+        && data.tax is number && data.tax >= 0 && data.tax <= 500000000
+        && data.shippingCost is number && data.shippingCost >= 0 && data.shippingCost <= 50000000
+        && data.total is number && data.total >= 0 && data.total <= 500000000
+        && data.orderStatus == 'pending'
+        && data.paymentStatus == 'pending'
+        && data.shippingAddress is string && data.shippingAddress.size() <= 500
+        && data.billingAddress is string && data.billingAddress.size() <= 500
+        && data.paymentMethod is string && data.paymentMethod.size() <= 50
+        && data.createdAt == request.time
+        && data.updatedAt == request.time;
+    }
+
+    function isValidRmaRequest(data) {
+      return data.keys().hasAll(['orderNumber', 'productName', 'sku', 'issueType', 'description', 'customerEmail', 'customerPhone', 'status', 'createdAt'])
+        && data.keys().size() == 9
+        && data.orderNumber is string && data.orderNumber.size() >= 1 && data.orderNumber.size() <= 100
+        && data.productName is string && data.productName.size() >= 1 && data.productName.size() <= 200
+        && data.sku is string && data.sku.size() <= 100
+        && data.issueType is string && data.issueType.size() <= 100
+        && data.description is string && data.description.size() <= 3000
+        && data.customerEmail is string && data.customerEmail.size() >= 3 && data.customerEmail.size() <= 200
+        && data.customerPhone is string && data.customerPhone.size() <= 50
+        && data.status == 'pending'
+        && data.createdAt == request.time;
+    }
+
+    function isValidWizardLead(data) {
+      return data.keys().hasAll(['customerName', 'email', 'company', 'phone', 'notes', 'answers', 'recommendedBundle', 'selectedAddons', 'totalProjectEstimate', 'createdAt', 'status'])
+        && data.keys().size() == 11
+        && data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 200
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.company is string && data.company.size() <= 200
+        && data.phone is string && data.phone.size() <= 50
+        && data.notes is string && data.notes.size() <= 2000
+        && data.answers is map && data.answers.size() <= 10
+        && data.recommendedBundle is string && data.recommendedBundle.size() <= 200
+        && data.selectedAddons is list && data.selectedAddons.size() <= 20
+        && data.totalProjectEstimate is number && data.totalProjectEstimate >= 0 && data.totalProjectEstimate <= 500000000
+        && data.status == 'new'
+        && data.createdAt == request.time;
+    }
+
+    function isValidEventQuote(data) {
+      return data.keys().hasAll(['fullName', 'email', 'phone', 'eventType', 'eventSubType', 'status', 'createdAt'])
+        && data.keys().size() <= 25
+        && data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 200
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.phone is string && data.phone.size() >= 3 && data.phone.size() <= 50
+        && data.eventType is string && data.eventType.size() <= 100
+        && data.eventSubType is string && data.eventSubType.size() <= 100
+        && data.status == 'new'
+        && data.createdAt == request.time;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['fullName', 'organization', 'email', 'phone', 'subject', 'message', 'status', 'createdAt'])
+        && data.keys().size() == 8
+        && data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 200
+        && data.organization is string && data.organization.size() <= 200
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.phone is string && data.phone.size() >= 3 && data.phone.size() <= 50
+        && data.subject is string && data.subject.size() <= 200
+        && data.message is string && data.message.size() >= 1 && data.message.size() <= 5000
+        && data.status == 'new'
+        && data.createdAt == request.time;
+    }
+
+    function isValidResellerApp(data) {
+      return data.keys().hasAll(['companyName', 'ntn', 'email', 'details', 'status', 'createdAt'])
+        && data.keys().size() == 6
+        && data.companyName is string && data.companyName.size() >= 1 && data.companyName.size() <= 200
+        && data.ntn is string && data.ntn.size() <= 100
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.details is string && data.details.size() <= 3000
+        && data.status == 'pending'
+        && data.createdAt == request.time;
+    }
+
+    function isValidNewsletterSubscriber(data) {
+      return data.keys().hasOnly(['email', 'createdAt', 'source'])
+        && data.keys().hasAll(['email', 'createdAt'])
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 200
+        && (!('source' in data) || (data.source is string && data.source.size() <= 100))
+        && data.createdAt == request.time;
     }
 
     // 4. Collection Matches
-    
-    // Homepage - Public read, Admin write
+
+    // Homepage - Public read, Staff Editor write
     match /homepage/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isStaffEditor() && isValidId(docId);
     }
 
-    // Products - Public read, Admin write
+    // Products - Public read, Staff Editor write
     match /products/{productId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isStaffEditor() && isValidId(productId);
     }
 
-    // Categories - Public read, Admin write
+    // Product Backups - Recoverable snapshots for deleted or image-updated products
+    match /product_backups/{backupId} {
+      allow read, write: if isStaffEditor() && isValidId(backupId);
+    }
+
+    // Categories - Public read, Staff Editor write
     match /categories/{categoryId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isStaffEditor() && isValidId(categoryId);
     }
 
-    // About/Contact - Public read, Admin write
+    // About/Contact - Public read, Staff Editor write
     match /about/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isStaffEditor() && isValidId(docId);
     }
     match /contact/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isStaffEditor() && isValidId(docId);
     }
 
-    // Orders - Create for anyone, read for owner or admin
+    // Orders - Validated public create, read for owner or admin, update/delete for admin
     match /orders/{orderId} {
-      allow create: if true; 
-      allow read: if isAdmin() || (isSignedIn() && (existing().customerId == request.auth.uid || existing().customerEmail == request.auth.token.email));
+      allow create: if isValidId(orderId) && isValidOrder(incoming());
+      allow read: if isAdmin() || (isSignedIn() && (
+        existing().customerId == request.auth.uid ||
+        (isEmailVerified() && existing().customerEmail == request.auth.token.email)
+      ));
       allow update, delete: if isAdmin();
     }
 
     // RMA Requests
     match /rma_requests/{rmaId} {
-      allow create: if true;
+      allow create: if isValidId(rmaId) && isValidRmaRequest(incoming());
       allow read, update, delete: if isAdmin();
     }
 
     // Wizard Leads
     match /wizard_leads/{leadId} {
-      allow create: if true;
+      allow create: if isValidId(leadId) && isValidWizardLead(incoming());
       allow read, update, delete: if isAdmin();
     }
 
     // Event Quotes
     match /event_quotes/{quoteId} {
-      allow create: if true;
+      allow create: if isValidId(quoteId) && isValidEventQuote(incoming());
       allow read, update, delete: if isAdmin();
     }
 
     // Contact Inquiries, Reseller Applications & Newsletter Subscriptions
     match /inquiries/{inquiryId} {
-      allow create: if true;
+      allow create: if isValidId(inquiryId) && isValidInquiry(incoming());
       allow read, update, delete: if isAdmin();
     }
 
     match /reseller_applications/{appId} {
-      allow create: if true;
+      allow create: if isValidId(appId) && isValidResellerApp(incoming());
       allow read, update, delete: if isAdmin();
     }
 
     match /newsletter_subscribers/{subId} {
-      allow create: if true;
+      allow create: if isValidId(subId) && isValidNewsletterSubscriber(incoming());
       allow read, update, delete: if isAdmin();
     }
 
-    // Quote Requests - EXPLICIT ALLOW CREATE
+    // Quote Requests
     match /quote_requests/{quoteId} {
-      allow create: if isValidQuoteRequest(incoming());
+      allow create: if isValidId(quoteId) && isValidQuoteRequest(incoming());
       allow read, update, delete: if isAdmin();
     }
 
-    // Users - Profile management
+    // Users - Profile management with least-privilege role protection
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && (incoming().role == 'customer' || (incoming().role == 'admin' && request.auth.token.email == 'infowarspakistan@gmail.com'));
-      allow update: if isOwner(userId) && (!incoming().diff(existing()).affectedKeys().hasAny(['role', 'uid', 'email'])) || isAdmin();
+      allow create: if isOwner(userId) && isValidId(userId) && (
+        incoming().role == 'customer' ||
+        (incoming().role == 'admin' && isEmailVerified() && request.auth.token.email == 'infowarspakistan@gmail.com')
+      );
+      allow update: if (
+        isOwner(userId) &&
+        !incoming().diff(existing()).affectedKeys().hasAny(['role', 'uid', 'email'])
+      ) || isAdmin();
     }
 
     // Services Page Content
     match /services_page/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isStaffEditor() && isValidId(docId);
     }
 
     // Services Collection
     match /services/{serviceId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isStaffEditor() && isValidId(serviceId);
     }
 
     // Settings
     match /settings/{docId} {
-      allow read: if docId == 'global' || isAdmin();
-      allow write: if true;
+      allow read: if docId == 'global' || docId == 'catalog_tombstones' || isAdmin();
+      allow write: if isValidId(docId) && (docId == 'catalog_tombstones' ? isStaffEditor() : isAdmin());
     }
 
     // Stock History
     match /stock_history/{historyId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isStaffEditor() && isValidId(historyId);
     }
 
     // Workflow Automation (n8n)
     match /n8n_workflows/{workflowId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdmin() && isValidId(workflowId);
     }
 
     match /n8n_logs/{logId} {
-      allow read: if isAdmin();
-      allow create: if true; // Server-side trigger needs to add logs
-      allow delete: if isAdmin();
+      allow read, delete: if isAdmin();
+      allow create, update: if false;
     }
 
     // Page Contents
     match /page_contents/{pageId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isStaffEditor() && isValidId(pageId);
     }
 
     // Blog Posts
     match /blog_posts/{postId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isStaffEditor() && isValidId(postId);
     }
 
-    // Admins - Only accessible via console or system for write, read for signed in
+    // Admins - Only readable by admins; managed server-side / console
     match /admins/{adminId} {
-      allow read: if isSignedIn();
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Startup connection probe
+    match /test/connection {
+      allow read: if true;
       allow write: if false;
     }
   }

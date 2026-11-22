@@ -52,20 +52,7 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { CurrencySelector } from '../components/CurrencySelector';
 import { buildProductImageSeo, buildImageObjectSchema } from '../lib/image-seo';
-
-function cleanRichTextHtml(rawHtml?: string | null): string {
-  if (!rawHtml) return '';
-  return String(rawHtml)
-    .replace(/(?:&nbsp;|\u00A0)+/gi, ' ')
-    .replace(
-      /\[www\.avlives\.com\]\(https?:\/\/www\.avlives\.com\)\.pk/gi,
-      '<a href="https://avlive.com.pk" class="text-[#00B4D8] font-bold underline">www.avlive.com.pk</a>'
-    )
-    .replace(/https?:\/\/(?:www\.)?avlives\.com(?:\.pk)?/gi, 'https://avlive.com.pk')
-    .replace(/www\.avlives\.com\.pk/gi, 'www.avlive.com.pk')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-}
+import { cleanRichTextHtml } from '../lib/html-sanitize';
 
 export function ProductDetails() {
   const { productId } = useParams<{ productId: string }>();

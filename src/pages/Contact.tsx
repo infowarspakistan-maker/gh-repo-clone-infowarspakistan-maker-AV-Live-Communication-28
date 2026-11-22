@@ -5,6 +5,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase/client';
 import { subscribeToContact, ContactData } from '../lib/firebase/firestore-helpers';
 import { SEO } from '../components/SEO';
+import { cleanRichTextHtml } from '../lib/html-sanitize';
 
 export function Contact() {
   const [content, setContent] = useState<ContactData | null>(null);
@@ -111,7 +112,7 @@ export function Contact() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="text-base md:text-lg text-white max-w-3xl mx-auto leading-relaxed font-medium prose prose-invert max-w-none [&_*]:break-words [&_*]:whitespace-normal"
-            dangerouslySetInnerHTML={{ __html: data.heroSubheading }}
+            dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.heroSubheading) }}
           />
         </div>
         {/* Abstract Background Elements */}
@@ -141,7 +142,7 @@ export function Contact() {
                    <div className="text-gray-400 shrink-0 mt-1"><MapPin size={18} /></div>
                    <div>
                       <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Physical Address</div>
-                      <div className="text-[#1A2B4C] font-bold leading-relaxed" dangerouslySetInnerHTML={{ __html: data.address }} />
+                      <div className="text-[#1A2B4C] font-bold leading-relaxed" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.address) }} />
                    </div>
                 </div>
 

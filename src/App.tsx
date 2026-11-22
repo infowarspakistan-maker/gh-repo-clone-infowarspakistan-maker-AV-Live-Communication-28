@@ -996,7 +996,7 @@ function Navbar() {
               <div className="px-1.5 pb-1.5 mb-1 text-[11px] font-black text-[#1A2B4C] uppercase tracking-wider border-b border-gray-50 flex items-center justify-between">
                 <span>Hardware Categories</span>
                 <Link to="/shop" onClick={() => setIsOpen(false)} className="text-[10px] font-bold text-[#00B4D8] inline-flex items-center">
-                  All 54 SKUs →
+                  All 53 SKUs →
                 </Link>
               </div>
               <div className="divide-y divide-gray-50">
@@ -1109,7 +1109,7 @@ function Navbar() {
                   { label: 'Enterprise AV Buyer’s Guides', path: '/guides', badge: 'BG' },
                   { label: 'Company Blog & Case Studies', path: '/blog', badge: 'BL' },
                   { label: 'RMA & Hardware Warranty Service', path: '/rma', badge: 'RM' },
-                  { label: 'Complete Site Directory (156 Pages)', path: '/sitemap', badge: 'SD' },
+                  { label: 'Complete Site Directory (157 Pages)', path: '/sitemap', badge: 'SD' },
                   { label: 'Contact Engineering Support', path: '/contact', badge: 'CS' },
                 ].map((item) => (
                   <Link
@@ -1260,6 +1260,43 @@ function Navbar() {
 
 import { ScrollToTop } from "./components/ScrollToTop";
 
+class RouteErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  declare state: { hasError: boolean };
+  declare props: { children: React.ReactNode };
+  declare setState: (next: { hasError: boolean }) => void;
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.error('Route rendering error recovered:', error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="max-w-xl mx-auto my-16 p-8 bg-white rounded-3xl border border-gray-100 shadow-sm text-center space-y-4">
+          <h2 className="text-xl font-black text-[#1A2B4C]">Section Reloaded</h2>
+          <p className="text-sm text-gray-600">A temporary view state occurred. You can safely continue browsing our catalog.</p>
+          <button
+            type="button"
+            onClick={() => this.setState({ hasError: false })}
+            className="px-6 py-2.5 rounded-xl bg-[#1A2B4C] text-white text-xs font-black uppercase tracking-widest hover:bg-[#00B4D8] transition-colors cursor-pointer"
+          >
+            Retry View
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   const [showDeferredWidgets, setShowDeferredWidgets] = useState(false);
   const [showCookieConsent, setShowCookieConsent] = useState(false);
@@ -1293,6 +1330,7 @@ export default function App() {
         </a>
         <Navbar />
         <main id="main-content" className="flex-grow flex flex-col">
+          <RouteErrorBoundary>
           <React.Suspense fallback={null}>
             <Routes>
             <Route path="/" element={<Home />} />
@@ -1473,12 +1511,12 @@ export default function App() {
           <Route path="/services/corporate-event-management" element={<Navigate to="/corporate-event-management" replace />} />
           <Route path="/video-conference-in-pakistan" element={<KeywordLandingPage />} />
 
-          {/* Fallback keyword landing page for unhandled top-level dynamic SEO slugs & 404 routes */}
-          <Route path="/:keywordSlug" element={<KeywordLandingPage />} />
+          {/* Fallback 404 route for unhandled paths */}
           <Route path="*" element={<KeywordLandingPage />} />
 
         </Routes>
       </React.Suspense>
+      </RouteErrorBoundary>
       </main>
       <Footer />
       {showDeferredWidgets && (

@@ -129,9 +129,17 @@ export function HtmlSitemap() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const allProducts = useMemo(() => {
-    return Object.keys(PRODUCT_GMC_METADATA)
-      .map((slug) => buildFallbackProductFromGmcMeta(slug))
-      .filter(Boolean);
+    const seen = new Set<string>();
+    const list: NonNullable<ReturnType<typeof buildFallbackProductFromGmcMeta>>[] = [];
+    for (const rawKey of Object.keys(PRODUCT_GMC_METADATA)) {
+      const prod = buildFallbackProductFromGmcMeta(rawKey);
+      if (!prod) continue;
+      const canonicalSlug = prod.slug || rawKey;
+      if (seen.has(canonicalSlug)) continue;
+      seen.add(canonicalSlug);
+      list.push(prod);
+    }
+    return list;
   }, []);
 
   const filteredProducts = useMemo(() => {

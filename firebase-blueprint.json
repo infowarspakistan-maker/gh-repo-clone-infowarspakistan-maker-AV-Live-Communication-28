@@ -84,6 +84,23 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["fullName", "email", "phone", "projectTypes", "status"]
+    },
+    "ProductBackup": {
+      "title": "Product Backup Snapshot",
+      "description": "Automatic and manual JSON snapshots of products and image URLs before updates or deletions",
+      "type": "object",
+      "properties": {
+        "originalProductId": { "type": "string" },
+        "gmcId": { "type": "string" },
+        "productName": { "type": "string" },
+        "brand": { "type": "string" },
+        "sku": { "type": "string" },
+        "reason": { "type": "string", "enum": ["before_delete", "before_image_update", "manual_snapshot"] },
+        "backedUpBy": { "type": "string" },
+        "images": { "type": "array" },
+        "productSnapshot": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -94,6 +111,10 @@
     "products/{productId}": {
       "schema": "Product",
       "description": "Individual product documents"
+    },
+    "product_backups/{backupId}": {
+      "schema": "ProductBackup",
+      "description": "Recoverable product & image backup snapshots"
     },
     "categories/{categoryId}": {
       "schema": "object",
@@ -121,7 +142,7 @@
     },
     "settings/{docId}": {
       "schema": "object",
-      "description": "Global and payment integration settings"
+      "description": "Global, catalog tombstones, and payment integration settings"
     },
     "stock_history/{historyId}": {
       "schema": "object",

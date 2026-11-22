@@ -8,7 +8,7 @@ export const DEFAULT_EXTERNAL_PRODUCT_IMAGE =
  * - Converts Dropbox share links (?dl=0) into raw image stream URLs (?raw=1).
  * - Preserves external CDN query parameters and signatures untouched.
  */
-const VERIFIED_LOCAL_IMAGE_PREFIX = /^\/images\/(products|projects|teleprompter|video-conference)\//i;
+const VERIFIED_LOCAL_IMAGE_PREFIX = /^\/images\/(products|projects|teleprompter|video-conference|uploads)\//i;
 
 export function normalizeExternalImageUrl(rawUrl: string | undefined | null): string {
   if (!rawUrl || typeof rawUrl !== 'string') return '';

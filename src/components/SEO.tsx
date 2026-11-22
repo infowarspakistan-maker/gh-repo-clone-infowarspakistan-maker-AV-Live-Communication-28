@@ -125,6 +125,8 @@ export function SEO({
     ? 'noindex, nofollow'
     : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
+  const schemaKey = schema ? JSON.stringify(schema) : '';
+
   useEffect(() => {
     if (typeof document === 'undefined') return;
     document.title = siteTitle;
@@ -170,7 +172,7 @@ export function SEO({
     cleanupStaticSsrTags('meta[name="twitter:image:alt"]');
 
     // Remove Wave-1 SSR JSON-LD script tag once Wave-2 React <SEO schema={...}> mounts so Google WRS never merges duplicate @id Product nodes ("Duplicate field brand")
-    if (schema) {
+    if (schemaKey) {
       const ssrJsonLdNodes = document.head.querySelectorAll('#ssr-route-schema, #ssr-home-schema');
       ssrJsonLdNodes.forEach((node) => {
         if (!isReactManaged(node) && node.parentNode) {
@@ -178,7 +180,7 @@ export function SEO({
         }
       });
     }
-  }, [siteTitle, absoluteUrl, clampedDescription, robotsContent, schema]);
+  }, [siteTitle, absoluteUrl, clampedDescription, robotsContent, schemaKey]);
 
   return (
     <Helmet htmlAttributes={{ lang: 'en', prefix: 'og: https://ogp.me/ns# fb: https://ogp.me/ns/fb#' }}>

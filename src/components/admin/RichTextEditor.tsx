@@ -22,9 +22,17 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     input.onchange = async () => {
       const file = input.files ? input.files[0] : null;
       if (file) {
-        const storageRef = ref(storage, `uploads/editor_${Date.now()}_${file.name}`);
+        let uploadFile = file;
         try {
-          const snapshot = await uploadBytes(storageRef, file);
+          const { compressImageFile } = await import('../../lib/client-image-compressor');
+          const compressed = await compressImageFile(file, { preset: 'editor' });
+          uploadFile = compressed.webpFile;
+        } catch {
+          // Fallback to original file if canvas compression is unavailable
+        }
+        const storageRef = ref(storage, `uploads/editor_${Date.now()}_${uploadFile.name}`);
+        try {
+          const snapshot = await uploadBytes(storageRef, uploadFile);
           const url = await getDownloadURL(snapshot.ref);
           const quill = quillRef.current?.getEditor();
           if (quill) {

@@ -204,6 +204,13 @@ async function startServer() {
   app.get('/favicon.svg', serveRootIcon('favicon.svg', 'image/svg+xml'));
   app.get('/apple-touch-icon.png', serveRootIcon('apple-touch-icon.png', 'image/png'));
 
+  // Serve public/images directly before Vite middleware so newly uploaded WebP/JPG images resolve immediately without server restarts
+  const publicImagesDir = path.join(process.cwd(), 'public', 'images');
+  if (!fs.existsSync(publicImagesDir)) {
+    fs.mkdirSync(publicImagesDir, { recursive: true });
+  }
+  app.use('/images', express.static(publicImagesDir, { maxAge: '1h' }));
+
   // Helper to verify admin role
   async function verifyAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
     const authHeader = req.headers.authorization;
@@ -213,16 +220,20 @@ async function startServer() {
     const token = authHeader.split('Bearer ')[1];
     try {
       const decodedToken = await auth.verifyIdToken(token);
-      const userDoc = await db.collection('users').doc(decodedToken.uid).get();
-      const role = userDoc.data()?.role;
-      if (role === 'admin' || decodedToken.email === 'infowarspakistan@gmail.com') {
-        (req as any).user = decodedToken;
-        next();
-      } else {
-        res.status(403).json({ error: 'Forbidden: Admin access required' });
+      let role: string | undefined;
+      try {
+        const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+        role = userDoc.data()?.role;
+      } catch {
+        // Admin SDK datastore viewer IAM may be absent; fall back to verified superadmin email
       }
-    } catch (error) {
-      res.status(401).json({ error: 'Invalid token' });
+      if (role === 'admin' || (decodedToken.email === 'infowarspakistan@gmail.com' && decodedToken.email_verified !== false)) {
+        (req as any).user = decodedToken;
+        return next();
+      }
+      return res.status(403).json({ error: 'Forbidden: Admin access required' });
+    } catch {
+      return res.status(401).json({ error: 'Invalid token' });
     }
   }
 
@@ -688,6 +699,55 @@ async function startServer() {
       res.status(500).send('Error generating GMC TSV feed');
     }
   });
+  // SSRF Guard for outbound n8n webhook URLs
+  function isSafeExternalWebhookUrl(rawUrl: unknown): boolean {
+    if (typeof rawUrl !== 'string' || !rawUrl.trim()) return false;
+    try {
+      const parsed = new URL(rawUrl.trim());
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+      const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+      if (
+        !host ||
+        host === 'localhost' ||
+        host.endsWith('.localhost') ||
+        host.endsWith('.local') ||
+        host.endsWith('.internal')
+      ) {
+        return false;
+      }
+      // Block IPv6 loopback / ULA / link-local / mapped addresses
+      if (
+        host === '::1' ||
+        host === '::' ||
+        host.startsWith('fc') ||
+        host.startsWith('fd') ||
+        host.startsWith('fe80:') ||
+        host.startsWith('::ffff:')
+      ) {
+        return false;
+      }
+      // Block private, loopback, and link-local IPv4 ranges
+      const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+      if (ipv4Match) {
+        const [, a, b] = ipv4Match.map(Number);
+        if (
+          a === 0 ||
+          a === 10 ||
+          a === 127 ||
+          (a === 169 && b === 254) ||
+          (a === 172 && b >= 16 && b <= 31) ||
+          (a === 192 && b === 168) ||
+          (a === 100 && b >= 64 && b <= 127)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   // --- n8n Workflow Automation Helper ---
   async function triggerN8NWorkflows(event: string, payload: any) {
     try {
@@ -713,6 +773,22 @@ async function startServer() {
         const webhookUrl = workflow.webhookUrl;
         const secretHeader = workflow.secretHeader || '';
 
+        if (!isSafeExternalWebhookUrl(webhookUrl)) {
+          await db.collection('n8n_logs').add({
+            workflowId,
+            workflowName,
+            webhookUrl: String(webhookUrl || ''),
+            event,
+            timestamp: new Date().toISOString(),
+            payload: JSON.stringify(payload),
+            responseStatus: 400,
+            responseBody: 'Blocked unsafe or private webhook URL',
+            status: 'failure',
+            durationMs: 0
+          });
+          return;
+        }
+
         const start = Date.now();
         let responseStatus = 0;
         let responseBody = '';
@@ -726,10 +802,11 @@ async function startServer() {
             headers['X-Webhook-Secret'] = secretHeader;
           }
 
-          // Use native global fetch (available in Node 18+)
           const res = await fetch(webhookUrl, {
             method: 'POST',
             headers,
+            redirect: 'error',
+            signal: AbortSignal.timeout(10000),
             body: JSON.stringify({
               event,
               timestamp: new Date().toISOString(),
@@ -778,8 +855,25 @@ async function startServer() {
     res.json(siteSettings);
   });
 
-  app.post('/api/settings', (req, res) => {
-    siteSettings = { ...siteSettings, ...req.body };
+  app.post('/api/settings', verifyAdmin, (req, res) => {
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    const updates: Partial<typeof siteSettings> = {};
+    if (typeof body.siteName === 'string' && body.siteName.trim().length <= 150) {
+      updates.siteName = body.siteName.trim();
+    }
+    if (typeof body.contactEmail === 'string' && body.contactEmail.trim().length <= 150) {
+      updates.contactEmail = body.contactEmail.trim();
+    }
+    if (typeof body.phone === 'string' && body.phone.trim().length <= 50) {
+      updates.phone = body.phone.trim();
+    }
+    if (typeof body.address === 'string' && body.address.trim().length <= 300) {
+      updates.address = body.address.trim();
+    }
+    if (typeof body.taxRate === 'number' && Number.isFinite(body.taxRate) && body.taxRate >= 0 && body.taxRate <= 1) {
+      updates.taxRate = body.taxRate;
+    }
+    siteSettings = { ...siteSettings, ...updates };
     res.json({ success: true, settings: siteSettings });
   });
 
@@ -807,13 +901,16 @@ async function startServer() {
       if (!name || !webhookUrl) {
         return res.status(400).json({ error: 'Name and Webhook URL are required' });
       }
+      if (!isSafeExternalWebhookUrl(webhookUrl)) {
+        return res.status(400).json({ error: 'Webhook URL must be a valid public http(s) URL' });
+      }
 
       const newWorkflow = {
-        name,
-        webhookUrl,
-        events: events || ['all'],
+        name: String(name).slice(0, 120),
+        webhookUrl: String(webhookUrl).trim(),
+        events: Array.isArray(events) ? events.slice(0, 20) : ['all'],
         isActive: isActive !== false,
-        secretHeader: secretHeader || '',
+        secretHeader: typeof secretHeader === 'string' ? secretHeader.slice(0, 256) : '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -831,15 +928,18 @@ async function startServer() {
     try {
       const { id } = req.params;
       const { name, webhookUrl, events, isActive, secretHeader } = req.body;
-      
+      if (webhookUrl !== undefined && !isSafeExternalWebhookUrl(webhookUrl)) {
+        return res.status(400).json({ error: 'Webhook URL must be a valid public http(s) URL' });
+      }
+
       const updateData: any = {
         updatedAt: new Date().toISOString()
       };
-      if (name !== undefined) updateData.name = name;
-      if (webhookUrl !== undefined) updateData.webhookUrl = webhookUrl;
-      if (events !== undefined) updateData.events = events;
-      if (isActive !== undefined) updateData.isActive = isActive;
-      if (secretHeader !== undefined) updateData.secretHeader = secretHeader;
+      if (name !== undefined) updateData.name = String(name).slice(0, 120);
+      if (webhookUrl !== undefined) updateData.webhookUrl = String(webhookUrl).trim();
+      if (events !== undefined && Array.isArray(events)) updateData.events = events.slice(0, 20);
+      if (isActive !== undefined) updateData.isActive = Boolean(isActive);
+      if (secretHeader !== undefined) updateData.secretHeader = String(secretHeader).slice(0, 256);
 
       await db.collection('n8n_workflows').doc(id).update(updateData);
       res.json({ success: true, message: 'Workflow updated successfully' });
@@ -886,6 +986,10 @@ async function startServer() {
       const webhookUrl = workflow.webhookUrl;
       const secretHeader = workflow.secretHeader || '';
 
+      if (!isSafeExternalWebhookUrl(webhookUrl)) {
+        return res.status(400).json({ error: 'Blocked unsafe or private webhook URL' });
+      }
+
       const testPayload = {
         testId: `TEST-${Math.floor(1000 + Math.random() * 9000)}`,
         message: 'This is a test event triggered from the AV Live Admin Panel',
@@ -913,6 +1017,8 @@ async function startServer() {
         const fetchRes = await fetch(webhookUrl, {
           method: 'POST',
           headers,
+          redirect: 'error',
+          signal: AbortSignal.timeout(10000),
           body: JSON.stringify({
             event: 'test_connection',
             timestamp: new Date().toISOString(),
@@ -986,14 +1092,19 @@ async function startServer() {
     });
   });
 
-  app.get('/api/orders', (req, res) => {
+  app.get('/api/orders', verifyAdmin, (req, res) => {
     res.json(orders);
   });
 
-  app.patch('/api/orders/:id', (req, res) => {
+  app.patch('/api/orders/:id', verifyAdmin, (req, res) => {
+    const allowedStatuses = new Set(['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled']);
+    const nextStatus = typeof req.body?.status === 'string' ? req.body.status.trim() : '';
+    if (!allowedStatuses.has(nextStatus)) {
+      return res.status(400).json({ error: 'Invalid order status' });
+    }
     const order = orders.find(o => o.id === req.params.id);
     if (order) {
-      order.status = req.body.status;
+      order.status = nextStatus;
       res.json({ success: true, order });
     } else {
       res.status(404).json({ error: 'Order not found' });
@@ -1021,18 +1132,27 @@ async function startServer() {
     res.json(products);
   });
 
-  app.post('/api/products', (req, res) => {
+  app.post('/api/products', verifyAdmin, (req, res) => {
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    const name = typeof body.name === 'string' ? body.name.trim().slice(0, 200) : '';
+    if (!name) {
+      return res.status(400).json({ error: 'Product name is required' });
+    }
     const newProduct = {
       id: products.length + 1,
-      ...req.body,
-      stock: req.body.stock || 0
+      name,
+      brand: typeof body.brand === 'string' ? body.brand.trim().slice(0, 100) : 'AV Live',
+      category: typeof body.category === 'string' ? body.category.trim().slice(0, 100) : 'Video Conferencing',
+      price: typeof body.price === 'number' && Number.isFinite(body.price) && body.price >= 0 ? body.price : 0,
+      image: typeof body.image === 'string' ? body.image.trim().slice(0, 500) : '',
+      stock: typeof body.stock === 'number' && Number.isFinite(body.stock) && body.stock >= 0 ? Math.floor(body.stock) : 0
     };
     products.push(newProduct);
     res.json({ success: true, product: newProduct });
   });
 
-  app.delete('/api/products/:id', (req, res) => {
-    products = products.filter(p => p.id !== parseInt(req.params.id));
+  app.delete('/api/products/:id', verifyAdmin, (req, res) => {
+    products = products.filter(p => p.id !== parseInt(req.params.id, 10));
     res.json({ success: true });
   });
 
@@ -1040,24 +1160,40 @@ async function startServer() {
   
   app.post('/api/event-quote', async (req, res) => {
     try {
-      const body = req.body;
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
       
       const required = ['fullName', 'email', 'phone', 'eventType', 'eventSubType'];
       for (const field of required) {
-        if (!body[field]) {
+        if (typeof body[field] !== 'string' || !body[field].trim()) {
           return res.status(400).json({ error: `Missing required field: ${field}` });
         }
       }
 
+      const quotePayload = {
+        fullName: String(body.fullName).trim().slice(0, 200),
+        email: String(body.email).trim().slice(0, 200),
+        phone: String(body.phone).trim().slice(0, 50),
+        companyName: typeof body.companyName === 'string' ? body.companyName.trim().slice(0, 200) : '',
+        city: typeof body.city === 'string' ? body.city.trim().slice(0, 100) : '',
+        eventType: String(body.eventType).trim().slice(0, 100),
+        eventSubType: String(body.eventSubType).trim().slice(0, 100),
+        eventDate: typeof body.eventDate === 'string' ? body.eventDate.trim().slice(0, 60) : '',
+        guestCount: typeof body.guestCount === 'string' || typeof body.guestCount === 'number' ? String(body.guestCount).slice(0, 40) : '',
+        budget: typeof body.budget === 'string' ? body.budget.trim().slice(0, 100) : '',
+        venue: typeof body.venue === 'string' ? body.venue.trim().slice(0, 200) : '',
+        notes: typeof body.notes === 'string' ? body.notes.trim().slice(0, 3000) : '',
+        services: Array.isArray(body.services) ? body.services.slice(0, 20).map((s: any) => String(s).slice(0, 100)) : [],
+      };
+
       const docRef = await db.collection('event_quotes').add({
-        ...body,
+        ...quotePayload,
         status: 'new',
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp()
       });
 
       // Trigger active n8n workflows with the event quote request
-      triggerN8NWorkflows('new_quote', { id: docRef.id, ...body, status: 'new' });
+      triggerN8NWorkflows('new_quote', { id: docRef.id, ...quotePayload, status: 'new' });
 
       res.json({
         success: true,
@@ -1071,26 +1207,44 @@ async function startServer() {
   });
 
   app.post('/api/event-queries', (req, res) => {
-    console.log('Received Event Query:', req.body);
-    // Trigger n8n automation for contact submissions
-    triggerN8NWorkflows('contact_submission', { ...req.body, type: 'event_consultation' });
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    if (!body.email && !body.phone && !body.name && !body.fullName) {
+      return res.status(400).json({ error: 'Contact details are required' });
+    }
+    const sanitized = {
+      name: typeof body.name === 'string' ? body.name.slice(0, 200) : (typeof body.fullName === 'string' ? body.fullName.slice(0, 200) : ''),
+      email: typeof body.email === 'string' ? body.email.slice(0, 200) : '',
+      phone: typeof body.phone === 'string' ? body.phone.slice(0, 50) : '',
+      message: typeof body.message === 'string' ? body.message.slice(0, 3000) : '',
+      type: 'event_consultation',
+    };
+    triggerN8NWorkflows('contact_submission', sanitized);
     res.json({ success: true, message: 'Event consultation request received successfully.' });
   });
 
   app.post('/api/ai-queries', (req, res) => {
-    console.log('Received AI Query:', req.body);
-    // Trigger n8n automation for contact submissions
-    triggerN8NWorkflows('contact_submission', { ...req.body, type: 'ai_strategy' });
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    if (!body.email && !body.phone && !body.name && !body.fullName) {
+      return res.status(400).json({ error: 'Contact details are required' });
+    }
+    const sanitized = {
+      name: typeof body.name === 'string' ? body.name.slice(0, 200) : (typeof body.fullName === 'string' ? body.fullName.slice(0, 200) : ''),
+      email: typeof body.email === 'string' ? body.email.slice(0, 200) : '',
+      phone: typeof body.phone === 'string' ? body.phone.slice(0, 50) : '',
+      message: typeof body.message === 'string' ? body.message.slice(0, 3000) : '',
+      type: 'ai_strategy',
+    };
+    triggerN8NWorkflows('contact_submission', sanitized);
     res.json({ success: true, message: 'AI strategy request received successfully.' });
   });
 
   
   // AI Image Generation Endpoint
-  app.post('/api/generate-image', async (req, res) => {
+  app.post('/api/generate-image', verifyAdmin, async (req, res) => {
     try {
       const { prompt } = req.body;
-      if (!prompt) {
-        return res.status(400).json({ error: 'Prompt is required' });
+      if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 2000) {
+        return res.status(400).json({ error: 'A valid prompt (1-2000 characters) is required' });
       }
       
       const ai = new GoogleGenAI({ 
@@ -1141,8 +1295,208 @@ async function startServer() {
     }
   });
 
+  // ============================================
+  // ADMIN MEDIA VAULT & OPTIMIZER ENDPOINTS
+  // ============================================
+  const MEDIA_ALLOWED_FOLDERS = new Set(['uploads', 'products', 'projects', 'video-conference']);
+  const MEDIA_HEAVY_THRESHOLD_BYTES = 200 * 1024;
+
+  async function verifyMediaOperator(req: express.Request, res: express.Response, next: express.NextFunction) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const token = authHeader.split('Bearer ')[1];
+    try {
+      const decodedToken = await auth.verifyIdToken(token);
+      let role: string | undefined;
+      try {
+        const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+        role = userDoc.data()?.role;
+      } catch {
+        // Admin SDK datastore viewer may be absent in local preview; rely on superadmin email check
+      }
+      if (role === 'admin' || role === 'editor' || (decodedToken.email === 'infowarspakistan@gmail.com' && decodedToken.email_verified !== false)) {
+        (req as any).user = decodedToken;
+        return next();
+      }
+      return res.status(403).json({ error: 'Forbidden: Admin or Editor role required' });
+    } catch {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+  }
+
+  function isValidImageMagicBytes(buf: Buffer): boolean {
+    if (!buf || buf.length < 12) return false;
+    // WebP: RIFF....WEBP
+    if (
+      buf.slice(0, 4).toString('ascii') === 'RIFF' &&
+      buf.slice(8, 12).toString('ascii') === 'WEBP'
+    ) {
+      return true;
+    }
+    // JPEG: FF D8 FF
+    if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) {
+      return true;
+    }
+    // PNG: 89 50 4E 47
+    if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) {
+      return true;
+    }
+    return false;
+  }
+
+  app.get('/api/admin/media/list', verifyMediaOperator, (_req, res) => {
+    try {
+      const scanFolders = ['uploads', 'products', 'projects', 'video-conference', 'teleprompter'];
+      const items: Array<{
+        name: string;
+        folder: string;
+        path: string;
+        fullUrl: string;
+        sizeBytes: number;
+        isHeavy: boolean;
+        updatedAt: string;
+      }> = [];
+
+      for (const folder of scanFolders) {
+        const dirPath = path.join(publicImagesDir, folder);
+        if (!fs.existsSync(dirPath)) continue;
+        const entries = fs.readdirSync(dirPath);
+        for (const entry of entries) {
+          if (!/\.(webp|jpe?g|png)$/i.test(entry)) continue;
+          const filePath = path.join(dirPath, entry);
+          const stat = fs.statSync(filePath);
+          if (!stat.isFile()) continue;
+          const relPath = `/images/${folder}/${entry}`;
+          items.push({
+            name: entry,
+            folder,
+            path: relPath,
+            fullUrl: `https://avlive.com.pk${relPath}`,
+            sizeBytes: stat.size,
+            isHeavy: stat.size > MEDIA_HEAVY_THRESHOLD_BYTES,
+            updatedAt: stat.mtime.toISOString(),
+          });
+        }
+      }
+
+      items.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+      res.json({ items, total: items.length });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || 'Failed to list media assets' });
+    }
+  });
+
+  app.post(
+    '/api/admin/media/upload',
+    express.json({ limit: '5mb' }),
+    verifyMediaOperator,
+    (req, res) => {
+      try {
+        const rawFolder = String(req.body?.folder || 'uploads').trim().toLowerCase();
+        const folder = MEDIA_ALLOWED_FOLDERS.has(rawFolder) ? rawFolder : 'uploads';
+        const rawSlug = String(req.body?.filename || '')
+          .toLowerCase()
+          .replace(/\.[^.]+$/, '')
+          .replace(/[^a-z0-9-]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 72);
+
+        if (!rawSlug || rawSlug.includes('avlive-')) {
+          return res.status(400).json({
+            error: 'Invalid filename slug. Use lowercase letters, numbers, and hyphens (avoid avlive- prefix).',
+          });
+        }
+
+        const webpBase64 = typeof req.body?.webpBase64 === 'string' ? req.body.webpBase64.trim() : '';
+        const jpgBase64 = typeof req.body?.jpgBase64 === 'string' ? req.body.jpgBase64.trim() : '';
+
+        if (!webpBase64 && !jpgBase64) {
+          return res.status(400).json({ error: 'Compressed image payload is required' });
+        }
+
+        const targetDir = path.resolve(publicImagesDir, folder);
+        if (!targetDir.startsWith(path.resolve(publicImagesDir) + path.sep)) {
+          return res.status(400).json({ error: 'Invalid target folder' });
+        }
+        fs.mkdirSync(targetDir, { recursive: true });
+
+        const maxBytes = 1.5 * 1024 * 1024;
+        const writtenFiles: { webpPath?: string; jpgPath?: string; bytes: number } = { bytes: 0 };
+
+        if (webpBase64) {
+          const webpBuf = Buffer.from(webpBase64, 'base64');
+          if (webpBuf.length > maxBytes || !isValidImageMagicBytes(webpBuf)) {
+            return res.status(400).json({ error: 'Invalid or oversized WebP image buffer (max 1.5 MB)' });
+          }
+          const ext = webpBuf.slice(0, 4).toString('ascii') === 'RIFF' ? 'webp' : 'jpg';
+          const outWebp = path.resolve(targetDir, `${rawSlug}.${ext}`);
+          if (!outWebp.startsWith(targetDir + path.sep)) {
+            return res.status(400).json({ error: 'Invalid output path' });
+          }
+          fs.writeFileSync(outWebp, webpBuf);
+          writtenFiles.webpPath = `/images/${folder}/${rawSlug}.${ext}`;
+          writtenFiles.bytes = webpBuf.length;
+        }
+
+        if (jpgBase64) {
+          const jpgBuf = Buffer.from(jpgBase64, 'base64');
+          if (jpgBuf.length > maxBytes || !isValidImageMagicBytes(jpgBuf)) {
+            return res.status(400).json({ error: 'Invalid or oversized JPEG image buffer (max 1.5 MB)' });
+          }
+          const outJpg = path.resolve(targetDir, `${rawSlug}.jpg`);
+          if (!outJpg.startsWith(targetDir + path.sep)) {
+            return res.status(400).json({ error: 'Invalid output path' });
+          }
+          fs.writeFileSync(outJpg, jpgBuf);
+          writtenFiles.jpgPath = `/images/${folder}/${rawSlug}.jpg`;
+          if (!writtenFiles.bytes) writtenFiles.bytes = jpgBuf.length;
+        }
+
+        const primaryUrl = writtenFiles.webpPath || writtenFiles.jpgPath || '';
+        const gmcPreferredUrl = writtenFiles.jpgPath || writtenFiles.webpPath || '';
+
+        res.json({
+          success: true,
+          url: primaryUrl,
+          fullUrl: `https://avlive.com.pk${primaryUrl}`,
+          jpgUrl: writtenFiles.jpgPath ? `https://avlive.com.pk${writtenFiles.jpgPath}` : undefined,
+          gmcUrl: gmcPreferredUrl ? `https://avlive.com.pk${gmcPreferredUrl}` : undefined,
+          folder,
+          slug: rawSlug,
+          bytes: writtenFiles.bytes,
+        });
+      } catch (error: any) {
+        res.status(500).json({ error: error?.message || 'Failed to save optimized image' });
+      }
+    }
+  );
+
+  app.delete('/api/admin/media', verifyMediaOperator, (req, res) => {
+    try {
+      const relPath = String(req.body?.path || req.query?.path || '').trim();
+      const match = relPath.match(/^\/images\/(uploads|products|projects|video-conference)\/([a-zA-Z0-9._-]+\.(?:webp|jpe?g|png))$/i);
+      if (!match) {
+        return res.status(400).json({ error: 'Invalid media asset path' });
+      }
+      const resolved = path.resolve(publicImagesDir, match[1], match[2]);
+      const allowedSubdir = path.resolve(publicImagesDir, match[1]);
+      if (!resolved.startsWith(allowedSubdir + path.sep)) {
+        return res.status(400).json({ error: 'Invalid media asset target' });
+      }
+      if (!fs.existsSync(resolved)) {
+        return res.status(404).json({ error: 'Image file not found' });
+      }
+      fs.unlinkSync(resolved);
+      res.json({ success: true, deleted: relPath });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || 'Failed to delete media asset' });
+    }
+  });
+
   // Server-side SEO Canonical, Metadata & Structured Data injector for Googlebot first-wave HTML crawls
-  function injectRouteSeoIntoHtml(html: string, reqPath: string): string {
+  function injectRouteSeoIntoHtml(html: string, reqPath: string): { html: string; statusCode: number } {
     const cleanPath = reqPath === '/' ? '' : reqPath.replace(/\/+$/, '');
     const canonicalUrl = `https://avlive.com.pk${cleanPath}`;
 
@@ -1976,6 +2330,11 @@ async function startServer() {
       '/admin': {
         title: 'Admin Portal | AV Live',
         description: 'Restricted administrative portal.',
+        noindex: true
+      },
+      '/blueprint-hub': {
+        title: 'Architecture Blueprint Hub | AV Live',
+        description: 'Internal architecture blueprint generator.',
         noindex: true
       }
     };
@@ -3042,21 +3401,6 @@ async function startServer() {
         }
       };
 
-      // Fallback matched metadata if any unrecognized route reaches injectRouteSeoIntoHtml (prevents Duplicate Homepage Title/Description)
-      if (!matched && cleanPath !== '' && cleanPath !== '/') {
-        const fallbackLabel = cleanPath
-          .replace(/^\/+/, '')
-          .replace(/[/-]+/g, ' ')
-          .replace(/\b\w/g, c => c.toUpperCase());
-        matched = {
-          title: clampSeoTitle(`${fallbackLabel} in Pakistan | Enterprise AV | AV Live`, 65),
-          description: clampSeoDescription(
-            `${fallbackLabel} solutions, hardware & turnkey engineering in Lahore, Karachi & Islamabad by AV Live Communications Pakistan.`,
-            128
-          ),
-        };
-      }
-
       const customStatic = staticPageCustomContent[cleanPath];
       if (customStatic && matched) {
         const cleanStaticH1 = matched.title.replace(/\s*\|\s*AV Live.*$/i, '');
@@ -3139,15 +3483,48 @@ async function startServer() {
       }
     }
 
-    let updated = html
-      .replace(
-        /<link(?:\s+data-rh="true")?\s+rel="canonical"\s+href="https:\/\/avlive\.com\.pk"\s*\/>/,
-        `<link data-rh="true" rel="canonical" href="${canonicalUrl}" />`
-      )
-      .replace(
-        /<meta(?:\s+data-rh="true")?\s+property="og:url"\s+content="https:\/\/avlive\.com\.pk"\s*\/>/,
-        `<meta data-rh="true" property="og:url" content="${canonicalUrl}" />`
-      );
+    // Return authentic HTTP 404 + noindex, nofollow for any unrecognized route
+    let isNotFoundRoute = false;
+    if (!matched && cleanPath !== '' && cleanPath !== '/') {
+      isNotFoundRoute = true;
+      matched = {
+        title: 'Page Not Found (404) | AV Live Communications Pakistan',
+        description: 'The requested page could not be found on AV Live Communications Pakistan.',
+        noindex: true,
+      };
+      ssrCustomBodyHtml = `
+        <main class="ssr-seo-snapshot">
+          <article>
+            <h1>404 — Page Not Found</h1>
+            <p>The page you requested (<code>${escapeHtmlText(cleanPath)}</code>) does not exist or has moved. Browse our verified enterprise AV catalog and turnkey engineering portals below:</p>
+            <ul>
+              <li><a href="https://avlive.com.pk/">AV Live Communications Home</a></li>
+              <li><a href="https://avlive.com.pk/shop">Enterprise AV Hardware Shop</a></li>
+              <li><a href="https://avlive.com.pk/services">Corporate Events &amp; Integration Services</a></li>
+              <li><a href="https://avlive.com.pk/contact">Contact Support (0321-4256263)</a></li>
+            </ul>
+          </article>
+        </main>`;
+    }
+
+    const statusCode = isNotFoundRoute ? 404 : 200;
+
+    let updated = html;
+    if (statusCode === 404) {
+      updated = updated
+        .replace(/<link(?:\s+data-rh="true")?\s+rel="canonical"[^>]*>\s*/gi, '')
+        .replace(/<meta(?:\s+data-rh="true")?\s+property="og:url"[^>]*>\s*/gi, '');
+    } else {
+      updated = updated
+        .replace(
+          /<link(?:\s+data-rh="true")?\s+rel="canonical"\s+href="https:\/\/avlive\.com\.pk"\s*\/>/,
+          `<link data-rh="true" rel="canonical" href="${canonicalUrl}" />`
+        )
+        .replace(
+          /<meta(?:\s+data-rh="true")?\s+property="og:url"\s+content="https:\/\/avlive\.com\.pk"\s*\/>/,
+          `<meta data-rh="true" property="og:url" content="${canonicalUrl}" />`
+        );
+    }
 
     if (matched) {
       const clampedTitle = clampSeoTitle(matched.title, 65);
@@ -3304,7 +3681,7 @@ async function startServer() {
       );
     }
 
-    return updated;
+    return { html: updated, statusCode };
   }
 
   // Legacy, Query-Param Brand, Non-Product Category & Raw Firestore ID / MPN 301 Redirects
@@ -3709,14 +4086,17 @@ async function startServer() {
         try {
           const indexPath = path.join(process.cwd(), 'index.html');
           const rawHtml = fs.readFileSync(indexPath, 'utf8');
-          const seoHtml = injectRouteSeoIntoHtml(rawHtml, req.path);
+          const { html: seoHtml, statusCode } = injectRouteSeoIntoHtml(rawHtml, req.path);
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          if (statusCode === 404) {
+            res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+          }
           try {
             const transformed = await vite.transformIndexHtml(req.path, seoHtml);
-            return res.status(200).send(transformed);
+            return res.status(statusCode).send(transformed);
           } catch {
-            // Fault-tolerant fallback: if vite.transformIndexHtml fails on edge cases, still serve valid 200 OK SSR HTML
-            return res.status(200).send(seoHtml);
+            // Fault-tolerant fallback: if vite.transformIndexHtml fails on edge cases, still serve SSR HTML with matching status
+            return res.status(statusCode).send(seoHtml);
           }
         } catch {
           try {
@@ -3750,7 +4130,11 @@ async function startServer() {
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
         try {
-          return res.status(200).send(injectRouteSeoIntoHtml(rawHtml, req.path));
+          const { html: seoHtml, statusCode } = injectRouteSeoIntoHtml(rawHtml, req.path);
+          if (statusCode === 404) {
+            res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+          }
+          return res.status(statusCode).send(seoHtml);
         } catch {
           return res.status(200).send(rawHtml);
         }
@@ -3769,7 +4153,8 @@ async function startServer() {
         if (fs.existsSync(rootIndex)) {
           const rawHtml = fs.readFileSync(rootIndex, 'utf8');
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
-          return res.status(200).send(injectRouteSeoIntoHtml(rawHtml, req.path));
+          const { html: seoHtml, statusCode } = injectRouteSeoIntoHtml(rawHtml, req.path);
+          return res.status(statusCode).send(seoHtml);
         }
       } catch {
         // Ignore fallback read errors

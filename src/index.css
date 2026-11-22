@@ -34,18 +34,12 @@ body {
   overflow-x: hidden;
 }
 
-/* Mobile-Only Viewport & Touch Ergonomics (Desktop >= 1024px Benchmark Untouched) */
+/* Mobile-Only Viewport & Touch Ergonomics (Preserve component-level dimensions while removing 300ms tap delay) */
 @media (max-width: 1023px) {
-  header a,
-  header button,
-  nav a,
-  nav button,
-  footer a,
-  footer button,
+  a,
   button,
   [role="button"] {
-    min-height: 48px;
-    min-width: 48px;
+    touch-action: manipulation;
   }
 }
 
