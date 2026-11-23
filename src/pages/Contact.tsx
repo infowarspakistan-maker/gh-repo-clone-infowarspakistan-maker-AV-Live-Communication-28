@@ -124,32 +124,32 @@ export function Contact() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Contact Information Sidebar */}
-          <div className="lg:col-span-1 space-y-8">
+          <div className="lg:col-span-1 space-y-6 lg:space-y-8">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl"
+              className="bg-white p-6 sm:p-8 lg:p-10 rounded-3xl lg:rounded-[3rem] border border-gray-100 shadow-xl"
             >
-              <h3 className="text-xl font-black text-[#1A2B4C] mb-10 flex items-center gap-4">
+              <h3 className="text-xl font-black text-[#1A2B4C] mb-8 flex items-center gap-4">
                 <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
                   <MapPin size={20} />
                 </div>
                 Primary HQ
               </h3>
               
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <div className="flex gap-4">
                    <div className="text-gray-400 shrink-0 mt-1"><MapPin size={18} /></div>
                    <div>
-                      <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Physical Address</div>
-                      <div className="text-[#1A2B4C] font-bold leading-relaxed" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.address) }} />
+                      <div className="text-xs font-black uppercase tracking-wider text-gray-400 mb-1">Physical Address</div>
+                      <div className="text-[#1A2B4C] text-sm sm:text-base font-bold leading-relaxed" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(data.address) }} />
                    </div>
                 </div>
 
                 <div className="flex gap-4">
                    <div className="text-gray-400 shrink-0 mt-1"><Phone size={18} /></div>
                    <div>
-                      <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Support Hotline</div>
+                      <div className="text-xs font-black uppercase tracking-wider text-gray-400 mb-1">Support Hotline</div>
                       <a href={`tel:${data.phone.replace(/\s+/g, '')}`} className="text-[#1A2B4C] font-black text-xl hover:text-[#00B4D8] transition-colors">{data.phone}</a>
                    </div>
                 </div>
@@ -157,8 +157,8 @@ export function Contact() {
                 <div className="flex gap-4">
                    <div className="text-gray-400 shrink-0 mt-1"><Mail size={18} /></div>
                    <div>
-                      <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Inquiry Vector</div>
-                      <a href={`mailto:${data.email}`} className="text-[#1A2B4C] font-bold hover:text-[#00B4D8] transition-colors">{data.email}</a>
+                      <div className="text-xs font-black uppercase tracking-wider text-gray-400 mb-1">Inquiry Vector</div>
+                      <a href={`mailto:${data.email}`} className="text-[#1A2B4C] text-sm sm:text-base font-bold hover:text-[#00B4D8] transition-colors break-all">{data.email}</a>
                    </div>
                 </div>
               </div>
@@ -168,7 +168,7 @@ export function Contact() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl"
+              className="bg-white p-6 sm:p-8 lg:p-10 rounded-3xl lg:rounded-[3rem] border border-gray-100 shadow-xl"
             >
               <h3 className="text-xl font-black text-[#1A2B4C] mb-8 flex items-center gap-4">
                 <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
@@ -245,11 +245,11 @@ export function Contact() {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-10 md:p-16 rounded-[4rem] border border-gray-100 shadow-2xl relative overflow-hidden"
+              className="bg-white p-6 sm:p-10 md:p-14 rounded-3xl md:rounded-[3.5rem] border border-gray-100 shadow-2xl relative overflow-hidden"
             >
               <div className="relative z-10">
-                <h2 className="text-3xl font-black text-[#1A2B4C] mb-4 tracking-tight">Transmission Terminal</h2>
-                <p className="text-gray-400 font-medium mb-12">Submit your requirements and our certified engineers will respond within 24 hours.</p>
+                <h2 className="text-2xl sm:text-3xl font-black text-[#1A2B4C] mb-3 tracking-tight">Transmission Terminal</h2>
+                <p className="text-gray-500 text-sm sm:text-base font-medium mb-8 sm:mb-10">Submit your requirements and our certified engineers will respond within 24 hours.</p>
                 
                 {submitted ? (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-8 text-center space-y-4">

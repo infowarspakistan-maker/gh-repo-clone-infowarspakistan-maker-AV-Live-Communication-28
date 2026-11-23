@@ -161,14 +161,14 @@ export function Footer() {
             </ul>
 
             <div className="mt-3.5">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-300 mb-2">Official Channels</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">Official Channels</div>
               <div className="flex flex-wrap gap-1.5">
                 <a
                   href="https://www.youtube.com/@AVLivePakistan"
                   target="_blank"
                   rel="noopener"
                   aria-label="AV Live on YouTube (@AVLivePakistan)"
-                  className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
+                  className="px-2.5 py-1.5 min-h-[32px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-xs font-bold transition-colors inline-flex items-center justify-center"
                 >
                   YouTube
                 </a>
@@ -177,7 +177,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener"
                   aria-label="AV Live on Instagram (@avlive25)"
-                  className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
+                  className="px-2.5 py-1.5 min-h-[32px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-xs font-bold transition-colors inline-flex items-center justify-center"
                 >
                   Instagram
                 </a>
@@ -186,7 +186,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener"
                   aria-label="AV Live on TikTok (@almalikk00)"
-                  className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
+                  className="px-2.5 py-1.5 min-h-[32px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-xs font-bold transition-colors inline-flex items-center justify-center"
                 >
                   TikTok
                 </a>
@@ -195,7 +195,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener"
                   aria-label="AV Live on X (Twitter)"
-                  className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
+                  className="px-2.5 py-1.5 min-h-[32px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-xs font-bold transition-colors inline-flex items-center justify-center"
                 >
                   X
                 </a>
@@ -204,7 +204,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener"
                   aria-label="AV Live on LinkedIn"
-                  className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
+                  className="px-2.5 py-1.5 min-h-[32px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-xs font-bold transition-colors inline-flex items-center justify-center"
                 >
                   LinkedIn
                 </a>
@@ -213,7 +213,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener"
                   aria-label="AV Live on Facebook (@AvLivePakistan)"
-                  className="px-2.5 py-1.5 min-h-[30px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-[11px] font-bold transition-colors inline-flex items-center justify-center"
+                  className="px-2.5 py-1.5 min-h-[32px] bg-white/10 hover:bg-[#00B4D8] hover:text-[#1A2B4C] rounded-lg text-xs font-bold transition-colors inline-flex items-center justify-center"
                 >
                   Facebook
                 </a>
@@ -230,10 +230,10 @@ export function Footer() {
 
         {/* Global OEM & Ecosystem Reference Links */}
         <div className="border-t border-[#2A658E] py-3.5 mb-2">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-gray-300 mb-1.5">
+          <div className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-1.5">
             Global Unified Communications &amp; OEM Technology Partners
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-200">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-200">
             <a href="https://www.ipphone-warehouse.com/" target="_blank" rel="noopener" className="hover:text-[#00B4D8] transition-colors py-0.5">IP Phone Warehouse</a>
             <a href="https://www.hp.com/" target="_blank" rel="noopener" className="hover:text-[#00B4D8] transition-colors py-0.5">HP.com (HP Poly)</a>
             <a href="https://www.plantronics.com/" target="_blank" rel="noopener" className="hover:text-[#00B4D8] transition-colors py-0.5">Plantronics.com Headsets</a>
@@ -244,7 +244,7 @@ export function Footer() {
           </div>
         </div>
         
-        <div className="border-t border-[#2A658E] pt-3.5 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] text-gray-200">
+        <div className="border-t border-[#2A658E] pt-3.5 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-gray-200">
           <div>
             &copy; {new Date().getFullYear()} AV LIVE COMMUNICATIONS. All rights reserved.
           </div>
@@ -259,6 +259,7 @@ export function Footer() {
             </button>
             <Link to="/privacy-policy" className="hover:text-white transition-colors py-0.5">Privacy Policy</Link>
             <Link to="/terms-of-service" className="hover:text-white transition-colors py-0.5">Terms of Service</Link>
+            <Link to="/user-data-deletion" className="hover:text-white transition-colors py-0.5">User Data Deletion</Link>
           </div>
         </div>
       </div>

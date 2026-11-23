@@ -8,24 +8,24 @@ Welcome to the **AV Live Communications** source code repository and platform bl
 
 | Endpoint / File | Purpose | Live Count / Status |
 | :--- | :--- | :--- |
-| **`/sitemap.xml`** (`public/sitemap.xml`) | Dynamic XML 1.0 Sitemap synced from Firestore + synchronous fallback catalogs | **157 Canonical URLs** (71 Static/Brand/Geo/Pillar including `/sitemap`, `/video-conference-in-pakistan` & `/event-management-in-pakistan`, 54 Products, 12 Categories, 9 Services, 11 Blogs) |
-| **`/sitemap`** (`src/pages/HtmlSitemap.tsx`) | Human & Googlebot HTML Sitemap & Enterprise Hardware Directory (all 157 URLs within 2 clicks) | Active (Linked in Navbar & Footer) |
+| **`/sitemap.xml`** (`public/sitemap.xml`) | Dynamic XML 1.0 Sitemap synced from Firestore + synchronous fallback catalogs | **166 Canonical URLs** (74 Static/Brand/Geo/Pillar including `/sitemap`, `/video-conference-in-pakistan`, `/event-management-in-pakistan` & `/user-data-deletion`, 60 Products, 12 Categories, 9 Services, 11 Blogs) |
+| **`/sitemap`** (`src/pages/HtmlSitemap.tsx`) | Human & Googlebot HTML Sitemap & Enterprise Hardware Directory (all 166 URLs within 2 clicks) | Active (Linked in Navbar & Footer) |
 | **`/llms.txt`** (`public/llms.txt`) | Concise AI Search (ChatGPT, Perplexity, Claude, Gemini) index & entity directory | Active (HTTP 200 `text/plain`) |
-| **`/llms-full.txt`** (`public/llms-full.txt`) | Complete 32KB+ Markdown corpus of all 54 SKUs (MPNs, GTINs, real model-specific PKR prices), BoM tables & guides | Active (HTTP 200 `text/plain`) |
-| **`/api/gmc-feed.xml`** | Google Merchant Center RSS 2.0 XML Product Feed (`g:id`, `g:mpn`, `g:gtin`, `g:price` in PKR, multi-angle images, 5+ specs) | **54 Verified Hardware SKUs** |
-| **`/api/gmc-feed.tsv`** | Google Merchant Center Tab-Separated Values (TSV) Feed for Google Sheets scheduled fetch | **54 Verified Hardware SKUs** |
+| **`/llms-full.txt`** (`public/llms-full.txt`) | Complete 32KB+ Markdown corpus of all 60 SKUs (MPNs, GTINs, real model-specific PKR prices), BoM tables & guides | Active (HTTP 200 `text/plain`) |
+| **`/api/gmc-feed.xml`** | Google Merchant Center RSS 2.0 XML Product Feed (`g:id`, `g:mpn`, `g:gtin`, `g:price` in PKR, multi-angle images, 5+ specs) | **60 Verified Hardware SKUs** |
+| **`/api/gmc-feed.tsv`** | Google Merchant Center Tab-Separated Values (TSV) Feed for Google Sheets scheduled fetch | **60 Verified Hardware SKUs** |
 | **`/robots.txt`** (`public/robots.txt`) | Explicit `Allow: /` for `Googlebot`, `Google-Extended`, `GPTBot`, `OAI-SearchBot`, `PerplexityBot`, `ClaudeBot` | Active (Blocks `/admin/` & private `/api/`, allows GMC feeds & `X-Robots-Tag: noindex` observation) |
 
 ---
 
-## 2. Canonical Route Blueprint (156 Deduplicated Indexable URLs)
+## 2. Canonical Route Blueprint (166 Deduplicated Indexable URLs)
 
-### A. Core Commercial, Geo & Solution Hubs (71 URLs)
+### A. Core Commercial, Geo & Solution Hubs (72 URLs)
 - **Storefront & Discovery**: `/`, `/shop`, `/brands`, `/solutions`, `/services`, `/events-services`, `/event-quote`, `/esports`, `/room-designer`, `/compare`, `/guides`, `/reviews`, `/blog`, `/faqs`, `/contact`, `/about`, `/sitemap`
 - **High-Intent Commercial Pillar Pages**: `/video-conference-in-pakistan`, `/event-management-in-pakistan`, `/video-conferencing`, `/video-conferencing-solutions`, `/corporate-event-management` (with permanent `301` redirect from `/corporate-event-management-pakistan`), `/conference-room-solutions`, `/zoom-rooms`, `/microsoft-teams-rooms`, `/3d-hologram`, `/projection-mapping`, `/voip-service-providers`
 - **Regional Local SEO Hubs**: `/lahore`, `/karachi`, `/islamabad`
 - **B2B Procurement Programs (`/programs/*`)**: `/programs/quote`, `/programs/blind-drop-shipping`, `/programs/government-education-pricing`, `/programs/fulfillment-services`, `/programs/promotions`, `/programs/provisioning-services`, `/programs/reseller-program`
-- **Trust & Policy Pages**: `/returns`, `/shipping`, `/payment`, `/rma`, `/privacy-policy`, `/terms-of-service`
+- **Trust & Policy Pages**: `/returns`, `/shipping`, `/payment`, `/rma`, `/privacy-policy`, `/terms-of-service`, `/user-data-deletion`
 - **25 Authorized Brand Pages (`/brands/:brandSlug`)**:
   `/brands/poly`, `/brands/cisco`, `/brands/logitech`, `/brands/yealink`, `/brands/jabra`, `/brands/bosch`, `/brands/hikvision`, `/brands/dahua`, `/brands/axis`, `/brands/grandstream`, `/brands/fanvil`, `/brands/2n`, `/brands/epson`, `/brands/benq`, `/brands/optoma`, `/brands/panasonic`, `/brands/sony`, `/brands/viewsonic`, `/brands/uniview`, `/brands/itc`, `/brands/3cx`, `/brands/freepbx`, `/brands/sangoma`, `/brands/horion`, `/brands/google`
 

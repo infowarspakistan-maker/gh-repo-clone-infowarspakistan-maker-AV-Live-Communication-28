@@ -31,7 +31,7 @@ export function TermsOfService() {
       <div className="bg-[#1A2B4C] text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-black mb-4">Terms of Service</h1>
-          <p className="text-gray-300">Last Updated: July 11, 2026</p>
+          <p className="text-gray-300">Last Updated: November 22, 2026</p>
         </div>
       </div>
 
@@ -102,8 +102,17 @@ export function TermsOfService() {
           <h2 className="text-2xl font-black text-[#1A2B4C] mt-8 mb-4">10. Indemnification</h2>
           <p className="mb-6">You agree to indemnify and hold AV Live Communications harmless from any claims, losses, or expenses arising from your misuse of our site or products.</p>
 
-          <h2 className="text-2xl font-black text-[#1A2B4C] mt-8 mb-4">11. Termination</h2>
-          <p className="mb-6">We reserve the right to suspend or terminate your account/access to our website if we believe you have violated these Terms of Service.</p>
+          <h2 className="text-2xl font-black text-[#1A2B4C] mt-8 mb-4">11. Account Access, Third-Party Login &amp; Termination</h2>
+          <p className="mb-4">
+            We reserve the right to suspend or terminate your account/access to our website if we believe you have violated these Terms of Service. If you authenticate via Google Sign-In or Facebook Login, your use of those providers remains subject to their respective platform terms, and you may request account or data removal anytime on our{' '}
+            <Link to="/user-data-deletion" className="text-[#00B4D8] font-bold hover:underline">
+              User Data Deletion page
+            </Link>{' '}
+            in accordance with our{' '}
+            <Link to="/privacy-policy" className="text-[#00B4D8] font-bold hover:underline">
+              Privacy Policy
+            </Link>.
+          </p>
 
           <h2 className="text-2xl font-black text-[#1A2B4C] mt-8 mb-4">12. External Links</h2>
           <p className="mb-6">Our website may include links to third-party sites. We are not responsible for their content or practices.</p>

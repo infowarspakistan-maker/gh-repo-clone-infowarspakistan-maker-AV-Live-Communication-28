@@ -1,18 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'motion/react';
-import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
+import { Lock, Mail, AlertCircle, Loader2, Facebook } from 'lucide-react';
+import { ensureFacebookSdkReady } from '../../lib/facebook-sdk';
 
 export function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, signInWithGoogle } = useAuth();
+  const [fbSdkReady, setFbSdkReady] = useState(false);
+  const { login, signInWithGoogle, signInWithFacebook } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect') || '/admin/overview';
+
+  useEffect(() => {
+    let mounted = true;
+    ensureFacebookSdkReady()
+      .then((res) => {
+        if (mounted && res.ready) setFbSdkReady(true);
+      })
+      .catch(() => undefined);
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleGoogleLogin = async () => {
     setError('');
@@ -23,6 +37,32 @@ export function AdminLogin() {
     } catch (err: any) {
       console.error(err);
       setError('Google authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await signInWithFacebook();
+      navigate(redirect);
+    } catch (err: any) {
+      console.error(err);
+      if (err?.code === 'auth/account-exists-with-different-credential') {
+        setError(
+          'An account with this email already exists via Google or password sign-in. Please sign in with that method first.'
+        );
+      } else if (err?.code === 'auth/operation-not-allowed') {
+        setError(
+          'Facebook Login is not enabled in Firebase Authentication yet. Enable Facebook under Firebase Console → Authentication → Sign-in method.'
+        );
+      } else if (err?.code === 'auth/popup-closed-by-user') {
+        setError('Facebook sign-in popup was closed before completion.');
+      } else {
+        setError('Facebook authentication failed. Please verify your Meta App ID & Firebase Facebook provider settings.');
+      }
     } finally {
       setLoading(false);
     }
@@ -67,8 +107,8 @@ export function AdminLogin() {
                   Live
                 </div>
              </div>
-             <h1 className="text-2xl font-black text-[#1A2B4C] uppercase tracking-wider mb-2">V ADMIN LOGIN</h1>
-             <p className="text-gray-500 text-sm font-medium">Enterprise Management Portal</p>
+             <h1 className="text-2xl font-black text-[#1A2B4C] uppercase tracking-wider mb-2">AV LIVE SIGN IN</h1>
+             <p className="text-gray-500 text-sm font-medium">Enterprise &amp; Admin Portal</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -106,10 +146,10 @@ export function AdminLogin() {
               <motion.div 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2"
+                className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm font-bold flex items-start gap-2"
               >
-                <AlertCircle size={16} />
-                {error}
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
               </motion.div>
             )}
 
@@ -135,15 +175,33 @@ export function AdminLogin() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="w-full bg-white border border-gray-100 text-[#1A2B4C] py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-gray-50 transition-all shadow-sm flex items-center justify-center gap-3"
-            >
-              <img loading="lazy" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Sign in with Google" title="Sign in with Google" />
-              Sign In With Google
-            </button>
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full bg-white border border-gray-200 text-[#1A2B4C] py-4 rounded-2xl font-black text-sm uppercase tracking-[0.15em] hover:bg-gray-50 transition-all shadow-sm flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                <img loading="lazy" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Sign in with Google" title="Sign in with Google" />
+                Sign In With Google
+              </button>
+
+              <button
+                type="button"
+                onClick={handleFacebookLogin}
+                disabled={loading}
+                className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-[0.15em] transition-all shadow-sm flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                <Facebook size={18} />
+                Continue With Facebook
+              </button>
+            </div>
+
+            {fbSdkReady && (
+              <p className="text-[11px] text-center text-gray-400 font-medium">
+                Meta JavaScript SDK active (AppEvents initialized).
+              </p>
+            )}
           </form>
         </div>
       </motion.div>

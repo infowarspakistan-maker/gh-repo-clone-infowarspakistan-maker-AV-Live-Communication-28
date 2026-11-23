@@ -350,7 +350,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
               }`}>
                 {step > s.number ? '✓' : s.number}
               </div>
-              <span className={`text-[9px] uppercase tracking-wider mt-1.5 text-center hidden sm:block font-black ${
+              <span className={`text-xs uppercase tracking-wider mt-1.5 text-center hidden sm:block font-black ${
                 step === s.number ? 'text-[#00B4D8]' :
                 step > s.number ? 'text-green-600' :
                 'text-gray-400'
@@ -444,7 +444,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
 
               {formData.eventType && (
                 <div className="pt-4 border-t border-gray-100">
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">
                     Specific Sub-Type *
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -469,7 +469,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
 
               {formData.eventType === 'esports' && (
                 <div className="pt-4 border-t border-gray-100">
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">
                     Game Titles
                   </label>
                   <div className="flex flex-wrap gap-1.5">
@@ -517,7 +517,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     Expected Participants *
                   </label>
                   <select
@@ -536,7 +536,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     Expected Audience Size *
                   </label>
                   <select
@@ -555,7 +555,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
               </div>
 
               <div>
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                   Event Duration *
                 </label>
                 <select
@@ -599,7 +599,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
               <h3 className="text-lg font-black text-[#1A2B4C] mb-2">3. Logistics & Infrastructure</h3>
 
               <div>
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                   Venue Requirement
                 </label>
                 <select
@@ -614,7 +614,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
               </div>
 
               <div>
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                   Venue City *
                 </label>
                 <input
@@ -629,7 +629,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     Internet Requirement
                   </label>
                   <select
@@ -644,7 +644,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     Power Requirement
                   </label>
                   <select
@@ -660,7 +660,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
               </div>
 
               <div>
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                   Equipment Requirement
                 </label>
                 <select
@@ -700,7 +700,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
               <h3 className="text-lg font-black text-[#1A2B4C] mb-2">4. Budget Range</h3>
 
               <div>
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                   Overall Budget Range *
                 </label>
                 <select
@@ -719,7 +719,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
               </div>
 
               <div>
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                   Prize Pool / Event Budget (PKR)
                 </label>
                 <input
@@ -770,7 +770,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     Full Name *
                   </label>
                   <input
@@ -783,7 +783,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     Company/Organization
                   </label>
                   <input
@@ -797,7 +797,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     Email Address *
                   </label>
                   <input
@@ -810,7 +810,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     Phone Number *
                   </label>
                   <input
@@ -825,7 +825,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     City
                   </label>
                   <input
@@ -838,7 +838,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                     Preferred Contact Method
                   </label>
                   <select
@@ -854,7 +854,7 @@ export function DeepQueryForm({ isModal = false, onSuccess, onClose, initialEven
               </div>
 
               <div>
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2.5 ml-1">
                   Additional Information
                 </label>
                 <textarea

@@ -27,6 +27,8 @@ import {
   Upload,
   Star,
   Save,
+  Facebook,
+  RefreshCw,
 } from 'lucide-react';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -60,6 +62,10 @@ import {
   generateGmcXml,
   getCanonicalProductSlug,
   sanitizeTsvText,
+  PRODUCT_GMC_METADATA,
+  PRODUCT_ID_TO_SEO_SLUG,
+  buildFallbackProductFromGmcMeta,
+  resolveProductPricing,
 } from '../../lib/gmc-feed';
 import { inferDefaultGoogleCategory } from '../../lib/google-taxonomy';
 import {
@@ -235,6 +241,7 @@ export function ProductManagement() {
   const [showStorageBrowserModal, setShowStorageBrowserModal] = useState(false);
   const [showBackupsModal, setShowBackupsModal] = useState(false);
   const [isSavingImagesOnly, setIsSavingImagesOnly] = useState(false);
+  const [isSyncingGmcPrices, setIsSyncingGmcPrices] = useState(false);
   const [storageBusyUrl, setStorageBusyUrl] = useState<string | null>(null);
 
   const normalizeProductImageUrl = (raw: string): string => {
@@ -758,6 +765,73 @@ export function ProductManagement() {
     }
   };
 
+  const handleSyncGmcPricesToFirestore = async () => {
+    setIsSyncingGmcPrices(true);
+    try {
+      const [{ collection, getDocs, doc, setDoc, updateDoc, serverTimestamp }, { db }] = await Promise.all([
+        import('firebase/firestore'),
+        import('../../lib/firebase/client'),
+      ]);
+      const snap = await getDocs(collection(db, 'products'));
+      const existingBySlug = new Map<string, { docId: string; data: Record<string, any> }>();
+      let sanitizedCount = 0;
+      let createdCount = 0;
+
+      for (const d of snap.docs) {
+        const data: Record<string, any> = { ...d.data(), id: d.id };
+        const canonical = getCanonicalProductSlug(data, d.id);
+        if (canonical) {
+          existingBySlug.set(canonical, { docId: d.id, data });
+        }
+        if (data.isActive === false) continue;
+
+        const rawReg = Number(data.regularPrice ?? data.price ?? 0);
+        const rawSale = Number(data.salePrice ?? 0);
+        // Clean invalid salePrice >= regularPrice anomalies so PDP, SSR & GMC feed match 100%
+        if (rawReg > 0 && rawSale > rawReg) {
+          await updateDoc(doc(db, 'products', d.id), {
+            salePrice: rawReg,
+            updatedAt: serverTimestamp(),
+          });
+          sanitizedCount++;
+        }
+      }
+
+      for (const slugKey of Object.keys(PRODUCT_GMC_METADATA)) {
+        if (PRODUCT_ID_TO_SEO_SLUG[slugKey]) continue;
+        const canonical = getCanonicalProductSlug({ slug: slugKey }, slugKey);
+        if (existingBySlug.has(canonical)) continue;
+        const fb = buildFallbackProductFromGmcMeta(canonical);
+        if (!fb) continue;
+        const pricing = resolveProductPricing(fb);
+        await setDoc(
+          doc(db, 'products', canonical),
+          {
+            ...fb,
+            id: canonical,
+            slug: canonical,
+            regularPrice: pricing.regularPrice,
+            salePrice: pricing.salePrice,
+            isActive: true,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+        createdCount++;
+      }
+
+      showNotice(
+        `GMC Price Sync Complete: ${createdCount} new catalog SKUs synced to Firestore, ${sanitizedCount} invalid sale prices cleaned. Ready for GMC Fetch Now.`
+      );
+    } catch (error) {
+      console.error('Failed to reconcile GMC prices to Firestore:', error);
+      showNotice('GMC price reconciliation failed — verify you are signed in as Admin.', 'error');
+    } finally {
+      setIsSyncingGmcPrices(false);
+    }
+  };
+
   const handleBulkImageUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bulkImageText.trim()) return;
@@ -940,6 +1014,16 @@ export function ProductManagement() {
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
+            disabled={isSyncingGmcPrices}
+            onClick={handleSyncGmcPricesToFirestore}
+            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-emerald-200 shadow-sm flex items-center gap-2 disabled:opacity-60"
+            title="Push any missing GMC catalog products into Firestore and clean invalid sale prices for 100% GMC parity"
+          >
+            <RefreshCw size={14} className={isSyncingGmcPrices ? 'animate-spin text-emerald-600' : 'text-emerald-600'} />
+            {isSyncingGmcPrices ? 'Syncing GMC...' : 'Sync GMC Prices'}
+          </button>
+          <button
+            type="button"
             onClick={() => setShowStorageBrowserModal(true)}
             className="bg-sky-50 hover:bg-sky-100 text-[#0077B6] px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-sky-200 shadow-sm flex items-center gap-2"
           >
@@ -1091,7 +1175,7 @@ export function ProductManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filteredProducts.map((product) => {
+                {filteredProducts.map((product, prodIdx) => {
                   const avail: AvailabilityOption =
                     product.availability ||
                     ((product.stockQuantity ?? 0) > 0 ? 'in_stock' : 'out_of_stock');
@@ -1106,7 +1190,7 @@ export function ProductManagement() {
 
                   return (
                     <tr
-                      key={product.id}
+                      key={product.id || product.gmcId || `prod-${prodIdx}`}
                       className="hover:bg-gray-50/60 transition-colors group cursor-pointer"
                       onClick={() => handleEdit(product)}
                     >
@@ -1220,15 +1304,25 @@ export function ProductManagement() {
                               </button>
                             </div>
                           ) : (
-                            <button
-                              type="button"
-                              onClick={() => setConfirmDeleteId(product.id!)}
-                              className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-all hover:bg-red-100"
-                              title="Delete Product"
-                              aria-label={`Delete ${product.productName}`}
-                            >
-                              <Trash2 size={14} />
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <Link
+                                to={`/admin/facebook-publisher?type=product&id=${encodeURIComponent(product.id || product.sku || '')}`}
+                                className="w-8 h-8 rounded-full bg-blue-50 text-[#1877F2] flex items-center justify-center opacity-80 group-hover:opacity-100 transition-all hover:bg-blue-100"
+                                title="Post Product to Facebook Page"
+                                aria-label={`Post ${product.productName} to Facebook`}
+                              >
+                                <Facebook size={14} />
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteId(product.id!)}
+                                className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-all hover:bg-red-100"
+                                title="Delete Product"
+                                aria-label={`Delete ${product.productName}`}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
                           )}
                         </div>
                       </td>
@@ -1244,7 +1338,7 @@ export function ProductManagement() {
       {/* Product Creation & Editing Drawer (All 5 GMC Sections + Storefront SEO) */}
       <AnimatePresence>
         {showForm && (
-          <div className="fixed inset-0 z-[100] flex justify-end">
+          <div key="product-form-drawer" className="fixed inset-0 z-[100] flex justify-end">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1922,8 +2016,8 @@ export function ProductManagement() {
                         <option value="Intercom & Paging > Public Address Systems" />
                         <option value="IP Cameras > Enterprise Surveillance" />
                         <option value="Broadcast > Podium Teleprompters" />
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.name} />
+                        {categories.map((cat, catIdx) => (
+                          <option key={cat.id || cat.slug || `cat-${catIdx}`} value={cat.name} />
                         ))}
                       </datalist>
                     </div>
@@ -2766,7 +2860,7 @@ export function ProductManagement() {
 
         {/* GMC XML / CSV Feed Preview & Live Endpoints Modal */}
         {showFeedPreviewModal && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div key="feed-preview-modal" className="fixed inset-0 z-[120] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -2871,7 +2965,7 @@ export function ProductManagement() {
 
         {/* Bulk External Image URLs Modal (Preserved) */}
         {showBulkImageModal && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div key="bulk-image-modal" className="fixed inset-0 z-[110] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -2944,45 +3038,45 @@ export function ProductManagement() {
             </motion.div>
           </div>
         )}
-
-        <ProductsStorageBrowserModal
-          isOpen={showStorageBrowserModal}
-          onClose={() => setShowStorageBrowserModal(false)}
-          defaultSlugHint={formData.productName || formData.gmcId}
-          hasActiveProductForm={showForm}
-          onSelectAsMain={(url) => {
-            setFormData((prev) => {
-              const oldMain = prev.mainImageUrl.trim();
-              const nextAdditional =
-                oldMain && oldMain !== url && !prev.additionalImageUrls.includes(oldMain)
-                  ? [oldMain, ...prev.additionalImageUrls].slice(0, 10)
-                  : prev.additionalImageUrls;
-              return {
-                ...prev,
-                mainImageUrl: url,
-                additionalImageUrls: nextAdditional,
-              };
-            });
-          }}
-          onAddToAdditional={(url) => {
-            setFormData((prev) => ({
-              ...prev,
-              additionalImageUrls:
-                prev.additionalImageUrls.includes(url) || prev.mainImageUrl === url
-                  ? prev.additionalImageUrls
-                  : [...prev.additionalImageUrls.filter(Boolean).slice(0, 9), url],
-            }));
-          }}
-          onNotify={showNotice}
-        />
-
-        <ProductBackupsModal
-          isOpen={showBackupsModal}
-          onClose={() => setShowBackupsModal(false)}
-          products={products}
-          onNotify={showNotice}
-        />
       </AnimatePresence>
+
+      <ProductsStorageBrowserModal
+        isOpen={showStorageBrowserModal}
+        onClose={() => setShowStorageBrowserModal(false)}
+        defaultSlugHint={formData.productName || formData.gmcId}
+        hasActiveProductForm={showForm}
+        onSelectAsMain={(url) => {
+          setFormData((prev) => {
+            const oldMain = prev.mainImageUrl.trim();
+            const nextAdditional =
+              oldMain && oldMain !== url && !prev.additionalImageUrls.includes(oldMain)
+                ? [oldMain, ...prev.additionalImageUrls].slice(0, 10)
+                : prev.additionalImageUrls;
+            return {
+              ...prev,
+              mainImageUrl: url,
+              additionalImageUrls: nextAdditional,
+            };
+          });
+        }}
+        onAddToAdditional={(url) => {
+          setFormData((prev) => ({
+            ...prev,
+            additionalImageUrls:
+              prev.additionalImageUrls.includes(url) || prev.mainImageUrl === url
+                ? prev.additionalImageUrls
+                : [...prev.additionalImageUrls.filter(Boolean).slice(0, 9), url],
+          }));
+        }}
+        onNotify={showNotice}
+      />
+
+      <ProductBackupsModal
+        isOpen={showBackupsModal}
+        onClose={() => setShowBackupsModal(false)}
+        products={products}
+        onNotify={showNotice}
+      />
     </div>
   );
 }

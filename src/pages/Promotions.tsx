@@ -52,7 +52,66 @@ export function Promotions() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+        {/* Flagship Featured Deal: Poly Studio X50 4K + TC8 Controller (PKR 399,000 • Free Delivery in Pakistan) */}
+        <div className="mb-10 rounded-3xl overflow-hidden shadow-xl border border-[#141816]/15 grid grid-cols-1 lg:grid-cols-[1.25fr_0.95fr] bg-white">
+          <div className="bg-[#c7f5c7] p-7 sm:p-10 flex flex-col justify-center text-[#141816]">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-extrabold uppercase tracking-wider mb-3">
+              <span>LIMITED CONFERENCE ROOM DEAL</span>
+              <span className="bg-[#141816] text-[#c7f5c7] px-2.5 py-0.5 rounded text-[11px] font-black">SAVE 53%</span>
+              <span className="bg-emerald-800 text-white px-2.5 py-0.5 rounded text-[11px] font-black">FREE DELIVERY IN PAKISTAN</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight mb-3">
+              POLY STUDIO X50 4K + TC8 CONTROLLER
+            </h2>
+            <div className="flex flex-wrap items-baseline gap-3 mb-4">
+              <div className="flex flex-col text-xs font-extrabold uppercase leading-tight">
+                <span>SPECIAL</span>
+                <span>OFFER</span>
+              </div>
+              <div className="text-4xl sm:text-5xl font-black tracking-tight text-[#141816]">
+                <span className="text-lg font-extrabold mr-1">PKR</span>399,000
+              </div>
+              <div className="text-base font-bold text-[#d9383a] line-through decoration-2">
+                PKR 850,000
+              </div>
+            </div>
+            <p className="text-sm text-[#2d3831] leading-relaxed mb-5 max-w-xl">
+              Upgrade your medium-to-large conference rooms with 4K UltraHD auto-framing video, boardroom-filling stereo speakers, the Poly TC8 8-inch touch controller, and seamless Zoom &amp; Teams integration — including free nationwide delivery anywhere in Pakistan.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                to="/product/poly-studio-x50-tc8-special-offer-pakistan"
+                className="bg-[#141816] hover:bg-[#28302c] text-white px-6 py-3.5 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-colors"
+              >
+                Buy Now — PKR 399,000
+              </Link>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('open-poly-x50-offer'))}
+                className="bg-white hover:bg-gray-50 text-[#141816] border border-[#141816]/30 px-5 py-3.5 rounded-lg text-xs font-extrabold uppercase tracking-wider cursor-pointer transition-colors"
+              >
+                Open Interactive Brochure Popup
+              </button>
+            </div>
+          </div>
+          <div className="bg-white p-8 flex flex-col items-center justify-center">
+            <Link to="/product/poly-studio-x50-tc8-special-offer-pakistan" className="block max-w-[320px] w-full group">
+              <img
+                src="https://firebasestorage.googleapis.com/v0/b/studio-5367437135-24ac6.firebasestorage.app/o/Products%2Fpoly-studio-x50-png-3cq9.webp?alt=media&token=bc3614ec-64f7-405b-95df-7a793acd7563"
+                alt="Poly Studio X50 4K Video Bar and Poly TC8 Touch Controller Special Offer"
+                title="Poly Studio X50 4K + TC8 Bundle — PKR 399,000"
+                width={1000}
+                height={800}
+                className="w-full h-auto object-contain -rotate-3 group-hover:-rotate-1 group-hover:scale-103 drop-shadow-lg transition-transform"
+              />
+            </Link>
+            <p className="mt-4 text-center text-xs font-bold uppercase tracking-wider text-gray-500">
+              All-in-One 4K Video Bar + TC8 Touch Panel &bull; Free Delivery in Pakistan
+            </p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm group">

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import type { User } from 'firebase/auth';
+import { logoutFacebookSdk } from '../lib/facebook-sdk';
 
 export interface UserProfile {
   uid: string;
@@ -18,6 +19,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   signInWithGoogle: () => Promise<User>;
+  signInWithFacebook: () => Promise<User>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   isAdmin: boolean;
@@ -193,9 +195,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result.user;
   };
 
+  const signInWithFacebook = async (): Promise<User> => {
+    initAuthListener();
+    const { authMod, clientMod } = await loadFirebaseAuthRuntime();
+    const result = await authMod.signInWithPopup(clientMod.auth, clientMod.facebookProvider);
+    return result.user;
+  };
+
   const logout = async (): Promise<void> => {
     const { authMod, clientMod } = await loadFirebaseAuthRuntime();
-    await authMod.signOut(clientMod.auth);
+    await Promise.all([
+      authMod.signOut(clientMod.auth),
+      logoutFacebookSdk().catch(() => undefined),
+    ]);
     setUser(null);
     setUserProfile(null);
   };
@@ -220,6 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         login,
         signInWithGoogle,
+        signInWithFacebook,
         logout,
         resetPassword,
         isAdmin,

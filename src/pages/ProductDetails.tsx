@@ -349,7 +349,11 @@ export function ProductDetails() {
         "description": product.seoMetaDescription || product.shortDescription?.replace(/<[^>]*>?/gm, '') || gmcMeta?.defaultDescription || `Buy ${product.productName} by ${resolvedBrand} for Video Conference in Pakistan.`,
         "sku": resolvedMpn,
         ...(hasIdentifiers ? { "mpn": resolvedMpn } : {}),
-        ...(hasIdentifiers && resolvedGtin ? { "gtin12": resolvedGtin, "gtin": resolvedGtin } : {}),
+        ...(hasIdentifiers && resolvedGtin
+          ? resolvedGtin.replace(/\D/g, '').length === 13
+            ? { "gtin13": resolvedGtin, "gtin": resolvedGtin }
+            : { "gtin12": resolvedGtin, "gtin": resolvedGtin }
+          : {}),
         "brand": {
           "@type": "Brand",
           "name": resolvedBrand
@@ -489,11 +493,20 @@ export function ProductDetails() {
 
   const candidateTitleWithMpn = `${product.productName} (${resolvedMpn}) Pakistan | AV Live`;
   const candidateTitleShort = `${product.productName} Price in Pakistan | AV Live`;
-  const productSeoTitle = candidateTitleWithMpn.length <= 65
-    ? candidateTitleWithMpn
-    : candidateTitleShort.length <= 65
-    ? candidateTitleShort
-    : `${product.productName} | AV Live`;
+  const baseTitlePrefix = product.productName.split(/\s+[–—-]\s+/)[0]?.trim() || product.productName;
+  const candidateCompact = `${baseTitlePrefix} | AV Live`;
+  const rawSeoTitle =
+    candidateTitleWithMpn.length <= 65
+      ? candidateTitleWithMpn
+      : candidateTitleShort.length <= 65
+      ? candidateTitleShort
+      : candidateCompact.length <= 65
+      ? candidateCompact
+      : `${product.productName} | AV Live`;
+  const productSeoTitle =
+    rawSeoTitle.length <= 65
+      ? rawSeoTitle
+      : `${rawSeoTitle.slice(0, 54).replace(/\s+\S*$/, '')} | AV Live`;
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen text-[#1A2B4C]">
@@ -756,7 +769,7 @@ export function ProductDetails() {
                      <button 
                        key={tab.id}
                        onClick={() => setActiveTab(tab.id as any)}
-                       className={`min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center text-[10px] md:text-xs font-black uppercase tracking-[0.15em] pb-3 border-b-2 transition-all whitespace-nowrap ${activeTab === tab.id ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent text-gray-400 hover:text-[#1A2B4C]'}`}
+                       className={`min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center text-xs sm:text-sm font-black uppercase tracking-[0.12em] pb-3 border-b-2 transition-all whitespace-nowrap cursor-pointer ${activeTab === tab.id ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent text-gray-500 hover:text-[#1A2B4C]'}`}
                      >
                        {tab.label}
                      </button>
@@ -767,57 +780,57 @@ export function ProductDetails() {
                   {/* All tab panels remain mounted in the DOM for Googlebot crawlability; visibility is toggled via CSS */}
                   <div className={activeTab === 'overview' ? 'prose prose-blue max-w-none block' : 'hidden'}>
                     {/* Answer-First AEO Executive Summary */}
-                    <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-4 mb-6 not-prose">
-                      <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
+                    <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-4 sm:p-5 mb-6 not-prose">
+                      <span className="block text-xs font-black uppercase tracking-widest text-[#00B4D8] mb-1">
                         Answer-First Hardware Verdict
                       </span>
-                      <p className="text-xs sm:text-sm font-bold text-[#1A2B4C] leading-relaxed">
+                      <p className="text-sm sm:text-base font-bold text-[#1A2B4C] leading-relaxed">
                         The <strong>{product.productName}</strong> (Official MPN: <strong>{resolvedMpn}</strong>, GTIN: {resolvedGtin}) by <strong>{resolvedBrand}</strong> is an enterprise-grade solution priced at <strong>{formatPrice(effectivePrice)}</strong>{currency !== 'PKR' ? ` (${formatExactPkr(effectivePrice)})` : ''} in Pakistan. {gmcMeta?.highlight ? `${gmcMeta.highlight}. ` : ''}Includes a 1-year official local replacement warranty, PTA compliance, and nationwide deployment across Lahore, Karachi, and Islamabad.
                       </p>
                     </div>
 
-                    <div className="text-gray-600 leading-relaxed font-medium text-xs break-words overflow-hidden prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(product.description || gmcMeta?.defaultDescription || '') }} />
+                    <div className="text-gray-700 leading-relaxed font-medium text-sm sm:text-base break-words overflow-hidden prose prose-sm sm:prose-base max-w-none" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(product.description || gmcMeta?.defaultDescription || '') }} />
 
                     {/* Semantic HTML Quick-Spec Matrix for Google Featured Snippets & AI Crawlers */}
-                    <div className="mt-6 overflow-x-auto rounded-2xl border border-gray-100 not-prose">
-                      <table className="w-full text-left border-collapse text-xs">
-                        <caption className="bg-gray-50 text-[#1A2B4C] font-black text-left px-4 py-2.5 text-[10px] uppercase tracking-widest border-b border-gray-100">
+                    <div className="mt-6 overflow-x-auto rounded-2xl border border-gray-200 not-prose">
+                      <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                        <caption className="bg-gray-50 text-[#1A2B4C] font-black text-left px-4 py-3 text-xs uppercase tracking-wider border-b border-gray-200">
                           {product.productName} — Verified Technical &amp; Commercial Summary
                         </caption>
                         <tbody className="divide-y divide-gray-100">
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px] w-2/5">Manufacturer &amp; Brand</th>
-                            <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedBrand}</td>
+                            <th className="py-3 px-4 font-black text-gray-500 uppercase tracking-wider text-xs w-2/5">Manufacturer &amp; Brand</th>
+                            <td className="py-3 px-4 font-bold text-[#1A2B4C]">{resolvedBrand}</td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Product ID / SKU &amp; MPN</th>
-                            <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedMpn}</td>
+                            <th className="py-3 px-4 font-black text-gray-500 uppercase tracking-wider text-xs">Product ID / SKU &amp; MPN</th>
+                            <td className="py-3 px-4 font-bold text-[#1A2B4C]">{resolvedMpn}</td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">GS1 GTIN / UPC-12</th>
-                            <td className="py-2.5 px-4 font-bold text-[#1A2B4C]">{resolvedGtin} (Identifier Exists: Yes)</td>
+                            <th className="py-3 px-4 font-black text-gray-500 uppercase tracking-wider text-xs">GS1 GTIN / UPC-12</th>
+                            <td className="py-3 px-4 font-bold text-[#1A2B4C]">{resolvedGtin} (Identifier Exists: Yes)</td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Condition &amp; Availability</th>
-                            <td className="py-2.5 px-4 font-bold text-emerald-700">
+                            <th className="py-3 px-4 font-black text-gray-500 uppercase tracking-wider text-xs">Condition &amp; Availability</th>
+                            <td className="py-3 px-4 font-bold text-emerald-700">
                               New (Factory Sealed) • {(product.stockQuantity ?? 10) > 0 ? 'In Stock (in_stock)' : 'Out of Stock (out_of_stock)'}
                             </td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Sale / Regular Price ({currency})</th>
-                            <td className="py-2.5 px-4 font-black text-[#00B4D8]">
+                            <th className="py-3 px-4 font-black text-gray-500 uppercase tracking-wider text-xs">Sale / Regular Price ({currency})</th>
+                            <td className="py-3 px-4 font-black text-[#00B4D8]">
                               {formatPrice(effectivePrice)} {currency !== 'PKR' ? `(${formatExactPkr(effectivePrice)}) ` : ''}{resolvedSalePrice < resolvedRegularPrice ? `(List Price: ${formatPrice(resolvedRegularPrice)})` : ''} • FBR GST Invoice Available
                             </td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Product Highlights</th>
-                            <td className="py-2.5 px-4 font-semibold text-gray-700">
+                            <th className="py-3 px-4 font-black text-gray-500 uppercase tracking-wider text-xs">Product Highlights</th>
+                            <td className="py-3 px-4 font-semibold text-gray-700">
                               {gmcMeta?.highlight || product.shortDescription || `Official ${resolvedBrand} enterprise AV hardware in Pakistan`}
                             </td>
                           </tr>
                           <tr>
-                            <th className="py-2.5 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]">Warranty &amp; SLA</th>
-                            <td className="py-2.5 px-4 font-bold text-emerald-600">1-Year Official Local Warranty (Upgradable to 3-Year SLA)</td>
+                            <th className="py-3 px-4 font-black text-gray-500 uppercase tracking-wider text-xs">Warranty &amp; SLA</th>
+                            <td className="py-3 px-4 font-bold text-emerald-600">1-Year Official Local Warranty (Upgradable to 3-Year SLA)</td>
                           </tr>
                         </tbody>
                       </table>
@@ -1017,6 +1030,30 @@ export function ProductDetails() {
                     </a>
                   </div>
                 )}
+                {(canonicalSlug === 'poly-studio-x50-tc8-special-offer-pakistan' ||
+                  canonicalSlug === 'poly-studio-x50-pakistan') && (
+                  <div className="pt-3 border-t border-gray-100 rounded-2xl bg-[#c7f5c7] p-4 text-[#141816] space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-[#141816] text-[#c7f5c7] px-2 py-0.5 rounded">
+                        LIMITED DEAL • SAVE 53%
+                      </span>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-900">
+                        FREE DELIVERY IN PAKISTAN
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-[#141816] leading-snug">
+                      Poly Studio X50 4K Video Bar + Poly TC8 Touch Controller Special Bundle for{' '}
+                      <strong>PKR 399,000</strong> (Free Nationwide Insured Shipping).
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent('open-poly-x50-offer'))}
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#141816] hover:bg-[#28302c] text-white text-[11px] font-black uppercase tracking-wider cursor-pointer transition-colors"
+                    >
+                      Open Interactive Deal Brochure &amp; Claim Quote
+                    </button>
+                  </div>
+                )}
               </div>
 
                 <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6 w-full h-auto">
@@ -1042,57 +1079,57 @@ export function ProductDetails() {
                   <div className="border-t border-b border-gray-100 py-6 space-y-4">
                     {/* Deployment Mode Variant */}
                     <div>
-                      <span className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">On-Site Deployment</span>
-                      <div className="grid grid-cols-2 gap-2">
+                      <span className="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">On-Site Deployment</span>
+                      <div className="grid grid-cols-2 gap-2.5">
                         <button
                           type="button"
                           onClick={() => setDeploymentVariant('standard')}
-                          className={`border-2 p-3 rounded-xl text-left transition-all ${deploymentVariant === 'standard' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                          className={`border-2 p-3 rounded-xl text-left transition-all cursor-pointer ${deploymentVariant === 'standard' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
                         >
-                          <span className="block text-xs font-black text-[#1A2B4C]">Standard Delivery</span>
-                          <span className="block text-[9px] text-gray-400 font-bold uppercase mt-1">Self Installation</span>
+                          <span className="block text-xs sm:text-sm font-black text-[#1A2B4C]">Standard Delivery</span>
+                          <span className="block text-xs text-gray-500 font-bold uppercase mt-1">Self Installation</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeploymentVariant('enterprise')}
-                          className={`border-2 p-3 rounded-xl text-left transition-all ${deploymentVariant === 'enterprise' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                          className={`border-2 p-3 rounded-xl text-left transition-all cursor-pointer ${deploymentVariant === 'enterprise' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
                         >
-                          <span className="block text-xs font-black text-[#1A2B4C]">Enterprise Deployment</span>
-                          <span className="block text-[9px] text-[#00B4D8] font-black uppercase mt-1">+ {formatPrice(15000)}</span>
+                          <span className="block text-xs sm:text-sm font-black text-[#1A2B4C]">Enterprise Deployment</span>
+                          <span className="block text-xs text-[#0088A8] font-black uppercase mt-1">+ {formatPrice(15000)}</span>
                         </button>
                       </div>
                     </div>
 
                     {/* Warranty Period Variant */}
                     <div>
-                      <span className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Warranty Period</span>
-                      <div className="grid grid-cols-2 gap-2">
+                      <span className="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">Warranty Period</span>
+                      <div className="grid grid-cols-2 gap-2.5">
                         <button
                           type="button"
                           onClick={() => setWarrantyVariant('1year')}
-                          className={`border-2 p-3 rounded-xl text-left transition-all ${warrantyVariant === '1year' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                          className={`border-2 p-3 rounded-xl text-left transition-all cursor-pointer ${warrantyVariant === '1year' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
                         >
-                          <span className="block text-xs font-black text-[#1A2B4C]">1-Year Standard</span>
-                          <span className="block text-[9px] text-gray-400 font-bold uppercase mt-1">Local Warranty</span>
+                          <span className="block text-xs sm:text-sm font-black text-[#1A2B4C]">1-Year Standard</span>
+                          <span className="block text-xs text-gray-500 font-bold uppercase mt-1">Local Warranty</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setWarrantyVariant('3year')}
-                          className={`border-2 p-3 rounded-xl text-left transition-all ${warrantyVariant === '3year' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                          className={`border-2 p-3 rounded-xl text-left transition-all cursor-pointer ${warrantyVariant === '3year' ? 'border-[#00B4D8] bg-[#00B4D8]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
                         >
-                          <span className="block text-xs font-black text-[#1A2B4C]">3-Year Extended</span>
-                          <span className="block text-[9px] text-[#00B4D8] font-black uppercase mt-1">+ {formatPrice(25000)}</span>
+                          <span className="block text-xs sm:text-sm font-black text-[#1A2B4C]">3-Year Extended</span>
+                          <span className="block text-xs text-[#0088A8] font-black uppercase mt-1">+ {formatPrice(25000)}</span>
                         </button>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-3 bg-gray-50/50 rounded-2xl p-4 border border-gray-100">
-                     <div className="flex items-center gap-2 text-xs font-bold text-[#1A2B4C]">
+                     <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1A2B4C]">
                         {product.stockQuantity > 0 ? (
                            <>
                              <CheckCircle size={16} className="text-[#00B4D8]" /> 
-                             <span className="text-[#00B4D8]">In Stock & Ready to Dispatch</span>
+                             <span className="text-[#0088A8]">In Stock &amp; Ready to Dispatch</span>
                            </>
                         ) : (
                            <>
@@ -1101,10 +1138,10 @@ export function ProductDetails() {
                            </>
                         )}
                      </div>
-                     <div className="text-[10px] text-gray-500 font-semibold space-y-1 pl-6 leading-relaxed">
-                       <div>• Delivery: <strong className="text-gray-700">2-3 Business Days</strong> nationwide (Free over {formatPrice(100000)}).</div>
-                       <div>• Policy: <strong className="text-gray-700">7-Day Local Replacement Warranty</strong>.</div>
-                       <div>• Authenticity: <strong className="text-gray-700">100% Genuine Certified Hardware</strong>.</div>
+                     <div className="text-xs text-gray-600 font-semibold space-y-1 pl-6 leading-relaxed">
+                       <div>• Delivery: <strong className="text-gray-800">2-3 Business Days</strong> nationwide (Free over {formatPrice(100000)}).</div>
+                       <div>• Policy: <strong className="text-gray-800">7-Day Local Replacement Warranty</strong>.</div>
+                       <div>• Authenticity: <strong className="text-gray-800">100% Genuine Certified Hardware</strong>.</div>
                      </div>
                   </div>
 

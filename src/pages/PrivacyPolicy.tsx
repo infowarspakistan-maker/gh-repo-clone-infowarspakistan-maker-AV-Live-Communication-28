@@ -31,7 +31,7 @@ export function PrivacyPolicy() {
       <div className="bg-[#1A2B4C] text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-black mb-4">Privacy Policy</h1>
-          <p className="text-gray-300">Last Updated: July 11, 2026</p>
+          <p className="text-gray-300">Last Updated: November 22, 2026</p>
         </div>
       </div>
 
@@ -74,12 +74,33 @@ export function PrivacyPolicy() {
           <h2 className="text-2xl font-black text-[#1A2B4C] mt-8 mb-4">5. Cookies</h2>
           <p className="mb-6">We use cookies to enhance your browsing experience, remember your cart, and analyze site traffic. You can disable cookies in your browser settings, though this may affect site functionality.</p>
 
-          <h2 className="text-2xl font-black text-[#1A2B4C] mt-8 mb-4">6. Your Rights</h2>
+          <h2 className="text-2xl font-black text-[#1A2B4C] mt-8 mb-4">6. Facebook Login &amp; Meta Platform Data</h2>
+          <p className="mb-4">
+            When you sign in with <strong>Facebook Login</strong> or connect a Facebook Page through AV Live Admin, we only access permissions you explicitly authorize (such as <code>public_profile</code>, <code>email</code>, and for authorized administrators, <code>pages_show_list</code>, <code>pages_read_engagement</code>, and <code>pages_manage_posts</code>).
+          </p>
+          <ul className="list-disc pl-6 space-y-2 mb-6">
+            <li>We use Facebook profile data strictly to authenticate your AV Live account and display your name and profile avatar.</li>
+            <li>We never sell Meta platform data or share Page Access Tokens with unauthorized third parties.</li>
+            <li>
+              You may revoke access or request complete deletion of your Facebook Login data anytime via our{' '}
+              <Link to="/user-data-deletion" className="text-[#00B4D8] font-bold hover:underline">
+                User Data Deletion Portal
+              </Link>.
+            </li>
+          </ul>
+
+          <h2 className="text-2xl font-black text-[#1A2B4C] mt-8 mb-4">7. Your Rights &amp; Data Deletion</h2>
           <p>You have the right to:</p>
           <ul className="list-disc pl-6 space-y-2 mb-6">
             <li>Access the personal data we hold about you.</li>
             <li>Request corrections to inaccurate data.</li>
-            <li>Request deletion of your data (subject to legal/order retention requirements).</li>
+            <li>
+              Request deletion of your account and personal records via our{' '}
+              <Link to="/user-data-deletion" className="text-[#00B4D8] font-bold hover:underline">
+                User Data Deletion page
+              </Link>{' '}
+              (subject to statutory FBR tax/audit retention requirements).
+            </li>
             <li>Withdraw consent for marketing communications.</li>
           </ul>
 

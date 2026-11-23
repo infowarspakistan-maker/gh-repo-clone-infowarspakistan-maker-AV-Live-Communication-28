@@ -101,6 +101,29 @@
         "productSnapshot": { "type": "object" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "FacebookPost": {
+      "title": "Facebook Page Post Record",
+      "description": "Audit log of products, services, and custom updates published to the connected Facebook Page",
+      "type": "object",
+      "properties": {
+        "pageId": { "type": "string", "maxLength": 64 },
+        "pageName": { "type": "string", "maxLength": 200 },
+        "itemType": { "type": "string", "enum": ["product", "service", "custom"] },
+        "itemId": { "type": "string", "maxLength": 150 },
+        "title": { "type": "string", "maxLength": 300 },
+        "message": { "type": "string", "maxLength": 5000 },
+        "postFormat": { "type": "string", "enum": ["photo", "link", "text"] },
+        "linkUrl": { "type": "string", "maxLength": 500 },
+        "imageUrl": { "type": "string", "maxLength": 1000 },
+        "facebookPostId": { "type": "string", "maxLength": 150 },
+        "permalinkUrl": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["published", "failed"] },
+        "errorMessage": { "type": "string", "maxLength": 500 },
+        "publishedBy": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["pageId", "pageName", "itemType", "title", "message", "postFormat", "status", "publishedBy", "createdAt"]
     }
   },
   "firestore": {
@@ -142,7 +165,11 @@
     },
     "settings/{docId}": {
       "schema": "object",
-      "description": "Global, catalog tombstones, and payment integration settings"
+      "description": "Global, catalog tombstones, payment, and Facebook Page integration settings"
+    },
+    "facebook_posts/{postId}": {
+      "schema": "FacebookPost",
+      "description": "History of products and services published to the connected Facebook Page"
     },
     "stock_history/{historyId}": {
       "schema": "object",

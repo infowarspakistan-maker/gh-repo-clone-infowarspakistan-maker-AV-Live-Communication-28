@@ -310,12 +310,46 @@ export function enrichProductImages(p: Product): Product {
     PRODUCT_CUSTOM_PAGE_ROUTES[canonicalSlug] ||
     (p.id ? PRODUCT_CUSTOM_PAGE_ROUTES[p.id] : undefined);
 
+  const isGgnCiscoRefresh = Boolean(meta?.gmcId?.startsWith('GGN-CS-')) && p.imagesCustomized !== true;
+  const normalizedRegular =
+    Number(p.regularPrice) > 0 ? Number(p.regularPrice) : Number(meta?.regularPrice || 0);
+  const rawSale = Number(p.salePrice ?? 0);
+  const normalizedSale =
+    rawSale > 0 && (normalizedRegular <= 0 || rawSale < normalizedRegular)
+      ? rawSale
+      : normalizedRegular;
+
   return {
     ...p,
+    id: String(p.id || canonicalSlug).trim() || canonicalSlug,
     slug: canonicalSlug,
     ...(resolvedCustomPagePath ? { customPagePath: resolvedCustomPagePath } : {}),
-    sku: (p.sku && p.sku.trim()) || meta?.mpn || p.mpn || '',
-    mpn: (p.mpn && p.mpn.trim()) || meta?.mpn || p.sku || '',
+    ...(p.gmcId || meta?.gmcId ? { gmcId: p.gmcId || meta?.gmcId } : {}),
+    ...(p.gtin || meta?.gtin ? { gtin: isGgnCiscoRefresh ? meta?.gtin || p.gtin : p.gtin || meta?.gtin } : {}),
+    productName: isGgnCiscoRefresh && meta?.title ? meta.title : p.productName,
+    sku: isGgnCiscoRefresh && meta?.mpn ? meta.mpn : (p.sku && p.sku.trim()) || meta?.mpn || p.mpn || '',
+    mpn: isGgnCiscoRefresh && meta?.mpn ? meta.mpn : (p.mpn && p.mpn.trim()) || meta?.mpn || p.sku || '',
+    regularPrice: normalizedRegular,
+    salePrice: normalizedSale,
+    ...(p.googleProductCategory || meta?.googleProductCategory
+      ? { googleProductCategory: p.googleProductCategory || meta?.googleProductCategory }
+      : {}),
+    ...(p.productType || meta?.productType ? { productType: p.productType || meta?.productType } : {}),
+    ...(p.customLabel0 || meta?.customLabel0 ? { customLabel0: p.customLabel0 || meta?.customLabel0 } : {}),
+    ...(p.customLabel1 || meta?.customLabel1 ? { customLabel1: p.customLabel1 || meta?.customLabel1 } : {}),
+    ...(p.customLabel2 || meta?.customLabel2 ? { customLabel2: p.customLabel2 || meta?.customLabel2 } : {}),
+    ...(p.customLabel3 || meta?.customLabel3 ? { customLabel3: p.customLabel3 || meta?.customLabel3 } : {}),
+    ...(p.customLabel4 || meta?.customLabel4 ? { customLabel4: p.customLabel4 || meta?.customLabel4 } : {}),
+    ...(p.shippingWeight || meta?.shippingWeight
+      ? { shippingWeight: isGgnCiscoRefresh ? meta?.shippingWeight || p.shippingWeight : p.shippingWeight || meta?.shippingWeight }
+      : {}),
+    ...(p.shippingLength || meta?.shippingLength ? { shippingLength: p.shippingLength || meta?.shippingLength } : {}),
+    ...(p.shippingWidth || meta?.shippingWidth ? { shippingWidth: p.shippingWidth || meta?.shippingWidth } : {}),
+    ...(p.shippingHeight || meta?.shippingHeight ? { shippingHeight: p.shippingHeight || meta?.shippingHeight } : {}),
+    ...(p.returnPolicyLabel || meta?.returnPolicyLabel
+      ? { returnPolicyLabel: p.returnPolicyLabel || meta?.returnPolicyLabel }
+      : {}),
+    ...(p.isBundle || meta?.isBundle ? { isBundle: p.isBundle || meta?.isBundle } : {}),
     categoryIds: mergedCategoryIds,
     categorySlugs: normalizedSlugs.length > 0 ? normalizedSlugs : p.categorySlugs,
     images: finalImages,
@@ -368,6 +402,30 @@ async function fetchDeletedCatalogIds(): Promise<Set<string>> {
   return memoryDeletedCatalogIds;
 }
 
+function mergeUnpersistedCatalogFallbacks(
+  firestoreProducts: Product[],
+  tombstones: Set<string>
+): Product[] {
+  const coveredSlugs = new Set<string>();
+  const coveredIds = new Set<string>();
+  for (const p of firestoreProducts) {
+    if (p.id) coveredIds.add(String(p.id));
+    const canonical = getCanonicalProductSlug(p, p.id);
+    if (canonical) coveredSlugs.add(canonical);
+  }
+  const merged = [...firestoreProducts];
+  for (const slugKey of Object.keys(PRODUCT_GMC_METADATA)) {
+    const canonical = getCanonicalProductSlug({ slug: slugKey }, slugKey);
+    if (!canonical || coveredSlugs.has(canonical) || coveredIds.has(slugKey)) continue;
+    const fb = buildFallbackProductFromGmcMeta(canonical) as Product | null;
+    if (fb && !isProductTombstoned(fb, tombstones)) {
+      merged.push(fb);
+      coveredSlugs.add(canonical);
+    }
+  }
+  return deduplicateProducts(merged).filter((p) => !isProductTombstoned(p, tombstones));
+}
+
 function getFallbackFilteredProducts(filter?: { isActive?: boolean; categoryId?: string }): Product[] {
   let products = Object.keys(PRODUCT_GMC_METADATA)
     .map((slug) => buildFallbackProductFromGmcMeta(slug))
@@ -408,14 +466,12 @@ export function subscribeToProducts(
   const emitCombined = () => {
     let list =
       latestFirestoreProducts.length > 0
-        ? [...latestFirestoreProducts]
-        : (Object.keys(PRODUCT_GMC_METADATA)
-            .map((slug) => buildFallbackProductFromGmcMeta(slug))
-            .filter(Boolean) as Product[]);
-
-    list = deduplicateProducts(list).filter(
-      (p) => !isProductTombstoned(p, memoryDeletedCatalogIds)
-    );
+        ? mergeUnpersistedCatalogFallbacks(latestFirestoreProducts, memoryDeletedCatalogIds)
+        : (deduplicateProducts(
+            Object.keys(PRODUCT_GMC_METADATA)
+              .map((slug) => buildFallbackProductFromGmcMeta(slug))
+              .filter(Boolean) as Product[]
+          ).filter((p) => !isProductTombstoned(p, memoryDeletedCatalogIds)));
     if (filter?.isActive !== undefined) {
       list = list.filter((p) => Boolean(p.isActive) === filter.isActive);
     }
@@ -456,7 +512,7 @@ export function subscribeToProducts(
       hasInitialProducts = true;
       latestFirestoreProducts = [];
       snapshot.forEach((docSnap) => {
-        latestFirestoreProducts.push({ id: docSnap.id, ...docSnap.data() } as Product);
+        latestFirestoreProducts.push({ ...docSnap.data(), id: docSnap.id } as Product);
       });
       emitCombined();
     },
@@ -830,7 +886,7 @@ export async function getCategories(): Promise<Category[]> {
     );
     const categories: Category[] = [];
     snapshot.forEach((doc) => {
-      categories.push({ id: doc.id, ...doc.data() } as Category);
+      categories.push({ ...doc.data(), id: doc.id } as Category);
     });
     return categories.length > 0 ? categories : FALLBACK_CATEGORIES_LIST;
   } catch (err) {
@@ -850,7 +906,7 @@ export function subscribeToCategories(
   return onSnapshot(q, (snapshot) => {
     const categories: Category[] = [];
     snapshot.forEach((doc) => {
-      categories.push({ id: doc.id, ...doc.data() } as Category);
+      categories.push({ ...doc.data(), id: doc.id } as Category);
     });
     callback(categories.length > 0 ? categories : FALLBACK_CATEGORIES_LIST);
   }, (error) => {
@@ -1438,16 +1494,13 @@ export async function getProducts(): Promise<Product[]> {
     try {
       const snapshot = await getDocs(collection(db, 'products'));
       snapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() } as Product);
+        products.push({ ...doc.data(), id: doc.id } as Product);
       });
     } catch (err) {
       checkAndTripQuota(err);
     }
   }
-  if (products.length === 0) {
-    products = Object.keys(PRODUCT_GMC_METADATA).map(slug => buildFallbackProductFromGmcMeta(slug)).filter(Boolean) as Product[];
-  }
-  return deduplicateProducts(products).filter((p) => !isProductTombstoned(p, tombstones));
+  return mergeUnpersistedCatalogFallbacks(products, tombstones);
 }
 
 export async function addStockHistory(
@@ -2337,7 +2390,7 @@ export function subscribeToServices(
   return onSnapshot(q, (snapshot) => {
     const services: Service[] = [];
     snapshot.forEach((doc) => {
-      services.push({ id: doc.id, ...doc.data() } as Service);
+      services.push({ ...doc.data(), id: doc.id } as Service);
     });
     callback(services.length > 0 ? services : (FALLBACK_SERVICES_CATALOG as Service[]));
   }, (error) => {
@@ -2361,7 +2414,7 @@ export async function getAllServices(): Promise<Service[]> {
     );
     const services: Service[] = [];
     snapshot.forEach((doc) => {
-      services.push({ id: doc.id, ...doc.data() } as Service);
+      services.push({ ...doc.data(), id: doc.id } as Service);
     });
     return services.length > 0 ? services : (FALLBACK_SERVICES_CATALOG as Service[]);
   } catch (err) {
@@ -2448,7 +2501,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
     const snapshot = await getDocs(q);
     const posts: BlogPost[] = [];
     snapshot.forEach((doc) => {
-      posts.push({ id: doc.id, ...doc.data() } as BlogPost);
+      posts.push({ ...doc.data(), id: doc.id } as BlogPost);
     });
     return posts;
   } catch (err) {
@@ -2466,7 +2519,7 @@ export function subscribeToBlogPosts(callback: (posts: BlogPost[]) => void): Uns
   return onSnapshot(q, (snapshot) => {
     const posts: BlogPost[] = [];
     snapshot.forEach((doc) => {
-      posts.push({ id: doc.id, ...doc.data() } as BlogPost);
+      posts.push({ ...doc.data(), id: doc.id } as BlogPost);
     });
     callback(posts);
   }, (error) => {
@@ -2474,3 +2527,162 @@ export function subscribeToBlogPosts(callback: (posts: BlogPost[]) => void): Uns
     callback([]);
   });
 }
+
+// ============================================
+// FACEBOOK PAGE INTEGRATION & POST AUDIT HELPERS
+// ============================================
+
+export interface FacebookSettings {
+  connected: boolean;
+  pageId: string;
+  pageName: string;
+  pageCategory?: string;
+  pageLink?: string;
+  pictureUrl?: string;
+  fanCount?: number;
+  connectionMethod: 'oauth' | 'token';
+  pageAccessToken?: string;
+  defaultHashtags?: string;
+  autoIncludePrice?: boolean;
+  connectedBy?: string;
+  connectedAt?: string;
+  updatedAt?: any;
+}
+
+export interface FacebookPostRecord {
+  id?: string;
+  pageId: string;
+  pageName: string;
+  itemType: 'product' | 'service' | 'custom';
+  itemId: string;
+  title: string;
+  message: string;
+  postFormat: 'photo' | 'link' | 'text';
+  linkUrl: string;
+  imageUrl: string;
+  facebookPostId: string;
+  permalinkUrl: string;
+  status: 'published' | 'failed';
+  errorMessage: string;
+  publishedBy: string;
+  createdAt?: any;
+}
+
+export async function getFacebookSettings(): Promise<FacebookSettings | null> {
+  if (isFirestoreQuotaExhausted()) return null;
+  const path = 'settings/facebook';
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'facebook'));
+    if (snap.exists()) {
+      return snap.data() as FacebookSettings;
+    }
+    return null;
+  } catch (err) {
+    checkAndTripQuota(err);
+    handleFirestoreError(err, OperationType.GET, path);
+    return null;
+  }
+}
+
+export async function saveFacebookSettings(data: FacebookSettings): Promise<void> {
+  const path = 'settings/facebook';
+  try {
+    await setDoc(doc(db, 'settings', 'facebook'), {
+      connected: Boolean(data.connected),
+      pageId: String(data.pageId || '').slice(0, 64),
+      pageName: String(data.pageName || '').slice(0, 200),
+      pageCategory: String(data.pageCategory || 'Business').slice(0, 120),
+      pageLink: String(data.pageLink || '').slice(0, 500),
+      pictureUrl: String(data.pictureUrl || '').slice(0, 1000),
+      fanCount: Number(data.fanCount || 0),
+      connectionMethod: data.connectionMethod === 'oauth' ? 'oauth' : 'token',
+      pageAccessToken: String(data.pageAccessToken || ''),
+      defaultHashtags: String(data.defaultHashtags || '#AVLivePakistan #VideoConferencing #CorporateEvents').slice(0, 400),
+      autoIncludePrice: data.autoIncludePrice !== false,
+      connectedBy: String(data.connectedBy || auth.currentUser?.email || 'admin').slice(0, 200),
+      connectedAt: data.connectedAt || new Date().toISOString(),
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+  } catch (err) {
+    checkAndTripQuota(err);
+    handleFirestoreError(err, OperationType.WRITE, path);
+  }
+}
+
+export async function clearFacebookSettings(): Promise<void> {
+  const path = 'settings/facebook';
+  try {
+    await setDoc(doc(db, 'settings', 'facebook'), {
+      connected: false,
+      pageId: '',
+      pageName: '',
+      pageCategory: '',
+      pageLink: '',
+      pictureUrl: '',
+      fanCount: 0,
+      connectionMethod: 'token',
+      pageAccessToken: '',
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+  } catch (err) {
+    checkAndTripQuota(err);
+    handleFirestoreError(err, OperationType.WRITE, path);
+  }
+}
+
+export async function createFacebookPostRecord(
+  record: Omit<FacebookPostRecord, 'id' | 'createdAt'>
+): Promise<string> {
+  const postId = `fb_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const path = `facebook_posts/${postId}`;
+  try {
+    const payload = {
+      pageId: String(record.pageId || '').slice(0, 64),
+      pageName: String(record.pageName || 'Facebook Page').slice(0, 200),
+      itemType: (['product', 'service', 'custom'].includes(record.itemType) ? record.itemType : 'custom') as 'product' | 'service' | 'custom',
+      itemId: String(record.itemId || '').slice(0, 150),
+      title: String(record.title || 'AV Live Update').slice(0, 300),
+      message: String(record.message || '').slice(0, 5000),
+      postFormat: (['photo', 'link', 'text'].includes(record.postFormat) ? record.postFormat : 'photo') as 'photo' | 'link' | 'text',
+      linkUrl: String(record.linkUrl || '').slice(0, 500),
+      imageUrl: String(record.imageUrl || '').slice(0, 1000),
+      facebookPostId: String(record.facebookPostId || '').slice(0, 150),
+      permalinkUrl: String(record.permalinkUrl || '').slice(0, 500),
+      status: (record.status === 'failed' ? 'failed' : 'published') as 'published' | 'failed',
+      errorMessage: String(record.errorMessage || '').slice(0, 500),
+      publishedBy: String(record.publishedBy || auth.currentUser?.email || 'admin').slice(0, 200),
+      createdAt: serverTimestamp(),
+    };
+    await setDoc(doc(db, 'facebook_posts', postId), payload);
+    return postId;
+  } catch (err) {
+    checkAndTripQuota(err);
+    handleFirestoreError(err, OperationType.CREATE, path);
+    return '';
+  }
+}
+
+export async function getFacebookPostRecords(): Promise<FacebookPostRecord[]> {
+  if (isFirestoreQuotaExhausted()) return [];
+  const path = 'facebook_posts';
+  try {
+    const q = query(collection(db, 'facebook_posts'), orderBy('createdAt', 'desc'), firestoreLimit(30));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() } as FacebookPostRecord));
+  } catch (err) {
+    checkAndTripQuota(err);
+    handleFirestoreError(err, OperationType.LIST, path);
+    return [];
+  }
+}
+
+export async function deleteFacebookPostRecord(id: string): Promise<void> {
+  const path = `facebook_posts/${id}`;
+  try {
+    await deleteDoc(doc(db, 'facebook_posts', id));
+  } catch (err) {
+    checkAndTripQuota(err);
+    handleFirestoreError(err, OperationType.DELETE, path);
+  }
+}
+

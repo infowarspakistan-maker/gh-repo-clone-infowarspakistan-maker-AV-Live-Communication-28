@@ -51,6 +51,7 @@ const VoipService = React.lazy(() => import('./pages/VoipService').then(m => ({ 
 const EventQuote = React.lazy(() => import('./pages/EventQuote').then(m => ({ default: m.EventQuote })));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
 const TermsOfService = React.lazy(() => import('./pages/TermsOfService').then(m => ({ default: m.TermsOfService })));
+const UserDataDeletion = React.lazy(() => import('./pages/UserDataDeletion').then(m => ({ default: m.UserDataDeletion })));
 const Cart = React.lazy(() => import('./pages/Cart').then(m => ({ default: m.Cart })));
 const Checkout = React.lazy(() => import('./pages/Checkout').then(m => ({ default: m.Checkout })));
 const HtmlSitemap = React.lazy(() => import('./pages/HtmlSitemap').then(m => ({ default: m.HtmlSitemap })));
@@ -80,6 +81,7 @@ const MediaGuide = React.lazy(() => import('./pages/admin/MediaGuide').then(m =>
 const WorkspaceHub = React.lazy(() => import('./pages/admin/WorkspaceHub').then(m => ({ default: m.WorkspaceHub })));
 const WorkflowAutomation = React.lazy(() => import('./pages/admin/WorkflowAutomation').then(m => ({ default: m.WorkflowAutomation })));
 const GoogleBusinessExport = React.lazy(() => import('./pages/admin/GoogleBusinessExport').then(m => ({ default: m.GoogleBusinessExport })));
+const FacebookPublisher = React.lazy(() => import('./pages/admin/FacebookPublisher').then(m => ({ default: m.FacebookPublisher })));
 const BlueprintGeneratorHub = React.lazy(() => import('./pages/admin/BlueprintGeneratorHub').then(m => ({ default: m.BlueprintGeneratorHub })));
 const AdminLogin = React.lazy(() => import('./pages/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
 const Unauthorized = React.lazy(() => import('./pages/admin/Unauthorized').then(m => ({ default: m.Unauthorized })));
@@ -93,6 +95,7 @@ import { Footer } from './components/Footer';
 
 const CookieConsent = React.lazy(() => import('./components/CookieConsent').then(m => ({ default: m.CookieConsent })));
 const AIAssist = React.lazy(() => import('./components/AIAssist').then(m => ({ default: m.AIAssist })));
+const PolyX50OfferPopup = React.lazy(() => import('./components/PolyX50OfferPopup').then(m => ({ default: m.PolyX50OfferPopup })));
 
 const DEFAULT_NAV_CATEGORIES = [
   { id: 'cat-video', name: 'Video Conferencing', slug: 'video-conferencing', isActive: true, parentId: null, type: 'product' },
@@ -109,10 +112,20 @@ const DEFAULT_NAV_CATEGORIES = [
   { id: 'cat-intercom', name: 'Intercom, Paging & Access', slug: 'intercom-paging-access', isActive: true, parentId: null, type: 'product' },
 ];
 
-const FALLBACK_NAV_PRODUCTS = Object.keys(PRODUCT_GMC_METADATA)
-  .filter((slug) => !PRODUCT_ID_TO_SEO_SLUG[slug])
-  .map((slug) => buildFallbackProductFromGmcMeta(slug))
-  .filter(Boolean) as Record<string, any>[];
+const FALLBACK_NAV_PRODUCTS = (() => {
+  const seen = new Set<string>();
+  const list: Record<string, any>[] = [];
+  for (const slug of Object.keys(PRODUCT_GMC_METADATA)) {
+    if (PRODUCT_ID_TO_SEO_SLUG[slug]) continue;
+    const prod = buildFallbackProductFromGmcMeta(slug);
+    if (!prod) continue;
+    const key = String(prod.id || prod.slug || slug);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    list.push(prod);
+  }
+  return list;
+})();
 
 function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
@@ -266,6 +279,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
                   <li><Link to="/product/freepbx-enterprise-pakistan" className="hover:text-[#00B4D8] block">FreePBX Enterprise Appliance</Link></li>
                   <li><Link to="/product/cisco-cucm-license-pakistan" className="hover:text-[#00B4D8] block">Cisco CUCM CallManager</Link></li>
                   <li><Link to="/product/grandstream-ucm6308-pakistan" className="hover:text-[#00B4D8] block">Grandstream UCM6308 IP-PBX</Link></li>
+                  <li><Link to="/product/poly-vvx-411-pakistan" className="hover:text-[#00B4D8] block">Poly VVX 411 Gigabit IP Phone</Link></li>
                   <li><Link to="/category/ip-phones" className="hover:text-[#00B4D8] block">Enterprise SIP IP Phones</Link></li>
                   <li><Link to="/category/headsets" className="hover:text-[#00B4D8] block">Call Center ANC Headsets</Link></li>
                 </ul>
@@ -362,6 +376,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
               <div>
                 <div className="font-black text-[10px] text-gray-400 uppercase tracking-widest mb-2.5 pb-1 border-b border-gray-100">Poly Ecosystem</div>
                 <ul className="space-y-1.5 text-[12px] text-gray-600 font-semibold capitalize tracking-normal">
+                  <li><Link to="/product/poly-studio-x50-tc8-special-offer-pakistan" className="text-emerald-700 font-black hover:text-[#00B4D8] transition-colors block">Poly Studio X50 + TC8 Deal (Rs. 399k)</Link></li>
                   <li><Link to="/product/polycom-realpresence-group-500-pakistan" className="hover:text-[#00B4D8] transition-colors block">Polycom Group 500</Link></li>
                   <li><Link to="/product/poly-studio-x72-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio X72 / X70</Link></li>
                   <li><Link to="/product/poly-studio-x52-pakistan" className="hover:text-[#00B4D8] transition-colors block">Poly Studio X52</Link></li>
@@ -588,11 +603,11 @@ function Navbar() {
 
   return (
     <>
-      <div className="hidden lg:flex bg-[#f8f9fa] text-gray-600 px-3 sm:px-4 md:px-8 text-[11px] justify-between items-center border-b border-gray-200 font-medium h-8 shrink-0">
+      <div className="hidden lg:flex bg-[#f8f9fa] text-gray-600 px-3 sm:px-4 md:px-8 text-xs justify-between items-center border-b border-gray-200 font-medium h-8 shrink-0">
         <div className="flex items-center gap-4 sm:gap-5">
           <a href="tel:+923214256263" className="inline-flex items-center gap-1.5 hover:text-[#00B4D8] transition-colors py-0.5 font-semibold text-[#1A2B4C] sm:font-medium sm:text-gray-600"><Phone size={12} className="text-[#00B4D8] shrink-0" /> 0321 425 6263</a>
           <span className="hidden sm:flex items-center gap-1.5"><MapPin size={12} className="text-[#00B4D8]" /> Johar Town Block N, Lahore</span>
-          <div className="hidden xl:flex items-center gap-3 text-[11px] text-slate-600 border-l border-gray-200 pl-4">
+          <div className="hidden xl:flex items-center gap-3 text-xs text-slate-600 border-l border-gray-200 pl-4">
             <a href="https://www.youtube.com/@AVLivePakistan" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">YouTube</a>
             <a href="https://www.instagram.com/avlive25" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">Instagram</a>
             <a href="https://www.tiktok.com/@almalikk00" target="_blank" rel="noopener" className="hover:text-[#00B4D8]">TikTok</a>
@@ -820,12 +835,12 @@ function Navbar() {
                 <div className="bg-black text-[#f0f0f0] font-black text-lg md:text-2xl px-2 py-0.5 leading-none tracking-tight">AV</div>
                 <div className="text-black font-black text-lg md:text-2xl leading-none ml-1.5 flex items-center tracking-tight">Live</div>
               </div>
-              <div className="text-black font-light text-[7px] md:text-[8px] tracking-[0.34em] mt-0.5 ml-0.5 uppercase">Communication</div>
+              <div className="text-black font-semibold text-[10px] tracking-[0.22em] mt-0.5 ml-0.5 uppercase">Communication</div>
             </Link>
 
             <div className="shrink-0 hidden lg:flex flex-col">
               <a href="tel:+923214256263" className="text-[#F26522] font-black text-sm xl:text-base tracking-tight leading-tight hover:underline">0321 425 6263</a>
-              <div className="text-gray-500 text-[10px] font-medium uppercase tracking-wider">9 AM - 6 PM PKT M-S</div>
+              <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">9 AM - 6 PM PKT M-S</div>
             </div>
 
             <div ref={searchRef} className="flex-1 relative max-w-2xl min-w-0">
@@ -1190,7 +1205,7 @@ function Navbar() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-5 items-center h-[52px] px-1">
+          <div className="grid grid-cols-5 items-center h-[54px] px-1">
             {/* 1. Home */}
             <Link
               to="/"
@@ -1201,7 +1216,7 @@ function Navbar() {
               }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              <span className="text-[9px] font-bold tracking-tight leading-none mt-1">Home</span>
+              <span className="text-xs font-bold tracking-tight leading-none mt-1">Home</span>
             </Link>
 
             {/* 2. Shop / Store */}
@@ -1216,12 +1231,12 @@ function Navbar() {
               }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-              <span className="text-[9px] font-bold tracking-tight leading-none mt-1">Shop</span>
+              <span className="text-xs font-bold tracking-tight leading-none mt-1">Shop</span>
             </Link>
 
             {/* 3. Center Spacer & Label for Elevated Cart Button */}
             <div className="flex flex-col items-center justify-end h-full pb-1.5 pointer-events-none" aria-hidden="true">
-              <span className="text-[9px] font-bold tracking-tight leading-none text-gray-300">Cart</span>
+              <span className="text-xs font-bold tracking-tight leading-none text-gray-300">Cart</span>
             </div>
 
             {/* 4. Search */}
@@ -1236,7 +1251,7 @@ function Navbar() {
               className="flex flex-col items-center justify-center w-full h-full text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               <Search size={17} />
-              <span className="text-[9px] font-bold tracking-tight leading-none mt-1">Search</span>
+              <span className="text-xs font-bold tracking-tight leading-none mt-1">Search</span>
             </button>
 
             {/* 5. Hub Menu / Profile Directory */}
@@ -1249,7 +1264,7 @@ function Navbar() {
               }`}
             >
               <Menu size={17} />
-              <span className="text-[9px] font-bold tracking-tight leading-none mt-1">Menu</span>
+              <span className="text-xs font-bold tracking-tight leading-none mt-1">Menu</span>
             </button>
           </div>
         </div>
@@ -1302,19 +1317,36 @@ export default function App() {
   const [showCookieConsent, setShowCookieConsent] = useState(false);
 
   useEffect(() => {
-    const widgetTimer = setTimeout(() => setShowDeferredWidgets(true), 4200);
-    const cookieTimer = setTimeout(() => setShowCookieConsent(true), 15000);
+    const widgetTimer = setTimeout(() => {
+      React.startTransition(() => {
+        setShowDeferredWidgets(true);
+      });
+    }, 4200);
+    const cookieTimer = setTimeout(() => {
+      React.startTransition(() => {
+        setShowCookieConsent(true);
+      });
+    }, 15000);
 
     const handleEarlyCookieSettings = () => {
       (window as unknown as { __avliveOpenCookieSettings?: boolean }).__avliveOpenCookieSettings = true;
-      setShowCookieConsent(true);
+      React.startTransition(() => {
+        setShowCookieConsent(true);
+      });
+    };
+    const handleEarlyOfferPopup = () => {
+      React.startTransition(() => {
+        setShowDeferredWidgets(true);
+      });
     };
     window.addEventListener('open-cookie-settings', handleEarlyCookieSettings);
+    window.addEventListener('open-poly-x50-offer', handleEarlyOfferPopup);
 
     return () => {
       clearTimeout(widgetTimer);
       clearTimeout(cookieTimer);
       window.removeEventListener('open-cookie-settings', handleEarlyCookieSettings);
+      window.removeEventListener('open-poly-x50-offer', handleEarlyOfferPopup);
     };
   }, []);
 
@@ -1404,6 +1436,7 @@ export default function App() {
               <Route path="workspace" element={<WorkspaceHub />} />
               <Route path="automation" element={<WorkflowAutomation />} />
               <Route path="google-business" element={<GoogleBusinessExport />} />
+              <Route path="facebook-publisher" element={<FacebookPublisher />} />
               <Route path="media-guide" element={<MediaGuide />} />
               <Route path="blueprint-hub" element={<BlueprintGeneratorHub />} />
             </Route>
@@ -1430,6 +1463,10 @@ export default function App() {
           <Route path="/voip-service-providers" element={<VoipService />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/user-data-deletion" element={<UserDataDeletion />} />
+          <Route path="/data-deletion" element={<Navigate to="/user-data-deletion" replace />} />
+          <Route path="/facebook-data-deletion" element={<Navigate to="/user-data-deletion" replace />} />
+          <Route path="/delete-data" element={<Navigate to="/user-data-deletion" replace />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
 
@@ -1509,7 +1546,8 @@ export default function App() {
           <Route path="/products" element={<Navigate to="/shop" replace />} />
           <Route path="/services/video-conferencing-solutions" element={<Navigate to="/video-conferencing-solutions" replace />} />
           <Route path="/services/corporate-event-management" element={<Navigate to="/corporate-event-management" replace />} />
-          <Route path="/video-conference-in-pakistan" element={<KeywordLandingPage />} />
+          <Route path="/product/poly-studio-x50-tc8-bundle-pakistan" element={<Navigate to="/product/poly-studio-x50-tc8-special-offer-pakistan" replace />} />
+          <Route path="/product/poly-studio-x50-special-offer" element={<Navigate to="/product/poly-studio-x50-tc8-special-offer-pakistan" replace />} />
 
           {/* Fallback 404 route for unhandled paths */}
           <Route path="*" element={<KeywordLandingPage />} />
@@ -1522,6 +1560,7 @@ export default function App() {
       {showDeferredWidgets && (
         <React.Suspense fallback={null}>
           <AIAssist />
+          <PolyX50OfferPopup />
         </React.Suspense>
       )}
       {showCookieConsent && (

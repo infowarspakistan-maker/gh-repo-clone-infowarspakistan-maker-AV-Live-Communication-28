@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { useEffect, useLayoutEffect } from 'react';
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export interface SEOProps {
   title?: string;
@@ -126,142 +127,182 @@ export function SEO({
     : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
   const schemaKey = schema ? JSON.stringify(schema) : '';
+  const tagsKey = Array.isArray(tags) ? tags.join('|') : '';
 
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    document.title = siteTitle;
+  useIsomorphicLayoutEffect(() => {
+    if (typeof document === 'undefined' || !document.head) return;
 
-    const isReactManaged = (node: Element) =>
-      Object.keys(node).some((k) => k.startsWith('__react'));
-
-    // Remove only leftover static SSR [data-rh="true"] tags that are NOT managed by React 19 HostHoistable fibers
-    const cleanupStaticSsrTags = (selector: string) => {
-      const nodes = Array.from(document.head.querySelectorAll(selector));
-      const hasReactNode = nodes.some(isReactManaged);
-      if (hasReactNode) {
-        for (const node of nodes) {
-          if (!isReactManaged(node) && node.parentNode) {
-            node.parentNode.removeChild(node);
-          }
-        }
-      } else if (nodes.length > 1) {
-        for (let i = 1; i < nodes.length; i++) {
-          if (!isReactManaged(nodes[i]) && nodes[i].parentNode) {
-            nodes[i].parentNode.removeChild(nodes[i]);
-          }
-        }
+    const htmlEl = document.documentElement;
+    if (htmlEl) {
+      if (htmlEl.getAttribute('lang') !== 'en') htmlEl.setAttribute('lang', 'en');
+      if (htmlEl.getAttribute('prefix') !== 'og: https://ogp.me/ns# fb: https://ogp.me/ns/fb#') {
+        htmlEl.setAttribute('prefix', 'og: https://ogp.me/ns# fb: https://ogp.me/ns/fb#');
       }
-    };
+    }
 
-    cleanupStaticSsrTags('title');
-    cleanupStaticSsrTags('link[rel="canonical"]');
-    cleanupStaticSsrTags('meta[property="og:url"]');
-    cleanupStaticSsrTags('meta[property="og:title"]');
-    cleanupStaticSsrTags('meta[property="og:description"]');
-    cleanupStaticSsrTags('meta[property="og:image"]');
-    cleanupStaticSsrTags('meta[property="og:image:alt"]');
-    cleanupStaticSsrTags('meta[property="og:type"]');
-    cleanupStaticSsrTags('meta[property="og:site_name"]');
-    cleanupStaticSsrTags('meta[property="og:locale"]');
-    cleanupStaticSsrTags('meta[name="description"]');
-    cleanupStaticSsrTags('meta[name="robots"]');
-    cleanupStaticSsrTags('meta[name="twitter:card"]');
-    cleanupStaticSsrTags('meta[name="twitter:title"]');
-    cleanupStaticSsrTags('meta[name="twitter:description"]');
-    cleanupStaticSsrTags('meta[name="twitter:image"]');
-    cleanupStaticSsrTags('meta[name="twitter:image:alt"]');
+    // 1. Single <title data-rh="true">
+    document.title = siteTitle;
+    const titleNodes = Array.from(document.head.querySelectorAll('title'));
+    if (titleNodes.length === 0) {
+      const titleEl = document.createElement('title');
+      titleEl.setAttribute('data-rh', 'true');
+      titleEl.textContent = siteTitle;
+      document.head.insertBefore(titleEl, document.head.firstChild);
+    } else {
+      titleNodes[0].setAttribute('data-rh', 'true');
+      if (titleNodes[0].textContent !== siteTitle) {
+        titleNodes[0].textContent = siteTitle;
+      }
+      for (let i = 1; i < titleNodes.length; i++) {
+        titleNodes[i].parentNode?.removeChild(titleNodes[i]);
+      }
+    }
 
-    // Remove Wave-1 SSR JSON-LD script tag once Wave-2 React <SEO schema={...}> mounts so Google WRS never merges duplicate @id Product nodes ("Duplicate field brand")
+    // 2. Single self-referencing <link rel="canonical" data-rh="true">
+    const canonicalNodes = Array.from(document.head.querySelectorAll('link[rel="canonical"]'));
+    if (canonicalNodes.length === 0) {
+      const linkEl = document.createElement('link');
+      linkEl.setAttribute('data-rh', 'true');
+      linkEl.setAttribute('rel', 'canonical');
+      linkEl.setAttribute('href', absoluteUrl);
+      document.head.appendChild(linkEl);
+    } else {
+      canonicalNodes[0].setAttribute('data-rh', 'true');
+      canonicalNodes[0].setAttribute('href', absoluteUrl);
+      for (let i = 1; i < canonicalNodes.length; i++) {
+        canonicalNodes[i].parentNode?.removeChild(canonicalNodes[i]);
+      }
+    }
+
+    // 3. Synchronize all <meta data-rh="true"> entries in-place
+    const desiredMetas: Array<{ attr: 'name' | 'property'; key: string; content: string }> = [
+      { attr: 'name', key: 'description', content: clampedDescription },
+      { attr: 'name', key: 'robots', content: robotsContent },
+      { attr: 'property', key: 'og:site_name', content: 'AV Live Communications' },
+      { attr: 'property', key: 'og:type', content: type },
+      { attr: 'property', key: 'og:url', content: absoluteUrl },
+      { attr: 'property', key: 'og:title', content: siteTitle },
+      { attr: 'property', key: 'og:description', content: clampedDescription },
+      { attr: 'property', key: 'og:image', content: absoluteImage },
+      { attr: 'property', key: 'og:image:secure_url', content: absoluteImage },
+      { attr: 'property', key: 'og:image:alt', content: resolvedAlt },
+      { attr: 'property', key: 'og:image:width', content: String(imageWidth) },
+      { attr: 'property', key: 'og:image:height', content: String(imageHeight) },
+      { attr: 'property', key: 'og:locale', content: locale },
+      { attr: 'property', key: 'og:locale:alternate', content: 'en_US' },
+      { attr: 'name', key: 'twitter:card', content: 'summary_large_image' },
+      { attr: 'name', key: 'twitter:site', content: '@avlivepk' },
+      { attr: 'name', key: 'twitter:creator', content: '@avlivepk' },
+      { attr: 'name', key: 'twitter:domain', content: 'avlive.com.pk' },
+      { attr: 'name', key: 'twitter:url', content: absoluteUrl },
+      { attr: 'name', key: 'twitter:title', content: siteTitle },
+      { attr: 'name', key: 'twitter:description', content: clampedDescription },
+      { attr: 'name', key: 'twitter:image', content: absoluteImage },
+      { attr: 'name', key: 'twitter:image:alt', content: resolvedAlt },
+    ];
+
+    if (type === 'product') {
+      if (price !== undefined && price !== null) {
+        desiredMetas.push({ attr: 'property', key: 'product:price:amount', content: String(price) });
+        desiredMetas.push({ attr: 'property', key: 'product:price:currency', content: currency });
+      }
+      if (availability) desiredMetas.push({ attr: 'property', key: 'product:availability', content: availability });
+      if (brand) desiredMetas.push({ attr: 'property', key: 'product:brand', content: brand });
+      if (sku) desiredMetas.push({ attr: 'property', key: 'product:retailer_item_id', content: sku });
+      if (mpn) desiredMetas.push({ attr: 'property', key: 'product:mfr_part_no', content: mpn });
+      if (gtin) desiredMetas.push({ attr: 'property', key: 'product:gtin', content: gtin });
+      desiredMetas.push({ attr: 'property', key: 'product:condition', content: 'new' });
+    }
+
+    if (type === 'article' || publishedTime) {
+      desiredMetas.push({ attr: 'property', key: 'article:publisher', content: 'https://avlive.com.pk/#organization' });
+      if (author) desiredMetas.push({ attr: 'property', key: 'article:author', content: author });
+      if (publishedTime) desiredMetas.push({ attr: 'property', key: 'article:published_time', content: publishedTime });
+      if (modifiedTime) desiredMetas.push({ attr: 'property', key: 'article:modified_time', content: modifiedTime });
+      if (section) desiredMetas.push({ attr: 'property', key: 'article:section', content: section });
+      for (const tag of tags) {
+        if (tag) desiredMetas.push({ attr: 'property', key: 'article:tag', content: tag });
+      }
+    }
+
+    const keptMetaNodes = new Set<Element>();
+    for (const item of desiredMetas) {
+      const selector =
+        item.key === 'article:tag'
+          ? `meta[${item.attr}="${item.key}"][content="${CSS.escape(item.content)}"]`
+          : `meta[${item.attr}="${item.key}"]`;
+      const matches = Array.from(document.head.querySelectorAll(selector));
+      if (matches.length > 0) {
+        const primary = matches[0];
+        primary.setAttribute('data-rh', 'true');
+        primary.setAttribute('content', item.content);
+        keptMetaNodes.add(primary);
+        for (let i = 1; i < matches.length; i++) {
+          matches[i].parentNode?.removeChild(matches[i]);
+        }
+      } else {
+        const metaEl = document.createElement('meta');
+        metaEl.setAttribute('data-rh', 'true');
+        metaEl.setAttribute(item.attr, item.key);
+        metaEl.setAttribute('content', item.content);
+        document.head.appendChild(metaEl);
+        keptMetaNodes.add(metaEl);
+      }
+    }
+
+    // Remove stale [data-rh="true"] meta tags from previous route transitions
+    const allRhMetas = Array.from(document.head.querySelectorAll('meta[data-rh="true"]'));
+    for (const node of allRhMetas) {
+      if (!keptMetaNodes.has(node)) {
+        node.parentNode?.removeChild(node);
+      }
+    }
+
+    // 4. Synchronize JSON-LD structured data without duplicate Product/Organization nodes
     if (schemaKey) {
       const ssrJsonLdNodes = document.head.querySelectorAll('#ssr-route-schema, #ssr-home-schema');
       ssrJsonLdNodes.forEach((node) => {
-        if (!isReactManaged(node) && node.parentNode) {
-          node.parentNode.removeChild(node);
-        }
+        node.parentNode?.removeChild(node);
       });
+      let scriptEl = document.head.querySelector('script#rh-seo-schema[type="application/ld+json"]') as HTMLScriptElement | null;
+      if (!scriptEl) {
+        scriptEl = document.createElement('script');
+        scriptEl.id = 'rh-seo-schema';
+        scriptEl.type = 'application/ld+json';
+        scriptEl.setAttribute('data-rh', 'true');
+        document.head.appendChild(scriptEl);
+      }
+      if (scriptEl.textContent !== schemaKey) {
+        scriptEl.textContent = schemaKey;
+      }
     }
-  }, [siteTitle, absoluteUrl, clampedDescription, robotsContent, schemaKey]);
+  }, [
+    siteTitle,
+    clampedDescription,
+    robotsContent,
+    absoluteUrl,
+    absoluteImage,
+    resolvedAlt,
+    imageWidth,
+    imageHeight,
+    locale,
+    type,
+    price,
+    currency,
+    availability,
+    brand,
+    sku,
+    mpn,
+    gtin,
+    author,
+    publishedTime,
+    modifiedTime,
+    section,
+    tagsKey,
+    schemaKey,
+  ]);
 
-  return (
-    <Helmet htmlAttributes={{ lang: 'en', prefix: 'og: https://ogp.me/ns# fb: https://ogp.me/ns/fb#' }}>
-      {/* Standard metadata */}
-      <title data-rh="true">{siteTitle}</title>
-      <meta data-rh="true" name="description" content={clampedDescription} />
-      
-      {/* Robots Directives */}
-      {noindex ? (
-        <meta data-rh="true" name="robots" content="noindex, nofollow" />
-      ) : (
-        <meta data-rh="true" name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-      )}
-
-      {/* Canonical Link */}
-      <link data-rh="true" rel="canonical" href={absoluteUrl} />
-
-      {/* Open Graph / Facebook / LinkedIn / WhatsApp / Meta AI */}
-      <meta data-rh="true" property="og:site_name" content="AV Live Communications" />
-      <meta data-rh="true" property="og:type" content={type} />
-      <meta data-rh="true" property="og:url" content={absoluteUrl} />
-      <meta data-rh="true" property="og:title" content={siteTitle} />
-      <meta data-rh="true" property="og:description" content={clampedDescription} />
-      <meta data-rh="true" property="og:image" content={absoluteImage} />
-      <meta data-rh="true" property="og:image:secure_url" content={absoluteImage} />
-      <meta data-rh="true" property="og:image:alt" content={resolvedAlt} />
-      <meta data-rh="true" property="og:image:width" content={String(imageWidth)} />
-      <meta data-rh="true" property="og:image:height" content={String(imageHeight)} />
-      <meta data-rh="true" property="og:locale" content={locale} />
-      <meta data-rh="true" property="og:locale:alternate" content="en_US" />
-
-      {/* Product Open Graph Tags */}
-      {type === 'product' && (
-        <>
-          {price !== undefined && price !== null && (
-            <>
-              <meta data-rh="true" property="product:price:amount" content={String(price)} />
-              <meta data-rh="true" property="product:price:currency" content={currency} />
-            </>
-          )}
-          {availability && <meta data-rh="true" property="product:availability" content={availability} />}
-          {brand && <meta data-rh="true" property="product:brand" content={brand} />}
-          {sku && <meta data-rh="true" property="product:retailer_item_id" content={sku} />}
-          {mpn && <meta data-rh="true" property="product:mfr_part_no" content={mpn} />}
-          {gtin && <meta data-rh="true" property="product:gtin" content={gtin} />}
-          <meta data-rh="true" property="product:condition" content="new" />
-        </>
-      )}
-
-      {/* Article / Blog Open Graph Tags */}
-      {(type === 'article' || publishedTime) && (
-        <>
-          <meta data-rh="true" property="article:publisher" content="https://avlive.com.pk/#organization" />
-          {author && <meta data-rh="true" property="article:author" content={author} />}
-          {publishedTime && <meta data-rh="true" property="article:published_time" content={publishedTime} />}
-          {modifiedTime && <meta data-rh="true" property="article:modified_time" content={modifiedTime} />}
-          {section && <meta data-rh="true" property="article:section" content={section} />}
-          {tags.map((tag, idx) => (
-            <meta key={`og-tag-${idx}`} data-rh="true" property="article:tag" content={tag} />
-          ))}
-        </>
-      )}
-
-      {/* Twitter / X Meta Tags */}
-      <meta data-rh="true" name="twitter:card" content="summary_large_image" />
-      <meta data-rh="true" name="twitter:site" content="@avlivepk" />
-      <meta data-rh="true" name="twitter:creator" content="@avlivepk" />
-      <meta data-rh="true" name="twitter:domain" content="avlive.com.pk" />
-      <meta data-rh="true" name="twitter:url" content={absoluteUrl} />
-      <meta data-rh="true" name="twitter:title" content={siteTitle} />
-      <meta data-rh="true" name="twitter:description" content={clampedDescription} />
-      <meta data-rh="true" name="twitter:image" content={absoluteImage} />
-      <meta data-rh="true" name="twitter:image:alt" content={resolvedAlt} />
-
-      {/* Structured Data (JSON-LD) */}
-      {schema && (
-        <script type="application/ld+json">
-          {JSON.stringify(schema)}
-        </script>
-      )}
-    </Helmet>
-  );
+  return null;
 }
+
 

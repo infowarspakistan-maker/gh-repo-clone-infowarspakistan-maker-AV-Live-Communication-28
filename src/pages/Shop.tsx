@@ -12,7 +12,7 @@ import {
   X, 
   SlidersHorizontal,
   Check,
-  Eye, ArrowRight, Star, Heart, Plus,
+  Eye, ArrowRight, Star, Heart, Plus, Truck,
 } from 'lucide-react';
 import { Link, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
@@ -33,6 +33,15 @@ import { BlurProductImage } from '../components/BlurProductImage';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { buildProductImageSeo } from '../lib/image-seo';
 import { cleanRichTextHtml } from '../lib/html-sanitize';
+import {
+  EBAY_ROOM_SIZE_FACETS,
+  EBAY_FORM_FACTOR_FACETS,
+  EBAY_PRICE_TIERS,
+  getProductRoomSizeFacets,
+  getProductFormFactorFacets,
+  isProductBundleOrKit,
+  getProductListingBadges,
+} from '../lib/ebay-facets';
 
 const INITIAL_FALLBACK_SHOP_PRODUCTS: Product[] = (() => {
   const seen = new Set<string>();
@@ -74,11 +83,17 @@ export function Shop() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [expandedParents, setExpandedParents] = useState<{[key: string]: boolean}>({});
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [brandSearchTerm, setBrandSearchTerm] = useState('');
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
   const [visibleCount, setHoveredVisibleCount] = useState<number>(16);
   const setVisibleCount = setHoveredVisibleCount;
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  const toggleSection = (key: string) => {
+    setCollapsedSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   // Sync parameters from URL (/brands/:brandSlug or ?brand=...)
   const searchQuery = searchParams.get('q') || '';
@@ -92,6 +107,15 @@ export function Shop() {
     }
     return fromQuery;
   }, [searchParams, brandSlug]);
+  const selectedRooms = useMemo(() => {
+    const raw = searchParams.get('room');
+    return raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [];
+  }, [searchParams]);
+  const selectedTypes = useMemo(() => {
+    const raw = searchParams.get('type');
+    return raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [];
+  }, [searchParams]);
+  const listingTab = (searchParams.get('tab') || 'all') as 'all' | 'sale' | 'bundles' | 'free-shipping';
   const minPrice = searchParams.get('min_price') || '';
   const maxPrice = searchParams.get('max_price') || '';
   const sortOption = searchParams.get('sort') || 'featured';
@@ -144,6 +168,9 @@ export function Shop() {
     q?: string;
     category?: string | null;
     brand?: string[] | null;
+    room?: string[] | null;
+    type?: string[] | null;
+    tab?: string | null;
     min_price?: string;
     max_price?: string;
     sort?: string;
@@ -164,6 +191,21 @@ export function Shop() {
       if (updates.brand !== undefined) {
         if (updates.brand && updates.brand.length > 0) next.set('brand', updates.brand.join(','));
         else next.delete('brand');
+      }
+
+      if (updates.room !== undefined) {
+        if (updates.room && updates.room.length > 0) next.set('room', updates.room.join(','));
+        else next.delete('room');
+      }
+
+      if (updates.type !== undefined) {
+        if (updates.type && updates.type.length > 0) next.set('type', updates.type.join(','));
+        else next.delete('type');
+      }
+
+      if (updates.tab !== undefined) {
+        if (updates.tab && updates.tab !== 'all') next.set('tab', updates.tab);
+        else next.delete('tab');
       }
       
       if (updates.min_price !== undefined) {
@@ -190,40 +232,93 @@ export function Shop() {
     setLocalSearch('');
     setLocalMinPrice('');
     setLocalMaxPrice('');
+    setBrandSearchTerm('');
   };
 
-  // 1. Calculate available brands with contextual counts (after search & category filters)
-  const availableBrands = useMemo(() => {
-    let baseProducts = [...products];
+  // Base products filtered by category & search query for contextual facet counts
+  const categoryAndSearchProducts = useMemo(() => {
+    let base = [...products];
     if (selectedCategory) {
-      const cat = categories.find(c => c.id === selectedCategory);
-      baseProducts = baseProducts.filter(p => 
+      const cat = categories.find(c => c.id === selectedCategory || c.slug === selectedCategory);
+      base = base.filter(p =>
         p.categoryIds?.includes(selectedCategory) ||
-        (cat && (Array.isArray(p.categorySlugs) ? p.categorySlugs : (typeof p.categorySlugs === 'string' ? [p.categorySlugs] : [])).includes(cat.slug))
+        (Array.isArray(p.categorySlugs) ? p.categorySlugs : (typeof p.categorySlugs === 'string' ? [p.categorySlugs] : [])).includes(cat?.slug || selectedCategory)
       );
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      baseProducts = baseProducts.filter(p => 
-        (p.productName || p.name || '').toLowerCase().includes(q) || 
-        (p.brand || '').toLowerCase().includes(q)
+      base = base.filter(p =>
+        (p.productName || (p as any).name || '').toLowerCase().includes(q) ||
+        (p.brand || '').toLowerCase().includes(q) ||
+        (p.sku || '').toLowerCase().includes(q) ||
+        (p.mpn || '').toLowerCase().includes(q) ||
+        (p.gtin || '').toLowerCase().includes(q) ||
+        (p.gmcId || '').toLowerCase().includes(q)
       );
     }
+    return base;
+  }, [products, selectedCategory, categories, searchQuery]);
 
-    const counts: { [brand: string]: number } = {};
-    baseProducts.forEach(p => {
-      const b = p.brand || 'Other';
-      counts[b] = (counts[b] || 0) + 1;
+  // 1. Calculate available brands with contextual counts
+  const availableBrands = useMemo(() => {
+    const byNormalized = new Map<string, { name: string; count: number; normalized: string }>();
+    categoryAndSearchProducts.forEach(p => {
+      const raw = (p.brand || 'Other').trim() || 'Other';
+      const normalized = raw.toLowerCase();
+      const existing = byNormalized.get(normalized);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        byNormalized.set(normalized, { name: raw, count: 1, normalized });
+      }
     });
 
-    return Object.entries(counts).map(([name, count]) => ({
-      name,
-      count,
-      normalized: name.toLowerCase()
-    })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [products, selectedCategory, searchQuery]);
+    return Array.from(byNormalized.values()).sort(
+      (a, b) => b.count - a.count || a.name.localeCompare(b.name)
+    );
+  }, [categoryAndSearchProducts]);
 
-  // 2. Calculate category counts
+  // 2. Calculate Room Size & Form Factor aspect counts
+  const roomFacetCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    categoryAndSearchProducts.forEach((p) => {
+      getProductRoomSizeFacets(p).forEach((rId) => {
+        counts[rId] = (counts[rId] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [categoryAndSearchProducts]);
+
+  const formFactorCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    categoryAndSearchProducts.forEach((p) => {
+      getProductFormFactorFacets(p).forEach((tId) => {
+        counts[tId] = (counts[tId] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [categoryAndSearchProducts]);
+
+  // 3. Listing Format tab counts
+  const tabCounts = useMemo(() => {
+    let sale = 0;
+    let bundles = 0;
+    let freeShipping = 0;
+    categoryAndSearchProducts.forEach((p) => {
+      const { effectivePrice, hasSale } = resolveProductPricing(p);
+      if (hasSale) sale++;
+      if (isProductBundleOrKit(p)) bundles++;
+      if (effectivePrice >= 100000) freeShipping++;
+    });
+    return {
+      all: categoryAndSearchProducts.length,
+      sale,
+      bundles,
+      freeShipping,
+    };
+  }, [categoryAndSearchProducts]);
+
+  // 4. Calculate category counts
   const categoryCounts = useMemo(() => {
     const counts: { [catId: string]: number } = {};
     products.forEach(p => {
@@ -231,6 +326,7 @@ export function Shop() {
       p.categoryIds?.forEach(id => idsToCount.add(id));
       const slugs = Array.isArray(p.categorySlugs) ? p.categorySlugs : (typeof p.categorySlugs === 'string' ? [p.categorySlugs] : []);
       slugs.forEach(slug => {
+        idsToCount.add(slug);
         const cat = categories.find(c => c.slug === slug);
         if (cat && cat.id) idsToCount.add(cat.id);
       });
@@ -241,27 +337,17 @@ export function Shop() {
     return counts;
   }, [products, categories]);
 
-  // 3. Main Sorted and Filtered Products List
+  // 5. Main Sorted and Filtered Products List
   const sortedAndFilteredProducts = useMemo(() => {
-    let result = [...products];
+    let result = [...categoryAndSearchProducts];
 
-    // Filter by category
-    if (selectedCategory) {
-      const cat = categories.find(c => c.id === selectedCategory);
-      result = result.filter(p => 
-        p.categoryIds?.includes(selectedCategory) || 
-        (cat && (Array.isArray(p.categorySlugs) ? p.categorySlugs : (typeof p.categorySlugs === 'string' ? [p.categorySlugs] : [])).includes(cat.slug))
-      );
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(p => 
-        (p.productName || p.name || '').toLowerCase().includes(q) || 
-        (p.brand || '').toLowerCase().includes(q) ||
-        (p.sku || '').toLowerCase().includes(q)
-      );
+    // Filter by listing format tab
+    if (listingTab === 'sale') {
+      result = result.filter((p) => resolveProductPricing(p).hasSale);
+    } else if (listingTab === 'bundles') {
+      result = result.filter((p) => isProductBundleOrKit(p));
+    } else if (listingTab === 'free-shipping') {
+      result = result.filter((p) => resolveProductPricing(p).effectivePrice >= 100000);
     }
 
     // Filter by brand selection (including brand aliases like poly <-> hp poly / polycom)
@@ -278,11 +364,27 @@ export function Shop() {
       });
     }
 
+    // Filter by Room Size / Deployment Environment aspect
+    if (selectedRooms.length > 0) {
+      result = result.filter((p) => {
+        const pRooms = getProductRoomSizeFacets(p);
+        return selectedRooms.some((r) => pRooms.includes(r));
+      });
+    }
+
+    // Filter by Form Factor / Product Type aspect
+    if (selectedTypes.length > 0) {
+      result = result.filter((p) => {
+        const pTypes = getProductFormFactorFacets(p);
+        return selectedTypes.some((t) => pTypes.includes(t));
+      });
+    }
+
     // Filter by min price
     if (minPrice) {
       const minVal = parseFloat(minPrice);
       if (!isNaN(minVal)) {
-        result = result.filter(p => p.salePrice >= minVal);
+        result = result.filter(p => resolveProductPricing(p).effectivePrice >= minVal);
       }
     }
 
@@ -290,20 +392,30 @@ export function Shop() {
     if (maxPrice) {
       const maxVal = parseFloat(maxPrice);
       if (!isNaN(maxVal)) {
-        result = result.filter(p => p.salePrice <= maxVal);
+        result = result.filter(p => resolveProductPricing(p).effectivePrice <= maxVal);
       }
     }
 
     // Sort products
     switch (sortOption) {
       case 'price-low':
-        result.sort((a, b) => a.salePrice - b.salePrice);
+        result.sort((a, b) => resolveProductPricing(a).effectivePrice - resolveProductPricing(b).effectivePrice);
         break;
       case 'price-high':
-        result.sort((a, b) => b.salePrice - a.salePrice);
+        result.sort((a, b) => resolveProductPricing(b).effectivePrice - resolveProductPricing(a).effectivePrice);
+        break;
+      case 'savings':
+        result.sort((a, b) => {
+          const savA = getProductListingBadges(a).savingsAmount;
+          const savB = getProductListingBadges(b).savingsAmount;
+          return savB - savA;
+        });
         break;
       case 'newest':
         result.sort((a, b) => {
+          const ggnA = String(a.gmcId || '').startsWith('GGN-CS-') ? 1 : 0;
+          const ggnB = String(b.gmcId || '').startsWith('GGN-CS-') ? 1 : 0;
+          if (ggnB !== ggnA) return ggnB - ggnA;
           const timeA = a.createdAt ? (a.createdAt as any).seconds || 0 : 0;
           const timeB = b.createdAt ? (b.createdAt as any).seconds || 0 : 0;
           return timeB - timeA;
@@ -326,12 +438,12 @@ export function Shop() {
         break;
     }
     return result;
-  }, [products, searchQuery, selectedCategory, selectedBrands, minPrice, maxPrice, sortOption]);
+  }, [categoryAndSearchProducts, listingTab, selectedBrands, selectedRooms, selectedTypes, minPrice, maxPrice, sortOption]);
 
   // Reset progressive batching count when filters change
   useEffect(() => {
     setVisibleCount(16);
-  }, [searchQuery, selectedCategory, selectedBrands, minPrice, maxPrice, sortOption]);
+  }, [searchQuery, selectedCategory, selectedBrands, selectedRooms, selectedTypes, listingTab, minPrice, maxPrice, sortOption]);
 
   // Progressive IntersectionObserver batch loader for smooth Core Web Vitals
   useEffect(() => {
@@ -359,7 +471,7 @@ export function Shop() {
   const parentCategories = categories.filter(c => {
     const isProductCategory = !c.parentId && c.isActive && (!(c as any).type || (c as any).type === 'product');
     if (!isProductCategory) return false;
-    const parentCount = categoryCounts[c.id!] || 0;
+    const parentCount = categoryCounts[c.id!] || categoryCounts[c.slug] || 0;
     const hasProducts = parentCount > 0 || categories.some(sub => sub.parentId === c.id && (categoryCounts[sub.id!] || 0) > 0);
     return hasProducts;
   });
@@ -370,18 +482,32 @@ export function Shop() {
     const subCount = categoryCounts[c.id!] || 0;
     return subCount > 0;
   });
-  const selectedCategoryName = categories.find(c => c.id === selectedCategory)?.name || null;
+  const selectedCategoryName =
+    categories.find(c => c.id === selectedCategory || c.slug === selectedCategory)?.name ||
+    FALLBACK_SHOP_CATEGORIES.find(c => c.slug === selectedCategory)?.name ||
+    null;
 
-  // Toggle brand in search parameters list
+  // Toggle helpers
   const handleBrandToggle = (brandName: string) => {
     const normalized = brandName.toLowerCase();
-    let nextBrands: string[];
-    if (selectedBrands.includes(normalized)) {
-      nextBrands = selectedBrands.filter(b => b !== normalized);
-    } else {
-      nextBrands = [...selectedBrands, normalized];
-    }
+    const nextBrands = selectedBrands.includes(normalized)
+      ? selectedBrands.filter(b => b !== normalized)
+      : [...selectedBrands, normalized];
     updateFilters({ brand: nextBrands });
+  };
+
+  const handleRoomToggle = (roomId: string) => {
+    const nextRooms = selectedRooms.includes(roomId)
+      ? selectedRooms.filter(r => r !== roomId)
+      : [...selectedRooms, roomId];
+    updateFilters({ room: nextRooms });
+  };
+
+  const handleTypeToggle = (typeId: string) => {
+    const nextTypes = selectedTypes.includes(typeId)
+      ? selectedTypes.filter(t => t !== typeId)
+      : [...selectedTypes, typeId];
+    updateFilters({ type: nextTypes });
   };
 
   const handlePriceFilterApply = (e: React.FormEvent) => {
@@ -392,9 +518,25 @@ export function Shop() {
     });
   };
 
-  const isAnyFilterActive = searchQuery || selectedCategory || selectedBrands.length > 0 || minPrice || maxPrice;
+  const isAnyFilterActive = Boolean(
+    searchQuery ||
+    selectedCategory ||
+    selectedBrands.length > 0 ||
+    selectedRooms.length > 0 ||
+    selectedTypes.length > 0 ||
+    listingTab !== 'all' ||
+    minPrice ||
+    maxPrice
+  );
   const shouldNoIndexFaceted = Boolean(
-    searchQuery || minPrice || maxPrice || (sortOption && sortOption !== 'featured') || selectedBrands.length > 1
+    searchQuery ||
+    minPrice ||
+    maxPrice ||
+    selectedRooms.length > 0 ||
+    selectedTypes.length > 0 ||
+    listingTab !== 'all' ||
+    (sortOption && sortOption !== 'featured') ||
+    selectedBrands.length > 1
   );
 
   const activeSingleBrandSlug = brandSlug
@@ -539,12 +681,479 @@ export function Shop() {
     ],
   };
 
+  const filteredBrandList = useMemo(() => {
+    if (!brandSearchTerm.trim()) return availableBrands;
+    const q = brandSearchTerm.toLowerCase();
+    return availableBrands.filter((b) => b.name.toLowerCase().includes(q));
+  }, [availableBrands, brandSearchTerm]);
+
+  const renderSidebarFacets = () => (
+    <div className="space-y-4">
+      {/* 1. Category / Department Hierarchy */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('category')}
+          className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-50/70 border-b border-gray-100 text-left cursor-pointer"
+        >
+          <span className="font-black text-[11px] uppercase tracking-wider text-[#1A2B4C]">
+            Category / Department
+          </span>
+          <ChevronDown
+            size={15}
+            className={`text-gray-400 transition-transform ${collapsedSections['category'] ? '-rotate-90' : ''}`}
+          />
+        </button>
+        {!collapsedSections['category'] && (
+          <div className="p-3 space-y-1">
+            <button
+              type="button"
+              onClick={() => updateFilters({ category: null })}
+              className={`w-full flex items-center justify-between py-1.5 px-2.5 rounded-lg text-left transition-all cursor-pointer ${
+                !selectedCategory
+                  ? 'bg-[#1A2B4C] text-white font-black text-xs'
+                  : 'text-[#1A2B4C] hover:bg-gray-100 font-semibold text-xs'
+              }`}
+            >
+              <span>All Categories</span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${!selectedCategory ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                {products.length}
+              </span>
+            </button>
+
+            {parentCategories.map((parent) => {
+              const subs = getSubcategories(parent.id!);
+              const isParentActive = selectedCategory === parent.id || selectedCategory === parent.slug;
+              const isSubActive = subs.some((sub) => sub.id === selectedCategory);
+              const isExpanded = expandedParents[parent.id!] === true || isParentActive || isSubActive;
+              const parentCount = categoryCounts[parent.id!] || categoryCounts[parent.slug] || 0;
+              const totalCategoryCount = parentCount + subs.reduce((acc, sub) => acc + (categoryCounts[sub.id!] || 0), 0);
+
+              return (
+                <div key={parent.id || parent.slug} className="space-y-0.5">
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => updateFilters({ category: isParentActive ? null : parent.id || parent.slug })}
+                      className={`flex-1 flex items-center justify-between py-1.5 px-2.5 rounded-lg text-left transition-all cursor-pointer ${
+                        isParentActive
+                          ? 'bg-[#00B4D8]/15 text-[#0088A8] font-black text-xs'
+                          : 'text-gray-700 hover:bg-gray-50 font-semibold text-xs'
+                      }`}
+                    >
+                      <span className="truncate pr-1">{parent.name}</span>
+                      <span className="text-[10px] font-bold text-gray-400 shrink-0">({totalCategoryCount})</span>
+                    </button>
+                    {subs.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedParents((prev) => ({
+                            ...prev,
+                            [parent.id!]: !isExpanded,
+                          }))
+                        }
+                        aria-label={`Expand ${parent.name}`}
+                        className="p-1 text-gray-400 hover:text-[#1A2B4C]"
+                      >
+                        <ChevronDown size={13} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                      </button>
+                    )}
+                  </div>
+                  {subs.length > 0 && isExpanded && (
+                    <div className="pl-3 ml-2 border-l border-gray-200 space-y-0.5">
+                      {subs.map((sub) => {
+                        const isChildActive = selectedCategory === sub.id;
+                        return (
+                          <button
+                            key={sub.id}
+                            type="button"
+                            onClick={() => updateFilters({ category: isChildActive ? null : sub.id! })}
+                            className={`w-full flex items-center justify-between py-1 px-2 rounded-md text-left text-xs cursor-pointer ${
+                              isChildActive ? 'text-[#00B4D8] font-black' : 'text-gray-500 hover:text-[#1A2B4C] font-medium'
+                            }`}
+                          >
+                            <span className="truncate">{sub.name}</span>
+                            <span className="text-[10px] text-gray-400">({categoryCounts[sub.id!] || 0})</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 2. Brand / OEM Manufacturer (Searchable Checkboxes like eBay) */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('brand')}
+          className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-50/70 border-b border-gray-100 text-left cursor-pointer"
+        >
+          <span className="font-black text-[11px] uppercase tracking-wider text-[#1A2B4C]">
+            Brand / Manufacturer
+          </span>
+          <ChevronDown
+            size={15}
+            className={`text-gray-400 transition-transform ${collapsedSections['brand'] ? '-rotate-90' : ''}`}
+          />
+        </button>
+        {!collapsedSections['brand'] && (
+          <div className="p-3 space-y-2.5">
+            {availableBrands.length > 5 && (
+              <div className="relative">
+                <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={brandSearchTerm}
+                  onChange={(e) => setBrandSearchTerm(e.target.value)}
+                  placeholder="Find a brand..."
+                  aria-label="Filter brands"
+                  className="w-full pl-7 pr-6 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8]"
+                />
+                {brandSearchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setBrandSearchTerm('')}
+                    aria-label="Clear brand search"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            )}
+            <div className="max-h-56 overflow-y-auto pr-1 space-y-1">
+              {filteredBrandList.map((brand) => {
+                const isChecked = selectedBrands.includes(brand.normalized);
+                return (
+                  <button
+                    key={brand.normalized}
+                    type="button"
+                    onClick={() => handleBrandToggle(brand.name)}
+                    className="w-full flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-gray-50 group cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2.5 min-w-0">
+                      <span
+                        className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                          isChecked
+                            ? 'bg-[#1A2B4C] border-[#1A2B4C] text-white'
+                            : 'border-gray-300 bg-white group-hover:border-[#00B4D8]'
+                        }`}
+                      >
+                        {isChecked && <Check size={11} strokeWidth={3} />}
+                      </span>
+                      <span className={`text-xs truncate ${isChecked ? 'font-black text-[#1A2B4C]' : 'font-semibold text-gray-700'}`}>
+                        {brand.name}
+                      </span>
+                    </span>
+                    <span className="text-[11px] font-semibold text-gray-400 shrink-0">({brand.count})</span>
+                  </button>
+                );
+              })}
+              {filteredBrandList.length === 0 && (
+                <p className="text-xs text-gray-400 py-2 text-center">No matching brand</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 3. Room Size & Deployment Environment (eBay Aspect Filter) */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('room')}
+          className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-50/70 border-b border-gray-100 text-left cursor-pointer"
+        >
+          <span className="font-black text-[11px] uppercase tracking-wider text-[#1A2B4C]">
+            Room Size &amp; Environment
+          </span>
+          <ChevronDown
+            size={15}
+            className={`text-gray-400 transition-transform ${collapsedSections['room'] ? '-rotate-90' : ''}`}
+          />
+        </button>
+        {!collapsedSections['room'] && (
+          <div className="p-3 space-y-1">
+            {EBAY_ROOM_SIZE_FACETS.map((facet) => {
+              const count = roomFacetCounts[facet.id] || 0;
+              const isChecked = selectedRooms.includes(facet.id);
+              return (
+                <button
+                  key={facet.id}
+                  type="button"
+                  onClick={() => handleRoomToggle(facet.id)}
+                  className="w-full flex items-center justify-between py-1.5 px-1.5 rounded-lg hover:bg-gray-50 group text-left cursor-pointer"
+                >
+                  <span className="flex items-center gap-2.5 min-w-0">
+                    <span
+                      className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                        isChecked
+                          ? 'bg-[#1A2B4C] border-[#1A2B4C] text-white'
+                          : 'border-gray-300 bg-white group-hover:border-[#00B4D8]'
+                      }`}
+                    >
+                      {isChecked && <Check size={11} strokeWidth={3} />}
+                    </span>
+                    <span className={`text-xs leading-snug ${isChecked ? 'font-black text-[#1A2B4C]' : 'font-semibold text-gray-700'}`}>
+                      {facet.shortLabel || facet.label}
+                    </span>
+                  </span>
+                  <span className="text-[11px] font-semibold text-gray-400 shrink-0">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 4. Product Type / Hardware Form Factor (eBay Aspect Filter) */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('type')}
+          className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-50/70 border-b border-gray-100 text-left cursor-pointer"
+        >
+          <span className="font-black text-[11px] uppercase tracking-wider text-[#1A2B4C]">
+            Product Type / Form Factor
+          </span>
+          <ChevronDown
+            size={15}
+            className={`text-gray-400 transition-transform ${collapsedSections['type'] ? '-rotate-90' : ''}`}
+          />
+        </button>
+        {!collapsedSections['type'] && (
+          <div className="p-3 space-y-1">
+            {EBAY_FORM_FACTOR_FACETS.map((facet) => {
+              const count = formFactorCounts[facet.id] || 0;
+              const isChecked = selectedTypes.includes(facet.id);
+              return (
+                <button
+                  key={facet.id}
+                  type="button"
+                  onClick={() => handleTypeToggle(facet.id)}
+                  className="w-full flex items-center justify-between py-1.5 px-1.5 rounded-lg hover:bg-gray-50 group text-left cursor-pointer"
+                >
+                  <span className="flex items-center gap-2.5 min-w-0">
+                    <span
+                      className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                        isChecked
+                          ? 'bg-[#1A2B4C] border-[#1A2B4C] text-white'
+                          : 'border-gray-300 bg-white group-hover:border-[#00B4D8]'
+                      }`}
+                    >
+                      {isChecked && <Check size={11} strokeWidth={3} />}
+                    </span>
+                    <span className={`text-xs leading-snug ${isChecked ? 'font-black text-[#1A2B4C]' : 'font-semibold text-gray-700'}`}>
+                      {facet.shortLabel || facet.label}
+                    </span>
+                  </span>
+                  <span className="text-[11px] font-semibold text-gray-400 shrink-0">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 5. Price Range & eBay Quick Price Tiers */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('price')}
+          className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-50/70 border-b border-gray-100 text-left cursor-pointer"
+        >
+          <span className="font-black text-[11px] uppercase tracking-wider text-[#1A2B4C]">
+            Price Range (PKR)
+          </span>
+          <ChevronDown
+            size={15}
+            className={`text-gray-400 transition-transform ${collapsedSections['price'] ? '-rotate-90' : ''}`}
+          />
+        </button>
+        {!collapsedSections['price'] && (
+          <div className="p-3 space-y-3">
+            <div className="space-y-1">
+              {EBAY_PRICE_TIERS.map((tier) => {
+                const isSelected = minPrice === tier.min && maxPrice === tier.max;
+                return (
+                  <button
+                    key={tier.id}
+                    type="button"
+                    onClick={() => {
+                      setLocalMinPrice(tier.min);
+                      setLocalMaxPrice(tier.max);
+                      updateFilters({ min_price: tier.min, max_price: tier.max });
+                    }}
+                    className="w-full flex items-center gap-2.5 py-1 px-1.5 rounded-lg hover:bg-gray-50 text-left cursor-pointer"
+                  >
+                    <span
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                        isSelected ? 'border-[#1A2B4C]' : 'border-gray-300'
+                      }`}
+                    >
+                      {isSelected && <span className="w-2 h-2 rounded-full bg-[#1A2B4C]" />}
+                    </span>
+                    <span className={`text-xs ${isSelected ? 'font-black text-[#1A2B4C]' : 'font-semibold text-gray-700'}`}>
+                      {tier.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <form onSubmit={handlePriceFilterApply} className="pt-2 border-t border-gray-100 flex items-center gap-1.5">
+              <input
+                type="number"
+                placeholder="Min"
+                aria-label="Minimum price in PKR"
+                value={localMinPrice}
+                onChange={(e) => setLocalMinPrice(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8]"
+              />
+              <span className="text-xs text-gray-400 font-bold">to</span>
+              <input
+                type="number"
+                placeholder="Max"
+                aria-label="Maximum price in PKR"
+                value={localMaxPrice}
+                onChange={(e) => setLocalMaxPrice(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-[#1A2B4C] focus:outline-none focus:border-[#00B4D8]"
+              />
+              <button
+                type="submit"
+                aria-label="Apply price range"
+                className="px-3 py-1.5 bg-[#1A2B4C] hover:bg-[#00B4D8] text-white rounded-lg text-xs font-black transition-colors shrink-0 cursor-pointer"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+
+      {/* 6. Buying Format, Condition & Shipping Options */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('condition')}
+          className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-50/70 border-b border-gray-100 text-left cursor-pointer"
+        >
+          <span className="font-black text-[11px] uppercase tracking-wider text-[#1A2B4C]">
+            Condition &amp; Delivery
+          </span>
+          <ChevronDown
+            size={15}
+            className={`text-gray-400 transition-transform ${collapsedSections['condition'] ? '-rotate-90' : ''}`}
+          />
+        </button>
+        {!collapsedSections['condition'] && (
+          <div className="p-3 space-y-1.5">
+            <button
+              type="button"
+              onClick={() => updateFilters({ tab: listingTab === 'sale' ? 'all' : 'sale' })}
+              className="w-full flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-gray-50 text-left cursor-pointer"
+            >
+              <span className="flex items-center gap-2.5">
+                <span
+                  className={`w-4 h-4 rounded border flex items-center justify-center ${
+                    listingTab === 'sale' ? 'bg-[#1A2B4C] border-[#1A2B4C] text-white' : 'border-gray-300 bg-white'
+                  }`}
+                >
+                  {listingTab === 'sale' && <Check size={11} strokeWidth={3} />}
+                </span>
+                <span className="text-xs font-semibold text-gray-700">Special Offers &amp; Deals</span>
+              </span>
+              <span className="text-[11px] font-semibold text-gray-400">({tabCounts.sale})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => updateFilters({ tab: listingTab === 'bundles' ? 'all' : 'bundles' })}
+              className="w-full flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-gray-50 text-left cursor-pointer"
+            >
+              <span className="flex items-center gap-2.5">
+                <span
+                  className={`w-4 h-4 rounded border flex items-center justify-center ${
+                    listingTab === 'bundles' ? 'bg-[#1A2B4C] border-[#1A2B4C] text-white' : 'border-gray-300 bg-white'
+                  }`}
+                >
+                  {listingTab === 'bundles' && <Check size={11} strokeWidth={3} />}
+                </span>
+                <span className="text-xs font-semibold text-gray-700">Complete Room Bundles</span>
+              </span>
+              <span className="text-[11px] font-semibold text-gray-400">({tabCounts.bundles})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => updateFilters({ tab: listingTab === 'free-shipping' ? 'all' : 'free-shipping' })}
+              className="w-full flex items-center justify-between py-1 px-1.5 rounded-lg hover:bg-gray-50 text-left cursor-pointer"
+            >
+              <span className="flex items-center gap-2.5">
+                <span
+                  className={`w-4 h-4 rounded border flex items-center justify-center ${
+                    listingTab === 'free-shipping' ? 'bg-[#1A2B4C] border-[#1A2B4C] text-white' : 'border-gray-300 bg-white'
+                  }`}
+                >
+                  {listingTab === 'free-shipping' && <Check size={11} strokeWidth={3} />}
+                </span>
+                <span className="text-xs font-semibold text-gray-700">Free Nationwide Shipping</span>
+              </span>
+              <span className="text-[11px] font-semibold text-gray-400">({tabCounts.freeShipping})</span>
+            </button>
+
+            <div className="flex items-center justify-between py-1 px-1.5 text-left opacity-90">
+              <span className="flex items-center gap-2.5">
+                <span className="w-4 h-4 rounded border bg-emerald-600 border-emerald-600 text-white flex items-center justify-center">
+                  <Check size={11} strokeWidth={3} />
+                </span>
+                <span className="text-xs font-semibold text-gray-700">New (Factory Sealed OEM)</span>
+              </span>
+              <span className="text-[11px] font-semibold text-gray-400">({categoryAndSearchProducts.length})</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* B2B Quote Assistance Box */}
+      <div className="bg-[#1A2B4C] p-5 rounded-2xl text-white shadow-md">
+        <span className="text-[9px] font-black uppercase tracking-widest text-[#00B4D8] block mb-1">
+          Enterprise BOQ &amp; Tenders
+        </span>
+        <h4 className="text-xs font-black uppercase tracking-wider mb-1.5">Need Volume Project Pricing?</h4>
+        <p className="text-[11px] text-gray-300 leading-relaxed mb-3.5">
+          Request an FBR GST tax invoice, PPRA tender authorization letter, or 3D acoustic room design.
+        </p>
+        <div className="flex flex-col gap-2">
+          <Link
+            to="/programs/quote"
+            className="bg-[#00B4D8] hover:bg-white hover:text-[#1A2B4C] text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all text-center"
+          >
+            Request Custom BOQ
+          </Link>
+          <Link
+            to="/room-designer"
+            className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all text-center"
+          >
+            3D Room Designer
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="bg-[#F8F9FA] min-h-screen py-3 lg:py-6 text-[#1A2B4C]">
       <SEO 
         title={shopSeoTitle}
         description={shopSeoDescription}
-        keywords="Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Event management, Corporate event management, hybrid event, Hologram Display, events, AV hardware shop Pakistan"
+        keywords="Video Conference in Pakistan, Video conference, Polycom Group 500, Poly X70, Cisco Codec Pro, Cisco Room Bar, Event management, Corporate event management, hybrid event, AV hardware shop Pakistan"
         url={canonicalShopUrl}
         image="https://avlive.com.pk/og-image.jpg"
         imageAlt="AV Live Communications - Professional AV Equipment Catalog"
@@ -563,97 +1172,58 @@ export function Shop() {
         />
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-2.5 lg:gap-4 mb-3 lg:mb-5 pb-2.5 lg:pb-4 border-b border-gray-200">
-          <div>
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tight leading-snug">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-3 mb-4 pb-3 border-b border-gray-200">
+          <div className="min-w-0 flex-1">
+            <h1 className="w-full max-w-4xl text-xl sm:text-2xl lg:text-3xl leading-tight font-black tracking-tight text-[#1A2B4C]">
               {activeSingleBrandName
                 ? `${activeSingleBrandName} Video Conferencing & AV Hardware in Pakistan`
-                : 'Professional Audio Visual & Video Conferencing Hardware in Pakistan'}
+                : selectedCategoryName
+                  ? `${selectedCategoryName} — Official Pakistan Store`
+                  : 'Professional Audio Visual & Video Conferencing Hardware in Pakistan'}
             </h1>
-            <p className="text-gray-400 mt-0.5 font-black uppercase tracking-widest text-[9px]">
-              Official Polycom Group 500, Poly X70, Zoom Rooms & Corporate Event Equipment
+            <p className="text-gray-600 mt-1 font-bold uppercase tracking-wider text-xs">
+              Authorized Cisco Webex, HP Poly (Polycom), Logitech, Yealink &amp; Commercial Pro-AV Catalog • GS1 GTIN Verified
             </p>
           </div>
-          
-          <div className="flex flex-wrap items-center gap-2 lg:gap-3">
-            {/* Inline Search (Desktop/Tablet) */}
-            <div className="hidden lg:block relative shrink-0">
-              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400" size={15} />
-              <input 
-                type="text" 
-                placeholder="Search catalog..." 
+
+          {/* eBay-Style Search Bar in Header */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              updateFilters({ q: localSearch });
+            }}
+            className="flex items-center gap-2 w-full lg:w-auto"
+          >
+            <div className="relative flex-1 lg:w-80">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+              <input
+                type="text"
+                placeholder="Search by model, MPN (e.g. CS-CODEC-PRO-K9), or GTIN..."
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    updateFilters({ q: localSearch });
-                  }
-                }}
-                className="pl-10 pr-8 h-9 bg-white border border-gray-200 rounded-xl shadow-xs focus:outline-none focus:ring-2 focus:ring-[#00B4D8] focus:border-[#00B4D8] transition-all font-bold text-xs w-56 text-[#1A2B4C]"
+                className="w-full pl-9 pr-8 h-10 bg-white border border-gray-300 rounded-xl shadow-xs focus:outline-none focus:ring-2 focus:ring-[#00B4D8] focus:border-[#00B4D8] font-semibold text-xs text-[#1A2B4C]"
               />
               {localSearch && (
-                <button 
+                <button
+                  type="button"
                   onClick={() => {
                     setLocalSearch('');
                     updateFilters({ q: '' });
                   }}
-                  className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="Clear search query"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   <X size={14} />
                 </button>
               )}
             </div>
-
-            {/* Sorting */}
-            <div className="relative flex-1 sm:flex-initial">
-              <select 
-                value={sortOption}
-                onChange={(e) => updateFilters({ sort: e.target.value })}
-                aria-label="Sort products"
-                className="w-full sm:w-auto h-9 min-h-[36px] appearance-none bg-white border border-gray-200 pl-3 lg:pl-4 pr-8 lg:pr-9 py-1.5 rounded-xl shadow-xs focus:outline-none focus:ring-2 focus:ring-[#00B4D8] font-black text-[10px] uppercase tracking-wider cursor-pointer text-[#1A2B4C]"
-              >
-                <option value="featured">Featured Sequence</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="newest">Newest Arrivals</option>
-                <option value="popularity">Popularity</option>
-                <option value="name-asc">Lexical: A-Z</option>
-                <option value="name-desc">Lexical: Z-A</option>
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
-            </div>
-
-            {/* Grid/List View Toggler */}
-            <div className="hidden sm:flex border border-gray-200 bg-white rounded-xl overflow-hidden shadow-xs p-0.5 h-9 items-center">
-              <button 
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-all h-full aspect-square flex items-center justify-center ${viewMode === 'grid' ? 'bg-[#1A2B4C] text-white shadow-xs' : 'text-gray-400 hover:text-[#1A2B4C]'}`}
-                title="Grid Layout"
-              >
-                <Grid size={14} />
-              </button>
-              <button 
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg transition-all h-full aspect-square flex items-center justify-center ${viewMode === 'list' ? 'bg-[#1A2B4C] text-white shadow-xs' : 'text-gray-400 hover:text-[#1A2B4C]'}`}
-                title="List Layout"
-              >
-                <List size={14} />
-              </button>
-            </div>
-
-            {/* Filter Toggle Desktop/Mobile */}
             <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className={`h-9 min-h-[36px] flex items-center gap-1.5 px-3.5 rounded-xl font-black text-[10px] uppercase tracking-wider shadow-xs transition-all border ${
-                isSidebarOpen 
-                  ? 'bg-[#1A2B4C] text-white border-[#1A2B4C]' 
-                  : 'bg-white text-gray-500 border-gray-200 hover:text-[#1A2B4C]'
-              }`}
+              type="submit"
+              className="h-10 px-4 bg-[#1A2B4C] hover:bg-[#00B4D8] text-white rounded-xl font-black text-xs uppercase tracking-wider transition-colors shrink-0 cursor-pointer"
             >
-              <Filter size={14} className={isSidebarOpen ? "text-[#00B4D8]" : ""} /> 
-              Filters
+              Search
             </button>
-          </div>
+          </form>
         </div>
 
         {/* Authorized Brand Hub Executive Engineering Summary (SSR-to-CSR Parity on /brands/:brandSlug) */}
@@ -673,725 +1243,734 @@ export function Shop() {
           </div>
         )}
 
-        {/* Mobile Brand Pills & Compact Flagship Highlight (< 1024px) */}
-        <div className="lg:hidden mb-3.5 space-y-2.5">
-          {/* Brand Pill Scroller */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
-            {[
-              { label: 'All Brands', slug: '' },
-              { label: 'HP Poly', slug: 'poly' },
-              { label: 'Cisco', slug: 'cisco' },
-              { label: 'Logitech', slug: 'logitech' },
-              { label: 'Yealink', slug: 'yealink' },
-              { label: 'Grandstream', slug: 'grandstream' },
-              { label: 'Bosch', slug: 'bosch' },
-              { label: 'Horion', slug: 'horion' },
-            ].map((b) => {
-              const isBrandSelected = b.slug === ''
-                ? selectedBrands.length === 0
-                : selectedBrands.includes(b.slug);
-              return (
-                <button
-                  key={b.label}
-                  type="button"
-                  onClick={() => {
-                    if (b.slug === '') {
-                      updateFilters({ brand: [] });
-                    } else {
-                      updateFilters({ brand: isBrandSelected ? [] : [b.slug] });
-                    }
-                  }}
-                  className={`shrink-0 px-3 py-1.5 min-h-[32px] rounded-full text-[11px] font-bold transition-all border cursor-pointer ${
-                    isBrandSelected
-                      ? 'bg-[#1A2B4C] text-white border-[#1A2B4C] shadow-xs'
-                      : 'bg-white text-gray-500 border-gray-200 hover:text-[#1A2B4C]'
-                  }`}
+        {/* Featured Poly Studio X50 4K + TC8 Special Offer Banner Associated with Brochure Popup */}
+        {(!activeSingleBrandSlug || activeSingleBrandSlug.includes('poly')) && (
+          <div className="mb-4 rounded-2xl overflow-hidden border border-[#141816]/15 shadow-sm grid grid-cols-1 lg:grid-cols-[1.35fr_0.65fr] bg-[#c7f5c7] text-[#141816]">
+            <div className="p-4 sm:p-5 flex flex-col justify-center">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-wider mb-1.5">
+                <span className="bg-[#141816] text-[#c7f5c7] px-2 py-0.5 rounded">SPECIAL OFFER • SAVE 53%</span>
+                <span className="bg-emerald-800 text-white px-2 py-0.5 rounded inline-flex items-center gap-1">
+                  <Truck size={11} /> FREE DELIVERY IN PAKISTAN
+                </span>
+                <span className="text-[#2d3831] font-extrabold">MPN: 2215-86399-001</span>
+              </div>
+              <div className="flex flex-wrap items-baseline gap-3 mb-1.5">
+                <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-[#141816]">
+                  Poly Studio X50 4K + TC8 Touch Controller Bundle
+                </h2>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xl sm:text-2xl font-black text-[#141816]">PKR 399,000</span>
+                  <span className="text-xs font-bold text-[#d9383a] line-through">PKR 850,000</span>
+                </div>
+              </div>
+              <p className="text-xs text-[#2d3831] font-medium mb-3 max-w-2xl">
+                Complete medium-to-large conference room 4K UltraHD video bar with Poly DirectorAI auto-framing, stereo speakers, 8&quot; PoE TC8 touch panel, and free insured delivery across Pakistan.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  to="/product/poly-studio-x50-tc8-special-offer-pakistan"
+                  className="bg-[#141816] hover:bg-[#28302c] text-white px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
                 >
-                  {b.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Compact Horizontal Flagship Highlight Card */}
-          {sortedAndFilteredProducts[0] && (() => {
-            const heroProd = sortedAndFilteredProducts[0];
-            const heroSlug = getCanonicalProductSlug(heroProd);
-            const heroHref = getProductHref(heroProd, heroProd.id);
-            const { effectivePrice: heroPrice } = resolveProductPricing(heroProd);
-            const rawImgs = Array.isArray(heroProd.images) ? heroProd.images : (typeof heroProd.images === 'string' ? [heroProd.images] : (heroProd.image ? [heroProd.image] : []));
-            const heroImg = optimizeGalleryImageUrl(rawImgs[0] || '/images/products/poly-x70-studio.webp', 360, 75);
-            const heroSeo = buildProductImageSeo(heroProd, rawImgs[0], 0);
-            return (
-              <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-xs flex items-center gap-3">
-                <Link to={heroHref} className="w-20 h-20 rounded-xl bg-[#F8F9FA] p-2 flex items-center justify-center shrink-0 overflow-hidden">
-                  <BlurProductImage
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    width={160}
-                    height={160}
-                    src={heroImg}
-                    seed={heroSlug}
-                    title={heroSeo.title}
-                    alt={heroSeo.alt}
-                    className="relative z-10 w-full h-full object-contain mix-blend-multiply"
-                  />
+                  Buy Now / View Deal <ArrowRight size={13} />
                 </Link>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-[9px] font-black uppercase tracking-wider text-white bg-[#1A2B4C] px-2 py-0.5 rounded-full">
-                      Top Pick
-                    </span>
-                    <span className="text-[9px] font-black uppercase tracking-wider text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full truncate">
-                      {heroProd.brand || 'Official PK'}
-                    </span>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-poly-x50-offer'))}
+                  className="bg-white hover:bg-gray-50 text-[#141816] border border-[#141816]/25 px-3.5 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider cursor-pointer transition-colors"
+                >
+                  Open Interactive Deal Brochure
+                </button>
+              </div>
+            </div>
+            <div className="bg-white p-3 sm:p-4 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-gray-200">
+              <Link
+                to="/product/poly-studio-x50-tc8-special-offer-pakistan"
+                className="flex items-center gap-3 group"
+              >
+                <img
+                  src="https://firebasestorage.googleapis.com/v0/b/studio-5367437135-24ac6.firebasestorage.app/o/Products%2Fpoly-studio-x50-png-3cq9.webp?alt=media&token=bc3614ec-64f7-405b-95df-7a793acd7563"
+                  alt="Poly Studio X50 4K Video Bar + TC8 Controller Deal Pakistan"
+                  title="Poly Studio X50 4K + TC8 Special Offer — PKR 399,000"
+                  width={180}
+                  height={144}
+                  className="w-28 sm:w-36 h-auto object-contain group-hover:scale-105 transition-transform"
+                />
+                <div className="text-left">
+                  <span className="block text-[10px] font-black uppercase tracking-wider text-emerald-700">In Stock • Ready to Ship</span>
+                  <span className="block text-xs font-black text-[#141816] group-hover:text-[#00B4D8] transition-colors">Dual 4K Display Support</span>
+                  <span className="block text-[10px] font-semibold text-gray-500">1-Year Official Warranty</span>
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Department Pill Strip */}
+        <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-1.5 no-scrollbar">
+          <button
+            type="button"
+            onClick={() => updateFilters({ category: null })}
+            className={`shrink-0 px-3.5 py-2 min-h-[36px] rounded-full text-xs font-black uppercase tracking-wider transition-all border cursor-pointer ${
+              !selectedCategory
+                ? 'bg-[#1A2B4C] text-white border-[#1A2B4C] shadow-xs'
+                : 'bg-white text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
+            }`}
+          >
+            All Hardware ({products.length})
+          </button>
+          {FALLBACK_SHOP_CATEGORIES.map((cat) => {
+            const matchedCat = categories.find(c => c.slug === cat.slug || c.id === cat.id) || cat;
+            const catId = matchedCat.id || cat.slug;
+            const count = categoryCounts[catId] || categoryCounts[cat.slug] || 0;
+            const isActive = selectedCategory === catId || selectedCategory === cat.slug;
+            return (
+              <button
+                key={cat.slug}
+                type="button"
+                onClick={() => updateFilters({ category: isActive ? null : catId })}
+                className={`shrink-0 px-3.5 py-2 min-h-[36px] rounded-full text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? 'bg-[#00B4D8] text-white border-[#00B4D8] shadow-xs'
+                    : 'bg-white text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
+                }`}
+              >
+                <span>{cat.name}</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile Slide-Over Filter Drawer (< 1024px) */}
+        {isMobileFilterOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex">
+            <div
+              className="fixed inset-0 bg-black/50 backdrop-blur-xs"
+              onClick={() => setIsMobileFilterOpen(false)}
+            />
+            <div className="relative z-10 w-80 max-w-[88vw] bg-[#F8F9FA] h-full overflow-y-auto p-4 shadow-2xl flex flex-col">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-200">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal size={16} className="text-[#00B4D8]" />
+                  <span className="font-black text-sm text-[#1A2B4C] uppercase tracking-wider">Filter &amp; Sort</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileFilterOpen(false)}
+                  aria-label="Close filters"
+                  className="p-1.5 rounded-lg bg-white border border-gray-200 text-gray-600"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto">{renderSidebarFacets()}</div>
+              <div className="pt-3 mt-3 border-t border-gray-200 flex gap-2 bg-[#F8F9FA]">
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-300 bg-white text-xs font-black text-gray-700"
+                >
+                  Reset
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileFilterOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-[#1A2B4C] text-white text-xs font-black"
+                >
+                  Show {sortedAndFilteredProducts.length} Results
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main eBay-Style 2-Column Layout: Persistent Left Aspect Sidebar + Right Results Area */}
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+          {/* Desktop Persistent Left Aspect Filter Sidebar */}
+          <aside className="hidden lg:block lg:w-64 shrink-0 sticky top-20">
+            <div className="flex items-center justify-between mb-2.5 px-1">
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#1A2B4C] flex items-center gap-1.5">
+                <SlidersHorizontal size={13} className="text-[#00B4D8]" /> Refine Results
+              </span>
+              {isAnyFilterActive && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="text-[11px] font-bold text-[#00B4D8] hover:underline cursor-pointer"
+                >
+                  Reset all
+                </button>
+              )}
+            </div>
+            {renderSidebarFacets()}
+          </aside>
+
+          {/* Right Column: eBay Top Control Bar + Active Aspect Pills + Product Grid/List */}
+          <div className="flex-1 min-w-0 w-full">
+            {/* eBay-Style Top Control Bar (Buying Format Tabs + Result Counter + Sort + View Mode) */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-3 sm:p-4 mb-4 shadow-xs space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-100">
+                {/* eBay Buying Format / Availability Tabs */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                  {[
+                    { id: 'all', label: 'All Listings', count: tabCounts.all },
+                    { id: 'sale', label: 'Special Offers', count: tabCounts.sale },
+                    { id: 'bundles', label: 'Room Kits & Bundles', count: tabCounts.bundles },
+                    { id: 'free-shipping', label: 'Free Shipping', count: tabCounts.freeShipping },
+                  ].map((tab) => {
+                    const isTabActive = listingTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => updateFilters({ tab: tab.id })}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer border ${
+                          isTabActive
+                            ? 'bg-[#1A2B4C] text-white border-[#1A2B4C]'
+                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-[#1A2B4C]'
+                        }`}
+                      >
+                        {tab.label} <span className="text-[10px] opacity-80">({tab.count})</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Sort & View Controls */}
+                <div className="flex items-center gap-2 ml-auto">
+                  {/* Mobile Filter Drawer Trigger */}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileFilterOpen(true)}
+                    className="lg:hidden h-9 px-3 rounded-xl bg-[#1A2B4C] text-white font-black text-[11px] flex items-center gap-1.5"
+                  >
+                    <Filter size={13} /> Filters
+                  </button>
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="hidden sm:inline text-[11px] font-bold text-gray-500">Sort:</span>
+                    <div className="relative">
+                      <select
+                        value={sortOption}
+                        onChange={(e) => updateFilters({ sort: e.target.value })}
+                        aria-label="Sort products"
+                        className="h-9 appearance-none bg-gray-50 border border-gray-200 pl-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00B4D8] font-bold text-xs cursor-pointer text-[#1A2B4C]"
+                      >
+                        <option value="featured">Best Match (Featured)</option>
+                        <option value="price-low">Price: Lowest First</option>
+                        <option value="price-high">Price: Highest First</option>
+                        <option value="savings">Biggest Savings (PKR Off)</option>
+                        <option value="newest">Newly Listed (Cisco &amp; Poly)</option>
+                        <option value="name-asc">Model Name: A–Z</option>
+                        <option value="name-desc">Model Name: Z–A</option>
+                      </select>
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                    </div>
                   </div>
-                  <Link to={heroHref} className="text-xs font-black text-[#1A2B4C] line-clamp-1">
-                    {heroProd.productName}
-                  </Link>
-                  <div className="flex items-center justify-between mt-1.5">
-                    <span className="text-xs font-black text-[#1A2B4C]">
-                      Rs. {heroPrice.toLocaleString()}
-                    </span>
+
+                  {/* Grid / List View Toggler */}
+                  <div className="flex border border-gray-200 bg-gray-50 rounded-xl overflow-hidden p-0.5 h-9 items-center">
                     <button
                       type="button"
-                      onClick={() =>
-                        addToCart({
-                          id: heroProd.id || heroSlug,
-                          name: heroProd.productName,
-                          price: heroPrice,
-                          image: heroImg,
-                          brand: heroProd.brand,
-                        } as any)
-                      }
-                      className="px-3 py-1 min-h-[28px] rounded-full bg-[#1A2B4C] text-white font-bold text-[10px] inline-flex items-center gap-1 shadow-xs cursor-pointer"
+                      onClick={() => setViewMode('grid')}
+                      aria-label="Grid view"
+                      className={`p-1.5 rounded-lg transition-all h-full aspect-square flex items-center justify-center cursor-pointer ${
+                        viewMode === 'grid' ? 'bg-[#1A2B4C] text-white shadow-xs' : 'text-gray-500 hover:text-[#1A2B4C]'
+                      }`}
+                      title="Gallery Grid View"
                     >
-                      <span>+ Add</span>
+                      <Grid size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('list')}
+                      aria-label="List view"
+                      className={`p-1.5 rounded-lg transition-all h-full aspect-square flex items-center justify-center cursor-pointer ${
+                        viewMode === 'list' ? 'bg-[#1A2B4C] text-white shadow-xs' : 'text-gray-500 hover:text-[#1A2B4C]'
+                      }`}
+                      title="eBay Detailed List View"
+                    >
+                      <List size={14} />
                     </button>
                   </div>
                 </div>
               </div>
-            );
-          })()}
-        </div>
 
-        {/* Instant 1-Click Category & Price-Tier Filter Chips Bar */}
-        <div className="mb-4 lg:mb-6 space-y-2">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            <button
-              type="button"
-              onClick={() => updateFilters({ category: null })}
-              className={`shrink-0 px-3 py-1.5 min-h-[32px] rounded-full text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer ${
-                !selectedCategory
-                  ? 'bg-[#1A2B4C] text-white border-[#1A2B4C] shadow-xs'
-                  : 'bg-white text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
-              }`}
-            >
-              All Hardware ({products.length})
-            </button>
-            {FALLBACK_SHOP_CATEGORIES.map((cat) => {
-              const matchedCat = categories.find(c => c.slug === cat.slug || c.id === cat.id) || cat;
-              const catId = matchedCat.id || cat.slug;
-              const count = categoryCounts[catId] || categoryCounts[cat.slug] || 0;
-              const isActive = selectedCategory === catId || selectedCategory === cat.slug;
-              return (
-                <button
-                  key={cat.slug}
-                  type="button"
-                  onClick={() => updateFilters({ category: isActive ? null : catId })}
-                  className={`shrink-0 px-3 py-1.5 min-h-[32px] rounded-full text-[10px] font-black uppercase tracking-wider transition-all border flex items-center gap-1.5 cursor-pointer ${
-                    isActive
-                      ? 'bg-[#00B4D8] text-white border-[#00B4D8] shadow-xs'
-                      : 'bg-white text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
-                  }`}
-                >
-                  <span>{cat.name}</span>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Instant PKR Budget / Price-Tier Chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-1">Quick Budget Filter:</span>
-            {[
-              { label: 'All Budgets', min: '', max: '' },
-              { label: 'Under Rs. 100k (Phones & Headsets)', min: '', max: '100000' },
-              { label: 'Rs. 100k – 500k (Huddle & PTZ)', min: '100000', max: '500000' },
-              { label: 'Rs. 500k – 1.5M (Video Bars & PBX)', min: '500000', max: '1500000' },
-              { label: 'Rs. 1.5M+ (Boardroom & Codecs)', min: '1500000', max: '' },
-            ].map((tier) => {
-              const isTierActive = minPrice === tier.min && maxPrice === tier.max;
-              return (
-                <button
-                  key={tier.label}
-                  type="button"
-                  onClick={() => {
-                    setLocalMinPrice(tier.min);
-                    setLocalMaxPrice(tier.max);
-                    updateFilters({ min_price: tier.min, max_price: tier.max });
-                  }}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer ${
-                    isTierActive
-                      ? 'bg-[#1A2B4C]/10 text-[#1A2B4C] border-[#1A2B4C]'
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-[#00B4D8] hover:text-[#00B4D8]'
-                  }`}
-                >
-                  {tier.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Active Filter Chips / Indicators Row */}
-        {isAnyFilterActive && (
-          <div className="flex flex-wrap items-center gap-3 mb-8 animate-in fade-in slide-in-from-top-1 duration-250">
-            <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5 mr-2">
-              <SlidersHorizontal size={12} /> Active Criteria:
-            </span>
-            
-            {/* Search Query Chip */}
-            {searchQuery && (
-              <span className="bg-white border border-[#00B4D8]/20 text-[#1A2B4C] pl-3 pr-2 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                Search: "{searchQuery}"
-                <button onClick={() => updateFilters({ q: '' })} className="text-[#00B4D8] hover:text-red-500 rounded-full p-0.5 hover:bg-gray-50">
-                  <X size={12} />
-                </button>
-              </span>
-            )}
-
-            {/* Category Chip */}
-            {selectedCategory && (
-              <span className="bg-white border border-[#00B4D8]/20 text-[#1A2B4C] pl-3 pr-2 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                Classification: {selectedCategoryName || 'Hardware'}
-                <button onClick={() => updateFilters({ category: null })} className="text-[#00B4D8] hover:text-red-500 rounded-full p-0.5 hover:bg-gray-50">
-                  <X size={12} />
-                </button>
-              </span>
-            )}
-
-            {/* Brands Chips */}
-            {selectedBrands.map(brand => {
-              const properName = availableBrands.find(b => b.normalized === brand)?.name || brand.toUpperCase();
-              return (
-                <span key={brand} className="bg-white border border-[#00B4D8]/20 text-[#1A2B4C] pl-3 pr-2 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                  Partner: {properName}
-                  <button onClick={() => handleBrandToggle(brand)} className="text-[#00B4D8] hover:text-red-500 rounded-full p-0.5 hover:bg-gray-50">
-                    <X size={12} />
-                  </button>
-                </span>
-              );
-            })}
-
-            {/* Price Chip */}
-            {(minPrice || maxPrice) && (
-              <span className="bg-white border border-[#00B4D8]/20 text-[#1A2B4C] pl-3 pr-2 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                Price: {minPrice ? `Rs. ${parseFloat(minPrice).toLocaleString()}` : '0'} - {maxPrice ? `Rs. ${parseFloat(maxPrice).toLocaleString()}` : 'Max'}
-                <button onClick={() => updateFilters({ min_price: '', max_price: '' })} className="text-[#00B4D8] hover:text-red-500 rounded-full p-0.5 hover:bg-gray-50">
-                  <X size={12} />
-                </button>
-              </span>
-            )}
-
-            {/* Reset All Button */}
-            <button 
-              onClick={clearAllFilters}
-              className="text-[#00B4D8] hover:text-[#1A2B4C] font-black text-[10px] uppercase tracking-widest flex items-center gap-1.5 ml-auto border border-dashed border-[#00B4D8]/30 hover:border-[#1A2B4C] px-4 py-2 rounded-xl transition-all bg-white"
-            >
-              <RotateCcw size={12} /> Clear Filters
-            </button>
-          </div>
-        )}
-
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          {/* Sidebar */}
-          {isSidebarOpen && (
-            <div className="w-full lg:w-56 shrink-0 space-y-6">
-              
-              {/* Inventory Classification Widget */}
-              <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
-                <h3 className="font-black mb-6 uppercase tracking-[0.2em] text-[10px] text-gray-400">Inventory Classification</h3>
-              
-              <div className="space-y-1.5">
-                {/* All Hardware Button */}
-                <button
-                  onClick={() => updateFilters({ category: null })}
-                  className={`w-full flex items-center justify-between py-2.5 px-3 rounded-xl text-left transition-all ${
-                    !selectedCategory 
-                      ? 'bg-[#00B4D8]/10 text-[#00B4D8] font-black text-xs uppercase tracking-wider shadow-sm' 
-                      : 'text-[#1A2B4C] hover:bg-gray-50 font-bold text-xs uppercase tracking-wider'
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    {!selectedCategory && <span className="w-1.5 h-1.5 rounded-full bg-[#00B4D8]" />}
-                    All Hardware
-                  </span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${!selectedCategory ? 'bg-[#00B4D8]/20 text-[#00B4D8]' : 'bg-gray-50 text-gray-400'}`}>
-                    {products.length}
-                  </span>
-                </button>
-
-                {/* Parent Categories list */}
-                <div className="space-y-1.5 pt-1.5 border-t border-gray-50">
-                  {parentCategories.map(parent => {
-                    const subs = getSubcategories(parent.id!);
-                    const isParentActive = selectedCategory === parent.id;
-                    const isSubActive = subs.some(sub => sub.id === selectedCategory);
-                    const isExpanded = expandedParents[parent.id!] === true || isParentActive || isSubActive; // defaults to false unless active
-                    const parentCount = categoryCounts[parent.id!] || 0;
-                    
-                    const totalCategoryCount = parentCount + subs.reduce((acc, sub) => acc + (categoryCounts[sub.id!] || 0), 0);
-
+              {/* Result Counter & Quick Brand Filter Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <p className="font-bold text-gray-600">
+                  Showing <span className="font-black text-[#1A2B4C]">{sortedAndFilteredProducts.length}</span> verified enterprise results
+                  {selectedCategoryName ? (
+                    <>
+                      {' '}in <span className="font-black text-[#00B4D8]">{selectedCategoryName}</span>
+                    </>
+                  ) : null}
+                </p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-gray-400 mr-1">Quick OEM:</span>
+                  {[
+                    { label: 'Cisco', slug: 'cisco' },
+                    { label: 'HP Poly', slug: 'poly' },
+                    { label: 'Logitech', slug: 'logitech' },
+                    { label: 'Yealink', slug: 'yealink' },
+                    { label: 'Bosch', slug: 'bosch' },
+                  ].map((oem) => {
+                    const active = selectedBrands.includes(oem.slug);
                     return (
-                      <div key={parent.id} className="space-y-1">
-                        <div className="flex items-center justify-between group">
-                          <button
-                            onClick={() => updateFilters({ category: parent.id! })}
-                            className={`flex-grow flex items-center justify-between py-2 px-3 rounded-xl text-left transition-all ${
-                              isParentActive 
-                                ? 'bg-[#00B4D8]/10 text-[#00B4D8] font-black text-xs uppercase tracking-wider' 
-                                : isSubActive 
-                                  ? 'text-[#00B4D8] font-bold text-xs uppercase tracking-wider' 
-                                  : 'text-[#1A2B4C] hover:bg-gray-50 font-bold text-xs uppercase tracking-wider'
-                            }`}
-                          >
-                            <span className="flex items-center gap-2 truncate">
-                              {isParentActive && <span className="w-1.5 h-1.5 rounded-full bg-[#00B4D8]" />}
-                              <span className="truncate">{parent.name}</span>
-                            </span>
-                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ${isParentActive ? 'bg-[#00B4D8]/20 text-[#00B4D8]' : 'bg-gray-50 text-gray-400'}`}>
-                              {totalCategoryCount}
-                            </span>
-                          </button>
-
-                          {subs.length > 0 && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setExpandedParents(prev => ({
-                                  ...prev,
-                                  [parent.id!]: !isExpanded
-                                }));
-                              }}
-                              className="p-1.5 hover:bg-gray-50 rounded-lg text-gray-400 hover:text-[#00B4D8] transition-colors ml-0.5 shrink-0"
-                            >
-                              <ChevronDown 
-                                size={14} 
-                                className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
-                              />
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Subcategories (Hierarchically nested) */}
-                        {subs.length > 0 && isExpanded && (
-                          <div className="pl-5 pr-1 py-0.5 space-y-1.5 border-l border-gray-100 ml-5 mt-0.5 mb-1.5">
-                            {subs.map(sub => {
-                              const isChildActive = selectedCategory === sub.id;
-                              const childCount = categoryCounts[sub.id!] || 0;
-                              return (
-                                <button
-                                  key={sub.id}
-                                  onClick={() => updateFilters({ category: sub.id! })}
-                                  className={`w-full flex items-center justify-between py-1 px-2.5 rounded-lg text-left transition-all ${
-                                    isChildActive 
-                                      ? 'text-[#00B4D8] font-black text-xs bg-[#00B4D8]/5' 
-                                      : 'text-gray-500 hover:text-[#1A2B4C] font-semibold text-xs'
-                                  }`}
-                                >
-                                  <span className="flex items-center gap-1.5 truncate">
-                                    {isChildActive && <span className="w-1 h-1 rounded-full bg-[#00B4D8]" />}
-                                    <span className="truncate">{sub.name}</span>
-                                  </span>
-                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-full shrink-0 ${isChildActive ? 'bg-[#00B4D8]/10 text-[#00B4D8]' : 'text-gray-300'}`}>
-                                    {childCount}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
+                      <button
+                        key={oem.slug}
+                        type="button"
+                        onClick={() => handleBrandToggle(oem.slug)}
+                        className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold border transition-all cursor-pointer ${
+                          active
+                            ? 'bg-[#00B4D8] text-white border-[#00B4D8]'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-[#00B4D8]'
+                        }`}
+                      >
+                        {oem.label}
+                      </button>
                     );
                   })}
                 </div>
               </div>
-            </div>
 
-            {/* Hardware Partners (Brand Checkboxes) Widget */}
-            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
-              <h3 className="font-black mb-6 uppercase tracking-[0.2em] text-[10px] text-gray-400">Hardware Partners</h3>
-              
-              <div className="space-y-3">
-                {availableBrands.map(brand => {
-                  const isChecked = selectedBrands.includes(brand.normalized);
-                  return (
-                    <button 
-                      key={brand.normalized}
-                      onClick={() => handleBrandToggle(brand.name)}
-                      className="w-full flex items-center justify-between group py-1"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${isChecked ? 'bg-[#00B4D8] border-[#00B4D8] text-white' : 'border-gray-300 bg-white group-hover:border-[#00B4D8]'}`}>
-                          {isChecked && <Check size={10} strokeWidth={3} />}
-                        </div>
-                        <span className={`text-xs font-bold uppercase tracking-widest transition-colors ${isChecked ? 'text-[#00B4D8]' : 'text-gray-500 group-hover:text-[#1A2B4C]'}`}>
-                          {brand.name}
-                        </span>
-                      </div>
-                      <span className="text-[9px] font-black text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
-                        {brand.count}
+              {/* Active Aspect Filter Pills Row */}
+              {isAnyFilterActive && (
+                <div className="pt-2.5 border-t border-gray-100 flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 mr-1">
+                    Active Aspects:
+                  </span>
+
+                  {searchQuery && (
+                    <span className="bg-gray-100 text-[#1A2B4C] pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1">
+                      Keyword: &ldquo;{searchQuery}&rdquo;
+                      <button type="button" onClick={() => updateFilters({ q: '' })} className="hover:text-red-600 p-0.5">
+                        <X size={12} />
+                      </button>
+                    </span>
+                  )}
+
+                  {selectedCategory && (
+                    <span className="bg-gray-100 text-[#1A2B4C] pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1">
+                      Dept: {selectedCategoryName || selectedCategory}
+                      <button type="button" onClick={() => updateFilters({ category: null })} className="hover:text-red-600 p-0.5">
+                        <X size={12} />
+                      </button>
+                    </span>
+                  )}
+
+                  {listingTab !== 'all' && (
+                    <span className="bg-gray-100 text-[#1A2B4C] pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1">
+                      Format: {listingTab}
+                      <button type="button" onClick={() => updateFilters({ tab: 'all' })} className="hover:text-red-600 p-0.5">
+                        <X size={12} />
+                      </button>
+                    </span>
+                  )}
+
+                  {selectedBrands.map((brand) => {
+                    const properName = availableBrands.find((b) => b.normalized === brand)?.name || brand.toUpperCase();
+                    return (
+                      <span key={brand} className="bg-gray-100 text-[#1A2B4C] pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1">
+                        Brand: {properName}
+                        <button type="button" onClick={() => handleBrandToggle(brand)} className="hover:text-red-600 p-0.5">
+                          <X size={12} />
+                        </button>
                       </span>
-                    </button>
-                  );
-                })}
-                {availableBrands.length === 0 && (
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest py-2">No active partners for selected criteria</p>
-                )}
-              </div>
-            </div>
+                    );
+                  })}
 
-            {/* Price Limit Widget */}
-            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
-              <h3 className="font-black mb-6 uppercase tracking-[0.2em] text-[10px] text-gray-400">Value Limits (Rs.)</h3>
-              
-              <form onSubmit={handlePriceFilterApply} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1.5">Min Limit</label>
-                    <input 
-                      type="number" 
-                      placeholder="0"
-                      value={localMinPrice}
-                      onChange={(e) => setLocalMinPrice(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#00B4D8] rounded-xl px-3 py-2 text-xs font-bold text-[#1A2B4C]"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1.5">Max Limit</label>
-                    <input 
-                      type="number" 
-                      placeholder="Any"
-                      value={localMaxPrice}
-                      onChange={(e) => setLocalMaxPrice(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#00B4D8] rounded-xl px-3 py-2 text-xs font-bold text-[#1A2B4C]"
-                    />
-                  </div>
+                  {selectedRooms.map((roomId) => {
+                    const label = EBAY_ROOM_SIZE_FACETS.find((r) => r.id === roomId)?.shortLabel || roomId;
+                    return (
+                      <span key={roomId} className="bg-gray-100 text-[#1A2B4C] pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1">
+                        Room: {label}
+                        <button type="button" onClick={() => handleRoomToggle(roomId)} className="hover:text-red-600 p-0.5">
+                          <X size={12} />
+                        </button>
+                      </span>
+                    );
+                  })}
+
+                  {selectedTypes.map((typeId) => {
+                    const label = EBAY_FORM_FACTOR_FACETS.find((t) => t.id === typeId)?.shortLabel || typeId;
+                    return (
+                      <span key={typeId} className="bg-gray-100 text-[#1A2B4C] pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1">
+                        Type: {label}
+                        <button type="button" onClick={() => handleTypeToggle(typeId)} className="hover:text-red-600 p-0.5">
+                          <X size={12} />
+                        </button>
+                      </span>
+                    );
+                  })}
+
+                  {(minPrice || maxPrice) && (
+                    <span className="bg-gray-100 text-[#1A2B4C] pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1">
+                      Price: {minPrice ? `Rs. ${parseFloat(minPrice).toLocaleString()}` : '0'} – {maxPrice ? `Rs. ${parseFloat(maxPrice).toLocaleString()}` : 'Max'}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLocalMinPrice('');
+                          setLocalMaxPrice('');
+                          updateFilters({ min_price: '', max_price: '' });
+                        }}
+                        className="hover:text-red-600 p-0.5"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={clearAllFilters}
+                    className="text-[#00B4D8] hover:text-[#1A2B4C] font-black text-[11px] flex items-center gap-1 ml-auto cursor-pointer"
+                  >
+                    <RotateCcw size={12} /> Clear All
+                  </button>
                 </div>
-                
-                <button 
-                  type="submit"
-                  className="w-full bg-[#1A2B4C] hover:bg-[#00B4D8] text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition-all shadow-sm active:scale-98"
-                >
-                  Apply Value Limits
-                </button>
-              </form>
+              )}
             </div>
 
-            {/* Quote Sidebar Widget */}
-            <div className="bg-[#1A2B4C] p-8 rounded-[2rem] text-white shadow-xl relative overflow-hidden group">
-              <div className="relative z-10">
-                <h4 className="text-sm font-black uppercase tracking-widest mb-4">Design Assistance</h4>
-                <p className="text-xs text-gray-400 leading-relaxed mb-6 font-medium">Need a custom technical drawing or volume enterprise discount?</p>
-                <Link to="/programs/quote" className="bg-[#00B4D8] text-white px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-[#1A2B4C] transition-all inline-block shadow-md">
-                  Request Custom Quote
-                </Link>
-              </div>
-              <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/5 rounded-full translate-x-8 translate-y-8 group-hover:scale-150 transition-transform duration-700"></div>
-            </div>
-
-          </div>
-          )}
-
-          {/* Product Grid / List container */}
-          <div className="flex-1">
-            <div className="mb-6 flex justify-between items-center">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                {loading
-                  ? 'Loading verified hardware inventory...'
-                  : `Showing ${sortedAndFilteredProducts.length} of ${products.length} hardware modules`}
-              </p>
-            </div>
-
+            {/* Product Results Grid or eBay Detailed Horizontal List */}
             {loading ? (
-              <div className="py-24 flex items-center justify-center bg-white rounded-[2.5rem] border border-gray-100">
+              <div className="py-24 flex items-center justify-center bg-white rounded-3xl border border-gray-200">
                 <div className="text-center">
                   <Loader2 className="animate-spin text-[#00B4D8] mx-auto mb-4" size={40} />
                   <p className="text-gray-400 font-black uppercase tracking-widest text-[10px]">Syncing Gear Catalog...</p>
                 </div>
               </div>
             ) : (
-            <div className={viewMode === 'grid' ? "grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8" : "flex flex-col gap-6"}>
-              {visibleProducts.map((product, index) => {
-                const productSlug = getCanonicalProductSlug(product);
-                const productHref = getProductHref(product, product.id);
-                const productKey = product.id || productSlug;
-                const { regularPrice: cardRegularPrice, effectivePrice: cardEffectivePrice, hasSale: cardHasSale } = resolveProductPricing(product);
-                const rawImages = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
-                const firstImage = optimizeGalleryImageUrl(rawImages[0] || '/images/products/poly-x70-studio.webp', 480, 75);
-                const secondImage = rawImages[1] ? optimizeGalleryImageUrl(rawImages[1], 480, 75) : null;
-                const primarySeo = buildProductImageSeo(product, rawImages[0], 0);
-                const secondarySeo = secondImage ? buildProductImageSeo(product, rawImages[1], 1) : null;
-                const isEagerCard = index < 4;
+              <div className={viewMode === 'grid' ? 'grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5' : 'flex flex-col gap-4'}>
+                {visibleProducts.map((product, index) => {
+                  const productSlug = getCanonicalProductSlug(product);
+                  const productHref = getProductHref(product, product.id);
+                  const productKey = product.id || productSlug;
+                  const { regularPrice: cardRegularPrice, effectivePrice: cardEffectivePrice, hasSale: cardHasSale } = resolveProductPricing(product);
+                  const badges = getProductListingBadges(product);
+                  const rawImages = Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : []));
+                  const firstImage = optimizeGalleryImageUrl(rawImages[0] || '/images/products/poly-x70-studio.webp', 480, 75);
+                  const secondImage = rawImages[1] ? optimizeGalleryImageUrl(rawImages[1], 480, 75) : null;
+                  const primarySeo = buildProductImageSeo(product, rawImages[0], 0);
+                  const secondarySeo = secondImage ? buildProductImageSeo(product, rawImages[1], 1) : null;
+                  const isEagerCard = index < 4;
 
-                return viewMode === 'grid' ? (
-                  <React.Fragment key={productKey}>
-                    <div className="lg:hidden">
-                      <MobileProductCard
-                        product={product}
-                        eager={isEagerCard}
-                        priority={index < 2}
-                      />
-                    </div>
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(index, 8) * 0.02 }}
-                    onMouseEnter={() => secondImage && setHoveredProductId(productKey)}
-                    onMouseLeave={() => secondImage && setHoveredProductId(null)}
-                    className="hidden lg:flex bg-white group cursor-pointer rounded-3xl overflow-hidden flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative"
-                  >
-                    <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
-                      <Link to={productHref} className="absolute inset-0 z-0">
+                  return viewMode === 'grid' ? (
+                    <React.Fragment key={productKey}>
+                      <div className="lg:hidden">
+                        <MobileProductCard
+                          product={product}
+                          eager={isEagerCard}
+                          priority={index < 2}
+                        />
+                      </div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: Math.min(index, 8) * 0.02 }}
+                        onMouseEnter={() => secondImage && setHoveredProductId(productKey)}
+                        onMouseLeave={() => secondImage && setHoveredProductId(null)}
+                        className="hidden lg:flex bg-white group rounded-2xl overflow-hidden flex-col border border-gray-200 hover:border-[#00B4D8] transition-all duration-300 shadow-xs hover:shadow-xl relative"
+                      >
+                        <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden p-4">
+                          <Link to={productHref} className="absolute inset-0 z-0 flex items-center justify-center p-4">
+                            <BlurProductImage
+                              loading={isEagerCard ? 'eager' : 'lazy'}
+                              fetchPriority={index < 2 ? 'high' : 'auto'}
+                              decoding="async"
+                              width={480}
+                              height={360}
+                              src={firstImage}
+                              seed={productSlug}
+                              title={primarySeo.title}
+                              alt={primarySeo.alt}
+                              className={`w-full h-full object-contain mix-blend-multiply transition-opacity duration-500 ${secondImage ? 'group-hover:opacity-0' : ''}`}
+                            />
+                            {secondImage && secondarySeo && hoveredProductId === productKey && (
+                              <img
+                                loading="lazy"
+                                decoding="async"
+                                width={480}
+                                height={360}
+                                src={secondImage}
+                                title={secondarySeo.title}
+                                alt={secondarySeo.alt}
+                                className="absolute inset-0 w-full h-full object-contain p-4 mix-blend-multiply opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                              />
+                            )}
+                          </Link>
+
+                          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
+                            {cardHasSale && badges.savingsPercent > 0 && (
+                              <span className="bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs">
+                                Save {badges.savingsPercent}%
+                              </span>
+                            )}
+                            {badges.isBundle && (
+                              <span className="bg-[#1A2B4C] text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs">
+                                Complete Kit
+                              </span>
+                            )}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setQuickViewProduct(product);
+                            }}
+                            aria-label={`Quick view ${product.productName}`}
+                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-[#1A2B4C] text-[#1A2B4C] hover:text-white flex items-center justify-center transition-colors z-10 shadow-xs cursor-pointer"
+                            title="Quick View"
+                          >
+                            <Eye size={14} />
+                          </button>
+                        </div>
+
+                        <div className="p-4 flex flex-col flex-grow bg-white border-t border-gray-100">
+                          <div className="flex items-center justify-between gap-2 mb-1.5">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-[#0088A8]">
+                              {product.brand || 'Enterprise AV'}
+                            </span>
+                            {badges.mpn && (
+                              <span className="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                                {badges.mpn}
+                              </span>
+                            )}
+                          </div>
+
+                          <Link to={productHref} className="block mb-2">
+                            <h3 className="font-bold text-sm text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2 leading-snug min-h-[2.5rem]">
+                              {product.productName}
+                            </h3>
+                          </Link>
+
+                          {/* eBay-Style Item Specifics Pill Row */}
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            <span className="text-[10px] font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded">
+                              Brand New
+                            </span>
+                            {badges.productTypeLabel && (
+                              <span className="text-[10px] font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded truncate max-w-[140px]">
+                                {badges.productTypeLabel}
+                              </span>
+                            )}
+                            {badges.roomLabel && (
+                              <span className="text-[10px] font-semibold text-[#1A2B4C] bg-[#00B4D8]/10 px-2 py-0.5 rounded truncate max-w-[130px]">
+                                {badges.roomLabel}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="mt-auto pt-3 border-t border-gray-100">
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className="font-black text-lg text-[#1A2B4C]">
+                                {formatPrice(cardEffectivePrice)}
+                              </span>
+                              {cardHasSale && (
+                                <span className="text-xs text-gray-400 line-through font-semibold">
+                                  {formatPrice(cardRegularPrice)}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between text-[11px] text-gray-500 font-semibold mb-3">
+                              <span className="text-emerald-700 font-bold">
+                                {badges.isFreeShipping ? 'Free Insured PK Shipping' : '+ Standard Delivery'}
+                              </span>
+                              <span>In Stock</span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  addToCart({
+                                    id: product.id || productSlug,
+                                    name: product.productName,
+                                    price: cardEffectivePrice,
+                                    image: firstImage,
+                                    brand: product.brand,
+                                  } as any);
+                                }}
+                                aria-label={`Add ${product.productName} to cart`}
+                                className="flex-1 bg-[#1A2B4C] hover:bg-[#00B4D8] text-white py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-colors text-center cursor-pointer"
+                              >
+                                Add to Cart
+                              </button>
+                              <Link
+                                to={productHref}
+                                className="py-2 px-3 rounded-xl border border-gray-200 hover:border-[#1A2B4C] text-xs font-bold text-[#1A2B4C] transition-colors"
+                              >
+                                Specs
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </React.Fragment>
+                  ) : (
+                    /* eBay-Style Detailed Horizontal List Row */
+                    <motion.div
+                      key={productKey}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(index, 8) * 0.02 }}
+                      className="bg-white group rounded-2xl overflow-hidden flex flex-col sm:flex-row border border-gray-200 hover:border-[#00B4D8] transition-all shadow-xs hover:shadow-md p-4 sm:p-5 gap-5"
+                    >
+                      <Link
+                        to={productHref}
+                        className="w-full sm:w-48 h-44 bg-gray-50 rounded-xl overflow-hidden relative shrink-0 flex items-center justify-center p-3 border border-gray-100"
+                      >
                         <BlurProductImage
                           loading={isEagerCard ? 'eager' : 'lazy'}
-                          fetchPriority={index < 2 ? 'high' : 'auto'}
                           decoding="async"
-                          width={480}
-                          height={360}
+                          width={320}
+                          height={320}
                           src={firstImage}
                           seed={productSlug}
                           title={primarySeo.title}
                           alt={primarySeo.alt}
-                          className={`absolute inset-0 z-10 w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ease-in-out ${secondImage ? 'group-hover:opacity-0' : ''}`}
+                          className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
                         />
-                        {secondImage && secondarySeo && hoveredProductId === productKey && (
-                          <img
-                            loading="lazy"
-                            decoding="async"
-                            width={480}
-                            height={360}
-                            src={secondImage}
-                            title={secondarySeo.title}
-                            alt={secondarySeo.alt}
-                            className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 scale-105"
-                          />
+                        {cardHasSale && badges.savingsPercent > 0 && (
+                          <span className="absolute top-2.5 left-2.5 bg-rose-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-xs">
+                            Save {badges.savingsPercent}%
+                          </span>
                         )}
                       </Link>
-                      
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        aria-label={`Save ${product.productName}`}
-                        className="absolute top-2.5 right-2.5 lg:top-4 lg:right-4 w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-white/80 lg:bg-white/40 backdrop-blur-sm flex items-center justify-center text-rose-500 lg:text-[#1A2B4C] hover:bg-[#1A2B4C] hover:text-white transition-colors z-10 shadow-sm"
-                      >
-                        <Heart size={13} />
-                      </button>
 
-                      {cardHasSale && (
-                        <div className="absolute top-2.5 left-2.5 lg:top-4 lg:left-4 bg-white/90 backdrop-blur-sm text-[#00B4D8] text-[8px] lg:text-[9px] font-black uppercase tracking-widest px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-md shadow-sm z-10">
-                          Special Offer
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-3 sm:p-5 lg:p-6 flex flex-col flex-grow bg-white z-10 relative">
-                      <Link to={productHref} className="block">
-                        <h3 className="font-bold text-xs sm:text-base lg:text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-1 lg:mb-2 line-clamp-1">
-                          {product.productName}
-                        </h3>
-                      </Link>
-                      
-                      <div className="flex flex-wrap gap-1.5 lg:gap-2 mb-2 lg:mb-4">
-                         {product.brand && (
-                           <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-1.5 lg:px-2 py-0.5 rounded-sm truncate max-w-full">
-                             {product.brand}
-                           </span>
-                         )}
-                         {product.sku && (
-                           <span className="hidden sm:inline-block text-[9px] text-gray-500 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
-                             {product.sku}
-                           </span>
-                         )}
-                      </div>
-
-                      <div className="hidden lg:block text-gray-500 text-xs font-medium leading-relaxed line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.') }} />
-                      
-                      <div className="mt-auto flex items-end justify-between gap-2 lg:gap-4 pt-2.5 lg:pt-4 border-t border-gray-50">
-                        <div className="flex flex-col min-w-0">
-                          <span className="hidden lg:block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Price</span>
-                          <div className="flex items-baseline gap-1.5 lg:gap-2 flex-wrap">
-                            <span className="font-black text-xs sm:text-base lg:text-xl text-[#1A2B4C]">{formatPrice(cardEffectivePrice)}</span>
-                            {cardHasSale && (
-                              <span className="hidden sm:inline text-[10px] text-gray-400 line-through font-bold">{formatPrice(cardRegularPrice)}</span>
-                            )}
-                          </div>
-                        </div>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            addToCart({
-                              id: product.id!,
-                              name: product.productName,
-                              price: cardEffectivePrice,
-                              image: firstImage,
-                              brand: product.brand
-                            } as any);
-                          }}
-                          aria-label={`Add ${product.productName} to cart`}
-                          className="min-w-[48px] min-h-[48px] -m-2 lg:m-0 flex items-center justify-center lg:bg-[#1A2B4C] lg:text-white lg:px-5 lg:py-2.5 lg:rounded-lg text-xs font-bold lg:hover:bg-[#00B4D8] transition-all lg:shadow-md active:scale-95 shrink-0 whitespace-nowrap cursor-pointer"
-                        >
-                          <span className="lg:hidden w-8 h-8 rounded-full bg-[#1A2B4C] text-white flex items-center justify-center shadow-sm">
-                            <Plus size={15} strokeWidth={2.5} />
+                      <div className="flex-1 flex flex-col min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-[#0088A8]">
+                            {product.brand}
                           </span>
-                          <span className="hidden lg:inline">Add to cart</span>
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                  </React.Fragment>
-                ) : (
-                  // List View Card
-                  <motion.div 
-                    key={productKey}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(index, 8) * 0.02 }}
-                    className="bg-white group rounded-[2rem] overflow-hidden flex flex-col sm:flex-row border border-gray-100 hover:border-[#00B4D8] transition-all shadow-sm hover:shadow-xl p-6 gap-6"
-                  >
-                    <Link to={productHref} className="w-full sm:w-48 h-48 aspect-square bg-gray-50 rounded-2xl overflow-hidden relative shrink-0 block">
-                      <BlurProductImage
-                        loading={isEagerCard ? 'eager' : 'lazy'}
-                        decoding="async"
-                        width={320}
-                        height={320}
-                        src={firstImage}
-                        seed={productSlug}
-                        title={primarySeo.title}
-                        alt={primarySeo.alt}
-                        className="relative z-10 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
-                      {cardHasSale && (
-                        <div className="absolute top-4 left-4 bg-[#00B4D8] text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-md">
-                          Special Offer
-                        </div>
-                      )}
-                      <button 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setQuickViewProduct(product);
-                          }}
-                          className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm text-[#1A2B4C] px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-[#00B4D8] hover:text-white flex items-center gap-1 z-10"
-                        >
-                          <Eye size={12} /> Quick View
-                        </button>
-                      </Link>
-                    <div className="flex-grow flex flex-col min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-[#00B4D8] font-black uppercase tracking-widest">{product.brand}</span>
-                          <div className="w-1 h-1 bg-gray-200 rounded-full"></div>
-                          <span className="text-[10px] text-gray-400 font-semibold leading-normal uppercase tracking-widest">{product.sku}</span>
-                        </div>
-                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md ${
-                          (product.stockQuantity ?? 0) > 5 
-                            ? 'bg-emerald-50 text-emerald-600' 
-                            : (product.stockQuantity ?? 0) > 0 
-                              ? 'bg-amber-50 text-amber-600' 
-                              : 'bg-red-50 text-red-600'
-                        }`}>
-                          {(product.stockQuantity ?? 0) > 5 
-                            ? 'In Stock' 
-                            : (product.stockQuantity ?? 0) > 0 
-                              ? `Only ${product.stockQuantity} Left` 
-                              : 'Built to Order'}
-                        </span>
-                      </div>
-
-                      {/* Dynamic Star Rating Badge for List PLP */}
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <div className="flex items-center text-amber-500">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={11} fill={i < 4 ? "currentColor" : "none"} className={i < 4 ? "text-amber-500" : "text-gray-200"} />
-                          ))}
-                        </div>
-                        <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">4.8 (80+ Reviews)</span>
-                      </div>
-                      
-                      <Link to={productHref}>
-                        <h3 className="font-black text-lg sm:text-xl text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 leading-tight">
-                          {product.productName}
-                        </h3>
-                      </Link>
-                      
-                      <div className="text-gray-500 text-xs font-semibold line-clamp-3 mb-4" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(product.shortDescription || 'Enterprise-grade professional equipment and specialized deployment solutions.') }} />
-                      
-                      <div className="flex flex-wrap items-center justify-between pt-4 border-t border-gray-50 mt-auto gap-4">
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-black text-xl text-[#1A2B4C]">{formatPrice(cardEffectivePrice)}</span>
-                          {cardHasSale && (
-                            <span className="text-xs text-gray-400 line-through font-bold">{formatPrice(cardRegularPrice)}</span>
+                          {badges.mpn && (
+                            <span className="text-[11px] font-mono font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                              MPN: {badges.mpn}
+                            </span>
+                          )}
+                          {badges.gtin && (
+                            <span className="text-[10px] font-mono text-gray-400">
+                              GTIN: {badges.gtin}
+                            </span>
                           )}
                         </div>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToCart({
-                              id: product.id!,
-                              name: product.productName,
-                              price: cardEffectivePrice,
-                              image: (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || '',
-                              brand: product.brand
-                            } as any);
+
+                        <Link to={productHref}>
+                          <h3 className="font-black text-base sm:text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-1.5 leading-snug">
+                            {product.productName}
+                          </h3>
+                        </Link>
+
+                        <div className="flex flex-wrap items-center gap-2 mb-2 text-xs text-gray-600 font-semibold">
+                          <span>Brand New (Factory Sealed)</span>
+                          <span>•</span>
+                          <span>{badges.productTypeLabel}</span>
+                          {badges.roomLabel && (
+                            <>
+                              <span>•</span>
+                              <span className="text-[#1A2B4C] font-bold">{badges.roomLabel}</span>
+                            </>
+                          )}
+                        </div>
+
+                        <div
+                          className="text-gray-500 text-xs font-medium line-clamp-2 mb-3"
+                          dangerouslySetInnerHTML={{
+                            __html: cleanRichTextHtml(
+                              product.shortDescription ||
+                                'Genuine enterprise audio-visual & unified communications hardware with 1-year Pakistan warranty.'
+                            ),
                           }}
-                          className="bg-[#1A2B4C] text-white h-11 px-6 rounded-xl flex items-center justify-center hover:bg-[#00B4D8] transition-all shadow-md text-xs font-black uppercase tracking-widest gap-2 active:scale-95 shrink-0"
-                        >
-                          <Zap size={14} /> Add to Cart
-                        </button>
+                        />
+
+                        <div className="mt-auto pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                          <div>
+                            <div className="flex items-baseline gap-2">
+                              <span className="font-black text-xl text-[#1A2B4C]">
+                                {formatPrice(cardEffectivePrice)}
+                              </span>
+                              {cardHasSale && (
+                                <span className="text-xs text-gray-400 line-through font-bold">
+                                  {formatPrice(cardRegularPrice)}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] font-bold text-emerald-700 mt-0.5">
+                              {badges.isFreeShipping
+                                ? 'Free Insured Nationwide Shipping • Immediate Dispatch'
+                                : 'In Stock in Pakistan • 1-Year Official Warranty'}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setQuickViewProduct(product)}
+                              className="h-10 px-3.5 rounded-xl border border-gray-200 hover:border-[#1A2B4C] text-xs font-bold text-[#1A2B4C] flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Eye size={14} /> Quick View
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                addToCart({
+                                  id: product.id || productSlug,
+                                  name: product.productName,
+                                  price: cardEffectivePrice,
+                                  image: firstImage,
+                                  brand: product.brand,
+                                } as any)
+                              }
+                              className="bg-[#1A2B4C] hover:bg-[#00B4D8] text-white h-10 px-5 rounded-xl flex items-center justify-center transition-all text-xs font-black uppercase tracking-wider gap-1.5 cursor-pointer"
+                            >
+                              <Zap size={14} /> Add to Cart
+                            </button>
+                          </div>
+                        </div>
                       </div>
+                    </motion.div>
+                  );
+                })}
+
+                {sortedAndFilteredProducts.length === 0 && (
+                  <div className="col-span-full py-16 text-center bg-white rounded-3xl border border-gray-200 shadow-xs px-6">
+                    <div className="w-14 h-14 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Search size={26} />
                     </div>
-                  </motion.div>
-                );
-              })}
-              
-              {sortedAndFilteredProducts.length === 0 && (
-                <div className="col-span-full py-16 text-center bg-white rounded-[2.5rem] border border-gray-100 shadow-sm px-6">
-                  <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search size={30} />
+                    <h3 className="text-lg font-black text-[#1A2B4C] mb-1">No Exact Matches Found</h3>
+                    <p className="text-gray-500 font-medium max-w-md mx-auto text-xs mb-5">
+                      No hardware matched all selected eBay aspect filters. Remove one or more filters to broaden your search.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={clearAllFilters}
+                      className="bg-[#1A2B4C] text-white px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-[#00B4D8] transition-all cursor-pointer"
+                    >
+                      Reset All Filters
+                    </button>
                   </div>
-                  <h3 className="text-xl font-black text-[#1A2B4C] mb-2">No Matching Hardware</h3>
-                  <p className="text-gray-400 font-medium max-w-sm mx-auto text-sm mb-6">We couldn't find any equipment matching your criteria. Try adjusting or clearing your active filters.</p>
-                  <button 
-                    onClick={clearAllFilters}
-                    className="bg-[#1A2B4C] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#00B4D8] transition-all shadow-md"
-                  >
-                    Reset All Criteria
-                  </button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
             )}
 
             {visibleCount < sortedAndFilteredProducts.length && (
-              <div ref={loadMoreRef} className="mt-10 flex flex-col items-center justify-center gap-3 py-4">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  Showing {visibleProducts.length} of {sortedAndFilteredProducts.length} hardware modules
+              <div ref={loadMoreRef} className="mt-8 flex flex-col items-center justify-center gap-2.5 py-4">
+                <p className="text-xs font-bold text-gray-500">
+                  Showing {visibleProducts.length} of {sortedAndFilteredProducts.length} listings
                 </p>
                 <button
                   type="button"
                   onClick={() => setVisibleCount((prev) => Math.min(prev + 16, sortedAndFilteredProducts.length))}
-                  className="bg-white border border-gray-200 hover:border-[#00B4D8] text-[#1A2B4C] hover:text-[#00B4D8] px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm cursor-pointer"
+                  className="bg-white border border-gray-300 hover:border-[#00B4D8] text-[#1A2B4C] hover:text-[#00B4D8] px-7 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer"
                 >
-                  Load More Hardware ({sortedAndFilteredProducts.length - visibleProducts.length} Remaining)
+                  Show More Listings ({sortedAndFilteredProducts.length - visibleProducts.length} Remaining)
                 </button>
               </div>
             )}

@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import fs from 'fs';
 import zlib from 'zlib';
+import crypto from 'crypto';
 import { updateSheetData } from './server-utils/sheets';
 import {
   generateGmcTsv,
@@ -29,6 +30,7 @@ import {
   PRODUCT_ID_TO_SEO_SLUG,
   buildFallbackProductFromGmcMeta,
   resolveProductPricing,
+  normalizeGmcImageUrl,
 } from './src/lib/gmc-feed';
 import { FALLBACK_SERVICES_CATALOG } from './src/lib/services-catalog';
 import {
@@ -517,25 +519,87 @@ async function startServer() {
     res.redirect(302, '/llms-full.txt');
   });
 
-  const getGmcProductsWithFallback = async (): Promise<Record<string, any>[]> => {
+  let liveProductsBySlugCache = new Map<string, Record<string, any>>();
+  let liveGmcProductsCache: { items: Record<string, any>[]; updatedAt: number } = {
+    items: [],
+    updatedAt: 0,
+  };
+
+  const getDocUpdatedAtMs = (docObj: Record<string, any>): number => {
+    const u = docObj?.updatedAt;
+    if (!u) return 0;
+    if (typeof u?.toMillis === 'function') return u.toMillis();
+    if (typeof u?.seconds === 'number') return u.seconds * 1000;
+    const parsed = Date.parse(String(u));
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const getGmcProductsWithFallback = async (forceRefresh = false): Promise<Record<string, any>[]> => {
+    const now = Date.now();
+    if (!forceRefresh && liveGmcProductsCache.items.length > 0 && now - liveGmcProductsCache.updatedAt < 5 * 60 * 1000) {
+      return liveGmcProductsCache.items;
+    }
+
+    const byCanonical = new Map<string, Record<string, any>>();
+    const inactiveOrTombstonedSlugs = new Set<string>();
     try {
-      const docs = await fetchCollectionWithClientFallback('products');
-      const active = docs.filter((p: any) => p.isActive !== false);
-      if (active.length >= 50) return active;
+      const [docs, tombstoneDocs] = await Promise.all([
+        fetchCollectionWithClientFallback('products'),
+        fetchCollectionWithClientFallback('settings').catch(() => []),
+      ]);
+      const tombstoneDoc = tombstoneDocs.find((d: any) => d.id === 'catalog_tombstones');
+      if (tombstoneDoc && Array.isArray(tombstoneDoc.deletedIds)) {
+        for (const tid of tombstoneDoc.deletedIds) {
+          inactiveOrTombstonedSlugs.add(String(tid));
+        }
+      }
+      for (const p of docs) {
+        const canonical = getCanonicalProductSlug(p, p.id);
+        if (p.isActive === false) {
+          if (canonical) inactiveOrTombstonedSlugs.add(canonical);
+          continue;
+        }
+        if (!canonical) continue;
+        const existing = byCanonical.get(canonical);
+        // When two Firestore docs map to the same canonical URL, keep the newest updated doc (or canonical-ID match)
+        if (!existing) {
+          byCanonical.set(canonical, p);
+        } else {
+          const existingScore = (existing.id === canonical ? 1e15 : 0) + getDocUpdatedAtMs(existing);
+          const candidateScore = (p.id === canonical ? 1e15 : 0) + getDocUpdatedAtMs(p);
+          if (candidateScore >= existingScore) {
+            byCanonical.set(canonical, p);
+          }
+        }
+      }
     } catch (dbErr) {
       console.warn('Firestore read fallback for GMC feed:', dbErr);
     }
-    return Object.keys(PRODUCT_GMC_METADATA)
-      .filter((slug) => slug !== 'T1XLMubVYmFzeIfC7V9B' && slug !== 'wMbGVClqbDS2LFrv5HyX')
-      .map((slug) => {
-        const fb = buildFallbackProductFromGmcMeta(slug);
-        if (fb && slug === 'cisco-webex-room-kit-plus-pakistan') {
-          return { ...fb, id: 'cisco-webex-room-kit-plus-pakistan' };
-        }
-        return fb;
-      })
-      .filter(Boolean) as Record<string, any>[];
+
+    for (const slug of Object.keys(PRODUCT_GMC_METADATA)) {
+      if (slug === 'T1XLMubVYmFzeIfC7V9B' || slug === 'wMbGVClqbDS2LFrv5HyX') continue;
+      const canonical = getCanonicalProductSlug({ slug }, slug);
+      if (
+        byCanonical.has(canonical) ||
+        inactiveOrTombstonedSlugs.has(canonical) ||
+        inactiveOrTombstonedSlugs.has(slug)
+      ) {
+        continue;
+      }
+      const fb = buildFallbackProductFromGmcMeta(slug);
+      if (fb) {
+        byCanonical.set(canonical, fb);
+      }
+    }
+
+    const merged = Array.from(byCanonical.values());
+    liveProductsBySlugCache = byCanonical;
+    liveGmcProductsCache = { items: merged, updatedAt: now };
+    return merged;
   };
+
+  // Pre-warm live Firestore price cache asynchronously on boot so Wave-1 SSR matches GMC feed 100%
+  getGmcProductsWithFallback(true).catch(() => {});
 
   // Cached Live PKR Exchange Rates (6-hour TTL + verified offline baseline fallback)
   let cachedRatesPayload: {
@@ -1495,6 +1559,801 @@ async function startServer() {
     }
   });
 
+  // --- Facebook Page OAuth & Graph API v22.0 Auto-Publisher ---
+  const FB_GRAPH_VERSION = 'v22.0';
+  const fbOAuthSigningKey =
+    process.env.FACEBOOK_APP_SECRET || crypto.randomBytes(32).toString('hex');
+
+  interface FbCandidatePage {
+    id: string;
+    name: string;
+    category: string;
+    link: string;
+    fanCount: number;
+    pictureUrl: string;
+    accessToken: string;
+  }
+
+  const fbOAuthHandoffs = new Map<
+    string,
+    { uid: string; expiresAt: number; pages: FbCandidatePage[] }
+  >();
+  const fbPageTokenCache = new Map<
+    string,
+    { pageId: string; pageName: string; accessToken: string; updatedAt: string }
+  >();
+
+  function getFbRedirectUri(): string {
+    const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+    return `${appUrl}/api/facebook/oauth/callback`;
+  }
+
+  function signFbOAuthState(payload: { uid: string; nonce: string; exp: number }): string {
+    const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
+    const sig = crypto
+      .createHmac('sha256', fbOAuthSigningKey)
+      .update(encoded)
+      .digest('base64url');
+    return `${encoded}.${sig}`;
+  }
+
+  function verifyFbOAuthState(
+    token: string
+  ): { uid: string; nonce: string; exp: number } | null {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 2) return null;
+      const [encoded, sig] = parts;
+      const expected = crypto
+        .createHmac('sha256', fbOAuthSigningKey)
+        .update(encoded)
+        .digest('base64url');
+      const sigBuf = Buffer.from(sig, 'utf8');
+      const expectedBuf = Buffer.from(expected, 'utf8');
+      if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
+        return null;
+      }
+      const parsed = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+      if (!parsed || typeof parsed.uid !== 'string' || typeof parsed.exp !== 'number') {
+        return null;
+      }
+      if (parsed.exp < Date.now()) return null;
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
+  function escapeSimpleHtml(str: string): string {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function resolveFbPageToken(pageId: string, providedToken?: unknown): string {
+    const cached = fbPageTokenCache.get(pageId)?.accessToken;
+    if (cached) return cached;
+    if (
+      process.env.FACEBOOK_PAGE_ID &&
+      process.env.FACEBOOK_PAGE_ACCESS_TOKEN &&
+      process.env.FACEBOOK_PAGE_ID === pageId
+    ) {
+      return process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+    }
+    if (typeof providedToken === 'string' && providedToken.trim().length > 10) {
+      return providedToken.trim();
+    }
+    return '';
+  }
+
+  app.get('/api/facebook/sdk-config', (_req, res) => {
+    const rawAppId = (process.env.VITE_FACEBOOK_APP_ID || process.env.FACEBOOK_APP_ID || '').trim();
+    const safeAppId = rawAppId.replace(/[^0-9a-zA-Z_-]/g, '');
+    res.json({
+      configured: Boolean(safeAppId),
+      appId: safeAppId || null,
+      version: FB_GRAPH_VERSION,
+    });
+  });
+
+  app.get('/api/admin/facebook/status', verifyAdmin, (_req, res) => {
+    const appId = (process.env.VITE_FACEBOOK_APP_ID || process.env.FACEBOOK_APP_ID || '').trim();
+    const oauthConfigured = Boolean(
+      appId && process.env.FACEBOOK_APP_SECRET?.trim()
+    );
+    res.json({
+      oauthConfigured,
+      sdkConfigured: Boolean(appId),
+      redirectUri: getFbRedirectUri(),
+      hasEnvPageToken: Boolean(
+        process.env.FACEBOOK_PAGE_ID?.trim() && process.env.FACEBOOK_PAGE_ACCESS_TOKEN?.trim()
+      ),
+      envPageId: process.env.FACEBOOK_PAGE_ID?.trim() || null,
+    });
+  });
+
+  app.get('/api/admin/facebook/oauth/url', verifyAdmin, (req, res) => {
+    const appId = process.env.FACEBOOK_APP_ID?.trim();
+    const appSecret = process.env.FACEBOOK_APP_SECRET?.trim();
+    const redirectUri = getFbRedirectUri();
+    if (!appId || !appSecret) {
+      return res.status(400).json({
+        configured: false,
+        redirectUri,
+        error:
+          'FACEBOOK_APP_ID and FACEBOOK_APP_SECRET are not set in AI Studio Secrets. Add them for 1-click Meta OAuth, or connect immediately using a Page Access Token.',
+      });
+    }
+
+    const uid = String((req as any).user?.uid || '');
+    const state = signFbOAuthState({
+      uid,
+      nonce: crypto.randomBytes(12).toString('hex'),
+      exp: Date.now() + 10 * 60 * 1000,
+    });
+
+    const params = new URLSearchParams({
+      client_id: appId,
+      redirect_uri: redirectUri,
+      state,
+      response_type: 'code',
+      scope: 'pages_show_list,pages_read_engagement,pages_manage_posts',
+    });
+
+    res.json({
+      configured: true,
+      redirectUri,
+      url: `https://www.facebook.com/${FB_GRAPH_VERSION}/dialog/oauth?${params.toString()}`,
+    });
+  });
+
+  app.get(['/api/facebook/oauth/callback', '/api/facebook/oauth/callback/'], async (req, res) => {
+    const renderPopupResponse = (payload: Record<string, unknown>, messageText: string) => {
+      const safeJson = JSON.stringify(payload).replace(/</g, '\\u003c');
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(`<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Facebook Connection</title></head>
+  <body style="font-family:sans-serif;padding:24px;color:#1A2B4C;background:#F8F9FA;">
+    <p>${escapeSimpleHtml(messageText)}</p>
+    <script>
+      if (window.opener) {
+        window.opener.postMessage(${safeJson}, '*');
+        window.close();
+      } else {
+        window.location.href = '/admin/facebook-publisher';
+      }
+    </script>
+  </body>
+</html>`);
+    };
+
+    try {
+      const oauthErr = req.query.error_description || req.query.error;
+      if (oauthErr) {
+        return renderPopupResponse(
+          { type: 'FB_OAUTH_ERROR', error: String(oauthErr) },
+          `Facebook authorization cancelled: ${String(oauthErr)}`
+        );
+      }
+
+      const code = typeof req.query.code === 'string' ? req.query.code.trim() : '';
+      const rawState = typeof req.query.state === 'string' ? req.query.state.trim() : '';
+      const verifiedState = verifyFbOAuthState(rawState);
+      if (!code || !verifiedState) {
+        return renderPopupResponse(
+          { type: 'FB_OAUTH_ERROR', error: 'Invalid or expired OAuth state.' },
+          'Invalid or expired authorization session. You may close this window and retry.'
+        );
+      }
+
+      const appId = process.env.FACEBOOK_APP_ID?.trim() || '';
+      const appSecret = process.env.FACEBOOK_APP_SECRET?.trim() || '';
+      if (!appId || !appSecret) {
+        return renderPopupResponse(
+          { type: 'FB_OAUTH_ERROR', error: 'Meta App credentials are not configured on server.' },
+          'Meta App credentials are not configured on the server.'
+        );
+      }
+
+      // 1. Exchange code for short-lived User Access Token
+      const tokenParams = new URLSearchParams({
+        client_id: appId,
+        client_secret: appSecret,
+        redirect_uri: getFbRedirectUri(),
+        code,
+      });
+      const tokenResp = await fetch(
+        `https://graph.facebook.com/${FB_GRAPH_VERSION}/oauth/access_token?${tokenParams.toString()}`,
+        { signal: AbortSignal.timeout(12000) }
+      );
+      const tokenJson: any = await tokenResp.json();
+      if (!tokenResp.ok || !tokenJson?.access_token) {
+        throw new Error(tokenJson?.error?.message || 'Failed to exchange authorization code');
+      }
+
+      // 2. Upgrade to long-lived User Access Token so Page tokens do not expire
+      let userAccessToken = String(tokenJson.access_token);
+      try {
+        const longParams = new URLSearchParams({
+          grant_type: 'fb_exchange_token',
+          client_id: appId,
+          client_secret: appSecret,
+          fb_exchange_token: userAccessToken,
+        });
+        const longResp = await fetch(
+          `https://graph.facebook.com/${FB_GRAPH_VERSION}/oauth/access_token?${longParams.toString()}`,
+          { signal: AbortSignal.timeout(12000) }
+        );
+        const longJson: any = await longResp.json();
+        if (longResp.ok && longJson?.access_token) {
+          userAccessToken = String(longJson.access_token);
+        }
+      } catch {
+        // Fallback to short-lived token if long-lived exchange fails
+      }
+
+      // 3. Fetch managed Facebook Pages + Page Access Tokens
+      const accountsParams = new URLSearchParams({
+        fields: 'id,name,category,link,fan_count,picture{url},access_token',
+        access_token: userAccessToken,
+      });
+      const accountsResp = await fetch(
+        `https://graph.facebook.com/${FB_GRAPH_VERSION}/me/accounts?${accountsParams.toString()}`,
+        { signal: AbortSignal.timeout(12000) }
+      );
+      const accountsJson: any = await accountsResp.json();
+      if (!accountsResp.ok || !Array.isArray(accountsJson?.data)) {
+        throw new Error(accountsJson?.error?.message || 'Unable to list managed Facebook Pages');
+      }
+
+      const pages: FbCandidatePage[] = accountsJson.data
+        .filter((p: any) => p?.id && p?.access_token)
+        .map((p: any) => ({
+          id: String(p.id),
+          name: String(p.name || 'Facebook Page'),
+          category: String(p.category || 'Business'),
+          link: String(p.link || `https://www.facebook.com/${p.id}`),
+          fanCount: Number(p.fan_count || 0),
+          pictureUrl: String(p.picture?.data?.url || ''),
+          accessToken: String(p.access_token),
+        }));
+
+      if (pages.length === 0) {
+        return renderPopupResponse(
+          {
+            type: 'FB_OAUTH_ERROR',
+            error: 'No managed Facebook Pages with posting permissions were returned for this Meta account.',
+          },
+          'No managed Facebook Pages found.'
+        );
+      }
+
+      // Clean expired handoffs
+      const now = Date.now();
+      for (const [k, v] of fbOAuthHandoffs.entries()) {
+        if (v.expiresAt <= now) fbOAuthHandoffs.delete(k);
+      }
+
+      const handoffId = crypto.randomBytes(24).toString('hex');
+      fbOAuthHandoffs.set(handoffId, {
+        uid: verifiedState.uid,
+        expiresAt: now + 10 * 60 * 1000,
+        pages,
+      });
+
+      return renderPopupResponse(
+        { type: 'FB_OAUTH_PAGES_READY', handoffId },
+        'Facebook authorization successful. Returning to AV Live Admin...'
+      );
+    } catch (err: any) {
+      return renderPopupResponse(
+        { type: 'FB_OAUTH_ERROR', error: err?.message || 'Facebook OAuth failed' },
+        err?.message || 'Facebook OAuth failed.'
+      );
+    }
+  });
+
+  app.post('/api/admin/facebook/oauth/handoff', verifyAdmin, (req, res) => {
+    const handoffId = String(req.body?.handoffId || '').trim();
+    const entry = fbOAuthHandoffs.get(handoffId);
+    const uid = String((req as any).user?.uid || '');
+    if (!entry || entry.uid !== uid || entry.expiresAt < Date.now()) {
+      return res.status(404).json({ error: 'OAuth session expired or invalid. Please reconnect.' });
+    }
+    res.json({
+      pages: entry.pages.map(({ accessToken: _omit, ...safe }) => safe),
+    });
+  });
+
+  app.post('/api/admin/facebook/oauth/select-page', verifyAdmin, (req, res) => {
+    const handoffId = String(req.body?.handoffId || '').trim();
+    const pageId = String(req.body?.pageId || '').trim();
+    const entry = fbOAuthHandoffs.get(handoffId);
+    const uid = String((req as any).user?.uid || '');
+    if (!entry || entry.uid !== uid || entry.expiresAt < Date.now()) {
+      return res.status(404).json({ error: 'OAuth session expired or invalid.' });
+    }
+    const chosen = entry.pages.find((p) => p.id === pageId);
+    if (!chosen) {
+      return res.status(404).json({ error: 'Selected Facebook Page not found in OAuth session.' });
+    }
+
+    fbPageTokenCache.set(chosen.id, {
+      pageId: chosen.id,
+      pageName: chosen.name,
+      accessToken: chosen.accessToken,
+      updatedAt: new Date().toISOString(),
+    });
+    fbOAuthHandoffs.delete(handoffId);
+
+    res.json({
+      verified: true,
+      page: {
+        id: chosen.id,
+        name: chosen.name,
+        category: chosen.category,
+        link: chosen.link,
+        fanCount: chosen.fanCount,
+        pictureUrl: chosen.pictureUrl,
+      },
+      pageAccessToken: chosen.accessToken,
+    });
+  });
+
+  app.post('/api/admin/facebook/sdk-exchange', verifyAdmin, async (req, res) => {
+    try {
+      const userAccessToken =
+        typeof req.body?.userAccessToken === 'string' ? req.body.userAccessToken.trim() : '';
+      if (!userAccessToken || userAccessToken.length < 20 || userAccessToken.length > 4000) {
+        return res.status(400).json({ error: 'Valid Facebook SDK user access token is required.' });
+      }
+
+      const appId = (process.env.VITE_FACEBOOK_APP_ID || process.env.FACEBOOK_APP_ID || '').trim();
+      const appSecret = process.env.FACEBOOK_APP_SECRET?.trim() || '';
+      if (!appId || !appSecret) {
+        return res.status(400).json({
+          error:
+            'FACEBOOK_APP_ID and FACEBOOK_APP_SECRET must both be configured in AI Studio Secrets to exchange SDK login tokens for long-lived Page Access Tokens.',
+        });
+      }
+
+      const longParams = new URLSearchParams({
+        grant_type: 'fb_exchange_token',
+        client_id: appId,
+        client_secret: appSecret,
+        fb_exchange_token: userAccessToken,
+      });
+      const longRes = await fetch(
+        `https://graph.facebook.com/${FB_GRAPH_VERSION}/oauth/access_token?${longParams.toString()}`
+      );
+      const longJson: any = await longRes.json();
+      if (!longRes.ok || !longJson?.access_token) {
+        return res.status(400).json({
+          error: longJson?.error?.message || 'Failed to validate/exchange Facebook SDK token.',
+        });
+      }
+
+      const longLivedUserToken = String(longJson.access_token);
+      const accountsParams = new URLSearchParams({
+        fields: 'id,name,category,link,fan_count,picture{url},access_token',
+        access_token: longLivedUserToken,
+      });
+      const accountsRes = await fetch(
+        `https://graph.facebook.com/${FB_GRAPH_VERSION}/me/accounts?${accountsParams.toString()}`
+      );
+      const accountsJson: any = await accountsRes.json();
+      if (!accountsRes.ok) {
+        return res.status(400).json({
+          error: accountsJson?.error?.message || 'Unable to list managed Facebook Pages.',
+        });
+      }
+
+      const pages: FbCandidatePage[] = Array.isArray(accountsJson?.data)
+        ? accountsJson.data
+            .filter((p: any) => p?.id && p?.access_token)
+            .map((p: any) => ({
+              id: String(p.id),
+              name: String(p.name || 'Facebook Page'),
+              category: String(p.category || 'Business Page'),
+              link: String(p.link || `https://www.facebook.com/${p.id}`),
+              fanCount: Number(p.fan_count || 0),
+              pictureUrl: String(p?.picture?.data?.url || ''),
+              accessToken: String(p.access_token),
+            }))
+        : [];
+
+      if (pages.length === 0) {
+        return res.status(400).json({
+          error:
+            'No managed Facebook Pages with posting permissions were returned for this Meta account.',
+        });
+      }
+
+      const now = Date.now();
+      for (const [k, v] of fbOAuthHandoffs.entries()) {
+        if (v.expiresAt <= now) fbOAuthHandoffs.delete(k);
+      }
+      const handoffId = crypto.randomBytes(24).toString('hex');
+      const uid = String((req as any).user?.uid || '');
+      fbOAuthHandoffs.set(handoffId, {
+        uid,
+        expiresAt: now + 10 * 60 * 1000,
+        pages,
+      });
+
+      res.json({
+        handoffId,
+        pages: pages.map(({ accessToken: _omit, ...safe }) => safe),
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || 'Failed to complete Facebook SDK exchange' });
+    }
+  });
+
+  app.post('/api/admin/facebook/verify-token', verifyAdmin, async (req, res) => {
+    try {
+      const pageId = String(req.body?.pageId || '').trim();
+      const pageAccessToken = String(req.body?.pageAccessToken || '').trim();
+
+      if (!/^[0-9]{4,40}$/.test(pageId)) {
+        return res.status(400).json({ error: 'Enter a valid numeric Facebook Page ID.' });
+      }
+      if (!pageAccessToken || pageAccessToken.length < 20) {
+        return res.status(400).json({ error: 'Enter a valid Facebook Page Access Token.' });
+      }
+
+      const params = new URLSearchParams({
+        fields: 'id,name,category,link,fan_count,picture{url}',
+        access_token: pageAccessToken,
+      });
+      const fbResp = await fetch(
+        `https://graph.facebook.com/${FB_GRAPH_VERSION}/${encodeURIComponent(pageId)}?${params.toString()}`,
+        { signal: AbortSignal.timeout(10000) }
+      );
+      const fbData: any = await fbResp.json();
+
+      if (!fbResp.ok || !fbData?.id) {
+        return res.status(400).json({
+          error: fbData?.error?.message || 'Meta Graph API rejected the Page ID or Access Token.',
+        });
+      }
+
+      fbPageTokenCache.set(String(fbData.id), {
+        pageId: String(fbData.id),
+        pageName: String(fbData.name || 'Facebook Page'),
+        accessToken: pageAccessToken,
+        updatedAt: new Date().toISOString(),
+      });
+
+      res.json({
+        verified: true,
+        page: {
+          id: String(fbData.id),
+          name: String(fbData.name || 'Facebook Page'),
+          category: String(fbData.category || 'Business'),
+          link: String(fbData.link || `https://www.facebook.com/${fbData.id}`),
+          fanCount: Number(fbData.fan_count || 0),
+          pictureUrl: String(fbData.picture?.data?.url || ''),
+        },
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || 'Failed to verify Facebook Page token' });
+    }
+  });
+
+  app.post('/api/admin/facebook/disconnect', verifyAdmin, (req, res) => {
+    const pageId = String(req.body?.pageId || '').trim();
+    if (pageId) {
+      fbPageTokenCache.delete(pageId);
+    } else {
+      fbPageTokenCache.clear();
+    }
+    res.json({ success: true });
+  });
+
+  app.post('/api/admin/facebook/publish', verifyAdmin, async (req, res) => {
+    try {
+      const pageId = String(req.body?.pageId || '').trim();
+      const format = String(req.body?.format || 'photo').trim();
+      const message = String(req.body?.message || '').trim();
+      const linkUrl = typeof req.body?.linkUrl === 'string' ? req.body.linkUrl.trim() : '';
+      const imageUrl = typeof req.body?.imageUrl === 'string' ? req.body.imageUrl.trim() : '';
+      const token = resolveFbPageToken(pageId, req.body?.pageAccessToken);
+
+      if (!/^[0-9]{4,40}$/.test(pageId)) {
+        return res.status(400).json({ error: 'Invalid Facebook Page ID.' });
+      }
+      if (!token) {
+        return res.status(400).json({ error: 'Facebook Page is not connected or missing token.' });
+      }
+      if (!message || message.length > 5000) {
+        return res.status(400).json({ error: 'Post caption must be between 1 and 5000 characters.' });
+      }
+      if (linkUrl && !isSafeExternalWebhookUrl(linkUrl)) {
+        return res.status(400).json({ error: 'Invalid link URL.' });
+      }
+      if (imageUrl && !isSafeExternalWebhookUrl(imageUrl)) {
+        return res.status(400).json({ error: 'Invalid image URL.' });
+      }
+
+      // Cache verified token cleanly in server session map
+      fbPageTokenCache.set(pageId, {
+        pageId,
+        pageName: String(req.body?.pageName || pageId),
+        accessToken: token,
+        updatedAt: new Date().toISOString(),
+      });
+
+      let fbResp: Response;
+      if (format === 'photo' && imageUrl) {
+        const bodyParams = new URLSearchParams({
+          url: imageUrl,
+          caption: message,
+          published: 'true',
+          access_token: token,
+        });
+        fbResp = await fetch(
+          `https://graph.facebook.com/${FB_GRAPH_VERSION}/${encodeURIComponent(pageId)}/photos`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyParams.toString(),
+            signal: AbortSignal.timeout(15000),
+          }
+        );
+      } else {
+        const bodyParams = new URLSearchParams({
+          message,
+          access_token: token,
+        });
+        if (format === 'link' && linkUrl) {
+          bodyParams.set('link', linkUrl);
+        }
+        fbResp = await fetch(
+          `https://graph.facebook.com/${FB_GRAPH_VERSION}/${encodeURIComponent(pageId)}/feed`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyParams.toString(),
+            signal: AbortSignal.timeout(15000),
+          }
+        );
+      }
+
+      const fbJson: any = await fbResp.json();
+      if (!fbResp.ok || (!fbJson?.id && !fbJson?.post_id)) {
+        return res.status(400).json({
+          error: fbJson?.error?.message || 'Facebook Graph API rejected the post.',
+          fbErrorCode: fbJson?.error?.code,
+        });
+      }
+
+      const facebookPostId = String(fbJson.post_id || fbJson.id);
+      let permalinkUrl = `https://www.facebook.com/${facebookPostId}`;
+      try {
+        const permResp = await fetch(
+          `https://graph.facebook.com/${FB_GRAPH_VERSION}/${encodeURIComponent(facebookPostId)}?fields=permalink_url&access_token=${encodeURIComponent(token)}`,
+          { signal: AbortSignal.timeout(8000) }
+        );
+        const permJson: any = await permResp.json();
+        if (permResp.ok && permJson?.permalink_url) {
+          permalinkUrl = String(permJson.permalink_url);
+        }
+      } catch {
+        // Fallback to constructed URL
+      }
+
+      res.json({
+        success: true,
+        facebookPostId,
+        permalinkUrl,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || 'Failed to publish to Facebook Page' });
+    }
+  });
+
+  app.post('/api/admin/facebook/feed', verifyAdmin, async (req, res) => {
+    try {
+      const pageId = String(req.body?.pageId || '').trim();
+      const token = resolveFbPageToken(pageId, req.body?.pageAccessToken);
+      if (!/^[0-9]{4,40}$/.test(pageId) || !token) {
+        return res.status(400).json({ error: 'Connected Facebook Page ID and token required.' });
+      }
+
+      const params = new URLSearchParams({
+        fields: 'id,message,created_time,full_picture,permalink_url,shares,likes.summary(true),comments.summary(true)',
+        limit: '12',
+        access_token: token,
+      });
+      const fbResp = await fetch(
+        `https://graph.facebook.com/${FB_GRAPH_VERSION}/${encodeURIComponent(pageId)}/published_posts?${params.toString()}`,
+        { signal: AbortSignal.timeout(12000) }
+      );
+      const fbJson: any = await fbResp.json();
+      if (!fbResp.ok || !Array.isArray(fbJson?.data)) {
+        return res.status(400).json({
+          error: fbJson?.error?.message || 'Failed to retrieve live Facebook Page feed.',
+        });
+      }
+
+      const posts = fbJson.data.map((p: any) => ({
+        id: String(p.id),
+        message: String(p.message || ''),
+        createdTime: String(p.created_time || ''),
+        fullPicture: String(p.full_picture || ''),
+        permalinkUrl: String(p.permalink_url || `https://www.facebook.com/${p.id}`),
+        likesCount: Number(p.likes?.summary?.total_count || 0),
+        commentsCount: Number(p.comments?.summary?.total_count || 0),
+        sharesCount: Number(p.shares?.count || 0),
+      }));
+
+      res.json({ posts });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || 'Failed to fetch Facebook feed' });
+    }
+  });
+
+  app.delete('/api/admin/facebook/post/:fbPostId', verifyAdmin, async (req, res) => {
+    try {
+      const fbPostId = String(req.params.fbPostId || '').trim();
+      const pageId = String(req.body?.pageId || req.query?.pageId || '').trim();
+      const token = resolveFbPageToken(pageId, req.body?.pageAccessToken);
+
+      if (!/^[0-9_]{5,80}$/.test(fbPostId)) {
+        return res.status(400).json({ error: 'Invalid Facebook post ID.' });
+      }
+      if (!token) {
+        return res.status(400).json({ error: 'Connected Facebook Page token is required.' });
+      }
+
+      const fbResp = await fetch(
+        `https://graph.facebook.com/${FB_GRAPH_VERSION}/${encodeURIComponent(fbPostId)}?access_token=${encodeURIComponent(token)}`,
+        {
+          method: 'DELETE',
+          signal: AbortSignal.timeout(10000),
+        }
+      );
+      const fbJson: any = await fbResp.json();
+      if (!fbResp.ok || fbJson?.error) {
+        return res.status(400).json({
+          error: fbJson?.error?.message || 'Facebook Graph API rejected deletion.',
+        });
+      }
+
+      res.json({ success: true, deletedId: fbPostId });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || 'Failed to delete Facebook post' });
+    }
+  });
+
+  // Meta Data Deletion Callback + Public User Data Deletion Status & Request APIs
+  const fbDataDeletionLog = new Map<
+    string,
+    {
+      code: string;
+      status: 'completed' | 'pending_verification';
+      source: 'meta_callback' | 'web_form';
+      scope?: string;
+      requestedAt: string;
+      completedAt?: string;
+    }
+  >();
+
+  function parseMetaSignedRequest(
+    signedRequest: string,
+    appSecret: string
+  ): { user_id?: string; algorithm?: string; issued_at?: number } | null {
+    const parts = signedRequest.split('.');
+    if (parts.length !== 2) return null;
+    const [encodedSig, encodedPayload] = parts;
+    if (!encodedSig || !encodedPayload) return null;
+
+    const decodeB64Url = (s: string) =>
+      Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+
+    const sig = decodeB64Url(encodedSig);
+    const expectedSig = crypto
+      .createHmac('sha256', appSecret)
+      .update(encodedPayload)
+      .digest();
+    if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(sig, expectedSig)) {
+      return null;
+    }
+
+    const payloadJson = JSON.parse(decodeB64Url(encodedPayload).toString('utf8'));
+    if (String(payloadJson?.algorithm || '').toUpperCase() !== 'HMAC-SHA256') {
+      return null;
+    }
+    return payloadJson;
+  }
+
+  app.post(
+    '/api/facebook/data-deletion',
+    express.urlencoded({ extended: true }),
+    (req, res) => {
+      try {
+        const appSecret = process.env.FACEBOOK_APP_SECRET?.trim() || '';
+        if (!appSecret) {
+          return res.status(503).json({
+            error: 'FACEBOOK_APP_SECRET is not configured on the server.',
+          });
+        }
+        const signedRequest =
+          typeof req.body?.signed_request === 'string' ? req.body.signed_request.trim() : '';
+        const payload = parseMetaSignedRequest(signedRequest, appSecret);
+        if (!payload) {
+          return res.status(400).json({ error: 'Invalid Meta signed_request signature.' });
+        }
+
+        const code = `AVLIVE-DEL-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+        const nowIso = new Date().toISOString();
+        fbDataDeletionLog.set(code, {
+          code,
+          status: 'completed',
+          source: 'meta_callback',
+          scope: 'Facebook Login & Meta App Data',
+          requestedAt: nowIso,
+          completedAt: nowIso,
+        });
+
+        const baseUrl = (process.env.APP_URL || 'https://avlive.com.pk').replace(/\/+$/, '');
+        return res.json({
+          url: `${baseUrl}/user-data-deletion?code=${encodeURIComponent(code)}`,
+          confirmation_code: code,
+        });
+      } catch {
+        return res.status(400).json({ error: 'Malformed Meta data deletion payload.' });
+      }
+    }
+  );
+
+  app.get('/api/facebook/data-deletion/status', (req, res) => {
+    const code = typeof req.query.code === 'string' ? req.query.code.trim().toUpperCase() : '';
+    if (!code || !/^AVLIVE-DEL-[A-Z0-9]{6,24}$/.test(code)) {
+      return res.status(400).json({ error: 'Enter a valid AVLIVE-DEL confirmation code.' });
+    }
+    const record = fbDataDeletionLog.get(code);
+    if (!record) {
+      return res.status(404).json({
+        error:
+          'Confirmation code not found in active server memory. Email info@avlive.com.pk for archival confirmation.',
+      });
+    }
+    return res.json({ record });
+  });
+
+  app.post('/api/data-deletion-request', (req, res) => {
+    const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
+    const identifier = typeof req.body?.identifier === 'string' ? req.body.identifier.trim() : '';
+    const scope =
+      typeof req.body?.deletionScope === 'string' && req.body.deletionScope.trim()
+        ? req.body.deletionScope.trim().slice(0, 120)
+        : 'Facebook Login & Profile Data';
+
+    if (!name || name.length > 200 || !identifier || identifier.length > 200) {
+      return res.status(400).json({
+        error: 'Valid name and account email or Facebook User ID are required.',
+      });
+    }
+
+    const confirmationCode = `AVLIVE-DEL-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+    const nowIso = new Date().toISOString();
+    fbDataDeletionLog.set(confirmationCode, {
+      code: confirmationCode,
+      status: 'pending_verification',
+      source: 'web_form',
+      scope,
+      requestedAt: nowIso,
+    });
+
+    return res.json({ confirmationCode, status: 'pending_verification' });
+  });
+
   // Server-side SEO Canonical, Metadata & Structured Data injector for Googlebot first-wave HTML crawls
   function injectRouteSeoIntoHtml(html: string, reqPath: string): { html: string; statusCode: number } {
     const cleanPath = reqPath === '/' ? '' : reqPath.replace(/\/+$/, '');
@@ -2312,6 +3171,17 @@ async function startServer() {
           url: 'https://avlive.com.pk/terms-of-service'
         }
       },
+      '/user-data-deletion': {
+        title: 'User Data Deletion & Account Removal | AV Live Pakistan',
+        description: 'How to delete your AV Live account, Facebook Login profile data, and check your Meta data deletion confirmation code.',
+        schema: {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          '@id': 'https://avlive.com.pk/user-data-deletion#webpage',
+          name: 'User Data Deletion & Account Removal Portal — AV Live Communications',
+          url: 'https://avlive.com.pk/user-data-deletion'
+        }
+      },
       '/setup-wizard': {
         title: 'Database Setup Wizard | AV Live',
         description: 'Internal setup utility.',
@@ -2546,24 +3416,42 @@ async function startServer() {
       const resolvedSlug = resolveCanonicalProductSlugByIdentifier(rawIdentifier) || rawIdentifier;
       const gmcMeta = PRODUCT_GMC_METADATA[resolvedSlug];
       const fallbackProd = buildFallbackProductFromGmcMeta(resolvedSlug);
+      const liveFirestoreProd = liveProductsBySlugCache.get(resolvedSlug);
+      const authoritativeProd = liveFirestoreProd
+        ? { ...fallbackProd, ...liveFirestoreProd }
+        : fallbackProd;
       if (gmcMeta) {
-        const readableName = fallbackProd?.productName || resolvedSlug
+        const readableName = authoritativeProd?.productName || resolvedSlug
           .replace(/-pakistan$/, '')
           .split('-')
           .map(w => w.toUpperCase() === 'IP' || w.toUpperCase() === 'PTZ' || w.toUpperCase() === 'USB' || w.toUpperCase() === '4K' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))
           .join(' ');
-        const effectivePrice = fallbackProd ? resolveProductPricing(fallbackProd).effectivePrice : 50000;
-        const regularPrice = fallbackProd ? resolveProductPricing(fallbackProd).regularPrice : effectivePrice;
-        const productImg = fallbackProd?.images?.[0] || fallbackProd?.imageUrl || 'https://avlive.com.pk/og-image.jpg';
+        const resolvedPricing = authoritativeProd ? resolveProductPricing(authoritativeProd) : { effectivePrice: 50000, regularPrice: 50000 };
+        const effectivePrice = resolvedPricing.effectivePrice;
+        const regularPrice = resolvedPricing.regularPrice;
+        const rawFallbackImgs = (fallbackProd?.images?.length ? fallbackProd.images : [fallbackProd?.imageUrl || 'https://avlive.com.pk/og-image.jpg']) as string[];
+        const absSchemaImgs = Array.from(
+          new Set(rawFallbackImgs.map((u) => normalizeGmcImageUrl(u) || (u.startsWith('/') ? `https://avlive.com.pk${u}` : u)).filter(Boolean))
+        );
+        const productImg = absSchemaImgs[0] || 'https://avlive.com.pk/og-image.jpg';
         const candidateWithMpn = `${readableName} (${gmcMeta.mpn}) Pakistan | AV Live`;
         const candidateShort = `${readableName} Price in Pakistan | AV Live`;
+        const baseTitlePrefix = readableName.split(/\s+[–—-]\s+/)[0]?.trim() || readableName;
+        const candidateCompactPrice = `${baseTitlePrefix} Price in Pakistan | AV Live`;
+        const candidateCompact = `${baseTitlePrefix} | AV Live`;
         const title = candidateWithMpn.length <= 65
           ? candidateWithMpn
-          : clampSeoTitle(candidateShort.length <= 65 ? candidateShort : `${readableName} | AV Live`, 65);
-        const fullSchemaDesc = gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} MPN ${gmcMeta.mpn} with 1-year Pakistan warranty and nationwide deployment.`;
+          : candidateShort.length <= 65
+          ? candidateShort
+          : candidateCompactPrice.length <= 65
+          ? candidateCompactPrice
+          : candidateCompact.length <= 65
+          ? candidateCompact
+          : clampSeoTitle(`${readableName} | AV Live`, 65);
+        const fullSchemaDesc = gmcMeta.gmcDescription || gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} MPN ${gmcMeta.mpn} with 1-year Pakistan warranty and nationwide deployment.`;
         const description = clampSeoDescription(
-          `${readableName} (${gmcMeta.mpn}) in Pakistan: Rs. ${effectivePrice.toLocaleString()}. ${gmcMeta.highlight}. Official ${gmcMeta.brand} warranty.`,
-          128
+          gmcMeta.seoMetaDescription || `${readableName} (${gmcMeta.mpn}) in Pakistan: Rs. ${effectivePrice.toLocaleString()}. ${gmcMeta.highlight}. Official ${gmcMeta.brand} warranty.`,
+          160
         );
         const specEntries = (gmcMeta.defaultSpecs || '')
           .split(';')
@@ -2607,11 +3495,12 @@ async function startServer() {
                 '@type': 'Product',
                 '@id': `${canonicalUrl}#product`,
                 name: readableName,
-                image: fallbackProd?.images?.length ? fallbackProd.images : [productImg],
+                image: absSchemaImgs.length > 0 ? absSchemaImgs : [productImg],
                 sku: gmcMeta.mpn,
                 mpn: gmcMeta.mpn,
-                gtin12: gmcMeta.gtin,
-                gtin: gmcMeta.gtin,
+                ...(gmcMeta.gtin.replace(/\D/g, '').length === 13
+                  ? { gtin13: gmcMeta.gtin, gtin: gmcMeta.gtin }
+                  : { gtin12: gmcMeta.gtin, gtin: gmcMeta.gtin }),
                 description: fullSchemaDesc,
                 brand: { '@type': 'Brand', name: gmcMeta.brand },
                 aggregateRating: {
@@ -3518,42 +4407,42 @@ async function startServer() {
       updated = updated
         .replace(
           /<link(?:\s+data-rh="true")?\s+rel="canonical"\s+href="https:\/\/avlive\.com\.pk"\s*\/>/,
-          `<link data-rh="true" rel="canonical" href="${canonicalUrl}" />`
+          () => `<link data-rh="true" rel="canonical" href="${canonicalUrl}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+property="og:url"\s+content="https:\/\/avlive\.com\.pk"\s*\/>/,
-          `<meta data-rh="true" property="og:url" content="${canonicalUrl}" />`
+          () => `<meta data-rh="true" property="og:url" content="${canonicalUrl}" />`
         );
     }
 
     if (matched) {
       const clampedTitle = clampSeoTitle(matched.title, 65);
-      const clampedDesc = clampSeoDescription(matched.description, 128);
+      const clampedDesc = clampSeoDescription(matched.description, 160);
       const safeTitleText = escapeHtmlText(clampedTitle);
       const safeTitleAttr = escapeHtmlAttr(clampedTitle);
       const safeDescAttr = escapeHtmlAttr(clampedDesc);
 
       updated = updated
-        .replace(/<title(?:\s+data-rh="true")?>[\s\S]*?<\/title>/, `<title data-rh="true">${safeTitleText}</title>`)
+        .replace(/<title(?:\s+data-rh="true")?>[\s\S]*?<\/title>/, () => `<title data-rh="true">${safeTitleText}</title>`)
         .replace(
           /<meta(?:\s+data-rh="true")?\s+name="description"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" name="description" content="${safeDescAttr}" />`
+          () => `<meta data-rh="true" name="description" content="${safeDescAttr}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+property="og:title"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" property="og:title" content="${safeTitleAttr}" />`
+          () => `<meta data-rh="true" property="og:title" content="${safeTitleAttr}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+property="og:description"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" property="og:description" content="${safeDescAttr}" />`
+          () => `<meta data-rh="true" property="og:description" content="${safeDescAttr}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+name="twitter:title"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" name="twitter:title" content="${safeTitleAttr}" />`
+          () => `<meta data-rh="true" name="twitter:title" content="${safeTitleAttr}" />`
         )
         .replace(
           /<meta(?:\s+data-rh="true")?\s+name="twitter:description"\s+content="[^"]*"\s*\/>/,
-          `<meta data-rh="true" name="twitter:description" content="${safeDescAttr}" />`
+          () => `<meta data-rh="true" name="twitter:description" content="${safeDescAttr}" />`
         );
       if (matched.image) {
         const safeImageAttr = escapeHtmlAttr(matched.image);
@@ -3561,19 +4450,19 @@ async function startServer() {
         updated = updated
           .replace(
             /<meta(?:\s+data-rh="true")?\s+property="og:image"\s+content="[^"]*"\s*\/>/,
-            `<meta data-rh="true" property="og:image" content="${safeImageAttr}" />`
+            () => `<meta data-rh="true" property="og:image" content="${safeImageAttr}" />`
           )
           .replace(
             /<meta(?:\s+data-rh="true")?\s+property="og:image:alt"\s+content="[^"]*"\s*\/>/,
-            `<meta data-rh="true" property="og:image:alt" content="${safeImageAltAttr}" />`
+            () => `<meta data-rh="true" property="og:image:alt" content="${safeImageAltAttr}" />`
           )
           .replace(
             /<meta(?:\s+data-rh="true")?\s+name="twitter:image"\s+content="[^"]*"\s*\/>/,
-            `<meta data-rh="true" name="twitter:image" content="${safeImageAttr}" />`
+            () => `<meta data-rh="true" name="twitter:image" content="${safeImageAttr}" />`
           )
           .replace(
             /<meta(?:\s+data-rh="true")?\s+name="twitter:image:alt"\s+content="[^"]*"\s*\/>/,
-            `<meta data-rh="true" name="twitter:image:alt" content="${safeImageAltAttr}" />`
+            () => `<meta data-rh="true" name="twitter:image:alt" content="${safeImageAltAttr}" />`
           );
       }
       if (matched.noindex) {
@@ -3659,14 +4548,14 @@ async function startServer() {
             '@context': 'https://schema.org',
             '@graph': baseGraph
           };
-          const scopedScriptTag = `<script id="ssr-route-schema" type="application/ld+json">${JSON.stringify(scopedSchema)}</script>`;
+          const scopedScriptTag = `<script id="ssr-route-schema" type="application/ld+json">${JSON.stringify(scopedSchema).replace(/</g, '\\u003c')}</script>`;
           if (/<script id="ssr-home-schema" type="application\/ld\+json">[\s\S]*?<\/script>/.test(updated)) {
             updated = updated.replace(
               /<script id="ssr-home-schema" type="application\/ld\+json">[\s\S]*?<\/script>/,
-              scopedScriptTag
+              () => scopedScriptTag
             );
           } else {
-            updated = updated.replace('</head>', `${scopedScriptTag}\n  </head>`);
+            updated = updated.replace('</head>', () => `${scopedScriptTag}\n  </head>`);
           }
         }
       }
@@ -3674,10 +4563,19 @@ async function startServer() {
 
     if (ssrCustomBodyHtml) {
       const ssrHeaderHtml = `<header class="ssr-seo-header"><nav aria-label="Primary Header Navigation"><a href="https://avlive.com.pk">AV Live Communications</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/video-conference">Video Conference Systems</a> | <a href="https://avlive.com.pk/video-conferencing-solutions">Video Conferencing</a> | <a href="https://avlive.com.pk/corporate-event-management">Corporate Events</a> | <a href="https://avlive.com.pk/shop">Hardware Shop</a> | <a href="https://avlive.com.pk/room-designer">3D Room Designer</a> | <a href="https://avlive.com.pk/contact">Contact (0321-4256263)</a></nav></header>`;
-      const ssrFooterHtml = `<footer class="ssr-seo-footer"><nav aria-label="Footer Directory and Regional Hubs"><a href="https://avlive.com.pk/lahore">AV Live Lahore</a> | <a href="https://avlive.com.pk/karachi">AV Live Karachi</a> | <a href="https://avlive.com.pk/islamabad">AV Live Islamabad</a> | <a href="https://avlive.com.pk/solutions">Industry Solutions</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/video-conference">Video Conference Systems</a> | <a href="https://avlive.com.pk/video-conferencing">Video Conferencing Hub</a> | <a href="https://avlive.com.pk/esports">Esports Arena Production</a> | <a href="https://avlive.com.pk/sitemap">Complete HTML Sitemap</a> | <a href="https://avlive.com.pk/faqs">FAQs</a> | <a href="https://avlive.com.pk/reviews">Client Reviews</a> | <a href="https://avlive.com.pk/returns">30-Day Returns</a> | <a href="https://avlive.com.pk/shipping">Nationwide Shipping</a> | <a href="https://avlive.com.pk/payment">FBR GST Payment</a> | <a href="https://avlive.com.pk/rma">Warranty &amp; RMA</a> | <a href="https://avlive.com.pk/programs/government-education-pricing">Gov &amp; HEC Pricing</a> | <a href="https://avlive.com.pk/programs/reseller-program">Reseller Program</a> | <a href="https://avlive.com.pk/programs/blind-drop-shipping">Blind Drop Shipping</a> | <a href="https://avlive.com.pk/programs/fulfillment-services">3PL Fulfillment</a> | <a href="https://avlive.com.pk/programs/promotions">Bundles &amp; Rebates</a> | <a href="https://avlive.com.pk/programs/provisioning-services">Zero-Touch Provisioning</a> | <a href="https://avlive.com.pk/privacy-policy">Privacy Policy</a> | <a href="https://avlive.com.pk/terms-of-service">Terms of Service</a></nav></footer>`;
+      const ssrFooterHtml = `<footer class="ssr-seo-footer"><nav aria-label="Footer Directory and Regional Hubs"><a href="https://avlive.com.pk/lahore">AV Live Lahore</a> | <a href="https://avlive.com.pk/karachi">AV Live Karachi</a> | <a href="https://avlive.com.pk/islamabad">AV Live Islamabad</a> | <a href="https://avlive.com.pk/solutions">Industry Solutions</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/video-conference">Video Conference Systems</a> | <a href="https://avlive.com.pk/video-conferencing">Video Conferencing Hub</a> | <a href="https://avlive.com.pk/esports">Esports Arena Production</a> | <a href="https://avlive.com.pk/sitemap">Complete HTML Sitemap</a> | <a href="https://avlive.com.pk/faqs">FAQs</a> | <a href="https://avlive.com.pk/reviews">Client Reviews</a> | <a href="https://avlive.com.pk/returns">30-Day Returns</a> | <a href="https://avlive.com.pk/shipping">Nationwide Shipping</a> | <a href="https://avlive.com.pk/payment">FBR GST Payment</a> | <a href="https://avlive.com.pk/rma">Warranty &amp; RMA</a> | <a href="https://avlive.com.pk/programs/government-education-pricing">Gov &amp; HEC Pricing</a> | <a href="https://avlive.com.pk/programs/reseller-program">Reseller Program</a> | <a href="https://avlive.com.pk/programs/blind-drop-shipping">Blind Drop Shipping</a> | <a href="https://avlive.com.pk/programs/fulfillment-services">3PL Fulfillment</a> | <a href="https://avlive.com.pk/programs/promotions">Bundles &amp; Rebates</a> | <a href="https://avlive.com.pk/programs/provisioning-services">Zero-Touch Provisioning</a> | <a href="https://avlive.com.pk/privacy-policy">Privacy Policy</a> | <a href="https://avlive.com.pk/terms-of-service">Terms of Service</a> | <a href="https://avlive.com.pk/user-data-deletion">User Data Deletion</a></nav></footer>`;
       updated = updated.replace(
         /<div id="root">[\s\S]*?<\/div><!--ssr-root-end-->|<div id="root"><\/div>/,
-        `<div id="root">${ssrHeaderHtml}${ssrCustomBodyHtml}${ssrFooterHtml}</div><!--ssr-root-end-->`
+        () => `<div id="root">${ssrHeaderHtml}${ssrCustomBodyHtml}${ssrFooterHtml}</div><!--ssr-root-end-->`
+      );
+    }
+
+    const rawPublicFbAppId = (process.env.VITE_FACEBOOK_APP_ID || process.env.FACEBOOK_APP_ID || '').trim();
+    const safePublicFbAppId = rawPublicFbAppId.replace(/[^0-9a-zA-Z_-]/g, '');
+    if (safePublicFbAppId) {
+      updated = updated.replace(
+        'window.__FB_APP_ID__ = "";',
+        () => `window.__FB_APP_ID__ = ${JSON.stringify(safePublicFbAppId)};`
       );
     }
 
@@ -3721,6 +4619,9 @@ async function startServer() {
     '/terms': '/terms-of-service',
     '/terms-and-conditions': '/terms-of-service',
     '/privacy': '/privacy-policy',
+    '/data-deletion': '/user-data-deletion',
+    '/facebook-data-deletion': '/user-data-deletion',
+    '/delete-data': '/user-data-deletion',
     '/sitemap.html': '/sitemap',
     '/tools/room-designer': '/room-designer',
     '/fold-flat-podium-teleprompter': '/podium-teleprompter',
@@ -3756,6 +4657,7 @@ async function startServer() {
     '/category/contact': '/contact',
     '/category/privacy-policy': '/privacy-policy',
     '/category/terms-of-service': '/terms-of-service',
+    '/category/user-data-deletion': '/user-data-deletion',
     '/category/blind-drop-shipping': '/programs/blind-drop-shipping',
     '/category/fulfillment-services': '/programs/fulfillment-services',
     '/category/government-education-pricing': '/programs/government-education-pricing',

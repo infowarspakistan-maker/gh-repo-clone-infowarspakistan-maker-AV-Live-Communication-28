@@ -102,7 +102,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
     excerpt:
       'Choosing between a physical IP phone and a software-based softphone depends on your team\'s workflow, security needs, and budget. Desk IP phones remain essential for small businesses in 2026, offering reliability, superior audio quality, and dedicated features. We break down the pros and cons of each, helping you make the right decision for your organization.',
     answerFirstSummary:
-      'Physical PoE SIP desk phones (Cisco 8841, Yealink T46S, Polycom VVX 250, Grandstream GXP2170) provide 99.999% uptime on isolated voice VLANs with hardware acoustic echo cancellation, whereas softphones (3CX, Grandstream Wave) suit mobile field teams. Most Pakistani enterprises deploy a hybrid 70% desk IP phone + 30% mobile softphone architecture.',
+      'Physical PoE SIP desk phones (Poly VVX 411, Cisco 8841, Yealink T46S, Polycom VVX 250, Grandstream GXP2170) provide 99.999% uptime on isolated voice VLANs with hardware acoustic echo cancellation, whereas softphones (3CX, Grandstream Wave) suit mobile field teams. Most Pakistani enterprises deploy a hybrid 70% desk IP phone + 30% mobile softphone architecture.',
     comparisonTable: {
       caption: 'Hardware SIP IP Phones vs. Enterprise Softphones Comparison',
       headers: ['Evaluation Metric', 'Hardware PoE IP Phones (Yealink / Poly / Cisco)', 'Software Softphones (3CX / Wave App)'],
@@ -114,6 +114,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       ]
     },
     relatedLinks: [
+      { label: 'Poly VVX 411 12-Line Gigabit IP Phone', path: '/product/poly-vvx-411-pakistan' },
       { label: 'Enterprise IP Phones Catalog', path: '/category/ip-phones' },
       { label: 'VoIP Phone Systems & IP PBX', path: '/category/voip-phone-systems' },
       { label: 'Grandstream UCM6308 IP PBX', path: '/product/grandstream-ucm6308-pakistan' },
@@ -461,6 +462,7 @@ export const STATIC_CORE_ROUTES: string[] = [
   '/rma',
   '/privacy-policy',
   '/terms-of-service',
+  '/user-data-deletion',
   '/programs/quote',
   '/programs/blind-drop-shipping',
   '/programs/government-education-pricing',
@@ -584,6 +586,7 @@ export const NON_PRODUCT_CATEGORY_REDIRECTS: Record<string, string> = {
   contact: '/contact',
   'privacy-policy': '/privacy-policy',
   'terms-of-service': '/terms-of-service',
+  'user-data-deletion': '/user-data-deletion',
   'blind-drop-shipping': '/programs/blind-drop-shipping',
   'fulfillment-services': '/programs/fulfillment-services',
   'government-education-pricing': '/programs/government-education-pricing',
@@ -849,6 +852,7 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
   const policyRoutes = new Set([
     '/privacy-policy',
     '/terms-of-service',
+    '/user-data-deletion',
     '/returns',
     '/shipping',
     '/payment',

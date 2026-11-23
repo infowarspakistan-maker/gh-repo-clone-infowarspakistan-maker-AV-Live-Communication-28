@@ -108,6 +108,7 @@ const B2B_CORPORATE_LINKS = [
   { path: '/rma', label: 'Official Hardware Warranty Claim & RMA Portal' },
   { path: '/privacy-policy', label: 'Corporate Data Protection & Privacy Policy' },
   { path: '/terms-of-service', label: 'Enterprise Terms of Sale & SLA Conditions' },
+  { path: '/user-data-deletion', label: 'User Data Deletion & Account Removal Portal' },
 ];
 
 const CATEGORY_LABELS: Record<string, string> = {

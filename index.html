@@ -501,10 +501,69 @@
           <a href="https://avlive.com.pk/programs/promotions">Bundles &amp; Rebates</a> |
           <a href="https://avlive.com.pk/programs/provisioning-services">Zero-Touch Provisioning</a> |
           <a href="https://avlive.com.pk/privacy-policy">Privacy Policy</a> |
-          <a href="https://avlive.com.pk/terms-of-service">Terms of Service</a>
+          <a href="https://avlive.com.pk/terms-of-service">Terms of Service</a> |
+          <a href="https://avlive.com.pk/user-data-deletion">User Data Deletion</a>
         </nav>
       </footer>
     </div><!--ssr-root-end-->
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Facebook SDK for JavaScript (Deferred On-Demand / Post-Idle Loader for 98-100 Lighthouse Performance) -->
+    <script>
+      window.__FB_APP_ID__ = "";
+      window.__FB_API_VERSION__ = "v22.0";
+
+      window.fbAsyncInit = function() {
+        var appId = (window.__FB_APP_ID__ || "").trim();
+        if (!appId || appId === "{your-app-id}") {
+          return;
+        }
+        FB.init({
+          appId      : appId,
+          cookie     : true,
+          xfbml      : true,
+          version    : window.__FB_API_VERSION__ || "v22.0"
+        });
+
+        FB.AppEvents.logPageView();
+        window.__AVLIVE_FB_INITIALIZED_APP_ID__ = appId;
+        window.dispatchEvent(new Event("avlive:fb-sdk-ready"));
+      };
+
+      window.__avliveLoadFacebookSdk = function() {
+        if (document.getElementById("facebook-jssdk")) { return; }
+        var js = document.createElement("script");
+        js.id = "facebook-jssdk";
+        js.async = true;
+        js.defer = true;
+        js.crossOrigin = "anonymous";
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        var fjs = document.getElementsByTagName("script")[0];
+        if (fjs && fjs.parentNode) {
+          fjs.parentNode.insertBefore(js, fjs);
+        } else {
+          document.head.appendChild(js);
+        }
+      };
+
+      // Only prefetch Facebook SDK after first user interaction + idle if App ID is configured
+      (function() {
+        var appId = (window.__FB_APP_ID__ || "").trim();
+        if (!appId || appId === "{your-app-id}") { return; }
+        var triggered = false;
+        var triggerLoad = function() {
+          if (triggered) { return; }
+          triggered = true;
+          window.removeEventListener("pointerdown", triggerLoad);
+          window.removeEventListener("keydown", triggerLoad);
+          if ("requestIdleCallback" in window) {
+            window.requestIdleCallback(function() { window.__avliveLoadFacebookSdk(); }, { timeout: 4000 });
+          } else {
+            window.setTimeout(function() { window.__avliveLoadFacebookSdk(); }, 1500);
+          }
+        };
+        window.addEventListener("pointerdown", triggerLoad, { once: true, passive: true });
+        window.addEventListener("keydown", triggerLoad, { once: true, passive: true });
+      })();
+    </script>
   </body>
 </html>

@@ -152,39 +152,41 @@ export function Checkout() {
     <div className="bg-[#F8F9FA] min-h-screen py-16 text-[#1A2B4C]">
       <SEO title="Secure Checkout | AV Live Communications" noindex={true} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 lg:mb-12 gap-4">
            <div>
-             <h1 className="text-4xl font-black tracking-tight">Secure Logistics Portal</h1>
-             <p className="text-gray-400 mt-2 font-black uppercase tracking-widest text-[10px]">Finalizing Hardware Acquisition</p>
+             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight">Secure Logistics Portal</h1>
+             <p className="text-gray-500 mt-1.5 font-black uppercase tracking-widest text-xs">Finalizing Hardware Acquisition</p>
            </div>
            <CurrencySelector variant="pill" />
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-12">
-          <div className="lg:col-span-2 space-y-12">
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-12">
+          <div className="lg:col-span-2 space-y-6 lg:space-y-10">
             
             {/* Customer Information */}
-            <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-xl">
-              <h2 className="text-xl font-black mb-8 border-b border-gray-50 pb-6 uppercase tracking-widest text-[12px] text-gray-400">1. Deployment Profile</h2>
+            <div className="bg-white p-5 sm:p-8 lg:p-10 rounded-3xl lg:rounded-[2.5rem] border border-gray-100 shadow-xl">
+              <h2 className="text-sm sm:text-base font-black mb-6 border-b border-gray-100 pb-4 uppercase tracking-widest text-gray-500">1. Deployment Profile</h2>
               
-              <div className="flex gap-4 mb-10 p-1.5 bg-gray-50 rounded-2xl w-fit">
+              <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-4 mb-8 p-1.5 bg-gray-50 rounded-2xl w-full sm:w-fit">
                 <button 
+                  type="button"
                   onClick={() => setCustomerType('individual')}
-                  className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${customerType === 'individual' ? 'bg-white shadow-xl text-[#00B4D8]' : 'text-gray-400 hover:text-gray-700'}`}
+                  className={`px-4 sm:px-7 py-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${customerType === 'individual' ? 'bg-white shadow-md text-[#00B4D8]' : 'text-gray-500 hover:text-gray-800'}`}
                 >
                   <User size={16} /> Individual
                 </button>
                 <button 
+                  type="button"
                   onClick={() => setCustomerType('business')}
-                  className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${customerType === 'business' ? 'bg-white shadow-xl text-[#00B4D8]' : 'text-gray-400 hover:text-gray-700'}`}
+                  className={`px-4 sm:px-7 py-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${customerType === 'business' ? 'bg-white shadow-md text-[#00B4D8]' : 'text-gray-500 hover:text-gray-800'}`}
                 >
                   <Building2 size={16} /> Enterprise (B2B)
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Operator First Name</label>
+                  <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">Operator First Name</label>
                   <input 
                     type="text" 
                     value={formData.firstName}
@@ -296,20 +298,20 @@ export function Checkout() {
             </div>
 
             {/* Payment Information */}
-            <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-xl opacity-50 cursor-not-allowed">
-              <h2 className="text-xl font-black mb-8 border-b border-gray-50 pb-6 uppercase tracking-widest text-[12px] text-gray-400 flex items-center gap-2">
-                <CreditCard /> 2. Transaction Module
+            <div className="bg-white p-5 sm:p-8 lg:p-10 rounded-3xl lg:rounded-[2.5rem] border border-gray-100 shadow-xl opacity-60">
+              <h2 className="text-sm sm:text-base font-black mb-6 border-b border-gray-100 pb-4 uppercase tracking-widest text-gray-500 flex items-center gap-2">
+                <CreditCard size={18} /> 2. Transaction Module
               </h2>
-              <div className="flex items-center gap-4 text-gray-400 font-bold text-xs italic bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                 <Loader2 className="animate-spin" size={16} /> Awaiting deployment profile completion...
+              <div className="flex items-center gap-3 text-gray-500 font-bold text-xs sm:text-sm italic bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
+                 <Loader2 className="animate-spin shrink-0" size={16} /> Awaiting deployment profile completion...
               </div>
             </div>
             
           </div>
 
           <div>
-            <div className="bg-white rounded-[2.5rem] border border-gray-100 p-10 sticky top-32 shadow-2xl overflow-hidden">
-              <h3 className="font-black text-xl mb-10 border-b border-gray-50 pb-6 uppercase tracking-widest text-[12px] text-gray-400">Inventory Summary</h3>
+            <div className="bg-white rounded-3xl lg:rounded-[2.5rem] border border-gray-100 p-5 sm:p-8 lg:p-10 sticky top-28 shadow-2xl overflow-hidden">
+              <h3 className="font-black text-sm sm:text-base mb-6 lg:mb-8 border-b border-gray-100 pb-4 uppercase tracking-widest text-gray-500">Inventory Summary</h3>
               
               <div className="space-y-6 mb-10">
                 {cartItems.map(item => (

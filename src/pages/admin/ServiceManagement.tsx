@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit3, Loader2, X, Image as ImageIcon, Copy, Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Trash2, Edit3, Loader2, X, Image as ImageIcon, Copy, Check, Facebook } from 'lucide-react';
 import { RichTextEditor } from '../../components/admin/RichTextEditor';
 import { 
   Service, 
@@ -313,6 +314,14 @@ export function ServiceManagement() {
                 <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Slug: {service.slug}</p>
               </div>
               <div className="flex items-center gap-2">
+                <Link
+                  to={`/admin/facebook-publisher?type=service&id=${encodeURIComponent(service.id || service.slug)}`}
+                  title="Post Service to Facebook Page"
+                  aria-label={`Post ${service.title} to Facebook`}
+                  className="w-12 h-12 bg-blue-50 hover:bg-[#1877F2] hover:text-white text-[#1877F2] rounded-2xl flex items-center justify-center transition-all"
+                >
+                  <Facebook size={18} />
+                </Link>
                 <button 
                   onClick={() => handleEdit(service)}
                   className="w-12 h-12 bg-gray-50 hover:bg-[#00B4D8] hover:text-white text-[#1A2B4C] rounded-2xl flex items-center justify-center transition-all"

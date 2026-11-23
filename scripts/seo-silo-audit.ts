@@ -167,7 +167,7 @@ async function runAudit() {
     '/product/benq-w4100i-pakistan', '/product/panasonic-pt-rq45k-pakistan',
     '/product/bosch-paviro-pva-4cr12-pakistan', '/product/3cx-pro-8-sc-pakistan',
     '/product/freepbx-enterprise-pakistan', '/product/cisco-cucm-license-pakistan',
-    '/product/grandstream-ucm6308-pakistan', '/product/axis-m3065-v-camera-pakistan',
+    '/product/grandstream-ucm6308-pakistan', '/product/poly-vvx-411-pakistan', '/product/axis-m3065-v-camera-pakistan',
     '/product/2n-ip-vario-intercom-pakistan', '/product/axis-a8105-e-door-station-pakistan'
   ];
   const rootSet = adjacency.get('/') || new Set<string>();

@@ -92,11 +92,11 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
             />
           </div>
 
-          <h3 className="text-[11px] sm:text-xs font-black text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-1 leading-snug">
+          <h3 className="text-xs sm:text-sm font-black text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2 min-h-[2.25rem] leading-snug">
             {product.productName}
           </h3>
 
-          <p className="text-[9px] text-gray-400 font-semibold mt-0.5 truncate">
+          <p className="text-xs text-gray-500 font-semibold mt-1 truncate">
             {brandName} <span aria-hidden="true">·</span> {stockLabel}
           </p>
         </Link>
@@ -115,18 +115,18 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
                 : 'bg-white/95 text-rose-500 hover:bg-rose-50'
             }`}
           >
-            <Heart size={11} fill="currentColor" />
+            <Heart size={12} fill="currentColor" />
           </span>
         </button>
       </div>
 
-      <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-gray-50 gap-1">
+      <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-gray-100 gap-1.5">
         <div className="min-w-0">
-          <span className="block text-[11px] sm:text-xs font-black text-[#1A2B4C] truncate">
+          <span className="block text-xs sm:text-sm font-black text-[#1A2B4C] truncate">
             {formatPrice(effectivePrice)}
           </span>
           {hasSale && regularPrice > effectivePrice && (
-            <span className="block text-[9px] text-gray-400 line-through font-bold truncate">
+            <span className="block text-xs text-gray-400 line-through font-bold truncate">
               {formatPrice(regularPrice)}
             </span>
           )}

@@ -501,17 +501,17 @@ export function Home() {
           <h1 className="text-xs sm:text-sm lg:text-base font-black tracking-tight text-white leading-snug">
             Video Conference in Pakistan, Event Management in Pakistan &amp; Corporate Event Production — <span className="text-[#00B4D8]">AV Live (Est. 2011)</span>
           </h1>
-          <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar text-[10px] font-bold shrink-0">
-            <Link to="/video-conference-in-pakistan" className="px-2 py-0.5 rounded bg-[#00B4D8]/20 border border-[#00B4D8]/40 text-[#00B4D8] hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+          <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar text-xs font-bold shrink-0">
+            <Link to="/video-conference-in-pakistan" className="px-2.5 py-1 rounded bg-[#00B4D8]/20 border border-[#00B4D8]/40 text-[#00B4D8] hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
               Video Conference in Pakistan
             </Link>
-            <Link to="/event-management-in-pakistan" className="px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+            <Link to="/event-management-in-pakistan" className="px-2.5 py-1 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
               Event Management in Pakistan
             </Link>
-            <Link to="/corporate-event-management" className="px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+            <Link to="/corporate-event-management" className="px-2.5 py-1 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
               Corporate Events
             </Link>
-            <Link to="/av-equipment-rental" className="px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
+            <Link to="/av-equipment-rental" className="px-2.5 py-1 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
               SMD &amp; Sound Rental
             </Link>
           </div>
@@ -523,26 +523,26 @@ export function Home() {
         {/* Compact Deep Navy Rounded Hero Promo Card (Dynamic Slide Switcher) */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1A2B4C] via-[#1E325C] to-[#2B4C8C] text-white p-3.5 shadow-md">
           <div className="relative z-10 flex items-center justify-between gap-2.5">
-            <div className="flex-1 min-w-0 space-y-1">
-              <span className="inline-block text-[9px] font-black uppercase tracking-widest text-[#00B4D8] bg-white/10 px-2 py-0.5 rounded-full">
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <span className="inline-block text-xs font-black uppercase tracking-wider text-[#00B4D8] bg-white/10 px-2.5 py-0.5 rounded-full">
                 Official PK Partner • Est. 2011
               </span>
-              <h2 className="text-sm sm:text-base font-black leading-tight tracking-tight text-white line-clamp-2">
+              <h2 className="text-base sm:text-lg font-black leading-tight tracking-tight text-white line-clamp-2">
                 {activeHeroSlide.title}
               </h2>
-              <p className="text-[10px] text-white/80 font-medium leading-snug line-clamp-2">
+              <p className="text-xs text-white/85 font-medium leading-snug line-clamp-2">
                 {(activeHeroSlide.subtitle || '').replace(/<[^>]*>?/gm, '')}
               </p>
-              <div className="pt-1 flex flex-wrap items-center gap-1.5">
+              <div className="pt-1 flex flex-wrap items-center gap-2">
                 <Link
                   to={activeHeroSlide.ctaLink || '/shop'}
-                  className="px-3 py-1.5 min-h-[32px] rounded-lg bg-white text-[#1A2B4C] font-black text-[10px] uppercase tracking-wider inline-flex items-center justify-center shadow-xs"
+                  className="px-3.5 py-1.5 min-h-[34px] rounded-lg bg-white text-[#1A2B4C] font-black text-xs uppercase tracking-wider inline-flex items-center justify-center shadow-xs"
                 >
                   {activeHeroSlide.ctaText || 'Shop Catalog'}
                 </Link>
                 <Link
                   to="/event-quote"
-                  className="px-2.5 py-1.5 min-h-[32px] rounded-lg bg-white/15 border border-white/25 text-white font-bold text-[10px] inline-flex items-center justify-center"
+                  className="px-3 py-1.5 min-h-[34px] rounded-lg bg-white/15 border border-white/25 text-white font-bold text-xs inline-flex items-center justify-center"
                 >
                   15m Quote
                 </Link>
@@ -663,7 +663,7 @@ export function Home() {
             const isCurrentSlide = index === currentSlide;
             return (
               <div
-                key={slide.id || index}
+                key={`${slide.id || 'slide'}-${index}`}
                 aria-hidden={!isCurrentSlide}
                 className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
                   isCurrentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
@@ -768,13 +768,13 @@ export function Home() {
       <section aria-label="Enterprise AV & Unified Communications Categories" className="hidden lg:block bg-white border border-gray-100 shadow-xs py-3.5 relative z-20 mx-auto">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 overflow-x-auto pb-1 hide-scrollbar">
           <h2 className="sr-only">Primary Enterprise AV &amp; Unified Communications Categories in Pakistan</h2>
-          <div className="flex items-start justify-between min-w-max gap-6">
+          <div className="flex items-start justify-between min-w-max gap-5">
              {CATEGORIES.map((cat, i) => (
                <Link key={i} to={cat.link} className="flex flex-col items-center group w-24">
                  <div className="w-13 h-13 rounded-2xl bg-gray-50 flex items-center justify-center text-[#1A2B4C] group-hover:bg-[#1A2B4C] group-hover:text-white transition-all shadow-xs border border-gray-100 mb-1.5 group-hover:shadow-md group-hover:-translate-y-0.5">
                    <cat.icon size={22} strokeWidth={1.6} />
                  </div>
-                  <span className="text-[9px] font-black text-center leading-tight uppercase tracking-wider text-slate-600 group-hover:text-[#1A2B4C] transition-colors">{cat.name}</span>
+                  <span className="text-xs font-extrabold text-center leading-tight tracking-tight text-slate-700 group-hover:text-[#1A2B4C] transition-colors">{cat.name}</span>
                </Link>
              ))}
           </div>

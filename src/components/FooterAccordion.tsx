@@ -120,6 +120,7 @@ const B2B_REGIONAL_AND_POLICY_SEO_LINKS: SeoFooterLinkItem[] = [
   { path: '/rma', label: 'Hardware Warranty RMA Portal' },
   { path: '/privacy-policy', label: 'Corporate Privacy Policy' },
   { path: '/terms-of-service', label: 'Enterprise Terms of Service' },
+  { path: '/user-data-deletion', label: 'User Data Deletion Portal' },
 ];
 
 export function buildAll155SeoFooterCategories(): SeoFooterCategoryGroup[] {

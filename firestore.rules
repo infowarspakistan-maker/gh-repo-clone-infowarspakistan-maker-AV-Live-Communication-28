@@ -171,6 +171,26 @@ service cloud.firestore {
         && data.createdAt == request.time;
     }
 
+    function isValidFacebookPost(data) {
+      return data.keys().hasAll(['pageId', 'pageName', 'itemType', 'itemId', 'title', 'message', 'postFormat', 'linkUrl', 'imageUrl', 'facebookPostId', 'permalinkUrl', 'status', 'errorMessage', 'publishedBy', 'createdAt'])
+        && data.keys().hasOnly(['pageId', 'pageName', 'itemType', 'itemId', 'title', 'message', 'postFormat', 'linkUrl', 'imageUrl', 'facebookPostId', 'permalinkUrl', 'status', 'errorMessage', 'publishedBy', 'createdAt'])
+        && data.pageId is string && data.pageId.size() >= 1 && data.pageId.size() <= 64
+        && data.pageName is string && data.pageName.size() >= 1 && data.pageName.size() <= 200
+        && data.itemType in ['product', 'service', 'custom']
+        && data.itemId is string && data.itemId.size() <= 150
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 300
+        && data.message is string && data.message.size() >= 1 && data.message.size() <= 5000
+        && data.postFormat in ['photo', 'link', 'text']
+        && data.linkUrl is string && data.linkUrl.size() <= 500
+        && data.imageUrl is string && data.imageUrl.size() <= 1000
+        && data.facebookPostId is string && data.facebookPostId.size() <= 150
+        && data.permalinkUrl is string && data.permalinkUrl.size() <= 500
+        && data.status in ['published', 'failed']
+        && data.errorMessage is string && data.errorMessage.size() <= 500
+        && data.publishedBy is string && data.publishedBy.size() >= 1 && data.publishedBy.size() <= 200
+        && data.createdAt == request.time;
+    }
+
     // 4. Collection Matches
 
     // Homepage - Public read, Staff Editor write
@@ -285,6 +305,13 @@ service cloud.firestore {
     match /settings/{docId} {
       allow read: if docId == 'global' || docId == 'catalog_tombstones' || isAdmin();
       allow write: if isValidId(docId) && (docId == 'catalog_tombstones' ? isStaffEditor() : isAdmin());
+    }
+
+    // Facebook Page Publish History
+    match /facebook_posts/{postId} {
+      allow read, delete: if isAdmin();
+      allow create: if isAdmin() && isValidId(postId) && isValidFacebookPost(incoming());
+      allow update: if false;
     }
 
     // Stock History

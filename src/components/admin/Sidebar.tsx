@@ -17,7 +17,8 @@ import {
   FileText,
   Sparkles,
   Database,
-  Workflow
+  Workflow,
+  Facebook
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -45,6 +46,7 @@ export function Sidebar() {
     { id: 'automation', label: 'n8n Workflows', icon: Workflow, path: '/admin/automation', group: 'Automation' },
     { id: 'workspace', label: 'Workspace Hub', icon: Sparkles, path: '/admin/workspace', group: 'Google Workspace' },
     { id: 'google-business', label: 'Google Business Profile', icon: Sparkles, path: '/admin/google-business', group: 'Marketing' },
+    { id: 'facebook-publisher', label: 'Facebook Publisher', icon: Facebook, path: '/admin/facebook-publisher', group: 'Marketing' },
     { id: 'blueprint-hub', label: 'AI Agent & Niche Blueprint', icon: Sparkles, path: '/admin/blueprint-hub', group: 'Help & Docs' },
     { id: 'media-guide', label: 'Media Vault & Optimizer', icon: Sparkles, path: '/admin/media-guide', group: 'Page Editor' },
   ];

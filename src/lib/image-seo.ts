@@ -227,6 +227,30 @@ export const VIDEO_CONFERENCE_MEDIA_SEO: Record<string, ImageSeoMetadata> = {
     width: 1200,
     height: 900,
   },
+  '/images/products/poly-vvx-411-main.webp': {
+    title: 'Poly VVX 411 12-Line Gigabit PoE Business IP Phone (2200-48450-025) | AV Live Pakistan',
+    alt: 'Poly VVX 411 12-line Gigabit PoE business IP phone with 3.5-inch color LCD – front view',
+    width: 1200,
+    height: 900,
+  },
+  '/images/products/poly-vvx-411-main.jpg': {
+    title: 'Poly VVX 411 12-Line Gigabit PoE Business IP Phone (2200-48450-025) | AV Live Pakistan',
+    alt: 'Poly VVX 411 12-line Gigabit PoE business IP phone with 3.5-inch color LCD – front view',
+    width: 1200,
+    height: 900,
+  },
+  '/images/products/poly-vvx-411-ports.webp': {
+    title: 'Poly VVX 411 Gigabit PoE Rear Connectivity Ports (RJ45 x2, RJ9 Headset, USB 2.0) | AV Live Pakistan',
+    alt: 'Poly VVX 411 12-line Gigabit PoE business IP phone rear connectivity ports showing dual Gigabit RJ45 PoE, dedicated RJ9 headset port, USB 2.0 and 48V DC input',
+    width: 1200,
+    height: 900,
+  },
+  '/images/products/poly-vvx-411-ports.jpg': {
+    title: 'Poly VVX 411 Gigabit PoE Rear Connectivity Ports (RJ45 x2, RJ9 Headset, USB 2.0) | AV Live Pakistan',
+    alt: 'Poly VVX 411 12-line Gigabit PoE business IP phone rear connectivity ports showing dual Gigabit RJ45 PoE, dedicated RJ9 headset port, USB 2.0 and 48V DC input',
+    width: 1200,
+    height: 900,
+  },
   '/images/products/poly-x70-studio.webp': {
     title: 'HP Poly Studio X70 / X72 Dual-4K Lens Video Conferencing Bar — Studio View | AV Live Pakistan',
     alt: 'HP Poly Studio X70 and X72 flagship dual-4K 20MP all-in-one video conferencing bar with Poly DirectorAI speaker tracking, supplied with official warranty in Pakistan by AV Live.',
@@ -286,6 +310,18 @@ export const VIDEO_CONFERENCE_MEDIA_SEO: Record<string, ImageSeoMetadata> = {
     alt: 'High-brightness commercial 3D holographic showcase display and exhibition totem supplied and rented by AV Live Communications for expos and brand activations in Pakistan.',
     width: 1200,
     height: 900,
+  },
+  '/images/products/poly-studio-x50-tc8.webp': {
+    title: 'Poly Studio X50 4K Video Bar + Poly TC8 Touch Controller Bundle — Special Pakistan Deal (PKR 399,000) | AV Live',
+    alt: 'HP Poly Studio X50 all-in-one 4K UltraHD conference room video bar bundled with the Poly TC8 8-inch PoE touch controller — Special Offer Rs. 399,000 PKR with free delivery in Pakistan.',
+    width: 1000,
+    height: 800,
+  },
+  '/images/products/poly-studio-x50-tc8.jpg': {
+    title: 'Poly Studio X50 4K Video Bar + Poly TC8 Touch Controller Bundle — Special Pakistan Deal (PKR 399,000) | AV Live',
+    alt: 'HP Poly Studio X50 all-in-one 4K UltraHD conference room video bar bundled with the Poly TC8 8-inch PoE touch controller — Special Offer Rs. 399,000 PKR with free delivery in Pakistan.',
+    width: 1000,
+    height: 800,
   },
 };
 

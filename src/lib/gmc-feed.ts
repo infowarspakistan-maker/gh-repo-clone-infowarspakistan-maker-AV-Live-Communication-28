@@ -118,19 +118,38 @@ export function computeUpc12(elevenDigits: string): string {
 export const PRODUCT_GMC_METADATA: Record<
   string,
   {
+    gmcId?: string;
     gtin: string;
     mpn: string;
     brand: string;
+    title?: string;
     color?: string;
     isBundle?: 'yes' | 'no';
+    multipack?: number;
     shippingWeight?: string;
+    shippingLength?: string;
+    shippingWidth?: string;
+    shippingHeight?: string;
+    returnPolicyLabel?: string;
+    googleProductCategory?: string;
+    productType?: string;
+    customLabel0?: string;
+    customLabel1?: string;
+    customLabel2?: string;
+    customLabel3?: string;
+    customLabel4?: string;
     highlight: string;
+    shortSummary?: string;
+    gmcDescription?: string;
     regularPrice?: number;
     salePrice?: number;
     categorySlugs?: string[];
     images?: string[];
     defaultSpecs?: string;
     defaultDescription?: string;
+    seoMetaDescription?: string;
+    seoTags?: string;
+    imageAltText?: string;
   }
 > = {
   '2n-ip-vario-intercom-pakistan': {
@@ -159,8 +178,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: '3CX',
     color: 'Black',
     shippingWeight: '0.20 kg',
-    regularPrice: 145000,
-    salePrice: 128000,
+    regularPrice: 85000,
+    salePrice: 82000,
     categorySlugs: ['voip-phone-systems'],
     images: [
       'https://www.3cx.com/wp-content/uploads/2026/06/Slider-Banner-Home-Page-NO-AI-Recep-Feature-1014x540-px-New-1.webp',
@@ -179,8 +198,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'Polycom',
     color: 'Black',
     shippingWeight: '5.45 kg',
-    regularPrice: 825000,
-    salePrice: 745000,
+    regularPrice: 650000,
+    salePrice: 515000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs', 'ptz-cameras'],
     images: [
       'https://avlive.com.pk/images/products/polycom-group-500-eagleeye-iv.jpg',
@@ -200,8 +219,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'Polycom',
     color: 'Black',
     shippingWeight: '5.45 kg',
-    regularPrice: 825000,
-    salePrice: 745000,
+    regularPrice: 650000,
+    salePrice: 515000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs', 'ptz-cameras'],
     images: [
       'https://avlive.com.pk/images/products/polycom-group-500-eagleeye-iv.jpg',
@@ -237,8 +256,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'AXIS-M3065-V',
     brand: 'Axis',
     color: 'White',
-    regularPrice: 92000,
-    salePrice: 79500,
+    regularPrice: 45000,
+    salePrice: 42000,
     categorySlugs: ['ip-cameras'],
     images: [
       'https://www.axis.com/sites/axis/files/styles/square_500x500_/public/2020-07/61106%3Bp3247lv-ceiling-angle-front-2002.png.webp?itok=FTS3d9aO',
@@ -254,8 +273,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'BENQ-TK705I',
     brand: 'BenQ',
     color: 'White',
-    regularPrice: 445000,
-    salePrice: 398000,
+    regularPrice: 280000,
+    salePrice: 260000,
     categorySlugs: ['projectors'],
     images: [
       'https://image.benq.com/is/image/benqco/tk705i-set1-1-2?$ResponsivePreset$',
@@ -271,8 +290,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'BENQ-W4100I',
     brand: 'BenQ',
     color: 'Black',
-    regularPrice: 890000,
-    salePrice: 825000,
+    regularPrice: 490000,
+    salePrice: 465000,
     categorySlugs: ['projectors'],
     images: [
       'https://online.videopro.com.au/content/c/8/2/4/c82495416b48328b8bab28017ec145e4ed71ee98_W4100i__5_.png',
@@ -289,8 +308,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'PVA-2P500',
     brand: 'Bosch',
     color: 'Black',
-    regularPrice: 410000,
-    salePrice: 375000,
+    regularPrice: 180000,
+    salePrice: 165000,
     categorySlugs: ['intercom-paging-access'],
     images: [
       'https://5.imimg.com/data5/SELLER/Default/2026/2/582792239/ES/HU/CE/9318303/bosch-paviro-pva-2p500-power-amplifier-2x500w.png',
@@ -324,8 +343,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'CP-8841-K9',
     brand: 'Cisco',
     color: 'Charcoal',
-    regularPrice: 78000,
-    salePrice: 68500,
+    regularPrice: 45000,
+    salePrice: 42000,
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
       'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
@@ -354,67 +373,369 @@ export const PRODUCT_GMC_METADATA: Record<
       'Cisco CUCM (Unified Communications Manager) Enterprise Licensing in Pakistan. Enables mission-critical enterprise IP telephony, video calling, and unified endpoint management across multi-branch banking and corporate networks.',
   },
   'cisco-room-bar-pakistan': {
-    gtin: computeUpc12('88972800109'),
-    mpn: 'CS-BAR-NR-K9',
+    gmcId: 'GGN-CS-BAR-T-K9',
+    gtin: '0889728453981',
+    mpn: 'CS-BAR-T-K9',
     brand: 'Cisco',
-    color: 'Carbon Black',
-    shippingWeight: '3.50 kg',
-    regularPrice: 980000,
-    salePrice: 895000,
+    title: 'Cisco Room Bar CS-BAR-T-K9 – 4K Video Bar with Intelligent Camera and Noise-Cancelling Microphones',
+    color: 'First Light Gray',
+    isBundle: 'no',
+    shippingWeight: '1.50 kg',
+    shippingLength: '53.4 cm',
+    shippingWidth: '8.2 cm',
+    shippingHeight: '6.4 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Video Bars',
+    customLabel0: 'Cisco',
+    customLabel1: 'Video-Conferencing',
+    customLabel2: 'Huddle-Room',
+    customLabel3: 'Focus-Room',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 777010,
+    salePrice: 749210,
     categorySlugs: ['video-conferencing', 'touch-panels', 'boardroom-codecs'],
     images: [
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/a10cbe60-8715-422d-ab46-0d0465bbbc25/cisco+room+bar.jpg',
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
-      'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
       'https://avlive.com.pk/images/video-conference/huddle-space.webp',
-      'https://avlive.com.pk/images/projects/vissonic-delegate-boardroom.webp',
     ],
-    highlight: 'All-in-one AI video bar for Webex, Microsoft Teams, and Zoom meeting rooms',
+    highlight: 'All-in-one 4K AI video bar with Room Navigator touch panel for Webex & Microsoft Teams',
+    shortSummary:
+      'Cisco Room Bar (CS-BAR-T-K9) combines a 12MP 4K wide-angle AI camera, 4-element noise-cancelling microphone array, stereo speakers, and Room Navigator touch controller for huddle and focus rooms.',
+    gmcDescription:
+      'Cisco Room Bar combines a powerful codec, an intelligent wide-field-of-view camera, noise-cancelling microphones, dual stereo speakers, and robust integrations in a single device. Connect one or two displays via HDMI for full HD video and 4K content. It runs natively on RoomOS for Webex and provides interoperability with Microsoft Teams, Zoom, and Google Meet via the Room Navigator touch controller or voice command. Can also be configured as a native Microsoft Teams Rooms system.',
     defaultSpecs:
-      'Camera Optics:12MP 4K wide-angle lens with 120-degree FOV and 5x zoom;Controller Included:Cisco Room Navigator 10.1-inch touch scheduling & control panel;Audio System:4-element beamforming microphone array + stereo speakers + external mic port;Display Output:Dual HDMI 4K outputs and USB-C BYOD passthrough;Room Capacity:Huddle to Medium Rooms (4 to 10 Seats);Warranty:1-Year Official Cisco Pakistan Warranty',
+      'Camera Optics:12MP 4K UltraHD wide-angle lens with 120-degree horizontal FOV, f/2.5 aperture, and 5x digital zoom;Controller Included:Cisco Room Navigator 10.1-inch PoE tabletop touch controller;Audio System:4-element beamforming microphone array with AI noise removal + dual stereo speakers + external mic port;Display & Content I/O:2x HDMI monitor outputs (up to 3840x2160p60) + 1x HDMI content input + USB-C DisplayPort Alt Mode BYOD;Platform Support:Native Cisco RoomOS (Webex) & Native Microsoft Teams Rooms (MTR) + Zoom/Google Meet WebRTC;Dimensions & Weight:53.4 × 8.2 × 6.4 cm (21.0 × 3.2 × 2.5 in) • 1.50 kg (3.3 lb);Room Capacity:Huddle, Focus & Small Meeting Rooms (2 to 8 Seats);Warranty:1-Year Official Cisco Pakistan Warranty & 15-Min SLA',
     defaultDescription:
-      'Cisco Room Bar (CS-BAR-NR-K9) All-in-One 4K Video Conferencing Appliance with Room Navigator Touch Panel in Pakistan. Certified for Cisco Webex, Microsoft Teams Rooms, and Zoom Rooms with AI speaker tracking.',
+      'Cisco Room Bar (CS-BAR-T-K9, GTIN: 0889728453981) All-in-One 4K Video Bar with Room Navigator Touch Controller in Pakistan. Engineered for huddle spaces and focus rooms with a 120-degree 12MP AI speaker-tracking camera, noise-cancelling beamforming microphones, dual-screen HDMI output, single-cable USB-C BYOD passthrough, and native Cisco RoomOS or Microsoft Teams Rooms operation.',
+    seoMetaDescription:
+      'Buy Cisco Room Bar CS-BAR-T-K9 in Pakistan (Rs. 749,210). All-in-one 4K AI video bar with 120° camera, noise-cancelling mics and Room Navigator for Webex/Teams.',
   },
-  'cisco-room-kit-eq-pakistan': {
-    gtin: computeUpc12('88972800208'),
-    mpn: 'CS-KIT-EQ-C-K9',
+  'cisco-room-bar-t-c-k9-pakistan': {
+    gmcId: 'GGN-CS-BAR-T-C-K9',
+    gtin: '0889728453981',
+    mpn: 'CS-BAR-T-C-K9',
     brand: 'Cisco',
+    title: 'Cisco Room Bar CS-BAR-T-C-K9 – All-in-One 4K Video Bar with AI Camera and Noise-Cancelling Mics',
     color: 'Carbon Black',
-    isBundle: 'yes',
-    shippingWeight: '11.80 kg',
-    regularPrice: 2850000,
-    salePrice: 2620000,
+    isBundle: 'no',
+    shippingWeight: '1.50 kg',
+    shippingLength: '53.4 cm',
+    shippingWidth: '8.2 cm',
+    shippingHeight: '6.4 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Video Bars',
+    customLabel0: 'Cisco',
+    customLabel1: 'Video-Conferencing',
+    customLabel2: 'Huddle-Room',
+    customLabel3: 'Focus-Room',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 777010,
+    salePrice: 749210,
+    categorySlugs: ['video-conferencing', 'touch-panels', 'boardroom-codecs'],
+    images: [
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/f0cdcaa7-867f-410f-a75d-ba68ff16d262/cisco+room+bar.jpg',
+      'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
+      'https://avlive.com.pk/images/video-conference/huddle-space.webp',
+    ],
+    highlight: 'Carbon Black all-in-one 4K AI video bar with Room Navigator for huddle and focus rooms',
+    shortSummary:
+      'Cisco Room Bar Carbon Black (CS-BAR-T-C-K9) delivers a 12MP 120° AI camera, noise-cancelling beamforming mics, dual stereo speakers, and Room Navigator touch control for modern huddle spaces.',
+    gmcDescription:
+      'Cisco Room Bar combines a powerful codec, an intelligent wide-field-of-view camera, noise-cancelling microphones, dual stereo speakers, and robust integrations in a single device. Connect one or two displays via HDMI for full HD video and 4K content. It runs natively on RoomOS for Webex and provides interoperability with Microsoft Teams, Zoom, and Google Meet via the Room Navigator touch controller or voice command. Can also be configured as a native Microsoft Teams Rooms system.',
+    defaultSpecs:
+      'Camera Optics:12MP 4K UltraHD wide-angle lens (120-degree horizontal FOV, 5x digital zoom, AI auto-framing);Finish & Controller:Carbon Black enclosure with matching Cisco Room Navigator 10.1-inch touch controller;Audio Architecture:4-element directional microphone array + high-fidelity stereo speakers + 1x external table mic port;Video & BYOD I/O:Dual HDMI display outputs + 1x HDMI 4K content input + single-cable USB-C BYOD passthrough;UC Compatibility:Native Cisco RoomOS (Webex) or Native Microsoft Teams Rooms (MTR) + Zoom/Meet interop;Dimensions & Weight:53.4 × 8.2 × 6.4 cm (21.0 × 3.2 × 2.5 in) • 1.50 kg (3.3 lb);Room Capacity:Huddle & Focus Rooms (2 to 8 Seats);Warranty:1-Year Official Cisco Pakistan Warranty & 15-Min SLA',
+    defaultDescription:
+      'Cisco Room Bar Carbon Black (CS-BAR-T-C-K9, GTIN: 0889728453981) All-in-One 4K Video Conferencing Bar in Pakistan. Includes the Carbon Black video bar and matching Cisco Room Navigator tabletop touch controller, delivering dual-display 4K collaboration, AI speaker framing, ultrasonic proximity join, and USB-C BYOD mode.',
+    seoMetaDescription:
+      'Order Cisco Room Bar Carbon CS-BAR-T-C-K9 in Pakistan (Rs. 749,210). Carbon Black 4K AI video bar with 120° lens, stereo audio & Room Navigator touch panel.',
+  },
+  'cisco-room-bar-pro-pakistan': {
+    gmcId: 'GGN-CS-BARPRO-K9',
+    gtin: '0889728537841',
+    mpn: 'CS-BARPRO-K9',
+    brand: 'Cisco',
+    title: 'Cisco Room Bar Pro CS-BARPRO-K9 – AI-Enhanced Video Bar with Dual Cameras for Medium Rooms',
+    color: 'Carbon Black',
+    isBundle: 'no',
+    shippingWeight: '4.47 kg',
+    shippingLength: '96.0 cm',
+    shippingWidth: '11.0 cm',
+    shippingHeight: '9.0 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Video Bars',
+    customLabel0: 'Cisco',
+    customLabel1: 'Video-Conferencing',
+    customLabel2: 'Medium-Room',
+    customLabel3: 'Dual-Camera',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 2627100,
+    salePrice: 2349100,
+    categorySlugs: ['video-conferencing', 'large-room', 'touch-panels', 'boardroom-codecs'],
+    images: [
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/7aa2e865-0c08-415b-9902-8d525edef33c/cisco+barpro.webp',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
+      'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
+      'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
+    ],
+    highlight: 'AI-enhanced dual-48MP camera video bar with NVIDIA engine for medium-to-large conference rooms',
+    shortSummary:
+      'Cisco Room Bar Pro (CS-BARPRO-K9) packs dual 48MP AI cameras (96MP total), an NVIDIA Jetson computing engine, a 3-channel loudspeaker system, and 16-element microphone array for medium spaces.',
+    gmcDescription:
+      'Cisco Room Bar Pro is an integrated, AI-enhanced video bar solution featuring intelligent dual cameras, a three-channel loudspeaker system, a built-in microphone array, a powerful computing engine, and rich connectivity. It includes an intuitive touch controller and smart room accessories to deliver intelligent, inclusive video collaboration for medium-sized meeting spaces.',
+    defaultSpecs:
+      'Dual Camera System:96MP dual-lens array (2x 48MP sensors: 112° wide lens + 70° telephoto lens for long-throw clarity);AI Compute Engine:Dedicated NVIDIA AI processor enabling Cinematic Meetings, multi-stream people framing & virtual zones;Audio System:3-channel loudspeaker system with dual passive radiators + 16-element beamforming microphone array;External Audio & PoE:3x RJ45 PoE ports for Cisco Table/Ceiling Microphone Pro and Cisco Room Navigator;Video & BYOD I/O:2x HDMI 4K display outputs + 2x HDMI content inputs + USB-C 4K60 BYOD passthrough;Dimensions & Weight:96.0 × 11.0 × 9.0 cm (37.8 × 4.3 × 3.5 in) • 4.47 kg (9.85 lb);Room Capacity:Medium to Large Conference Rooms (8 to 16 Seats);Warranty:1-Year Official Cisco Pakistan Warranty & 15-Min SLA',
+    defaultDescription:
+      'Cisco Room Bar Pro (CS-BARPRO-K9, GTIN: 0889728537841) AI-Enhanced Dual-Camera Video Bar in Pakistan. Built for medium and large conference rooms, it integrates dual 48MP wide and telephoto lenses, an NVIDIA AI engine, a 16-element beamforming microphone array, 3 PoE peripheral ports, and native Webex or Microsoft Teams Rooms certification.',
+    seoMetaDescription:
+      'Buy Cisco Room Bar Pro CS-BARPRO-K9 in Pakistan (Rs. 2,349,100). Dual 48MP AI cameras, 16-mic array, 3-channel audio & Room Navigator for medium rooms.',
+  },
+  'cisco-webex-codec-pro-pakistan': {
+    gmcId: 'GGN-CS-CODEC-PRO-K9',
+    gtin: '0889728127431',
+    mpn: 'CS-CODEC-PRO-K9',
+    brand: 'Cisco',
+    title: 'Cisco Webex Codec Pro CS-CODEC-PRO-K9 – Intelligent Video Conferencing Appliance for Large Rooms',
+    color: 'Silver',
+    isBundle: 'no',
+    shippingWeight: '3.30 kg',
+    shippingLength: '43.6 cm',
+    shippingWidth: '23.1 cm',
+    shippingHeight: '6.6 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Codecs',
+    customLabel0: 'Cisco',
+    customLabel1: 'Video-Conferencing',
+    customLabel2: 'Large-Room',
+    customLabel3: 'Enterprise-Boardroom',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 528200,
+    salePrice: 512910,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
     images: [
-      'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/b60115d6-20c6-47bf-a3ea-1664b710ec82/codec+pro.webp',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
+      'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
+    ],
+    highlight: '1RU rack-mountable 4K60 integrator video conferencing codec with 6 video inputs & 8 XLR mic ports',
+    shortSummary:
+      'Cisco Webex Codec Pro (CS-CODEC-PRO-K9) is a 1RU rack-mountable 4K UHD integrator codec featuring 6 video inputs (HDMI/3G-SDI), 3 HDMI outputs, and 8 balanced XLR microphone inputs with individual AEC.',
+    gmcDescription:
+      'Cisco Webex Codec Pro is the most flexible video collaboration appliance for premium-quality meetings, unparalleled connectivity, and seamless configuration in large workspaces and custom audiovisual environments. It powers the Room Kit Pro bundle and delivers the processing power and hardware connectivity required for demanding collaboration deployments.',
+    defaultSpecs:
+      'Video Inputs:6 simultaneous video inputs (3x 4K UHD HDMI, 2x 1080p60 HDMI, 1x 3G-SDI / HD-SDI);Video Outputs:3 independent 4K UHD HDMI outputs (up to 3840x2160p60 + 2160p30);Audio Matrix & AEC:8 balanced Euroblock/XLR microphone inputs with 48V phantom power & 8 individual acoustic echo cancellers;Audio Outputs:6 balanced line outputs + 3 HDMI audio outputs + AES67 / Dante AoIP ethernet audio support;Network & Security:5x Gigabit RJ45 Ethernet ports (camera control, PoE Touch 10/Navigator), Wi-Fi 802.11ac, AES-256 H.323/SIP;Dimensions & Weight:43.6 × 23.1 × 6.6 cm (17.2 × 9.1 × 2.6 in, 1.5RU rack-ears included) • 3.30 kg (7.3 lb);Room Capacity:Executive Boardrooms, Council Chambers & Auditoriums (20 to 100+ Seats);Warranty:1-Year Official Cisco Pakistan Warranty & 15-Min SLA',
+    defaultDescription:
+      'Cisco Webex Codec Pro (CS-CODEC-PRO-K9, GTIN: 0889728127431) Integrator 4K60 Video Conferencing Codec in Pakistan. Designed for large custom boardrooms, auditoriums, and command centers requiring multi-camera HDMI/3G-SDI switching, 8 balanced XLR microphone inputs with dedicated acoustic echo cancellation, triple 4K display outputs, and AES-256 encrypted SIP/H.323 & Webex connectivity.',
+    seoMetaDescription:
+      'Buy Cisco Webex Codec Pro CS-CODEC-PRO-K9 in Pakistan (Rs. 512,910). 4K60 integrator codec with 6 HDMI/SDI inputs, 3 4K outputs & 8 XLR mic ports.',
+  },
+  'cisco-webex-room-kit-pro-p60-pakistan': {
+    gmcId: 'GGN-CS-KITPRO-P60-K9',
+    gtin: '0889728127448',
+    mpn: 'CS-KITPRO-P60-K9',
+    brand: 'Cisco',
+    title: 'Cisco Webex Room Kit Pro P60 CS-KITPRO-P60-K9 – UHD Video Collaboration Bundle for Boardrooms and Auditoriums',
+    color: 'Silver',
+    isBundle: 'yes',
+    shippingWeight: '5.80 kg',
+    shippingLength: '43.6 cm',
+    shippingWidth: '26.8 cm',
+    shippingHeight: '18.0 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Room Systems',
+    customLabel0: 'Cisco',
+    customLabel1: 'Video-Conferencing',
+    customLabel2: 'Large-Room',
+    customLabel3: 'Auditorium',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 1609220,
+    salePrice: 1081420,
+    categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs', 'ptz-cameras'],
+    images: [
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/d7751b8e-2b5d-4a8e-a2ff-66c0cf274868/kitp60+picture.jpg',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
+      'https://avlive.com.pk/images/video-conference/hybrid-summit.webp',
+    ],
+    highlight: 'Complete 2160p60 UHD boardroom & auditorium bundle with Codec Pro, Precision 60 20x PTZ Camera & Touch 10',
+    shortSummary:
+      'Cisco Webex Room Kit Pro P60 (CS-KITPRO-P60-K9) bundles the 4K60 Cisco Codec Pro, Precision 60 20x optical zoom PTZ camera, and Touch 10 / Navigator controller for auditoriums and long boardrooms.',
+    gmcDescription:
+      'The Cisco Webex Room Kit Pro provides a powerful and flexible platform for large custom video rooms including boardrooms, auditoriums, and purpose-built spaces. It acts as the audio and video engine for UHD collaboration, supporting multiple screens, the Cisco Webex Quad Camera, Precision 60 Camera, or SpeakerTrack 60 dual camera. AI capabilities include intelligent views, noise suppression, voice commands, and people count. Delivers up to 2160p60 end-to-end UHD video.',
+    defaultSpecs:
+      'Bundle Hardware:Cisco Webex Codec Pro + Cisco Precision 60 PTZ Camera + Cisco Touch 10 / Room Navigator Controller;Precision 60 Optics:1080p60 CMOS sensor with 10x optical zoom + 2x digital zoom (20x total zoom) for long auditorium throws;Codec Pro Video I/O:6 video inputs (3x 4K HDMI, 2x HD HDMI, 1x 3G-SDI) and 3 independent 4K60 UHD HDMI outputs;Pro Audio Matrix:8 balanced XLR microphone inputs with 8 acoustic echo cancellers + 6 balanced line outputs;Protocols & AI:2160p60 UHD H.264/H.265, SIP, H.323, Webex, MS Teams VI, AI noise removal & people count;Combined Weight & Footprint:5.80 kg total hardware (Codec Pro 3.3 kg + Precision 60 2.5 kg) • 43.6 × 26.8 × 18.0 cm;Room Capacity:Large Boardrooms, Lecture Theaters & Auditoriums (20 to 100+ Seats);Warranty:1-Year Official Cisco Pakistan Warranty & 15-Min SLA',
+    defaultDescription:
+      'Cisco Webex Room Kit Pro P60 (CS-KITPRO-P60-K9, GTIN: 0889728127448) UHD Video Collaboration Bundle in Pakistan. Combines the integrator-grade Cisco Codec Pro, the long-throw Cisco Precision 60 20x zoom motorized PTZ camera, and touch controller for large executive boardrooms, amphitheaters, and hybrid auditoriums.',
+    seoMetaDescription:
+      'Buy Cisco Webex Room Kit Pro P60 CS-KITPRO-P60-K9 in Pakistan (Rs. 1,081,420). UHD Codec Pro + Precision 60 20x PTZ camera bundle for auditoriums.',
+  },
+  'cisco-webex-desk-pro-pakistan': {
+    gmcId: 'GGN-CS-DESKPRO-K9',
+    gtin: '0889728296656',
+    mpn: 'CS-DESKPRO-K9',
+    brand: 'Cisco',
+    title: 'Cisco Webex Desk Pro CS-DESKPRO-K9 – 27-inch 4K AI Collaboration Device for Desks and Focus Rooms',
+    color: 'Silver',
+    isBundle: 'no',
+    shippingWeight: '11.60 kg',
+    shippingLength: '63.0 cm',
+    shippingWidth: '51.0 cm',
+    shippingHeight: '7.5 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Desk Devices',
+    customLabel0: 'Cisco',
+    customLabel1: 'Video-Conferencing',
+    customLabel2: 'Personal-Desk',
+    customLabel3: 'Focus-Room',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 383640,
+    salePrice: 361122,
+    categorySlugs: ['video-conferencing', 'touch-panels'],
+    images: [
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/9467ef2b-642c-4cbe-85d4-5c153b8e433c/deskpro+pic+3.jpg',
+      'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
+      'https://avlive.com.pk/images/video-conference/huddle-space.webp',
+    ],
+    highlight: '27-inch 4K IPS multi-touch executive desk collaboration display with 12MP camera & USB-C dock',
+    shortSummary:
+      'Cisco Webex Desk Pro (CS-DESKPRO-K9) is an all-in-one 27-inch 4K UHD capacitive touch display with a 12MP 71° camera, 8-element mic array, 3.1 woofer audio system, and 60W USB-C laptop dock.',
+    gmcDescription:
+      'Cisco Webex Desk Pro is an AI-powered 27-inch 4K touch display and collaboration device built for executive desks, shared workspaces, and small focus rooms. It features an anti-glare 4K IPS touchscreen, an HD camera, a multi-channel speaker system, and an advanced noise-cancelling microphone array. With a single USB-C cable, it doubles as a primary external monitor and docking station while supporting Webex, Microsoft Teams, Zoom, and Google Meet.',
+    defaultSpecs:
+      'Touch Display:27-inch 4K UHD (3840 × 2160) IPS LCD with optically bonded anti-glare capacitive multi-touch & active stylus;Camera Optics:12MP 71-degree horizontal FOV camera with f/2.0 aperture, privacy shutter, and 60fps HD encoding;Audio System:3.1 multichannel speaker array with dedicated downward-firing woofer + 8-element beamforming microphone array;Single-Cable USB-C Dock:USB-C DisplayPort Alt Mode with 60W laptop charging + HDMI 2.0 in + HDMI out for dual-screen setup;AI Features:Virtual backgrounds, AI noise removal, facial recognition, and digital whiteboarding;Dimensions & Weight:63.0 × 51.0 × 7.5 cm (24.8 × 20.1 × 3.0 in) • 11.60 kg (25.5 lb);Recommended Space:C-Suite Executive Desks & 1–3 Person Focus Rooms;Warranty:1-Year Official Cisco Pakistan Warranty & 15-Min SLA',
+    defaultDescription:
+      'Cisco Webex Desk Pro (CS-DESKPRO-K9, GTIN: 0889728296656) 27-Inch 4K All-in-One Executive Collaboration Display in Pakistan. Combines a brilliant 27-inch 4K anti-glare touchscreen, 12MP camera, 8-element noise-cancelling mic array, 3.1 woofer speaker system, digital whiteboard stylus, and 60W USB-C docking station for C-suite offices and focus rooms.',
+    seoMetaDescription:
+      'Buy Cisco Webex Desk Pro CS-DESKPRO-K9 in Pakistan (Rs. 361,122). 27-inch 4K touch collaboration screen with 12MP AI camera, 8-mic array & USB-C dock.',
+  },
+  'cisco-webex-codec-eq-pakistan': {
+    gmcId: 'GGN-CS-CODEC-EQ-K9',
+    gtin: '0889728530675',
+    mpn: 'CS-CODEC-EQ-K9',
+    brand: 'Cisco',
+    title: 'Cisco Webex Codec EQ CS-CODEC-EQ-K9 – AI Computing Engine for Room Kit EQ Deployments',
+    color: 'Carbon Black',
+    isBundle: 'no',
+    shippingWeight: '2.95 kg',
+    shippingLength: '44.2 cm',
+    shippingWidth: '29.7 cm',
+    shippingHeight: '4.3 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Codecs',
+    customLabel0: 'Cisco',
+    customLabel1: 'Video-Conferencing',
+    customLabel2: 'Large-Room',
+    customLabel3: 'Codec-Engine',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 2471420,
+    salePrice: 2471420,
+    categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
+    images: [
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/68ee51e7-b1ff-42b4-98c4-89d3f752261e/codec-eq-standalone-perspective-01.webp',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
+      'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
+    ],
+    highlight: 'Next-gen NVIDIA AI-powered 4K boardroom codec with triple HDMI outputs & 3 PoE++ peripheral ports',
+    shortSummary:
+      'Cisco Webex Codec EQ (CS-CODEC-EQ-K9) is the next-generation NVIDIA AI computing engine powering large RoomOS and Microsoft Teams Rooms boardrooms with triple 4K HDMI outputs and 3 PoE++ mic/touch ports.',
+    gmcDescription:
+      'Cisco Webex Codec EQ is the next-generation AI-powered computing engine that drives the Room Kit EQ series. Engineered for large conference rooms, boardrooms, and training spaces, it supports up to three 4K displays, multiple camera and content inputs, PoE++ peripheral connectivity, and USB-C BYOD passthrough. Runs natively on Cisco RoomOS or Microsoft Teams Rooms.',
+    defaultSpecs:
+      'AI Compute Engine:Integrated NVIDIA Jetson Xavier NX AI engine delivering 20 TOPS neural processing performance;Video Outputs:3 independent 4K UHD HDMI 2.0 outputs supporting triple-screen Webex & Microsoft Teams Front Row;Video & Content Inputs:3x HDMI inputs (supporting 4K content & auxiliary PTZ cameras) + 1x USB-C 4K60 BYOD passthrough;Audio & PoE++ Connectivity:3x RJ45 PoE++ (802.3bt) ports for Cisco Table/Ceiling Microphone Pro + 4x USB-A 3.0 + 3.5mm line out;Platform Support:Native Cisco RoomOS 11 (Webex) or Native Microsoft Teams Rooms (MTR on Android) + Zoom interop;Dimensions & Weight:44.2 × 29.7 × 4.3 cm (17.4 × 11.7 × 1.7 in, 1RU rack/wall mountable) • 2.95 kg (6.5 lb);Room Capacity:Large Boardrooms & Training Rooms (14 to 30+ Seats);Warranty:1-Year Official Cisco Pakistan Warranty & 15-Min SLA',
+    defaultDescription:
+      'Cisco Webex Codec EQ (CS-CODEC-EQ-K9, GTIN: 0889728530675) Next-Gen AI Video Conferencing Codec Engine in Pakistan. Powered by an embedded NVIDIA AI processor, Codec EQ drives up to three 4K displays, three HDMI camera/content sources, three PoE++ Cisco Table/Ceiling Microphone Pro arrays, and single-cable USB-C BYOD passthrough in large enterprise boardrooms.',
+    seoMetaDescription:
+      'Buy Cisco Webex Codec EQ CS-CODEC-EQ-K9 in Pakistan (Rs. 2,471,420). Next-gen NVIDIA AI boardroom codec with triple 4K HDMI outputs & 3 PoE++ ports.',
+  },
+  'cisco-room-kit-eq-pakistan': {
+    gmcId: 'GGN-CS-KIT-EQ-K9',
+    gtin: '0889728530644',
+    mpn: 'CS-KIT-EQ-K9',
+    brand: 'Cisco',
+    title: 'Cisco Room Kit EQ CS-KIT-EQ-K9 – AI-Powered Collaboration Solution with Quad Camera for Large Rooms',
+    color: 'Carbon Black',
+    isBundle: 'yes',
+    shippingWeight: '7.75 kg',
+    shippingLength: '95.0 cm',
+    shippingWidth: '29.7 cm',
+    shippingHeight: '12.0 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Room Systems',
+    customLabel0: 'Cisco',
+    customLabel1: 'Video-Conferencing',
+    customLabel2: 'Large-Room',
+    customLabel3: 'Enterprise-Boardroom',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 3800000,
+    salePrice: 2200000,
+    categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
+    images: [
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/20a86153-6613-45a6-b8da-50f8b0f7e94a/cisco+kit+eq+2.jpeg',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
       'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
     ],
-    highlight: 'AI-powered flagship quad-camera codec bundle for large enterprise boardrooms',
+    highlight: 'AI-powered flagship Quad Camera & Codec EQ bundle for large multi-display enterprise boardrooms',
+    shortSummary:
+      'Cisco Room Kit EQ (CS-KIT-EQ-K9) bundles the NVIDIA AI-powered Codec EQ, the 4-lens 5K Cisco Quad Camera bar, and Room Navigator touch controller for 16–30+ seat executive boardrooms.',
+    gmcDescription:
+      'Cisco Room Kit EQ is an advanced collaboration bundle built for large workspaces, boardrooms, and auditoriums. Powered by the next-generation Cisco Codec EQ AI computing engine and paired with the intelligent Quad Camera bar, it delivers lifelike multi-camera framing, intelligent noise removal, and multi-display 4K video and content sharing across Webex, Microsoft Teams Rooms, and Zoom.',
     defaultSpecs:
-      'Codec Engine:Cisco Codec EQ with NVIDIA AI engine (4x faster processing);Camera System:Cisco Quad Camera bar with four 5K lenses for multi-speaker framing;Display Support:Triple 4K HDMI outputs and 3 HDMI content inputs;Audio Connectivity:3x RJ45 PoE++ ports for Cisco Table/Ceiling Microphone Pro;Room Capacity:Large Executive Boardrooms (16 to 30+ Seats);Warranty:1-Year Official Cisco Pakistan Warranty',
+      'Codec Engine:Cisco Codec EQ with NVIDIA Jetson Xavier NX AI engine (20 TOPS neural processing);Quad Camera Array:Cisco Quad Camera bar with four 5K CMOS sensors (83° wide lens + three 50° telephoto lenses) & 6-speaker audio system;Display Support:3 independent 4K UHD HDMI 2.0 outputs + 3 HDMI camera/content inputs + USB-C 4K60 BYOD passthrough;Audio Connectivity:3x RJ45 PoE++ (802.3bt) ports for Cisco Table/Ceiling Microphone Pro + AI noise removal;Platform Certification:Native Cisco RoomOS 11 (Webex) & Certified Native Microsoft Teams Rooms (MTR) + Zoom interop;Combined Dimensions & Weight:Quad Camera 95.0 × 12.0 × 10.3 cm (4.8 kg) + Codec EQ 44.2 × 29.7 × 4.3 cm (2.95 kg) • 7.75 kg total;Room Capacity:Large Executive Boardrooms & Training Halls (16 to 30+ Seats);Warranty:1-Year Official Cisco Pakistan Warranty & 15-Min SLA',
     defaultDescription:
-      'Cisco Room Kit EQ (CS-KIT-EQ-C-K9) Flagship AI Boardroom Video Conferencing Bundle in Pakistan. Combines the NVIDIA-powered Codec EQ, Quad Camera bar, and Room Navigator for large multi-display executive boardrooms.',
+      'Cisco Room Kit EQ (CS-KIT-EQ-K9, GTIN: 0889728530644) Flagship AI Boardroom Video Conferencing Bundle in Pakistan. Combines the NVIDIA-powered Cisco Codec EQ, the 4-lens 5K Cisco Quad Camera soundbar, and Room Navigator touch controller for triple-display 4K executive boardrooms running native Cisco Webex or Microsoft Teams Rooms.',
+    seoMetaDescription:
+      'Buy Cisco Room Kit EQ CS-KIT-EQ-K9 in Pakistan (Rs. 2,666,020). AI Codec EQ + 5K Quad Camera bundle for large Webex & Microsoft Teams boardrooms.',
   },
   'cisco-room-kit-pakistan': {
-    gtin: computeUpc12('88265890115'),
+    gmcId: 'GGN-CS-KIT-K9',
+    gtin: '0889728021524',
     mpn: 'CS-KIT-K9',
     brand: 'Cisco',
+    title: 'Cisco Webex Room Kit CS-KIT-K9 – Integrated Video Conferencing System for Small to Medium Rooms',
     color: 'Silver',
-    shippingWeight: '4.80 kg',
-    regularPrice: 1320000,
-    salePrice: 1190000,
+    isBundle: 'no',
+    shippingWeight: '3.20 kg',
+    shippingLength: '70.0 cm',
+    shippingWidth: '10.6 cm',
+    shippingHeight: '8.8 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Room Systems',
+    customLabel0: 'Cisco',
+    customLabel1: 'Video-Conferencing',
+    customLabel2: 'Small-Medium-Room',
+    customLabel3: 'Conference-Room',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 1900000,
+    salePrice: 1750000,
     categorySlugs: ['video-conferencing', 'boardroom-codecs'],
     images: [
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/3ae2bb11-b106-4022-8b22-112dcc0f9e02/cisco%2Bcs-kit-k9%2Bfull%2Bpicture.jpg',
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
-      'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
       'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
-      'https://avlive.com.pk/images/projects/multicity-teams-boardrooms.webp',
     ],
-    highlight: 'Integrated 5K Ultra HD camera, speakers, and microphones for medium rooms',
+    highlight: 'Integrated 5K Ultra HD camera, stereo speakers, beamforming mics & Touch 10 for up to 7-person rooms',
+    shortSummary:
+      'Cisco Webex Room Kit (CS-KIT-K9) integrates a 5K Ultra HD 83° camera, 6-element directional microphone array, stereo speakers, and Touch 10 controller into a single bar for small-to-medium rooms.',
+    gmcDescription:
+      'Cisco Webex Room Kit is an all-in-one video collaboration bar designed for small to medium-sized meeting rooms seating up to 7 people. It integrates a 5K Ultra HD camera, stereo speakers, beamforming microphones, and a powerful codec into a single sleek device that mounts above or below your flat-panel display. Includes automatic speaker framing, dual-screen support, and 4K content sharing.',
     defaultSpecs:
-      'Camera:Integrated 5K UltraHD sensor with 83-degree horizontal FOV and automatic framing;Audio:Integrated 6-element directional microphone array and front-facing stereo speakers;Outputs:Dual HDMI 4K display outputs and dual HDMI content inputs;Standards:H.323, SIP, Webex, Microsoft Teams, and Zoom interop;Room Capacity:Medium Conference Rooms (6 to 14 Seats);Warranty:1-Year Official Cisco Pakistan Warranty',
+      'Camera Optics:Integrated 5K UltraHD (15.1MP) CMOS sensor with 83° horizontal FOV, 3x digital zoom & AI speaker tracking;Audio Architecture:6-element directional microphone array + integrated full-range stereo speakers & dual bass reflex ports + 2x external mic inputs;Video & Content I/O:2x HDMI monitor outputs (3840x2160p60) + 2x HDMI content inputs (up to 4K30);Controller Included:Cisco Touch 10 / Room Navigator 10-inch capacitive PoE touch control unit;Standards & Protocols:H.323, SIP, Cisco Webex, H.264/H.265, Wi-Fi 802.11ac, Bluetooth 4.0 & WebRTC interop;Dimensions & Weight:70.0 × 10.6 × 8.8 cm (27.5 × 4.2 × 3.5 in) • 3.20 kg (7.0 lb);Room Capacity:Small to Medium Conference Rooms (up to 7–10 Seats);Warranty:1-Year Official Cisco Pakistan Warranty & 15-Min SLA',
     defaultDescription:
-      'Cisco Webex Room Kit (CS-KIT-K9) Integrated Video Collaboration Bar in Pakistan. Features a 5K UltraHD camera, built-in stereo loudspeakers, beamforming microphones, and Cisco Touch 10 / Navigator control.',
+      'Cisco Webex Room Kit (CS-KIT-K9, GTIN: 0889728021524) Integrated Video Conferencing System in Pakistan. Combines a 5K UltraHD 15.1MP camera, 6-element directional microphone array, front-facing stereo speakers, dual-screen 4K HDMI outputs, and Cisco Touch 10 / Room Navigator controller for small-to-medium conference rooms.',
+    seoMetaDescription:
+      'Buy Cisco Webex Room Kit CS-KIT-K9 in Pakistan (Rs. 540,710). Integrated 5K camera, stereo speakers, 6-mic array & Touch 10 for small-to-medium rooms.',
   },
   'cisco-room-kit-plus-pakistan': {
     gtin: computeUpc12('88265890214'),
@@ -423,11 +744,11 @@ export const PRODUCT_GMC_METADATA: Record<
     color: 'Silver',
     isBundle: 'yes',
     shippingWeight: '9.50 kg',
-    regularPrice: 1950000,
-    salePrice: 1780000,
+    regularPrice: 3200000,
+    salePrice: 2200000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs', 'touch-panels'],
     images: [
-      'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
       'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
     ],
@@ -444,11 +765,11 @@ export const PRODUCT_GMC_METADATA: Record<
     color: 'Silver',
     isBundle: 'yes',
     shippingWeight: '13.40 kg',
-    regularPrice: 3250000,
-    salePrice: 2980000,
+    regularPrice: 5300000,
+    salePrice: 2800000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
     images: [
-      'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
       'https://avlive.com.pk/images/video-conference/hybrid-summit.webp',
     ],
@@ -469,7 +790,7 @@ export const PRODUCT_GMC_METADATA: Record<
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
     images: [
       'https://avlive.com.pk/images/products/cisco-room-kit-studio.jpg',
-      'https://avlive.com.pk/images/products/cisco-room-kit-eq.jpg',
+      'https://images.squarespace-cdn.com/content/v1/67db47a049b935648edd4c72/0314b887-3a14-4d3d-b4ae-101f44214454/cisco+kit+eq.webp',
       'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
     ],
     highlight: 'Cisco Webex Room Kit Plus collaboration system for large conference rooms',
@@ -483,8 +804,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'DAH-N43AL52',
     brand: 'Dahua',
     color: 'White',
-    regularPrice: 42000,
-    salePrice: 36500,
+    regularPrice: 24000,
+    salePrice: 21000,
     categorySlugs: ['ip-cameras'],
     images: [
       'https://cctvcamera.com.sg/wp-content/uploads/IPC-HDBW2241E-S_S0.jpg',
@@ -500,8 +821,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'EPS-LS-FLEX-PLUS',
     brand: 'Epson',
     color: 'White',
-    regularPrice: 520000,
-    salePrice: 475000,
+    regularPrice: 195000,
+    salePrice: 185000,
     categorySlugs: ['projectors'],
     images: [
       'https://geartechs.com/cdn/shop/files/panasonic-pt-vmz82-series-white-angle.jpg?v=1750357243',
@@ -518,8 +839,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'FANVIL-X4',
     brand: 'Fanvil',
     color: 'Black',
-    regularPrice: 28000,
-    salePrice: 23500,
+    regularPrice: 18000,
+    salePrice: 16500,
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
       'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
@@ -569,8 +890,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'UCM6304',
     brand: 'Grandstream',
     color: 'Black',
-    regularPrice: 310000,
-    salePrice: 278000,
+    regularPrice: 145000,
+    salePrice: 135000,
     categorySlugs: ['voip-phone-systems'],
     images: [
       'https://syntelo.co.za/cdn/shop/files/3cx_pro_8SC.jpg?v=1747992911&width=2048',
@@ -586,8 +907,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'UCM6308',
     brand: 'Grandstream',
     color: 'Black',
-    regularPrice: 465000,
-    salePrice: 425000,
+    regularPrice: 285000,
+    salePrice: 265000,
     categorySlugs: ['voip-phone-systems'],
     images: [
       'https://syntelo.co.za/cdn/shop/files/3cx_pro_8SC.jpg?v=1747992911&width=2048',
@@ -603,8 +924,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'DS-2CD2347G2-LU',
     brand: 'Hikvision',
     color: 'White',
-    regularPrice: 38500,
-    salePrice: 33500,
+    regularPrice: 22000,
+    salePrice: 19500,
     categorySlugs: ['ip-cameras'],
     images: [
       'https://assets.hikvision.com/prd/normal/all/image/m000032055/%E6%B5%B7%E8%9E%BA25-%E5%9F%BA%E7%BA%BF-%E9%BB%91%E7%99%BD%E4%B8%A4%E8%89%B2-%E5%8A%A0mic-%E5%8F%B3%E4%BE%A7.png',
@@ -620,8 +941,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'DS-2DE4A425IW-DE',
     brand: 'Hikvision',
     color: 'White',
-    regularPrice: 168000,
-    salePrice: 149000,
+    regularPrice: 85000,
+    salePrice: 78000,
     categorySlugs: ['ip-cameras', 'ptz-cameras'],
     images: [
       'https://image.made-in-china.com/2f0j00IidckVRGgbqT/4-Inch-50m-IR-4MP-25X-Zoom-Network-Speed-Dome-Mini-PTZ-Camera-Hikvision-Ds-2de4A425iw-De-S6-Version.jpg',
@@ -638,8 +959,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'Horion',
     color: 'Black',
     isBundle: 'yes',
-    regularPrice: 720000,
-    salePrice: 645000,
+    regularPrice: 450000,
+    salePrice: 415000,
     categorySlugs: ['touch-panels', 'video-conferencing', 'large-room'],
     images: [
       'https://img.directindustry.com/images_di/photo-g/244341-19545255.webp',
@@ -657,8 +978,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'VA-6200MA',
     brand: 'ITC',
     color: 'Black',
-    regularPrice: 345000,
-    salePrice: 315000,
+    regularPrice: 150000,
+    salePrice: 135000,
     categorySlugs: ['intercom-paging-access'],
     images: [
       'https://www.itctech.com.cn/Public//upload/2022-05-20/1653015496.5506_wm_7139.jpg',
@@ -675,8 +996,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'Jabra',
     color: 'Black',
     shippingWeight: '0.45 kg',
-    regularPrice: 88000,
-    salePrice: 76500,
+    regularPrice: 55000,
+    salePrice: 52000,
     categorySlugs: ['headsets'],
     images: [
       'https://f.btwcdn.com/store-29999/product/e3d66b16-6ddc-1332-b314-699d2b05772a.jpg',
@@ -693,8 +1014,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: '26599-989-999',
     brand: 'Jabra',
     color: 'Black',
-    regularPrice: 74000,
-    salePrice: 64500,
+    regularPrice: 46000,
+    salePrice: 43000,
     categorySlugs: ['headsets', 'speakerphones'],
     images: [
       'https://f.btwcdn.com/store-29999/product/e3d66b16-6ddc-1332-b314-699d2b05772a.jpg',
@@ -711,8 +1032,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: '960-001336',
     brand: 'Logitech',
     color: 'Graphite',
-    regularPrice: 695000,
-    salePrice: 635000,
+    regularPrice: 320000,
+    salePrice: 295000,
     categorySlugs: ['video-conferencing'],
     images: [
       'https://smartsolutioncomputer.com/upload-img/Products/Poly/Products/Poly_Studio_V52_(1).webp',
@@ -729,8 +1050,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: '960-001308',
     brand: 'Logitech',
     color: 'Graphite',
-    regularPrice: 945000,
-    salePrice: 865000,
+    regularPrice: 450000,
+    salePrice: 425000,
     categorySlugs: ['video-conferencing', 'large-room', 'ptz-cameras', 'touch-panels'],
     images: [
       'https://www.hp.com/content/dam/sites/worldwide/poly/video-conferencing/all-in-one/studio-x72/Hero_Banner_Desktop@2x.jpg',
@@ -764,8 +1085,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'OPT-PK32-PHOTON',
     brand: 'Optoma',
     color: 'Black',
-    regularPrice: 135000,
-    salePrice: 118000,
+    regularPrice: 110000,
+    salePrice: 98000,
     categorySlugs: ['projectors'],
     images: [
       'https://www.viewsonic.com/media/wysiwyg/26PRJ-MLT1176-RC-LSD400W_Bright_in_any_Room_1238x1102.jpg',
@@ -781,8 +1102,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'PAN-PT-RQ45K',
     brand: 'Panasonic',
     color: 'Black',
-    regularPrice: 5200000,
-    salePrice: 4850000,
+    regularPrice: 8500000,
+    salePrice: 8200000,
     categorySlugs: ['projectors'],
     images: [
       'https://eu.connect.panasonic.com/sites/default/files/media/image/2026-06/pt-rq45kseries-innovationstoeaseeverystep.webp',
@@ -799,8 +1120,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'PAN-PT-VMZ82',
     brand: 'Panasonic',
     color: 'White',
-    regularPrice: 980000,
-    salePrice: 895000,
+    regularPrice: 680000,
+    salePrice: 645000,
     categorySlugs: ['projectors'],
     images: [
       'https://geartechs.com/cdn/shop/files/panasonic-pt-vmz82-series-white-angle.jpg?v=1750357243',
@@ -817,8 +1138,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'HP Poly',
     color: 'Black',
     shippingWeight: '0.28 kg',
-    regularPrice: 19500,
-    salePrice: 16500,
+    regularPrice: 12000,
+    salePrice: 10500,
     categorySlugs: ['headsets'],
     images: [
       'https://static.wixstatic.com/media/fd30db_95b351e9a4314147a52072fe802afa14~mv2.jpg/v1/fit/w_500,h_500,q_90/file.jpg',
@@ -836,8 +1157,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'HP Poly',
     color: 'Black',
     shippingWeight: '5.20 kg',
-    regularPrice: 1580000,
-    salePrice: 1420000,
+    regularPrice: 9600000,
+    salePrice: 1459000,
     categorySlugs: ['video-conferencing', 'large-room', 'boardroom-codecs'],
     images: [
       'https://avlive.com.pk/images/products/poly-x70-boardroom.jpg',
@@ -857,8 +1178,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'Poly',
     color: 'Black',
     shippingWeight: '3.40 kg',
-    regularPrice: 285000,
-    salePrice: 248000,
+    regularPrice: 185000,
+    salePrice: 175000,
     categorySlugs: ['video-conferencing', 'speakerphones'],
     images: [
       'https://www.onedirect.co.uk/media/catalog/product/cache/aa0ba86914834d3bc3e1ab8fdcec579e/p/o/postur30_4__2.jpg',
@@ -897,8 +1218,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'HP Poly',
     color: 'Black',
     shippingWeight: '2.20 kg',
-    regularPrice: 560000,
-    salePrice: 495000,
+    regularPrice: 760000,
+    salePrice: 499000,
     categorySlugs: ['video-conferencing'],
     images: [
       'https://smartsolutioncomputer.com/upload-img/Products/Poly/Products/Poly_Studio_V52_(1).webp',
@@ -912,25 +1233,88 @@ export const PRODUCT_GMC_METADATA: Record<
       'HP Poly Studio X32 / X30 All-in-One 4K Video Bar (A3SV5AA) in Pakistan. Compact standalone video bar for small rooms and executive offices with native Zoom Rooms and Microsoft Teams Rooms—no external PC required.',
   },
   'poly-studio-x50-pakistan': {
+    gmcId: 'AVLIVE-POLY-X50-2200-85970-001',
     gtin: '610807891673',
     mpn: '2200-85970-001',
     brand: 'HP Poly',
+    title: 'Poly Studio X50 4K Video Bar with TC8 Touch Controller – Special Offer (Free Delivery Pakistan)',
     color: 'Black',
+    isBundle: 'yes',
     shippingWeight: '4.20 kg',
-    regularPrice: 725000,
-    salePrice: 655000,
-    categorySlugs: ['video-conferencing'],
+    shippingLength: '76.2 cm',
+    shippingWidth: '10.2 cm',
+    shippingHeight: '10.2 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Video Bars',
+    customLabel0: 'HP Poly',
+    customLabel1: 'Special-Offer',
+    customLabel2: 'Medium-Room',
+    customLabel3: 'Free-Delivery-Pakistan',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 759000,
+    salePrice: 759000,
+    categorySlugs: ['video-conferencing', 'touch-panels', 'large-room', 'boardroom-codecs'],
     images: [
+      'https://firebasestorage.googleapis.com/v0/b/studio-5367437135-24ac6.firebasestorage.app/o/Products%2Fpoly-studio-x50-png-3cq9.webp?alt=media&token=bc3614ec-64f7-405b-95df-7a793acd7563',
+      '/images/products/poly-studio-x50-tc8.webp',
       'https://avlive.com.pk/images/products/poly-x70-studio.jpg',
       'https://avlive.com.pk/images/products/poly-x70-boardroom.jpg',
       'https://avlive.com.pk/images/video-conference/huddle-space.webp',
       'https://avlive.com.pk/images/projects/multicity-teams-boardrooms.webp',
     ],
-    highlight: 'Radically simple all-in-one 4K dual-display video bar for medium boardrooms',
+    highlight: 'Special Pakistan Offer: Poly Studio X50 4K Dual-Display Video Bar + TC8 Controller with Free Nationwide Delivery',
+    shortSummary:
+      'Special Offer Deal (Rs. 399,000 PKR — Save 53%): HP Poly Studio X50 All-in-One 4K Video Bar bundled with the Poly TC8 8-inch Touch Controller and Free Insured Delivery anywhere in Pakistan.',
+    gmcDescription:
+      'Upgrade your medium-to-large conference rooms with the HP Poly Studio X50 4K UltraHD all-in-one video bar and Poly TC8 8-inch PoE touch controller bundle at our special promotional price of 399,000 PKR including free delivery across Pakistan. Features Poly DirectorAI auto-framing, boardroom-filling stereo speakers, 25-foot beamforming microphone pickup, dual 4K display support, and native Zoom Rooms and Microsoft Teams Rooms integration without an external PC.',
     defaultSpecs:
-      'Camera:4K UHD 120-degree FOV sensor with 5x digital zoom and Poly DirectorAI framing;Audio System:5-element next-gen beamforming mic array (7.6m / 25ft pickup) + stereo speakers;Video Outputs:Dual HDMI 4K outputs for simultaneous people and content displays;Platform Support:Native Zoom Rooms, Microsoft Teams Rooms, H.323/SIP, and USB Device Mode;Room Capacity:Medium Conference Rooms (6 to 10 Seats);Warranty:1-Year Official HP Poly Pakistan Warranty',
+      'Special Bundle Included:Poly Studio X50 4K Video Bar + Poly TC8 8-inch Touch Controller + Free Delivery Within Pakistan;Camera:4K UHD 120-degree FOV sensor with 5x digital zoom and Poly DirectorAI framing;Audio System:5-element next-gen beamforming mic array (7.6m / 25ft pickup) + boardroom stereo speakers;Video Outputs:Dual HDMI 4K outputs for simultaneous people and content displays;Platform Support:Native Zoom Rooms, Microsoft Teams Rooms, H.323/SIP, and USB Device Mode;Room Capacity:Medium to Large Conference Rooms (6 to 12 Seats);Warranty & Shipping:1-Year Official HP Poly Pakistan Warranty + Free Insured Nationwide Delivery',
     defaultDescription:
-      'HP Poly Studio X50 All-in-One Dual-Display 4K Video Conferencing Bar (2200-85970-001) in Pakistan. Delivers boardroom-filling stereo sound, 25-foot microphone pickup, and native Zoom/Teams operation.',
+      'HP Poly Studio X50 All-in-One Dual-Display 4K Video Conferencing Bar with Poly TC8 Touch Controller (2200-85970-001 / 2215-86399-001) Special Offer in Pakistan at Rs. 399,000 PKR including free nationwide delivery. Delivers boardroom-filling stereo sound, 25-foot microphone pickup, dual 4K display support, and native Zoom/Teams operation.',
+    seoMetaDescription:
+      'Special Offer: Poly Studio X50 4K + TC8 Controller for Rs. 399,000 PKR (Save 53%) with Free Delivery in Pakistan. Dual 4K displays, DirectorAI and Zoom/Teams.',
+  },
+  'poly-studio-x50-tc8-special-offer-pakistan': {
+    gmcId: 'AVLIVE-POLY-X50-TC8-DEAL',
+    gtin: computeUpc12('61080789861'),
+    mpn: '2215-86399-001',
+    brand: 'HP Poly',
+    title: 'Poly Studio X50 4K + TC8 Touch Controller Special Offer Bundle – Free Delivery in Pakistan',
+    color: 'Black',
+    isBundle: 'yes',
+    shippingWeight: '5.05 kg',
+    shippingLength: '76.2 cm',
+    shippingWidth: '14.5 cm',
+    shippingHeight: '12.5 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Video Conferencing',
+    productType: 'Video Conferencing > Room Systems',
+    customLabel0: 'HP Poly',
+    customLabel1: 'Special-Offer',
+    customLabel2: 'Medium-Room',
+    customLabel3: 'Free-Delivery-Pakistan',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 850000,
+    salePrice: 399000,
+    categorySlugs: ['video-conferencing', 'touch-panels', 'large-room', 'boardroom-codecs'],
+    images: [
+      '/images/products/poly-studio-x50-tc8.webp',
+      'https://avlive.com.pk/images/products/poly-x70-studio.jpg',
+      'https://avlive.com.pk/images/products/poly-x70-boardroom.jpg',
+      'https://avlive.com.pk/images/video-conference/boardroom-hero.webp',
+    ],
+    highlight: 'Limited Conference Room Deal (Save 53%): Poly Studio X50 4K Video Bar + Poly TC8 Touch Controller for PKR 399,000 with Free Delivery in Pakistan',
+    shortSummary:
+      'Exclusive Pakistan Bundle Deal (PKR 399,000 — Slashed from PKR 850,000, Save 53%): Complete Poly Studio X50 4K UltraHD Video Bar + Poly TC8 8-inch PoE Touch Controller with Free Insured Delivery anywhere in Pakistan.',
+    gmcDescription:
+      'Claim the limited-time AV Live Pakistan conference room deal: Poly Studio X50 4K UltraHD all-in-one video conferencing bar bundled with the Poly TC8 8-inch high-resolution PoE touch controller for only PKR 399,000 including free nationwide delivery within Pakistan. Engineered for medium-to-large conference rooms with 4K DirectorAI auto-framing, boardroom-filling stereo speakers, 25ft NoiseBlockAI microphone pickup, dual 4K HDMI display support, and native Zoom Rooms & Microsoft Teams Rooms operation.',
+    defaultSpecs:
+      'Promotional Bundle:Poly Studio X50 4K Video Bar + Poly TC8 8-inch Touch Controller (MPN: 2215-86399-001);Special Deal Price:PKR 399,000 (Save 53% off PKR 850,000) with Free Insured Delivery Anywhere in Pakistan;Camera & AI Framing:4K UltraHD 120-degree FOV camera with 5x digital zoom & Poly DirectorAI speaker/group framing;TC8 Touch Controller:8-inch HD (1280 x 800) capacitive IPS touch screen with single-cable RJ45 PoE power;Boardroom Audio:5-element beamforming mic array (25ft / 7.6m pickup) + dual stereo speakers + NoiseBlockAI & Acoustic Fence;Dual Display & BYOD:2x HDMI 4K video outputs + 1x HDMI content input + USB-C / USB-A BYOD mode + AirPlay/Miracast;Native UC Platforms:Native Zoom Rooms & Microsoft Teams Rooms on Poly VideoOS (no external PC required);Dimensions & Weight:Video Bar 76.2 × 10.2 × 10.2 cm + TC8 20.5 × 12.3 × 7.9 cm • 5.05 kg total packaged;Warranty:1-Year Official HP Poly Pakistan Warranty & 15-Minute Technical SLA',
+    defaultDescription:
+      'Poly Studio X50 4K Video Bar + Poly TC8 Touch Controller Bundle (2215-86399-001) Special Offer in Pakistan at Rs. 399,000 PKR (Save 53% off Rs. 850,000) including Free Insured Delivery across Lahore, Karachi, Islamabad, and nationwide. Upgrade medium-to-large boardrooms with 4K UltraHD DirectorAI framing, dual 4K display support, boardroom-filling stereo speakers, and one-touch TC8 Zoom & Microsoft Teams control.',
+    seoMetaDescription:
+      'Buy Poly Studio X50 4K + TC8 Controller Deal in Pakistan for Rs. 399,000 PKR (Save 53%). Free delivery in Pakistan, dual 4K display support and official warranty.',
   },
   'poly-studio-x52-pakistan': {
     gtin: '197029653413',
@@ -938,8 +1322,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'HP Poly',
     color: 'Black',
     shippingWeight: '4.30 kg',
-    regularPrice: 845000,
-    salePrice: 765000,
+    regularPrice: 1690000,
+    salePrice: 1200000,
     categorySlugs: ['video-conferencing'],
     images: [
       'https://smartsolutioncomputer.com/upload-img/Products/Poly/Products/Poly_Studio_V52_(1).webp',
@@ -959,8 +1343,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'HP Poly',
     color: 'Black',
     shippingWeight: '5.10 kg',
-    regularPrice: 1290000,
-    salePrice: 1165000,
+    regularPrice: 2000000,
+    salePrice: 1900000,
     categorySlugs: ['video-conferencing', 'large-room', 'ptz-cameras', 'touch-panels'],
     images: [
       'https://avlive.com.pk/images/products/poly-x70-studio.jpg',
@@ -999,8 +1383,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'Polycom',
     color: 'Black',
     shippingWeight: '1.15 kg',
-    regularPrice: 36500,
-    salePrice: 31500,
+    regularPrice: 32000,
+    salePrice: 29500,
     categorySlugs: ['ip-phones', 'voip-phone-systems'],
     images: [
       'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
@@ -1011,13 +1395,56 @@ export const PRODUCT_GMC_METADATA: Record<
     defaultDescription:
       'Polycom VVX 250 4-Line Business IP Desk Phone (2200-48820-025) in Pakistan. Features Poly HD Voice, Acoustic Fence technology, a 2.8-inch color display, and dual Gigabit PoE ports for enterprise VoIP deployments.',
   },
+  'poly-vvx-411-pakistan': {
+    gmcId: 'VVX411-2200-48450-025',
+    gtin: '0610807846727',
+    mpn: '2200-48450-025',
+    brand: 'Poly',
+    title: 'Poly VVX 411 12-Line Gigabit PoE Business IP Phone – 3.5" Color LCD, HD Voice',
+    color: 'Black',
+    isBundle: 'no',
+    shippingWeight: '1.4 kg',
+    shippingLength: '19 cm',
+    shippingWidth: '15 cm',
+    shippingHeight: '18 cm',
+    returnPolicyLabel: 'b2b-30-day',
+    googleProductCategory: 'Electronics > Communications > Telephony > Corded Phones',
+    productType: 'Business Phones > IP Phones',
+    customLabel0: 'Poly',
+    customLabel1: 'IP-Phones',
+    customLabel2: 'Enterprise-Office',
+    customLabel3: 'PoE-Gigabit',
+    customLabel4: 'Pakistan-Stock',
+    regularPrice: 49500,
+    salePrice: 42500,
+    categorySlugs: ['ip-phones', 'voip-phone-systems'],
+    images: [
+      '/images/products/poly-vvx-411-main.webp',
+      '/images/products/poly-vvx-411-ports.webp',
+    ],
+    highlight: '12-line Gigabit PoE business IP phone with 3.5" color LCD & Poly HD Voice',
+    shortSummary:
+      '12-line Gigabit PoE desk phone with a 3.5" color display and Poly HD Voice — built for Office365, Skype for Business and open-SIP environments in Pakistan.',
+    gmcDescription:
+      'The Poly VVX 411 is a 12-line Gigabit PoE business media phone built for knowledge workers and frontline staff who handle moderate call volumes. It features a backlit 3.5-inch color LCD (320 × 240), Poly HD Voice with 7 kHz frequency response, dual Gigabit Ethernet ports, a dedicated RJ9 headset port, and built-in IEEE 802.3af Power over Ethernet. The phone supports SIP, RTCP, RTP and SRTP, and integrates with Microsoft Exchange calendars, corporate directories and third-party UC platforms. An optional 48V DC power supply is available for non-PoE environments. Ideal for offices in Pakistan deploying Skype for Business, Zoom Phone or open-SIP PBX systems.',
+    defaultSpecs:
+      'Lines:12;Display:3.5 in TFT LCD (320 × 240);Ethernet:Dual Gigabit RJ45 (10/100/1000);PoE:IEEE 802.3af (Class 2);HD Voice:Poly HD Voice (7 kHz);Headset Port:Dedicated RJ9;Protocols:SIP, RTCP, RTP, SRTP, SDP;USB:1 × USB 2.0;Expansion:Supports VVX Expansion Modules;Power:Optional 48V DC adapter;Base Dimensions:19 × 15 × 18 cm;Weight:900 g (base) / 1.4 kg (shipping)',
+    defaultDescription:
+      '<h2>Poly VVX 411 12-Line Gigabit PoE Business Media Phone (MPN: 2200-48450-025)</h2><p>The <strong>Poly VVX 411</strong> (formerly Polycom VVX 411) is a high-performance 12-line color IP desk phone engineered for knowledge workers, receptionists, and frontline enterprise staff in Pakistan handling moderate-to-high call volumes. Equipped with dual Gigabit Ethernet (10/100/1000) ports and built-in <strong>IEEE 802.3af Class 2 PoE</strong>, it connects seamlessly over a single Cat6 drop to your workstation and corporate voice VLAN.</p><h3>Crystal-Clear Audio &amp; Visual Call Control</h3><ul><li><strong>3.5-Inch Backlit Color LCD (320 × 240):</strong> Displays 12 programmable SIP line/BLF keys with instant call status and intuitive menu navigation.</li><li><strong>Poly HD Voice &amp; Acoustic Clarity:</strong> Delivers 7 kHz wideband audio over the handset, full-duplex speakerphone, or dedicated RJ9 headset port with Poly Acoustic Fence noise reduction.</li><li><strong>USB 2.0 &amp; VVX Expansion Ready:</strong> Supports USB headsets/call recording and daisy-chained Poly VVX Expansion Modules for high-volume attendants.</li><li><strong>Flexible PBX &amp; Cloud UC Integration:</strong> Compatible with 3CX, FreePBX, Grandstream UCM, Cisco CUCM open-SIP, Zoom Phone, Microsoft Teams SIP Gateway, and Skype for Business.</li></ul><h3>SKU &amp; Packaging Reference</h3><p>Primary Stocked SKU: <strong>2200-48450-025</strong> (Standard Worldwide PoE Model, UPC: <code>0610807846727</code>). Optional Skype for Business / Lync Edition: <strong>2200-48450-019</strong> (UPC: <code>0610807857792</code>). Base footprint measures 19 × 15 × 18 cm (~900 g); packaged shipping weight is 1.4 kg. Optional 48V DC power adapter is available separately for non-PoE switches.</p>',
+    seoMetaDescription:
+      'Buy the Poly VVX 411 12-line Gigabit PoE IP phone in Pakistan. 3.5" color LCD, HD Voice, dual Gigabit ports, Skype for Business compatible.',
+    seoTags:
+      'Poly VVX 411 Pakistan, Polycom VVX 411 price in Pakistan, 12-line IP phone, Gigabit PoE desk phone, Poly HD Voice, Skype for Business phone, SIP desk phone Lahore',
+    imageAltText:
+      'Poly VVX 411 12-line Gigabit PoE business IP phone with 3.5-inch color LCD – front view',
+  },
   'sony-bravia-projector-7-pakistan': {
     gtin: computeUpc12('02724292500'),
     mpn: 'VPL-XW5000ES',
     brand: 'Sony',
     color: 'Black',
-    regularPrice: 1650000,
-    salePrice: 1495000,
+    regularPrice: 1250000,
+    salePrice: 1195000,
     categorySlugs: ['projectors'],
     images: [
       'https://d1ncau8tqf99kp.cloudfront.net/converted/125848_original_local_1200x1050_v3_converted.webp',
@@ -1034,8 +1461,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'UNV-IPC3612SR3-VF',
     brand: 'Uniview',
     color: 'White',
-    regularPrice: 26500,
-    salePrice: 22500,
+    regularPrice: 18000,
+    salePrice: 16000,
     categorySlugs: ['ip-cameras'],
     images: [
       'https://www.uhs-hardware.com/cdn/shop/products/1_9ff307f7-23c0-48ce-a33b-caa6bd1a5db2.jpg?v=1655492376',
@@ -1051,8 +1478,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'VS-LSD400W',
     brand: 'ViewSonic',
     color: 'White',
-    regularPrice: 385000,
-    salePrice: 345000,
+    regularPrice: 175000,
+    salePrice: 155000,
     categorySlugs: ['projectors'],
     images: [
       'https://www.viewsonic.com/media/wysiwyg/26PRJ-MLT1176-RC-LSD400W_Bright_in_any_Room_1238x1102.jpg',
@@ -1071,8 +1498,8 @@ export const PRODUCT_GMC_METADATA: Record<
     brand: 'ViewSonic',
     color: 'Black',
     shippingWeight: '4.60 kg',
-    regularPrice: 510000,
-    salePrice: 465000,
+    regularPrice: 350000,
+    salePrice: 325000,
     categorySlugs: ['projectors'],
     images: [
       'https://www.viewsonic.com/media/wysiwyg/26PRJ-MLT1176-RC-LSD400W_Bright_in_any_Room_1238x1102.jpg',
@@ -1125,8 +1552,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'BH70-DUAL-UC',
     brand: 'Yealink',
     color: 'Black',
-    regularPrice: 48000,
-    salePrice: 42000,
+    regularPrice: 42000,
+    salePrice: 39500,
     categorySlugs: ['headsets'],
     images: [
       'https://m.media-amazon.com/images/I/61mOJRTTmFL._AC_UF350,350_QL80_.jpg',
@@ -1143,8 +1570,8 @@ export const PRODUCT_GMC_METADATA: Record<
     mpn: 'SIP-T46S',
     brand: 'Yealink',
     color: 'Black',
-    regularPrice: 54000,
-    salePrice: 46500,
+    regularPrice: 38000,
+    salePrice: 35000,
     categorySlugs: ['ip-phones', 'voip-phone-systems', 'speakerphones'],
     images: [
       'https://cdn11.bigcommerce.com/s-u3uxlvxq3h/images/stencil/original/products/9024/26315/X4G-2__79148.1584438040.jpg?c=1',
@@ -1213,9 +1640,15 @@ export const DEFAULT_SHIPPING_WEIGHT_BY_SLUG: Record<string, string> = {
   'bosch-paviro-pva-4cr12-pakistan': '8.20 kg',
   'cisco-8841-ip-phone-pakistan': '1.35 kg',
   'cisco-cucm-license-pakistan': '0.20 kg',
-  'cisco-room-bar-pakistan': '3.50 kg',
-  'cisco-room-kit-eq-pakistan': '11.80 kg',
-  'cisco-room-kit-pakistan': '4.80 kg',
+  'cisco-room-bar-pakistan': '1.50 kg',
+  'cisco-room-bar-t-c-k9-pakistan': '1.50 kg',
+  'cisco-room-bar-pro-pakistan': '4.47 kg',
+  'cisco-webex-codec-pro-pakistan': '3.30 kg',
+  'cisco-webex-room-kit-pro-p60-pakistan': '5.80 kg',
+  'cisco-webex-desk-pro-pakistan': '11.60 kg',
+  'cisco-webex-codec-eq-pakistan': '2.95 kg',
+  'cisco-room-kit-eq-pakistan': '7.75 kg',
+  'cisco-room-kit-pakistan': '3.20 kg',
   'cisco-room-kit-plus-pakistan': '9.50 kg',
   'cisco-room-kit-pro-pakistan': '13.40 kg',
   'cisco-webex-room-kit-plus-pakistan': '9.50 kg',
@@ -1244,10 +1677,12 @@ export const DEFAULT_SHIPPING_WEIGHT_BY_SLUG: Record<string, string> = {
   'poly-studio-v52-pakistan': '3.80 kg',
   'poly-studio-x32-pakistan': '2.20 kg',
   'poly-studio-x50-pakistan': '4.20 kg',
+  'poly-studio-x50-tc8-special-offer-pakistan': '5.05 kg',
   'poly-studio-x52-pakistan': '4.30 kg',
   'poly-studio-x72-pakistan': '5.10 kg',
   'poly-voyager-focus-uc-pakistan': '0.52 kg',
   'polycom-vvx-250-pakistan': '1.15 kg',
+  'poly-vvx-411-pakistan': '1.4 kg',
   'sony-bravia-projector-7-pakistan': '15.50 kg',
   'uniview-ipc3612sr3-vf-pakistan': '0.68 kg',
   'viewsonic-lsd400w-pakistan': '4.90 kg',
@@ -1432,6 +1867,57 @@ export const PRODUCT_ID_TO_SEO_SLUG: Record<string, string> = {
   'uniview-ipc3612sr3-vf-bullet-pakistan': 'uniview-ipc3612sr3-vf-pakistan',
   'viewsonic-lsd400w-projector-pakistan': 'viewsonic-lsd400w-pakistan',
   'viewsonic-x1-4k-pro-projector-pakistan': 'viewsonic-x1-4k-pro-pakistan',
+  'VVX411-2200-48450-025': 'poly-vvx-411-pakistan',
+  '2200-48450-025': 'poly-vvx-411-pakistan',
+  '2200-48450-019': 'poly-vvx-411-pakistan',
+  'poly-vvx-411': 'poly-vvx-411-pakistan',
+  'polycom-vvx-411': 'poly-vvx-411-pakistan',
+  'polycom-vvx-411-pakistan': 'poly-vvx-411-pakistan',
+  '0610807846727': 'poly-vvx-411-pakistan',
+  'GGN-CS-CODEC-PRO-K9': 'cisco-webex-codec-pro-pakistan',
+  'CS-CODEC-PRO-K9': 'cisco-webex-codec-pro-pakistan',
+  'cs-codec-pro-k9': 'cisco-webex-codec-pro-pakistan',
+  'cisco-codec-pro-pakistan': 'cisco-webex-codec-pro-pakistan',
+  'GGN-CS-KITPRO-P60-K9': 'cisco-webex-room-kit-pro-p60-pakistan',
+  'CS-KITPRO-P60-K9': 'cisco-webex-room-kit-pro-p60-pakistan',
+  'cs-kitpro-p60-k9': 'cisco-webex-room-kit-pro-p60-pakistan',
+  'cisco-room-kit-pro-p60-pakistan': 'cisco-webex-room-kit-pro-p60-pakistan',
+  'GGN-CS-BAR-T-C-K9': 'cisco-room-bar-t-c-k9-pakistan',
+  'CS-BAR-T-C-K9': 'cisco-room-bar-t-c-k9-pakistan',
+  'cs-bar-t-c-k9': 'cisco-room-bar-t-c-k9-pakistan',
+  'cisco-cs-bar-t-c-k9': 'cisco-room-bar-t-c-k9-pakistan',
+  'cisco-room-bar-carbon-pakistan': 'cisco-room-bar-t-c-k9-pakistan',
+  'GGN-CS-BARPRO-K9': 'cisco-room-bar-pro-pakistan',
+  'CS-BARPRO-K9': 'cisco-room-bar-pro-pakistan',
+  'cs-barpro-k9': 'cisco-room-bar-pro-pakistan',
+  'product-4-9e76d-pr6ls-5tznn-jwd3f': 'cisco-room-bar-pro-pakistan',
+  'GGN-CS-KIT-K9': 'cisco-room-kit-pakistan',
+  'CS-KIT-K9': 'cisco-room-kit-pakistan',
+  'cs-kit-k9': 'cisco-room-kit-pakistan',
+  'cisco-webex-room-kit-pakistan': 'cisco-room-kit-pakistan',
+  'GGN-CS-DESKPRO-K9': 'cisco-webex-desk-pro-pakistan',
+  'CS-DESKPRO-K9': 'cisco-webex-desk-pro-pakistan',
+  'cs-deskpro-k9': 'cisco-webex-desk-pro-pakistan',
+  'cisco-desk-pro-pakistan': 'cisco-webex-desk-pro-pakistan',
+  'GGN-CS-KIT-EQ-K9': 'cisco-room-kit-eq-pakistan',
+  'CS-KIT-EQ-K9': 'cisco-room-kit-eq-pakistan',
+  'cs-kit-eq-k9': 'cisco-room-kit-eq-pakistan',
+  'CS-KIT-EQ-C-K9': 'cisco-room-kit-eq-pakistan',
+  'cs-kit-eq-c-k9': 'cisco-room-kit-eq-pakistan',
+  'GGN-CS-CODEC-EQ-K9': 'cisco-webex-codec-eq-pakistan',
+  'CS-CODEC-EQ-K9': 'cisco-webex-codec-eq-pakistan',
+  'cs-codec-eq-k9': 'cisco-webex-codec-eq-pakistan',
+  'cisco-codec-eq-pakistan': 'cisco-webex-codec-eq-pakistan',
+  'GGN-CS-BAR-T-K9': 'cisco-room-bar-pakistan',
+  'CS-BAR-T-K9': 'cisco-room-bar-pakistan',
+  'cs-bar-t-k9': 'cisco-room-bar-pakistan',
+  'CS-BAR-NR-K9': 'cisco-room-bar-pakistan',
+  'cs-bar-nr-k9': 'cisco-room-bar-pakistan',
+  'AVLIVE-POLY-X50-TC8-DEAL': 'poly-studio-x50-tc8-special-offer-pakistan',
+  '2215-86399-001': 'poly-studio-x50-tc8-special-offer-pakistan',
+  'poly-studio-x50-tc8-bundle-pakistan': 'poly-studio-x50-tc8-special-offer-pakistan',
+  'poly-studio-x50-tc8-pakistan': 'poly-studio-x50-tc8-special-offer-pakistan',
+  'poly-studio-x50-special-offer': 'poly-studio-x50-tc8-special-offer-pakistan',
 };
 
 export const SEO_SLUG_TO_PRODUCT_ID: Record<string, string> = {
@@ -1498,19 +1984,20 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
   if (!meta) return null;
 
   const readableName =
-    canonicalSlug === 'podium-prompter-17-compact-pakistan'
+    meta.title ||
+    (canonicalSlug === 'podium-prompter-17-compact-pakistan'
       ? 'AV Live Fold-Flat Podium Teleprompter'
       : canonicalSlug
           .replace(/-pakistan$/, '')
           .split('-')
           .map((w) =>
-            ['ip', 'ptz', 'usb', '4k', 'uhd', 'uc', 'pbx', 'sip', 'poe', '2n', '3cx', 'itc', 'eq', 'pro', 'hd'].includes(
+            ['ip', 'ptz', 'usb', '4k', 'uhd', 'uc', 'pbx', 'sip', 'poe', '2n', '3cx', 'itc', 'eq', 'pro', 'hd', 'vvx'].includes(
               w.toLowerCase()
             )
               ? w.toUpperCase()
               : w.charAt(0).toUpperCase() + w.slice(1)
           )
-          .join(' ');
+          .join(' '));
 
   const resolvedImages = (
     meta.images && meta.images.length > 0
@@ -1542,6 +2029,7 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
 
   return {
     id: SEO_SLUG_TO_PRODUCT_ID[canonicalSlug] || canonicalSlug,
+    ...(meta.gmcId ? { gmcId: meta.gmcId } : {}),
     slug: canonicalSlug,
     customPagePath: PRODUCT_CUSTOM_PAGE_ROUTES[canonicalSlug],
     productName: readableName,
@@ -1550,6 +2038,23 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
     gtin: meta.gtin,
     brand: meta.brand,
     shippingWeight: meta.shippingWeight || DEFAULT_SHIPPING_WEIGHT_BY_SLUG[canonicalSlug] || '2.50 kg',
+    ...(meta.shippingLength ? { shippingLength: meta.shippingLength } : {}),
+    ...(meta.shippingWidth ? { shippingWidth: meta.shippingWidth } : {}),
+    ...(meta.shippingHeight ? { shippingHeight: meta.shippingHeight } : {}),
+    ...(meta.returnPolicyLabel ? { returnPolicyLabel: meta.returnPolicyLabel } : {}),
+    ...(meta.googleProductCategory ? { googleProductCategory: meta.googleProductCategory } : {}),
+    ...(meta.productType ? { productType: meta.productType } : {}),
+    ...(meta.customLabel0 ? { customLabel0: meta.customLabel0 } : {}),
+    ...(meta.customLabel1 ? { customLabel1: meta.customLabel1 } : {}),
+    ...(meta.customLabel2 ? { customLabel2: meta.customLabel2 } : {}),
+    ...(meta.customLabel3 ? { customLabel3: meta.customLabel3 } : {}),
+    ...(meta.customLabel4 ? { customLabel4: meta.customLabel4 } : {}),
+    ...(meta.isBundle ? { isBundle: meta.isBundle } : {}),
+    ...(meta.multipack ? { multipack: meta.multipack } : {}),
+    ...(meta.gmcDescription ? { gmcDescription: meta.gmcDescription } : {}),
+    ...(meta.seoMetaDescription ? { seoMetaDescription: meta.seoMetaDescription } : {}),
+    ...(meta.seoTags ? { seoTags: meta.seoTags } : {}),
+    ...(meta.imageAltText ? { imageAltText: meta.imageAltText } : {}),
     regularPrice: meta.regularPrice || 145000,
     salePrice: meta.salePrice || 125000,
     stockQuantity: 10,
@@ -1560,7 +2065,7 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
     categoryIds: resolvedCategoryIds,
     categorySlugs: resolvedCategories,
     category: resolvedCategories[0],
-    shortDescription: meta.highlight,
+    shortDescription: meta.shortSummary || meta.highlight,
     description:
       meta.defaultDescription ||
       `${meta.highlight}. Genuine ${meta.brand} enterprise hardware (MPN: ${meta.mpn}, GTIN: ${meta.gtin}) supplied and integrated across Lahore, Karachi, and Islamabad by AV Live Communications.`,
@@ -1569,7 +2074,7 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
       `Manufacturer:${meta.brand};Part Number (MPN):${meta.mpn};GTIN / UPC:${meta.gtin};Warranty:1-Year Official Pakistan Warranty`,
     variations: [],
     isActive: true,
-    isFeatured: ['polycom-realpresence-group-500-pakistan', 'poly-studio-x72-pakistan', 'logitech-rally-bar-pakistan', 'cisco-room-kit-plus-pakistan', 'horion-k6a-bundle-special-offer', 'grandstream-ucm6308-pakistan', 'podium-prompter-17-compact-pakistan'].includes(canonicalSlug),
+    isFeatured: ['poly-studio-x50-tc8-special-offer-pakistan', 'poly-studio-x50-pakistan', 'polycom-realpresence-group-500-pakistan', 'poly-studio-x72-pakistan', 'logitech-rally-bar-pakistan', 'cisco-room-kit-plus-pakistan', 'horion-k6a-bundle-special-offer', 'grandstream-ucm6308-pakistan', 'podium-prompter-17-compact-pakistan'].includes(canonicalSlug),
   };
 }
 
@@ -1657,9 +2162,9 @@ export function resolveProductPricing(product?: Record<string, any> | null): {
   const rawRegular = Number(product?.regularPrice ?? product?.price ?? meta?.regularPrice ?? 0);
   const rawSale = Number(product?.salePrice ?? meta?.salePrice ?? 0);
   const regularPrice = rawRegular > 0 ? rawRegular : rawSale > 0 ? rawSale : meta?.regularPrice || 50000;
-  const salePrice = rawSale > 0 ? rawSale : regularPrice;
-  const effectivePrice = salePrice > 0 ? salePrice : regularPrice;
-  const hasSale = salePrice > 0 && salePrice < regularPrice;
+  const hasSale = rawSale > 0 && rawSale < regularPrice;
+  const salePrice = hasSale ? rawSale : regularPrice;
+  const effectivePrice = hasSale ? rawSale : regularPrice;
   return { regularPrice, salePrice, effectivePrice, hasSale };
 }
 
@@ -1707,7 +2212,7 @@ export function formatProductToGmcRow(
 
   // Use explicit custom GMC Product ID (max 50 chars) if provided, otherwise preserve Firestore/canonical ID
   const id = sanitizeTsvText(
-    product.gmcId || rawId || SEO_SLUG_TO_PRODUCT_ID[canonicalSlug] || canonicalSlug,
+    product.gmcId || meta.gmcId || rawId || SEO_SLUG_TO_PRODUCT_ID[canonicalSlug] || canonicalSlug,
     50
   );
 
@@ -1768,6 +2273,7 @@ export function formatProductToGmcRow(
   // Plain-text GMC description (max 5,000 chars, zero HTML tags)
   const rawFullDesc =
     sanitizeTsvText(product.gmcDescription) ||
+    sanitizeTsvText(meta.gmcDescription) ||
     sanitizeTsvText(meta.defaultDescription) ||
     sanitizeTsvText(product.description) ||
     `Genuine ${title} by ${brand} in Pakistan. ${meta.highlight || ''}. Includes 1-year official warranty and nationwide enterprise deployment by AV Live.`;
@@ -1841,7 +2347,7 @@ export function formatProductToGmcRow(
     rawCondition === 'refurbished' || rawCondition === 'used' ? rawCondition : 'new';
 
   const googleProductCategory =
-    sanitizeTsvText(product.googleProductCategory) ||
+    sanitizeTsvText(product.googleProductCategory || meta.googleProductCategory) ||
     inferDefaultGoogleCategory(product.categorySlugs, product.productName);
 
   const derivedStoreType = Array.isArray(product.categorySlugs) && product.categorySlugs.length > 0
@@ -1855,13 +2361,13 @@ export function formatProductToGmcRow(
         .filter(Boolean)
         .join(' > ')
     : 'Pro-AV Hardware';
-  const productType = sanitizeTsvText(product.productType) || derivedStoreType;
+  const productType = sanitizeTsvText(product.productType || meta.productType) || derivedStoreType;
 
-  const customLabel0 = sanitizeTsvText(product.customLabel0, 100);
-  const customLabel1 = sanitizeTsvText(product.customLabel1, 100);
-  const customLabel2 = sanitizeTsvText(product.customLabel2, 100);
-  const customLabel3 = sanitizeTsvText(product.customLabel3, 100);
-  const customLabel4 = sanitizeTsvText(product.customLabel4, 100);
+  const customLabel0 = sanitizeTsvText(product.customLabel0 || meta.customLabel0, 100);
+  const customLabel1 = sanitizeTsvText(product.customLabel1 || meta.customLabel1, 100);
+  const customLabel2 = sanitizeTsvText(product.customLabel2 || meta.customLabel2, 100);
+  const customLabel3 = sanitizeTsvText(product.customLabel3 || meta.customLabel3, 100);
+  const customLabel4 = sanitizeTsvText(product.customLabel4 || meta.customLabel4, 100);
 
   const shippingWeight =
     sanitizeTsvText(
@@ -1870,15 +2376,15 @@ export function formatProductToGmcRow(
         DEFAULT_SHIPPING_WEIGHT_BY_SLUG[canonicalSlug] ||
         DEFAULT_SHIPPING_WEIGHT_BY_SLUG[rawId]
     ) || '2.50 kg';
-  const shippingLength = sanitizeTsvText(product.shippingLength || '');
-  const shippingWidth = sanitizeTsvText(product.shippingWidth || '');
-  const shippingHeight = sanitizeTsvText(product.shippingHeight || '');
-  const returnPolicyLabel = sanitizeTsvText(product.returnPolicyLabel || '');
+  const shippingLength = sanitizeTsvText(product.shippingLength || meta.shippingLength || '');
+  const shippingWidth = sanitizeTsvText(product.shippingWidth || meta.shippingWidth || '');
+  const shippingHeight = sanitizeTsvText(product.shippingHeight || meta.shippingHeight || '');
+  const returnPolicyLabel = sanitizeTsvText(product.returnPolicyLabel || meta.returnPolicyLabel || '');
 
   const videoLink = sanitizeTsvText(product.videoLink || '');
   const isBundle: 'yes' | 'no' =
     String(product.isBundle || meta.isBundle || 'no').toLowerCase() === 'yes' ? 'yes' : 'no';
-  const multipackNum = Number(product.multipack);
+  const multipackNum = Number(product.multipack ?? meta.multipack);
   const multipack = Number.isInteger(multipackNum) && multipackNum > 1 ? String(multipackNum) : '';
 
   // Exclude US targeting on Hikvision and Dahua items to prevent US Local Requirements (NDAA/FCC) disapprovals

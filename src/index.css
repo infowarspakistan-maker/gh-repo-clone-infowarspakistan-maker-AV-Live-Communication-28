@@ -63,6 +63,28 @@ body {
   }
 }
 
+/* Sitewide Accessible Typography Floor & Responsive Screen-Size Safeguards */
+.text-\[7px\],
+.text-\[8px\],
+.text-\[9px\],
+.text-\[10px\] {
+  font-size: 0.75rem !important; /* 12px minimum readable floor */
+  line-height: 1.4 !important;
+}
+
+.text-\[11px\] {
+  font-size: 0.78125rem !important; /* 12.5px readable floor */
+  line-height: 1.45 !important;
+}
+
+@media (min-width: 640px) {
+  .text-\[10px\],
+  .text-\[11px\] {
+    font-size: 0.8125rem !important; /* 13px on tablet/desktop */
+    line-height: 1.45 !important;
+  }
+}
+
 /* Page Transitions */
 .page-transition-enter {
   opacity: 0;

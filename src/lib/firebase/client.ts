@@ -1,5 +1,11 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, setPersistence, browserLocalPersistence, GoogleAuthProvider } from 'firebase/auth';
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+} from 'firebase/auth';
 import { initializeFirestore, setLogLevel, doc, getDocFromServer } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import firebaseConfig from '../../../firebase-applet-config.json';
@@ -20,6 +26,9 @@ export const storage = getStorage(app);
 export const PRODUCTS_STORAGE_BUCKET = 'studio-5367437135-24ac6.firebasestorage.app';
 export const productsStorage = getStorage(app, `gs://${PRODUCTS_STORAGE_BUCKET}`);
 export const googleProvider = new GoogleAuthProvider();
+export const facebookProvider = new FacebookAuthProvider();
+facebookProvider.addScope('email');
+facebookProvider.addScope('public_profile');
 
 // Set persistence to LOCAL (survives browser restarts)
 setPersistence(auth, browserLocalPersistence).catch(console.error);
