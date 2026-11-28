@@ -124,6 +124,107 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["pageId", "pageName", "itemType", "title", "message", "postFormat", "status", "publishedBy", "createdAt"]
+    },
+    "AILead": {
+      "title": "AI Sales Agent Lead",
+      "description": "Omnichannel sales lead captured via WhatsApp Cloud API, 3CX SIP voice bridge, or Web AV Assist",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 200 },
+        "company": { "type": "string", "maxLength": 200 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "maxLength": 200 },
+        "city": { "type": "string", "maxLength": 100 },
+        "channel": { "type": "string", "enum": ["whatsapp", "phone_3cx", "web_chat", "email"] },
+        "language": { "type": "string", "enum": ["en", "ur", "roman_ur"] },
+        "stage": { "type": "string", "enum": ["new", "qualified", "quoted", "follow_up", "won", "lost"] },
+        "intentSummary": { "type": "string", "maxLength": 1000 },
+        "interestedSkus": { "type": "array" },
+        "estimatedValuePkr": { "type": "number" },
+        "escalated": { "type": "boolean" },
+        "sheetSyncedAt": { "type": "string", "maxLength": 64 },
+        "lastContactAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone", "channel", "language", "stage", "createdAt", "updatedAt"]
+    },
+    "AIConversation": {
+      "title": "AI Agent Conversation Thread",
+      "description": "Concise conversation history and interactive CTA button payloads per customer session",
+      "type": "object",
+      "properties": {
+        "leadId": { "type": "string", "maxLength": 128 },
+        "customerName": { "type": "string", "maxLength": 200 },
+        "customerPhone": { "type": "string", "maxLength": 50 },
+        "channel": { "type": "string", "enum": ["whatsapp", "phone_3cx", "web_chat"] },
+        "language": { "type": "string", "enum": ["en", "ur", "roman_ur"] },
+        "status": { "type": "string", "enum": ["open", "escalated", "resolved"] },
+        "lastMessage": { "type": "string", "maxLength": 1000 },
+        "messages": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerName", "channel", "language", "status", "messages", "createdAt", "updatedAt"]
+    },
+    "AIApprovalItem": {
+      "title": "AI Outbound Approval Queue Item",
+      "description": "Draft Gmail quotes, email follow-ups, daily reports, or WhatsApp outbound messages awaiting admin confirmation",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["gmail_quote", "gmail_followup", "gmail_daily_report", "whatsapp_followup"] },
+        "leadId": { "type": "string", "maxLength": 128 },
+        "recipientName": { "type": "string", "maxLength": 200 },
+        "recipientEmail": { "type": "string", "maxLength": 200 },
+        "recipientPhone": { "type": "string", "maxLength": 50 },
+        "subject": { "type": "string", "maxLength": 300 },
+        "bodyHtml": { "type": "string", "maxLength": 15000 },
+        "bodyText": { "type": "string", "maxLength": 5000 },
+        "quoteTotalPkr": { "type": "number" },
+        "quoteItems": { "type": "array" },
+        "buttons": { "type": "array" },
+        "status": { "type": "string", "enum": ["pending_approval", "sent", "rejected"] },
+        "approvedBy": { "type": "string", "maxLength": 200 },
+        "sentAt": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "recipientName", "subject", "bodyText", "status", "createdAt", "updatedAt"]
+    },
+    "AITask": {
+      "title": "AI Follow-Up Task",
+      "description": "Automated Day +1, Day +3, Day +7 follow-up cadence tasks linked to leads and optionally synced to Google Tasks",
+      "type": "object",
+      "properties": {
+        "leadId": { "type": "string", "maxLength": 128 },
+        "leadName": { "type": "string", "maxLength": 200 },
+        "title": { "type": "string", "maxLength": 300 },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "cadenceStep": { "type": "string", "enum": ["day_1", "day_3", "day_7", "custom"] },
+        "channel": { "type": "string", "enum": ["whatsapp", "phone_3cx", "email", "internal"] },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+        "status": { "type": "string", "enum": ["pending", "completed", "snoozed"] },
+        "dueAt": { "type": "string", "maxLength": 64 },
+        "googleTaskId": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "cadenceStep", "channel", "priority", "status", "dueAt", "createdAt", "updatedAt"]
+    },
+    "AIDailyReport": {
+      "title": "AI Daily Executive Report",
+      "description": "Daily operations briefing covering calls, WhatsApp chats, leads, quotes, PKR pipeline, overdue tasks, and escalations",
+      "type": "object",
+      "properties": {
+        "reportDate": { "type": "string", "maxLength": 32 },
+        "summaryText": { "type": "string", "maxLength": 6000 },
+        "summaryHtml": { "type": "string", "maxLength": 15000 },
+        "metrics": { "type": "object" },
+        "status": { "type": "string", "enum": ["draft", "sent"] },
+        "sentTo": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["reportDate", "summaryText", "metrics", "status", "createdAt"]
     }
   },
   "firestore": {
@@ -165,7 +266,7 @@
     },
     "settings/{docId}": {
       "schema": "object",
-      "description": "Global, catalog tombstones, payment, and Facebook Page integration settings"
+      "description": "Global, catalog tombstones, payment, AI agent, and Facebook Page integration settings"
     },
     "facebook_posts/{postId}": {
       "schema": "FacebookPost",
@@ -178,6 +279,26 @@
     "page_contents/{pageId}": {
       "schema": "object",
       "description": "Dynamic custom page content documents"
+    },
+    "ai_leads/{leadId}": {
+      "schema": "AILead",
+      "description": "Omnichannel sales leads captured by the AV Live AI Agent"
+    },
+    "ai_conversations/{conversationId}": {
+      "schema": "AIConversation",
+      "description": "Omnichannel WhatsApp, 3CX phone, and web AI chat transcripts with button metadata"
+    },
+    "ai_approval_queue/{itemId}": {
+      "schema": "AIApprovalItem",
+      "description": "Admin confirmation queue for outbound Gmail quotes, email follow-ups, daily reports, and WhatsApp pushes"
+    },
+    "ai_tasks/{taskId}": {
+      "schema": "AITask",
+      "description": "Automated Day +1/+3/+7 follow-up cadence tasks with optional Google Tasks sync"
+    },
+    "ai_daily_reports/{reportId}": {
+      "schema": "AIDailyReport",
+      "description": "Daily executive operations summaries generated by the AI Agent"
     }
   }
 }

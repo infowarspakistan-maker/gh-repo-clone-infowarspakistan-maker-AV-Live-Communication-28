@@ -1,0 +1,80 @@
+{
+  "run_id": "avlive-research-2026-11-23",
+  "target": "AV Live Communications (https://avlive.com.pk)",
+  "ingested_at": "2026-11-24T02:48:00Z",
+  "mode": "read_only_ux_color_hero_research",
+  "prior_applied_hunks": [
+    "UPG-1 (src/index.css prefers-reduced-motion guard)",
+    "UPG-2 (src/pages/Home.tsx hero #38BDF8 eyebrow, scrim & 44px CTA height)"
+  ],
+  "degraded_vision_mcp": true,
+  "degraded_reason": "External Pinterest/Dribbble/Page-Vision MCP servers not attached in sandbox; grounded in live workspace DOM/Tailwind inspection + web research across HP Poly, Cisco Webex Devices, Logitech Video Collaboration, Crestron, and WCAG 2.2 carousel guidelines.",
+  "pii_redaction": {
+    "performed": true,
+    "counts": {
+      "PHONE": 1
+    },
+    "warning": "Phone number in extracted nav label redacted to {{REDACTED:PHONE}} before persisting niche_profile.json."
+  },
+  "tokens": {
+    "primary": "#1A2B4C",
+    "secondary": "#00B4D8",
+    "accessible_cyan_aa": "#0077B6",
+    "deep_teal_aa": "#026896",
+    "hero_sky": "#38BDF8",
+    "conversion_amber": "#F59E0B",
+    "verified_emerald": "#047857",
+    "canvas_bg": "#F8F9FA",
+    "surface_bg": "#FFFFFF",
+    "border_subtle": "#E2E8F0",
+    "font_families": [
+      "Inter",
+      "ui-sans-serif",
+      "system-ui",
+      "sans-serif"
+    ]
+  },
+  "research_findings": [
+    {
+      "id": "RES-01",
+      "area": "Hero Slider UX & Accessibility (HP Poly / Cisco / WCAG 2.2 SC 2.2.2)",
+      "finding": "Current Home.tsx hero uses an automatic 10-second timer (L216) with anonymous pagination bars (L749-763), no explicit Pause/Play toggle for keyboard/screen-reader users, and hides prev/next arrows until hover (opacity-0 group-hover/slider:opacity-100). B2B Pro-AV leaders replace blind dots with named solution tabs (e.g., 01 Boardroom AV, 02 Corporate Events, 03 Delegate Systems), a 44x44px Pause/Play button, and pause-on-focus.",
+      "location": "src/pages/Home.tsx (L214-218, L655-765)"
+    },
+    {
+      "id": "RES-02",
+      "area": "Hero & Conversion CTA Hierarchy",
+      "finding": "Both hero buttons currently compete with similar high-emphasis uppercase styling, while mobile/desktop slide context does not dynamically adapt secondary trust proof (e.g., 15-Min SLA, Official Warranty, PPRA/FBR GST). High-converting B2B hardware heroes pair 1 primary solid CTA with 1 calm ghost secondary CTA + a crisp 1-line SLA/trust anchor.",
+      "location": "src/pages/Home.tsx (L536-548, L707-722)"
+    },
+    {
+      "id": "RES-03",
+      "area": "Light-Surface Color Contrast Gaps (Remaining Post-UPG-2)",
+      "finding": "While the dark hero eyebrow now passes AA at 6.56:1 (#38BDF8 on #1A2B4C), 7+ sections below the fold still render #00B4D8 text/prices directly on #FFFFFF/#F8F9FA (2.46:1 / 2.34:1 FAIL): Dual Pillars kicker (L788), service CTA links (L827, L857), Featured Hardware kicker (L874), Bento PKR prices (L1040-1100), and AEO/FAQ kickers & table column header (L1210, L1279, L1315).",
+      "location": "src/pages/Home.tsx (L788-1394)"
+    },
+    {
+      "id": "RES-04",
+      "area": "Pill Clutter, Card Radius Inconsistency & Non-Tabular PKR Prices",
+      "finding": "Static Brand/SKU strings sit in boxed border-gray-200 chips; Dual Pillars uses detached rounded-full all-caps capsules; cards alternate between rounded-3xl, rounded-[2.5rem], and rounded-[3rem]; PKR numbers lack tabular-nums alignment.",
+      "location": "src/pages/Home.tsx (L793-806, L976-997, L1063, L1342-1408)"
+    }
+  ],
+  "planned_bounds_check": {
+    "viewport_pixel_diff_fraction": 0.22,
+    "components_restructured": 3,
+    "top_level_dom_reorders": 0,
+    "removed_interactive_elements": 0,
+    "css_delta_fraction": 0.05,
+    "new_blocking_resources": 0,
+    "hardcoded_hex_over_system_token": 0,
+    "animated_properties": [
+      "transform",
+      "opacity"
+    ],
+    "has_reduced_motion_variant": true,
+    "min_touch_target_px": 44,
+    "section_iteration": 1,
+    "risk_tier": 2
+  }
+}

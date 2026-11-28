@@ -14,8 +14,8 @@ export function Esports() {
         title="Esports Tournament AV Production & Streaming Infrastructure | AV Live Pakistan" 
         description="High refresh rate SMD screens, low-latency broadcast cameras, player comms networks, and live event production for esports arenas."
         url="https://avlive.com.pk/esports"
-        image="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1920&q=80"
-        imageAlt="AV Live Esports Tournament Production Pakistan"
+        image="/images/projects/novo-nordisk-arena-wide-stage.webp"
+        imageAlt="AV Live Esports Tournament Arena SMD LED Production Pakistan"
         schema={{
           '@context': 'https://schema.org',
           '@graph': [

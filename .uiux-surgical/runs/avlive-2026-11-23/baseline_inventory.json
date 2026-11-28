@@ -1,0 +1,93 @@
+{
+  "run_id": "avlive-2026-11-23",
+  "target": "AV Live Communications (https://avlive.com.pk)",
+  "ingested_at": "2026-11-23T18:22:00Z",
+  "mode": "read_only_workspace_blueprint_ingest",
+  "degraded_vision_mcp": true,
+  "degraded_reason": "External Pinterest/Dribbble/Page-Vision MCP servers not attached in sandbox; ingested directly from live DOM/Tailwind/CSS source and OEM vertical benchmarks.",
+  "pii_redaction": {
+    "performed": true,
+    "counts": {
+      "PHONE": 1
+    },
+    "warning": "Phone number in extracted nav label redacted to {{REDACTED:PHONE}} before persisting niche_profile.json."
+  },
+  "tokens": {
+    "primary": "#1A2B4C",
+    "secondary": "#00B4D8",
+    "accessible_cyan_text": "#0077B6",
+    "dark_surface_cyan_text": "#38BDF8",
+    "canvas_bg": "#F8F9FA",
+    "surface_bg": "#FFFFFF",
+    "ink_primary": "#0F172A",
+    "ink_muted": "#6E6E73",
+    "border_subtle": "#E2E8F0",
+    "font_families": [
+      "Inter",
+      "ui-sans-serif",
+      "system-ui",
+      "sans-serif"
+    ]
+  },
+  "tier_0_frozen_elements": [
+    "Brand logo mark (AV Live header & mobile header lockup)",
+    "Primary navigation link order & mega-menu routes",
+    "Legal footer, sitemap links, privacy/return policy links",
+    "Auth/checkout/admin flows & canonical SEO schema/H1 authority bar"
+  ],
+  "detected_baseline_issues": [
+    {
+      "id": "ISS-01",
+      "severity": "wcag_aa_fail",
+      "location": "src/pages/Home.tsx (L788, L827, L857, L874, L1040)",
+      "issue": "Cyan #00B4D8 text used directly on #FFFFFF and #F9FAFB surfaces measures 2.46:1 (fails WCAG 2.2 AA 4.5:1 minimum).",
+      "measured_contrast": 2.4648,
+      "proposed_token": "#0077B6",
+      "proposed_contrast_on_white": 4.8676,
+      "proposed_contrast_on_f8f9fa": 4.6178
+    },
+    {
+      "id": "ISS-02",
+      "severity": "touch_target_fail",
+      "location": "src/pages/Home.tsx (L539, L545, L712, L719)",
+      "issue": "Mobile hero primary/secondary CTAs are min-h-[34px] (34px < 44px WCAG 2.2 AA & bounds.yaml cap); desktop hero CTAs are min-h-[36px].",
+      "measured_px": 34,
+      "proposed_px": 44
+    },
+    {
+      "id": "ISS-03",
+      "severity": "pill_clutter_and_density",
+      "location": "src/pages/Home.tsx (L527, L696, L796-L805, L976-L987)",
+      "issue": "Static metadata (Brand, SKU, Est. 2011 kicker, Enterprise AV badge) wrapped in bordered chips/rounded pills; Pillar switcher uses oversized rounded-full all-caps capsules instead of a crisp segmented control."
+    },
+    {
+      "id": "ISS-04",
+      "severity": "spacing_and_tabular_inconsistency",
+      "location": "src/pages/Home.tsx (L814, L841, L930, L995, L1035)",
+      "issue": "Card corner radii & padding vary across adjacent sections (rounded-3xl p-8 vs p-6 vs rounded-[3rem]); PKR prices lack tabular-nums alignment; hover lift (-translate-y-2) lacks motion-reduce protection."
+    },
+    {
+      "id": "ISS-05",
+      "severity": "reduced_motion_missing",
+      "location": "src/index.css (L9-L20, L89-L97)",
+      "issue": ".animate-marquee and .page-transition-enter-active lack @media (prefers-reduced-motion: reduce) fallbacks."
+    }
+  ],
+  "planned_bounds_check": {
+    "viewport_pixel_diff_fraction": 0.16,
+    "components_restructured": 3,
+    "top_level_dom_reorders": 0,
+    "removed_interactive_elements": 0,
+    "css_delta_fraction": 0.04,
+    "new_blocking_resources": 0,
+    "hardcoded_hex_over_system_token": 0,
+    "animated_properties": [
+      "transform",
+      "opacity"
+    ],
+    "has_reduced_motion_variant": true,
+    "min_touch_target_px": 44,
+    "section_iteration": 1,
+    "risk_tier": 2
+  }
+}

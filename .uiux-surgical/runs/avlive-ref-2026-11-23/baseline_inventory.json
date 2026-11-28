@@ -1,0 +1,87 @@
+{
+  "run_id": "avlive-ref-2026-11-23",
+  "target": "AV Live Communications (https://avlive.com.pk)",
+  "ingested_at": "2026-11-24T04:08:00Z",
+  "mode": "read_only_reference_image_ux_research",
+  "reference_attachment": {
+    "path": "public/assets/aistudio/image_e982880c.png",
+    "subject": "Moveix Clean E-Commerce Storefront Reference",
+    "extracted_structural_patterns": [
+      "Two-tone hero headline with high-contrast accent phrase + single pill CTA + pinned 3-badge bottom SLA strip",
+      "Circular soft-#F8F9FA category avatar strip with crisp hardware silhouettes, 1-line sub-labels, and right-aligned View All link",
+      "Minimal scan-optimized product cards: neutral thumbnail well, subtle top-left badge, Model + Brand/Category subline, tabular price bottom-left + square action button bottom-right",
+      "3-column horizontal dark-scrim promo banner trio for core product bundles / rental funnels",
+      "4-column crisp icon + title + 1-line caption service guarantee bar above footer CTA"
+    ]
+  },
+  "prior_applied_hunks": [
+    "UPG-1 (src/index.css prefers-reduced-motion guard)",
+    "UPG-2 (src/pages/Home.tsx hero #38BDF8 eyebrow, scrim & 44px CTA height)",
+    "C1 + H1 + UPG-3..6 (avlive-research-2026-11-23: Intent Tabs + WCAG 2.2 Pause/Play + #0077B6/#38BDF8 AA palette + segmented pillars + tabular PKR pricing)"
+  ],
+  "pii_redaction": {
+    "performed": true,
+    "counts": {
+      "PHONE": 1
+    },
+    "warning": "Phone number in extracted nav label redacted to {{REDACTED:PHONE}} before persisting niche_profile.json."
+  },
+  "tokens": {
+    "primary": "#1A2B4C",
+    "secondary": "#00B4D8",
+    "accessible_cyan_aa": "#0077B6",
+    "deep_teal_aa": "#026896",
+    "hero_sky": "#38BDF8",
+    "emerald_teal_aa": "#0F766E",
+    "cobalt_anchor": "#172848",
+    "canvas_bg": "#F8F9FA",
+    "surface_bg": "#FFFFFF",
+    "border_subtle": "#E2E8F0",
+    "font_families": [
+      "Inter",
+      "ui-sans-serif",
+      "system-ui",
+      "sans-serif"
+    ]
+  },
+  "current_baseline_gaps": [
+    {
+      "id": "REF-GAP-01",
+      "area": "Hero Visual Punch & Trust Framing (vs. Reference Two-Tone Headline + 3-Icon Strip)",
+      "detail": "Current desktop hero title is solid white across 2 lines without a focal keyword color accent, and trust proof sits inline after buttons (hidden below xl breakpoint) instead of a crisp 3-icon visual value bar pinned cleanly inside the hero.",
+      "location": "src/pages/Home.tsx (L724-759)"
+    },
+    {
+      "id": "REF-GAP-02",
+      "area": "Category Strip Scannability (vs. Reference Circular Category Avatars + View All Link)",
+      "detail": "Desktop category strip (L830-844) renders 12 flat lucide icons inside identical small rounded-2xl squares with single labels and no section header / 'View All Categories ->' anchor.",
+      "location": "src/pages/Home.tsx (L830-844)"
+    },
+    {
+      "id": "REF-GAP-03",
+      "area": "Featured Product Card Scan Speed (vs. Reference Minimal Card + Square Action Button)",
+      "detail": "Featured carousel cards (L992-1066) still carry a 2-line prose block and wide 'Specs & Quote' text button that compresses PKR pricing on 280px mobile/tablet snap cards.",
+      "location": "src/pages/Home.tsx (L992-1066)"
+    },
+    {
+      "id": "REF-GAP-04",
+      "area": "Mid-Page Commercial Funnel Contrast & Service Guarantee Strip",
+      "detail": "Lacks a crisp 3-up horizontal commercial promo banner strip (Boardroom Kits / SMD LED & Hologram Events / VoIP Bundles) and a clean 4-pillar horizontal service guarantee strip above the footer.",
+      "location": "src/pages/Home.tsx (L1082-1215)"
+    }
+  ],
+  "planned_bounds_check": {
+    "viewport_pixel_diff_fraction": 0.24,
+    "components_restructured": 3,
+    "top_level_dom_reorders": 0,
+    "removed_interactive_elements": 0,
+    "css_delta_fraction": 0.04,
+    "new_blocking_resources": 0,
+    "hardcoded_hex_over_system_token": 0,
+    "animated_properties": ["transform", "opacity"],
+    "has_reduced_motion_variant": true,
+    "min_touch_target_px": 44,
+    "section_iteration": 1,
+    "risk_tier": 2
+  }
+}

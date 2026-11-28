@@ -36,6 +36,7 @@ import {
 } from '../gmc-feed';
 import { FALLBACK_SERVICES_CATALOG } from '../services-catalog';
 import { extractDirectImageUrls, DEFAULT_EXTERNAL_PRODUCT_IMAGE } from '../image-optimize';
+import { TV_CATALOG_ITEMS } from '../tv-catalog';
 
 const QUOTA_STORAGE_KEY = 'avlive_fs_quota_tripped_until';
 let memoryQuotaTrippedUntil = 0;
@@ -85,11 +86,12 @@ const FALLBACK_CATEGORIES_LIST: Category[] = [
   { id: 'audio-microphones', name: 'Audio & Microphones', slug: 'audio-microphones', description: 'Ceiling mic arrays, speakerphones & DSPs', parentId: null, displayOrder: 2, isActive: true, isFeatured: true },
   { id: 'ip-phones', name: 'IP Phones & VoIP', slug: 'ip-phones', description: 'SIP desk phones, reception consoles & IP PBXs', parentId: null, displayOrder: 3, isActive: true, isFeatured: true },
   { id: 'headsets', name: 'Headsets', slug: 'headsets', description: 'ANC wireless DECT, Bluetooth & USB headsets', parentId: null, displayOrder: 4, isActive: true, isFeatured: true },
-  { id: 'displays', name: 'Commercial Displays & SMD Walls', slug: 'displays', description: 'Interactive flat panels & fine-pitch SMD LED walls', parentId: null, displayOrder: 5, isActive: true, isFeatured: true },
-  { id: 'projectors', name: 'Projectors', slug: 'projectors', description: 'Laser boardroom & large-venue projectors', parentId: null, displayOrder: 6, isActive: true, isFeatured: false },
-  { id: 'ip-cameras', name: 'IP Cameras', slug: 'ip-cameras', description: 'Enterprise NDAA-compliant IP surveillance', parentId: null, displayOrder: 7, isActive: true, isFeatured: false },
-  { id: 'intercom', name: 'Intercom & Paging', slug: 'intercom', description: 'SIP door intercoms & IP paging horns', parentId: null, displayOrder: 8, isActive: true, isFeatured: false },
-  { id: 'networking', name: 'Networking & PoE', slug: 'networking', description: 'Managed PoE+ switches & Wi-Fi 6/7 access points', parentId: null, displayOrder: 9, isActive: true, isFeatured: false },
+  { id: 'led-tv-displays', name: 'LED TVs & Commercial Displays', slug: 'led-tv-displays', description: 'Samsung Crystal UHD, TCL 4K Google TVs & Horion Interactive Flat Panels', parentId: null, displayOrder: 5, isActive: true, isFeatured: true },
+  { id: 'displays', name: 'Commercial Displays & SMD Walls', slug: 'displays', description: 'Interactive flat panels & fine-pitch SMD LED walls', parentId: null, displayOrder: 6, isActive: true, isFeatured: true },
+  { id: 'projectors', name: 'Projectors', slug: 'projectors', description: 'Laser boardroom & large-venue projectors', parentId: null, displayOrder: 7, isActive: true, isFeatured: false },
+  { id: 'ip-cameras', name: 'IP Cameras', slug: 'ip-cameras', description: 'Enterprise NDAA-compliant IP surveillance', parentId: null, displayOrder: 8, isActive: true, isFeatured: false },
+  { id: 'intercom', name: 'Intercom & Paging', slug: 'intercom', description: 'SIP door intercoms & IP paging horns', parentId: null, displayOrder: 9, isActive: true, isFeatured: false },
+  { id: 'networking', name: 'Networking & PoE', slug: 'networking', description: 'Managed PoE+ switches & Wi-Fi 6/7 access points', parentId: null, displayOrder: 10, isActive: true, isFeatured: false },
 ];
 
 async function getAuthHeader() {
@@ -192,6 +194,11 @@ export interface Product {
   isBundle?: 'yes' | 'no';
   multipack?: number | null;
   brand: string;
+  size?: string;
+  itemGroupId?: string;
+  modelSeries?: string;
+  typeKeyFeature?: string;
+  priceNote?: string;
   variations: any[];
   isActive: boolean;
   isFeatured?: boolean;
@@ -2685,4 +2692,106 @@ export async function deleteFacebookPostRecord(id: string): Promise<void> {
     handleFirestoreError(err, OperationType.DELETE, path);
   }
 }
+
+/**
+ * Idempotently syncs the LED TVs & Commercial Displays category and all 28 verified
+ * Samsung & TCL TV SKUs into Firestore so admins can update prices, stock, and add
+ * Horion commercial TVs directly from the Admin Panel.
+ */
+export async function syncLedTvCatalogToFirestore(): Promise<{
+  categorySynced: boolean;
+  productsSynced: number;
+}> {
+  const catPath = 'categories/led-tv-displays';
+  try {
+    await setDoc(
+      doc(db, 'categories', 'led-tv-displays'),
+      {
+        name: 'LED TVs & Commercial Displays',
+        slug: 'led-tv-displays',
+        description:
+          'Official Samsung Crystal UHD, TCL 4K Google TVs, and Horion 4K Interactive Flat Panels in Pakistan with verified PKR pricing, screen-size variants, and nationwide delivery.',
+        imageUrl: '/images/products/tv-samsung-u8000f.webp',
+        parentId: null,
+        displayOrder: 5,
+        isActive: true,
+        isFeatured: true,
+        type: 'product',
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    let synced = 0;
+    for (const item of TV_CATALOG_ITEMS) {
+      const docRef = doc(db, 'products', item.gmcId);
+      const existingSnap = await getDoc(docRef);
+      const existingData = existingSnap.exists() ? existingSnap.data() : null;
+      await setDoc(
+        docRef,
+        {
+          gmcId: item.gmcId,
+          slug: item.slug,
+          productName: item.title,
+          sku: item.gmcId,
+          gtin: item.gtin,
+          mpn: item.mpn,
+          identifierExists: item.identifierExists,
+          brand: item.brand,
+          size: item.size,
+          itemGroupId: item.itemGroupId,
+          modelSeries: item.modelSeries,
+          typeKeyFeature: item.typeKeyFeature,
+          priceNote: item.priceNote,
+          availability: existingData?.availability || item.availability,
+          condition: item.condition,
+          priceCurrency: 'PKR',
+          regularPrice: existingData?.regularPrice ?? item.regularPrice,
+          salePrice: existingData?.salePrice ?? item.salePrice,
+          stockQuantity: existingData?.stockQuantity ?? 12,
+          lowStockThreshold: existingData?.lowStockThreshold ?? 2,
+          images: item.images,
+          image: item.images[0],
+          additionalImages: item.images.slice(1),
+          categoryIds: ['led-tv-displays'],
+          categorySlugs: ['led-tv-displays'],
+          googleProductCategory: item.googleProductCategory,
+          productType: item.productType,
+          customLabel0: item.customLabel0,
+          customLabel1: item.customLabel1,
+          customLabel2: item.customLabel2,
+          customLabel3: item.customLabel3,
+          customLabel4: item.customLabel4,
+          shippingWeight: item.shippingWeight,
+          shippingLength: item.shippingLength,
+          shippingWidth: item.shippingWidth,
+          shippingHeight: item.shippingHeight,
+          returnPolicyLabel: item.returnPolicyLabel,
+          isBundle: item.isBundle,
+          shortDescription: item.shortSummary,
+          description: item.defaultDescription,
+          gmcDescription: item.gmcDescription,
+          specifications: item.defaultSpecs,
+          seoMetaDescription: item.seoMetaDescription,
+          seoTags: item.seoTags,
+          imageAltText: item.imageAltText,
+          variations: existingData?.variations || [],
+          isActive: existingData?.isActive !== undefined ? existingData.isActive : true,
+          isFeatured: existingData?.isFeatured !== undefined ? existingData.isFeatured : false,
+          ...(existingSnap.exists() ? {} : { createdAt: serverTimestamp() }),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      synced++;
+    }
+
+    return { categorySynced: true, productsSynced: synced };
+  } catch (err) {
+    checkAndTripQuota(err);
+    handleFirestoreError(err, OperationType.WRITE, catPath);
+    return { categorySynced: false, productsSynced: 0 };
+  }
+}
+
 

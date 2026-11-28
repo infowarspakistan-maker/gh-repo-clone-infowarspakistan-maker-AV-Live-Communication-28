@@ -4,7 +4,9 @@ import {
   PRODUCT_GMC_METADATA,
   buildFallbackProductFromGmcMeta,
   resolveProductPricing,
+  normalizeGmcImageUrl,
 } from './gmc-feed';
+import { TV_CATALOG_GMC_METADATA } from './tv-catalog';
 import { FALLBACK_SERVICES_CATALOG } from './services-catalog';
 
 export const SITEMAP_BASE_URL = 'https://avlive.com.pk';
@@ -89,7 +91,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'AI-driven speaker framing (Poly DirectorAI and Logitech RightSight 2) automatically tracks active speakers across large 20-seat executive boardrooms in Lahore, Karachi, and Islamabad without manual PTZ joystick intervention.',
       'Organizations in banking, government, and enterprise sectors increasingly demand Dual-Display 4K codecs, acoustic echo cancellation, and native Zoom Rooms and Microsoft Teams Rooms certification backed by local nationwide SLA support from AV Live Communications.'
     ],
-    image: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=800'
+    image: '/images/video-conference/boardroom-hero.webp'
   },
   {
     id: 2,
@@ -125,7 +127,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'Hardware SIP endpoints from Yealink, Poly, Cisco, and Fanvil operate on isolated voice VLANs with hardware acoustic echo cancellation and QoS prioritization, ensuring crystal-clear call quality even during workstation reboots.',
       'Hybrid deployments combine executive gigabit color IP phones on desks with encrypted 3CX or Grandstream Wave softphone apps for traveling field engineers.'
     ],
-    image: 'https://images.unsplash.com/photo-1563690325150-10aa17ff983e?auto=format&fit=crop&q=80&w=800'
+    image: '/images/products/poly-vvx-411-main.webp'
   },
   {
     id: 3,
@@ -149,7 +151,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'Medium-to-large boardrooms (8–20+ seats) require optical PTZ zoom and expansion table microphones—such as the Polycom RealPresence Group 500 with EagleEye IV 12x camera, Poly Studio X70, or Yealink MeetingBar A30.',
       'Always verify native platform compatibility (BYOD USB-C, Zoom Rooms, or Microsoft Teams Rooms) and ensure expansion microphone coverage reaches every participant within a 6-meter radius.'
     ],
-    image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&q=80&w=800'
+    image: '/images/video-conference/huddle-space.webp'
   },
   {
     id: 4,
@@ -173,7 +175,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'A complete voice evacuation and paging architecture integrates multi-zone mixer amplifiers, gooseneck paging consoles, ceiling/horn loudspeakers, and SIP intercom gateways linked directly to your IP PBX.',
       'Networked IP audio allows centralized scheduling, automated emergency alerts, and crystal-clear voice announcements across multi-building campuses.'
     ],
-    image: 'https://images.unsplash.com/photo-1520166012956-add9ba0ee3f4?auto=format&fit=crop&q=80&w=800'
+    image: '/images/projects/usaid-wapda-auditorium.webp'
   },
   {
     id: 5,
@@ -197,7 +199,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'AV Live deploys P2.5 indoor SMD LED walls, 3D hologram stage displays, multi-camera PTZ switching, digital wireless microphone arrays, and low-latency Zoom/Teams/YouTube simulcast encoders.',
       'Redundant audio feeds and dedicated acoustic mix-minus routing ensure remote keynote speakers interact naturally with the live auditorium without echo or latency.'
     ],
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800'
+    image: '/images/video-conference/hybrid-summit.webp'
   },
   {
     id: 6,
@@ -221,7 +223,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'As an authorized enterprise partner for HP Poly (Polycom), Logitech, Cisco, Yealink, Grandstream, Bosch, and Jabra, we combine genuine hardware distribution with certified acoustic and network engineering.',
       'From smart boardroom integration and VoIP telephony to nationwide corporate events and 3D hologram productions, our mission remains connecting teams with zero downtime.'
     ],
-    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&q=80&w=800'
+    image: '/images/projects/world-bank-diplomatic-ballroom-summit.webp'
   },
   {
     id: 7,
@@ -269,7 +271,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'Conversely, HP Poly Studio X50 and X52 lead in acoustic intelligence. Poly NoiseBlockAI suppresses keyboard typing, paper rustling, and HVAC hum in real time, while Acoustic Fence builds an invisible capture beam so voices outside glass partitions are never transmitted.',
       'AV Live Communications stocks both ecosystems with official Pakistan warranty, PTA compliance documentation, and turnkey installation across Lahore, Karachi, and Islamabad.'
     ],
-    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=800'
+    image: '/images/products/poly-studio-x50-tc8.webp'
   },
   {
     id: 8,
@@ -316,7 +318,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'For organizations seeking native Microsoft Teams Rooms or Zoom Rooms without recurring enterprise licensing overhead, HP Poly Studio X72 and Poly G7500 provide modular camera and ceiling microphone scalability at a highly competitive PKR price point.',
       'Our certified network and AV engineers design, stage, and commission Cisco, Poly, and Yealink boardrooms nationwide with guaranteed SLA response times.'
     ],
-    image: 'https://images.unsplash.com/photo-1585282263861-f55e341878f8?auto=format&fit=crop&q=80&w=800'
+    image: '/images/products/cisco-room-kit-studio.webp'
   },
   {
     id: 9,
@@ -353,7 +355,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
     relatedLinks: [
       { label: 'Interactive 3D Conference Room Designer', path: '/room-designer' },
       { label: 'Request Official B2B BoM Quotation', path: '/programs/quote' },
-      { label: 'Conference Room Solutions Hub', path: '/conference-room-solutions' },
+      { label: 'Video Conference in Pakistan Pillar', path: '/video-conference-in-pakistan' },
       { label: 'Microsoft Teams Rooms Pakistan', path: '/microsoft-teams-rooms' }
     ],
     content: [
@@ -361,7 +363,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'Undersizing a camera or relying on display speakers in a 20-foot boardroom is the #1 cause of echo and poor meeting intelligibility. Any table longer than 4.5 meters requires either expansion table microphones or a ceiling beamforming array.',
       'Use the Bill of Materials (BoM) matrix above to benchmark your organization\'s upcoming capex budget, or launch our interactive 3D Room Designer to generate an instant hardware schedule tailored to your exact room dimensions.'
     ],
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800'
+    image: '/images/projects/multicity-teams-boardrooms.webp'
   },
   {
     id: 10,
@@ -400,7 +402,7 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       'In the banking sector, boardrooms and treasury floors require standards-based H.323/SIP interoperability (Cisco Room Kit Plus, Polycom RealPresence Group 500) and encrypted voice VLANs across hundreds of nationwide branches powered by Grandstream UCM6308 and Cisco CUCM.',
       'In higher education and healthcare, reliability, lecture recording integration (Horion K6a Interactive Flat Panels, Poly Studio X52, mobile 4K telemedicine carts with Poly Studio USB), and campus-wide emergency paging (Bosch PAVIRO & 2N SIP Cleanroom Intercoms) take center stage. AV Live Communications provides dedicated vertical engineering teams and PPRA/tax-compliant procurement workflows for each sector.'
     ],
-    image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800'
+    image: '/images/projects/doing-business-reform-summit.webp'
   },
   {
     id: 11,
@@ -427,14 +429,14 @@ export const FALLBACK_BLOG_CATALOG: BlogCatalogEntry[] = [
       { label: 'Conference Speakerphones & Mic Arrays', path: '/category/speakerphones' },
       { label: 'Bosch PAVIRO Controller & Audio', path: '/product/bosch-paviro-pva-4cr12-pakistan' },
       { label: 'Interactive 3D Room Designer & Acoustic Planner', path: '/room-designer' },
-      { label: 'Conference Room Solutions Pakistan', path: '/conference-room-solutions' }
+      { label: 'Video Conference in Pakistan Pillar', path: '/video-conference-in-pakistan' }
     ],
     content: [
       'Audio intelligibility makes or breaks an executive video conference. Even a dual-4K camera bar cannot compensate for hollow, reverberant room audio caused by marble floors and glass partitions common in Pakistani corporate offices.',
       'Before specifying ceiling microphones, our acoustic engineers measure ambient HVAC noise (NC rating) and reverberation time (RT60). Where acoustic panels are not feasible, directional table microphone pods or Bosch chairman/delegate consoles deliver superior vocal isolation.',
       'Contact AV Live Communications for a complimentary acoustic assessment of your boardroom in Lahore, Karachi, or Islamabad.'
     ],
-    image: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=800'
+    image: '/images/projects/vissonic-delegate-boardroom.webp'
   }
 ];
 
@@ -476,12 +478,8 @@ export const STATIC_CORE_ROUTES: string[] = [
   '/video-conference-in-pakistan',
   '/event-management-in-pakistan',
   '/video-conference',
-  '/video-conferencing',
-  '/video-conferencing-solutions',
-  '/corporate-event-management',
   '/live-streaming-services',
   '/av-equipment-rental',
-  '/conference-room-solutions',
   '/zoom-rooms',
   '/microsoft-teams-rooms',
   '/lahore',
@@ -511,6 +509,8 @@ export const STATIC_CORE_ROUTES: string[] = [
   '/brands/freepbx',
   '/brands/sangoma',
   '/brands/horion',
+  '/brands/samsung',
+  '/brands/tcl',
   '/brands/google'
 ];
 
@@ -524,6 +524,7 @@ export const CANONICAL_CATEGORY_SLUGS: string[] = [
   'ip-phones',
   'voip-phone-systems',
   'projectors',
+  'led-tv-displays',
   'headsets',
   'ip-cameras',
   'intercom-paging-access'
@@ -552,12 +553,8 @@ export const PRIMARY_PILLAR_ROUTES: string[] = [
   '/video-conference-in-pakistan',
   '/event-management-in-pakistan',
   '/video-conference',
-  '/video-conferencing',
-  '/video-conferencing-solutions',
-  '/corporate-event-management',
   '/live-streaming-services',
   '/av-equipment-rental',
-  '/conference-room-solutions',
   '/zoom-rooms',
   '/microsoft-teams-rooms',
   '/3d-hologram',
@@ -704,7 +701,11 @@ export interface DynamicSitemapResult {
  * followed by active products, brand hubs, blog guides, and static pages.
  */
 export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): DynamicSitemapResult {
-  const today = new Date().toISOString().split('T')[0];
+  const LATEST_CATALOG_RELEASE_DATE = '2026-11-28';
+  const EXISTING_CATALOG_DATE = '2026-11-20';
+  const SERVICE_RELEASE_DATE = '2026-11-20';
+  const PROGRAM_RELEASE_DATE = '2026-11-10';
+  const POLICY_RELEASE_DATE = '2026-11-01';
   const seenUrls = new Set<string>();
   const urlBlocks: string[] = [];
 
@@ -729,7 +730,7 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
     if (seenUrls.has(fullLoc)) return false;
     seenUrls.add(fullLoc);
 
-    const lastmod = escapeXml(customLastMod || today);
+    const lastmod = escapeXml(customLastMod || EXISTING_CATALOG_DATE);
     urlBlocks.push(
       [
         '  <url>',
@@ -750,12 +751,21 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
   for (const route of PRIMARY_PILLAR_ROUTES) {
     const priority = route === '' ? '1.0' : '0.9';
     const freq = route === '' || route === '/shop' || route === '/services' ? 'daily' : 'weekly';
-    appendUrl(route, priority, 'staticPages', today, freq);
+    const pillarLastMod =
+      route === '' ||
+      route === '/shop' ||
+      route === '/video-conference-in-pakistan' ||
+      route === '/event-management-in-pakistan' ||
+      route === '/video-conference'
+        ? LATEST_CATALOG_RELEASE_DATE
+        : EXISTING_CATALOG_DATE;
+    appendUrl(route, priority, 'staticPages', pillarLastMod, freq);
   }
 
   // 2. Explicit Primary Product Categories (/category/*) — Top Crawl Depth Priority (0.9)
   for (const slug of PRIMARY_PRODUCT_CATEGORY_SLUGS) {
-    appendUrl(`/category/${slug}`, '0.9', 'categories', today, 'daily');
+    const catLastMod = slug === 'led-tv-displays' ? LATEST_CATALOG_RELEASE_DATE : EXISTING_CATALOG_DATE;
+    appendUrl(`/category/${slug}`, '0.9', 'categories', catLastMod, 'daily');
   }
   if (Array.isArray(input.categories)) {
     for (const cat of input.categories) {
@@ -764,18 +774,18 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
       if (!slug || (cat.type && cat.type !== 'product') || EXCLUDED_CATEGORY_SLUGS.has(slug)) {
         continue;
       }
-      const lastmod = formatSitemapDate(cat.updatedAt || cat.createdAt, today);
+      const lastmod = formatSitemapDate(cat.updatedAt || cat.createdAt, EXISTING_CATALOG_DATE);
       appendUrl(`/category/${slug}`, '0.9', 'categories', lastmod, 'daily');
     }
   }
 
   // 3. Explicit Primary Enterprise Services (/services/*) — Top Crawl Depth Priority (0.9)
   for (const serviceSlug of PRIMARY_SERVICE_SLUGS) {
-    appendUrl(`/services/${serviceSlug}`, '0.9', 'services', today, 'weekly');
+    appendUrl(`/services/${serviceSlug}`, '0.9', 'services', SERVICE_RELEASE_DATE, 'weekly');
   }
   for (const fallbackSvc of FALLBACK_SERVICES_CATALOG) {
     if (fallbackSvc.isActive === false) continue;
-    appendUrl(`/services/${fallbackSvc.slug}`, '0.9', 'services', today, 'weekly');
+    appendUrl(`/services/${fallbackSvc.slug}`, '0.9', 'services', SERVICE_RELEASE_DATE, 'weekly');
   }
   if (Array.isArray(input.services)) {
     for (const svc of input.services) {
@@ -786,7 +796,7 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
       if (EXCLUDED_CATEGORY_SLUGS.has(cleanSlug) && !PRIMARY_SERVICE_SLUGS.includes(cleanSlug)) {
         continue;
       }
-      const lastmod = formatSitemapDate(svc.updatedAt || svc.createdAt, today);
+      const lastmod = formatSitemapDate(svc.updatedAt || svc.createdAt, SERVICE_RELEASE_DATE);
       appendUrl(`/services/${cleanSlug}`, '0.9', 'services', lastmod, 'weekly');
     }
   }
@@ -798,7 +808,8 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
       const canonicalSlug = getCanonicalProductSlug(prod, String(prod.id || prod.slug || ''));
       if (!canonicalSlug) continue;
       const productHref = getProductHref(prod, String(prod.id || prod.slug || ''));
-      const lastmod = formatSitemapDate(prod.updatedAt || prod.createdAt, today);
+      const defaultDate = TV_CATALOG_GMC_METADATA[canonicalSlug] ? LATEST_CATALOG_RELEASE_DATE : EXISTING_CATALOG_DATE;
+      const lastmod = formatSitemapDate(prod.updatedAt || prod.createdAt, defaultDate);
       appendUrl(
         productHref,
         canonicalSlug === 'polycom-realpresence-group-500-pakistan' || productHref === '/podium-teleprompter' ? '0.9' : '0.8',
@@ -811,11 +822,12 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
   for (const rawKey of Object.keys(PRODUCT_GMC_METADATA)) {
     const canonicalSlug = getCanonicalProductSlug({ slug: rawKey }, rawKey);
     const productHref = getProductHref({ slug: canonicalSlug }, rawKey);
+    const prodLastMod = canonicalSlug && TV_CATALOG_GMC_METADATA[canonicalSlug] ? LATEST_CATALOG_RELEASE_DATE : EXISTING_CATALOG_DATE;
     appendUrl(
       productHref,
       canonicalSlug === 'polycom-realpresence-group-500-pakistan' || productHref === '/podium-teleprompter' ? '0.9' : '0.8',
       productHref.startsWith('/product/') ? 'products' : 'staticPages',
-      today,
+      prodLastMod,
       'weekly'
     );
   }
@@ -831,8 +843,8 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
         fb => fb.slug === canonicalBlogSlug || String(fb.id) === rawSlug
       );
       const lastmod = formatSitemapDate(
-        post.updatedAt || post.publishedAt || matchedFallback?.publishedIso,
-        today
+        post.updatedAt || post.publishedAt,
+        matchedFallback?.publishedIso || EXISTING_CATALOG_DATE
       );
       appendUrl(`/blog/${canonicalBlogSlug}`, '0.8', 'blogs', lastmod, 'weekly');
     }
@@ -843,7 +855,7 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
       `/blog/${fallbackPost.slug}`,
       '0.8',
       'blogs',
-      today,
+      fallbackPost.publishedIso,
       'weekly'
     );
   }
@@ -862,6 +874,7 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
     '/reviews',
     '/guides',
   ]);
+  const updatedBrands = new Set(['/brands/samsung', '/brands/tcl', '/brands/horion', '/brands/google']);
   for (const route of STATIC_CORE_ROUTES) {
     const priority =
       route === ''
@@ -872,10 +885,12 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
         ? '0.7'
         : '0.8';
     const routeLastMod = policyRoutes.has(route)
-      ? '2026-11-01'
+      ? POLICY_RELEASE_DATE
       : route.startsWith('/programs/')
-      ? '2026-11-10'
-      : today;
+      ? PROGRAM_RELEASE_DATE
+      : updatedBrands.has(route) || route === '/brands' || route === '/sitemap'
+      ? LATEST_CATALOG_RELEASE_DATE
+      : EXISTING_CATALOG_DATE;
     const freq: 'daily' | 'weekly' | 'monthly' = policyRoutes.has(route) ? 'monthly' : 'weekly';
     appendUrl(route, priority, 'staticPages', routeLastMod, freq);
   }
@@ -892,21 +907,24 @@ export function buildDynamicSitemapXml(input: DynamicSitemapInput = {}): Dynamic
 
 /**
  * Dynamically generates /llms.txt so the concise AI crawler index is 100% synchronized
- * with /llms-full.txt, /sitemap.xml, and the 156 canonical routes.
+ * with /llms-full.txt, /sitemap.xml, and all canonical routes.
  */
 export function buildLlmsTxt(): string {
+  const sitemapTotal = buildDynamicSitemapXml().counts.total;
   const lines: string[] = [
     '# AV Live Communications (avlive.com.pk)',
     '',
-    "> AV Live Communications is Pakistan's premier enterprise Audio-Visual (AV) systems integrator, Video Conferencing hardware distributor, and Corporate Event Management company. Operating across Lahore, Karachi, Islamabad, and nationwide, AV Live specializes in two primary commercial pillars: (1) Video Conferencing in Pakistan (Polycom Group 500, Poly Studio X70/X72, Logitech Rally Bar, Cisco Room Kits, Yealink, Zoom Rooms, Microsoft Teams Rooms) and (2) Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Displays, and 3D Projection Mapping. All pricing is denominated in Pakistani Rupees (PKR / Rs.) with official FBR GST/NTN invoicing and a 15-minute technical callback SLA.",
+    "> AV Live Communications is Pakistan's premier enterprise Audio-Visual (AV) systems integrator, Video Conferencing & Commercial Display distributor, and Corporate Event Management company. Operating across Lahore, Karachi, Islamabad, and nationwide, AV Live specializes in two primary commercial pillars: (1) Video Conferencing in Pakistan & Enterprise Displays (Polycom Group 500, Poly Studio X70/X72, Logitech Rally Bar, Cisco Room Kits, Yealink, Samsung Crystal UHD, TCL Google TV, Horion IFP, Zoom Rooms, Microsoft Teams Rooms) and (2) Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Displays, and 3D Projection Mapping. All pricing is denominated in Pakistani Rupees (PKR / Rs.) with official FBR GST/NTN invoicing and a 15-minute technical callback SLA.",
     '',
     '## Pillar 1: Video Conferencing in Pakistan & Enterprise Hardware Categories',
-    '- [Video Conferencing in Pakistan Hub](https://avlive.com.pk/video-conferencing): Complete boardroom AV design, acoustic calibration, and multi-camera tracking systems.',
+    '- [Video Conference in Pakistan Pillar](https://avlive.com.pk/video-conference-in-pakistan): Complete boardroom AV design, acoustic calibration, PKR pricing, and multi-camera tracking systems.',
+    '- [Interactive Boardroom Configurator & SIP Architecture](https://avlive.com.pk/video-conference): Interactive room sizing calculator and H.323/SIP deployment topology tool.',
     '- [Video Conferencing Hardware Category](https://avlive.com.pk/category/video-conferencing): Genuine Polycom Group 500 codecs, Poly Studio X70/X72 dual-4K AI video bars, Poly Studio X52/X50, Logitech Rally Bar, and Cisco Room Kits.',
     '- [Boardroom Codecs](https://avlive.com.pk/category/boardroom-codecs): Standards-based H.323/SIP and native Teams/Zoom room codecs.',
     '- [Large Room & Auditorium AV](https://avlive.com.pk/category/large-room): 14-to-40+ seat executive boardroom and auditorium video collaboration bundles.',
     '- [4K Optical PTZ Cameras](https://avlive.com.pk/category/ptz-cameras): Motorized 12x to 25x optical zoom cameras for boardrooms and lecture halls.',
     '- [Touch Panels & Room Controllers](https://avlive.com.pk/category/touch-panels): 10-inch PoE scheduling panels and interactive 4K flat panels (Horion K6A).',
+    '- [LED TVs & Commercial Displays](https://avlive.com.pk/category/led-tv-displays): Official Samsung Crystal UHD, TCL 4K Google TV, and Horion commercial display series in 32" to 85" sizes.',
     '- [Conference Speakerphones & Ceiling Mics](https://avlive.com.pk/category/speakerphones): Beamforming microphone arrays and daisy-chained table speakerphones.',
     '- [IP Phones & Executive Desk Endpoints](https://avlive.com.pk/category/ip-phones): Cisco, Yealink, Polycom VVX, Grandstream, and Fanvil Gigabit PoE IP phones.',
     '- [VoIP Phone Systems & IP PBX Servers](https://avlive.com.pk/category/voip-phone-systems): Grandstream UCM6304/UCM6308, 3CX Pro/Enterprise, FreePBX, and Cisco CUCM.',
@@ -915,7 +933,8 @@ export function buildLlmsTxt(): string {
     '- [IP Security Cameras](https://avlive.com.pk/category/ip-cameras): Axis, Hikvision ColorVu, Dahua Starlight, and Uniview NDAA-compliant IP surveillance.',
     '- [SIP Intercom, Paging & PA Systems](https://avlive.com.pk/category/intercom-paging-access): Bosch PAVIRO EN 54-16 voice evacuation, ITC Audio PA, and 2N SIP intercoms.',
     '',
-    '## Pillar 2: Corporate Event Management, Hybrid Events & 3D Hologram Displays',
+    '## Pillar 2: Event Management in Pakistan, Hybrid Events & 3D Hologram Displays',
+    '- [Event Management in Pakistan Pillar](https://avlive.com.pk/event-management-in-pakistan): Flagship national turnkey corporate event production, SMD LED video walls, and stage engineering.',
   ];
 
   for (const svc of FALLBACK_SERVICES_CATALOG) {
@@ -951,7 +970,7 @@ export function buildLlmsTxt(): string {
 
   lines.push('## Structured Feeds, Full LLM Catalog & Sitemaps');
   lines.push('- **Full LLM Hardware & Pricing Knowledge Base**: https://avlive.com.pk/llms-full.txt');
-  lines.push('- **XML Sitemap (157 Canonical URLs)**: https://avlive.com.pk/sitemap.xml');
+  lines.push(`- **XML Sitemap (${sitemapTotal} Canonical URLs)**: https://avlive.com.pk/sitemap.xml`);
   lines.push('- **HTML Sitemap Directory**: https://avlive.com.pk/sitemap');
   lines.push('- **Google Merchant Center Product Feed (XML)**: https://avlive.com.pk/feed/google-merchant.xml');
   lines.push('- **Google Merchant Center Product Feed (CSV)**: https://avlive.com.pk/feed/google-merchant.csv');
@@ -969,13 +988,13 @@ export function buildLlmsFullTxt(): string {
   const lines: string[] = [
     '# AV Live Communications Pakistan — Complete Enterprise Knowledge Base (llms-full.txt)',
     '',
-    '> Official AI & LLM Reference Catalog for AV Live Communications (https://avlive.com.pk). AV Live is Pakistan\'s premier authorized distributor and turnkey systems integrator for Video Conferencing (HP Poly / Polycom Group 500, Poly Studio X70/X72/X52, Logitech Rally Bar, Cisco Room Kits, Yealink), Enterprise VoIP & IP Telephony (3CX, FreePBX, Grandstream, Cisco, Fanvil), Commercial Laser Projectors (Panasonic, Epson, Sony, BenQ), and Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Stage Displays, and 3D Projection Mapping across Lahore, Karachi, and Islamabad.',
+    '> Official AI & LLM Reference Catalog for AV Live Communications (https://avlive.com.pk). AV Live is Pakistan\'s premier authorized distributor and turnkey systems integrator for Video Conferencing (HP Poly / Polycom Group 500, Poly Studio X70/X72/X52, Logitech Rally Bar, Cisco Room Kits, Yealink), Commercial LED TVs & 4K Displays (Samsung Crystal UHD, TCL Google TV, Horion Interactive Panels), Enterprise VoIP & IP Telephony (3CX, FreePBX, Grandstream, Cisco, Fanvil), Commercial Laser Projectors (Panasonic, Epson, Sony, BenQ), and Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Stage Displays, and 3D Projection Mapping across Lahore, Karachi, and Islamabad.',
     '',
     '## 1. Standardized Corporate Identity, 15-Minute Technical SLA & Regional Experience Centers (NAP)',
     '- **Legal Entity**: AV Live Communications (Pvt) Ltd',
     '- **Primary Domain**: https://avlive.com.pk',
     '- **Primary 24/7 Enterprise Hotlines**: 0321 425 6263 | 0339 0000 921 (Guaranteed 15-Minute Quote & Technical SLA Response)',
-    '- **Authorized Hardware Partner Ecosystem**: Cisco, HP Poly (Polycom), Yealink, Logitech, Horion (Interactive Flat Panels), Grandstream, Bosch, Jabra',
+    '- **Authorized Hardware Partner Ecosystem**: Cisco, HP Poly (Polycom), Yealink, Logitech, Samsung, TCL, Horion (Interactive Flat Panels), Grandstream, Bosch, Jabra',
     '- **Lahore Head Office & Experience Center**: Johar Town Block N & DHA Commercial Coverage, Lahore, Punjab, Pakistan | Phone: +92 42 3233 4782 | Hotlines: 0321 425 6263 / 0339 0000 921 | URL: https://avlive.com.pk/lahore',
     '- **Karachi Regional Office**: Clifton Executive Hub & Shahrah-e-Faisal, Karachi, Sindh, Pakistan | Phone: +92 21 3589 0123 | Hotlines: 0321 425 6263 / 0339 0000 921 | URL: https://avlive.com.pk/karachi',
     '- **Islamabad Regional Office**: Blue Area Commercial Hub, Jinnah Avenue, Islamabad, ICT, Pakistan | Phone: +92 51 2890 124 | Hotlines: 0321 425 6263 / 0339 0000 921 | URL: https://avlive.com.pk/islamabad',
@@ -1017,9 +1036,9 @@ export function buildLlmsFullTxt(): string {
     lines.push('');
   }
 
-  lines.push('## 5. Verified Enterprise Hardware Catalog (Canonical Slugs, MPNs & Reference PKR Pricing)');
-  lines.push('| Product Name | Brand | Official MPN | GTIN / UPC | Reference Price (PKR) | Key Highlight | Canonical URL |');
-  lines.push('| :--- | :--- | :--- | :--- | :--- | :--- | :--- |');
+  lines.push('## 5. Verified Enterprise Hardware Catalog (Canonical Slugs, MPNs, Reference PKR Pricing & Official Product Images)');
+  lines.push('| Product Name | Brand | Official MPN | GTIN / UPC | Reference Price (PKR) | Key Highlight | Canonical URL | Verified Image URL |');
+  lines.push('| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |');
 
   const seenProductSlugs = new Set<string>();
   for (const rawKey of Object.keys(PRODUCT_GMC_METADATA)) {
@@ -1031,8 +1050,9 @@ export function buildLlmsFullTxt(): string {
     if (!fallbackProd || !meta) continue;
     const { effectivePrice } = resolveProductPricing(fallbackProd);
     const productHref = getProductHref(fallbackProd, rawKey);
+    const imageUrl = normalizeGmcImageUrl(fallbackProd.image) || 'https://avlive.com.pk/images/products/poly-x70-studio.jpg';
     lines.push(
-      `| ${fallbackProd.productName} | ${meta.brand} | ${meta.mpn} | ${meta.gtin} | Rs. ${effectivePrice.toLocaleString()} | ${meta.highlight} | https://avlive.com.pk${productHref} |`
+      `| ${fallbackProd.productName} | ${meta.brand} | ${meta.mpn} | ${meta.gtin} | Rs. ${effectivePrice.toLocaleString()} | ${meta.highlight} | https://avlive.com.pk${productHref} | ${imageUrl} |`
     );
   }
 

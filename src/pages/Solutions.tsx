@@ -42,7 +42,7 @@ export function Solutions() {
               "@type": "ListItem",
               "position": 1,
               "name": "Boardroom Video Conference in Pakistan (Polycom Group 500 & Poly X70)",
-              "url": "https://avlive.com.pk/video-conferencing"
+              "url": "https://avlive.com.pk/video-conference-in-pakistan"
             },
             {
               "@type": "ListItem",
@@ -120,8 +120,8 @@ export function Solutions() {
         </motion.p>
 
         {/* Answer-First Direct Engineering Verdict (50-70 Words) */}
-        <div className="bg-white rounded-2xl border-l-4 border-[#00B4D8] border border-gray-200 p-4 sm:p-6 mb-6 shadow-xs">
-          <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1.5">
+        <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 sm:p-6 mb-6">
+          <span className="block text-[10px] font-black uppercase tracking-widest text-[#0077B6] mb-1.5">
             Direct Engineering Verdict (TL;DR) — Enterprise AV &amp; Event Architecture
           </span>
           <p className="text-xs sm:text-sm text-[#1A2B4C] font-semibold leading-relaxed">
@@ -147,11 +147,11 @@ export function Solutions() {
                 <li className="flex items-center"><span className="w-2 h-2 bg-[#00B4D8] rounded-full mr-4"></span> Native Zoom Rooms & Microsoft Teams Rooms</li>
                 <li className="flex items-center"><span className="w-2 h-2 bg-[#00B4D8] rounded-full mr-4"></span> Acoustic Echo Cancellation & Touch-Panel Control</li>
               </ul>
-              <div className="flex flex-wrap gap-4">
-                <Link to="/video-conferencing" className="bg-[#1A2B4C] text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-[#00B4D8] transition-all tracking-wider uppercase text-center">
+              <div className="flex flex-wrap gap-3">
+                <Link to="/video-conference-in-pakistan" className="bg-[#1A2B4C] text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-[#00B4D8] transition-all tracking-wider uppercase text-center">
                   Explore Video Conferencing
                 </Link>
-                <Link to="/product/polycom-realpresence-group-500-pakistan" className="bg-white border-2 border-[#1A2B4C] text-[#1A2B4C] px-6 py-3 rounded-full text-sm font-bold hover:bg-[#1A2B4C] hover:text-white transition-all tracking-wider uppercase text-center">
+                <Link to="/product/polycom-realpresence-group-500-pakistan" className="bg-white border border-slate-300 text-[#1A2B4C] px-6 py-3 rounded-lg text-sm font-bold hover:bg-[#1A2B4C] hover:text-white transition-all tracking-wider uppercase text-center">
                   View Polycom Group 500
                 </Link>
               </div>
@@ -178,11 +178,11 @@ export function Solutions() {
                 <li className="flex items-center"><span className="w-2 h-2 bg-[#00B4D8] rounded-full mr-4"></span> P1.8 to P4 Fine-Pitch SMD LED Video Walls</li>
                 <li className="flex items-center"><span className="w-2 h-2 bg-[#00B4D8] rounded-full mr-4"></span> Bosch PAVIRO Multi-Zone PA & Voice Alarm Audio</li>
               </ul>
-              <div className="flex flex-wrap gap-4">
-                <Link to="/3d-hologram" className="bg-[#1A2B4C] text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-[#00B4D8] transition-all tracking-wider uppercase text-center">
+              <div className="flex flex-wrap gap-3">
+                <Link to="/3d-hologram" className="bg-[#1A2B4C] text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-[#00B4D8] transition-all tracking-wider uppercase text-center">
                   3D Hologram Displays
                 </Link>
-                <Link to="/projection-mapping" className="bg-white border-2 border-[#1A2B4C] text-[#1A2B4C] px-8 py-3 rounded-full text-sm font-bold hover:bg-[#1A2B4C] hover:text-white transition-all tracking-wider uppercase text-center">
+                <Link to="/projection-mapping" className="bg-white border border-slate-300 text-[#1A2B4C] px-6 py-3 rounded-lg text-sm font-bold hover:bg-[#1A2B4C] hover:text-white transition-all tracking-wider uppercase text-center">
                   3D Projection Mapping
                 </Link>
               </div>
@@ -208,14 +208,14 @@ export function Solutions() {
                 <li className="flex items-center"><span className="w-2 h-2 bg-[#00B4D8] rounded-full mr-4"></span> Hybrid Event Simulcasting (Zoom, Teams, YouTube Live)</li>
                 <li className="flex items-center"><span className="w-2 h-2 bg-[#00B4D8] rounded-full mr-4"></span> Interactive Room Designer & Instant Event Quote Estimator</li>
               </ul>
-              <div className="flex flex-wrap gap-4">
-                <Link to="/services/corporate-events" className="bg-[#1A2B4C] text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-[#00B4D8] transition-all tracking-wider uppercase text-center">
+              <div className="flex flex-wrap gap-3">
+                <Link to="/services/corporate-events" className="bg-[#1A2B4C] text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-[#00B4D8] transition-all tracking-wider uppercase text-center">
                   Corporate Event Management
                 </Link>
-                <Link to="/services/hybrid-events" className="bg-white border-2 border-[#1A2B4C] text-[#1A2B4C] px-8 py-3 rounded-full text-sm font-bold hover:bg-[#1A2B4C] hover:text-white transition-all tracking-wider uppercase text-center">
+                <Link to="/services/hybrid-events" className="bg-white border border-slate-300 text-[#1A2B4C] px-6 py-3 rounded-lg text-sm font-bold hover:bg-[#1A2B4C] hover:text-white transition-all tracking-wider uppercase text-center">
                   Hybrid Event Solutions
                 </Link>
-                <Link to="/room-designer" className="bg-[#00B4D8] text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-[#1A2B4C] transition-all tracking-wider uppercase text-center">
+                <Link to="/room-designer" className="bg-[#00B4D8] text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-[#1A2B4C] transition-all tracking-wider uppercase text-center">
                   3D Room Designer &amp; LED Calculator
                 </Link>
               </div>

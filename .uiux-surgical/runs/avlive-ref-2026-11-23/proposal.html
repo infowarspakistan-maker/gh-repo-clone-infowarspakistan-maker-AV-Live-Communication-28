@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>UIUX Surgical Enhancer v2 — AV Live Reference-Grounded Options Lab</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --brand: #1a2b4c;
+      --accent: #00b4d8;
+      --accent-aa: #0077b6;
+      --ok: #047857;
+      --warn: #b45309;
+      --danger: #b91c1c;
+
+      /* Dynamic theme tokens updated by RC1 / RC2 / RC3 */
+      --opt-navy: #1a2b4c;
+      --opt-navy-deep: #111e36;
+      --opt-aa: #0077b6;
+      --opt-hero-highlight: #38bdf8;
+      --opt-cta-bg: #38bdf8;
+      --opt-cta-fg: #111e36;
+      --opt-promo-cta-bg: #38bdf8;
+      --opt-promo-cta-fg: #111e36;
+      --opt-sla-check: #0077b6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 126px; }
+    header.page-hdr {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
+      gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px;
+    }
+    .kicker { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-aa); }
+    h1.page-title { margin: 4px 0 0; font-size: 24px; color: var(--brand); letter-spacing: -0.02em; }
+    .meta { font-size: 12px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+      margin-bottom: 20px; box-shadow: 0 1px 3px rgba(15,23,42,0.03);
+    }
+    .card h2 { margin: 0 0 8px; font-size: 16px; color: var(--brand); letter-spacing: -0.01em; }
+    .sub-copy { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+
+    .constraints { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+    .constraint-item { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 12px; background: #fbfdff; }
+    .constraint-item strong { display: block; color: var(--brand); margin-bottom: 2px; }
+
+    .studio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+    .opt-box { border: 1px solid var(--border); border-radius: 12px; padding: 14px; background: #fbfdff; }
+    .opt-box h3 { margin: 0 0 10px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+    .opt-choices { display: flex; flex-direction: column; gap: 8px; }
+    .opt-btn {
+      width: 100%; text-align: left; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border);
+      background: #fff; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+      transition: border-color 140ms, box-shadow 140ms;
+    }
+    .opt-btn:hover { border-color: #94a3b8; }
+    .opt-btn.active { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(26,43,76,0.14); background: #f8fbff; }
+    .opt-title { font-size: 12.5px; font-weight: 800; color: var(--brand); display: block; }
+    .opt-desc { font-size: 11.5px; color: var(--muted); display: block; margin-top: 2px; }
+    .swatches { display: inline-flex; gap: 3px; flex-shrink: 0; margin-top: 2px; }
+    .sw { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.16); display: inline-block; }
+
+    .check-opt {
+      display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: 9px; background: #fff; cursor: pointer; font-size: 12px;
+    }
+    .check-opt input { margin-top: 3px; accent-color: var(--brand); width: 16px; height: 16px; cursor: pointer; }
+    .tier-badge {
+      display: inline-block; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 5px;
+      background: #eef2ff; color: var(--brand); margin-left: 4px;
+    }
+    .tier-badge.t1 { background: #ecfdf5; color: #047857; }
+    .cap-meter {
+      margin-top: 10px; padding: 9px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      display: flex; justify-content: space-between; align-items: center;
+      background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;
+    }
+    .cap-meter.over { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+
+    .controls-row {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .viewport-tabs { display: inline-flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 9px; border: 1px solid var(--border); }
+    .tab-btn {
+      padding: 8px 14px; border: none; background: transparent; border-radius: 6px;
+      font-size: 12px; font-weight: 700; cursor: pointer; color: #475569; min-height: 36px;
+    }
+    .tab-btn.active { background: #fff; color: var(--brand); box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+    .metric-badges { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); }
+    .metric-badges strong { color: var(--ink); }
+
+    .compare-grid { display: grid; grid-template-columns: 0.65fr 1fr 1.25fr; gap: 16px; align-items: start; }
+    @media (max-width: 1180px) { .compare-grid { grid-template-columns: 1fr; } }
+    .compare-grid.mobile-mode { grid-template-columns: 0.6fr minmax(350px, 400px) minmax(350px, 400px); justify-content: center; }
+    @media (max-width: 1180px) { .compare-grid.mobile-mode { grid-template-columns: 1fr; } }
+
+    .shot-frame {
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #f8f9fa;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    }
+    .shot-label {
+      padding: 10px 14px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      background: #fff; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
+    }
+    .ref-scroll { max-height: 760px; overflow-y: auto; background: #fff; }
+    .ref-scroll img { width: 100%; height: auto; display: block; }
+
+    /* Simulated Storefront Header */
+    .sim-bar {
+      background: #111e36; color: #fff; padding: 7px 12px; font-size: 10px; font-weight: 800;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    }
+    .sim-bar .cyan { color: #00b4d8; }
+    .sim-nav {
+      background: #fff; padding: 9px 12px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #f1f5f9; font-size: 10.5px; font-weight: 700; color: #1a2b4c;
+    }
+    .sim-logo { display: inline-flex; align-items: stretch; font-weight: 900; letter-spacing: -0.02em; }
+    .sim-logo .av { background: #000; color: #f0f0f0; padding: 2px 6px; font-size: 12px; }
+    .sim-logo .live { color: #000; padding-left: 5px; font-size: 14px; display: flex; align-items: center; }
+    .sim-nav-links { display: flex; gap: 9px; color: #334155; font-size: 10px; }
+    .mobile-mode .sim-nav-links { display: none; }
+
+    /* BEFORE HERO (Current Production Post-H1) */
+    .sim-hero {
+      position: relative; padding: 20px 16px 14px; color: #fff; overflow: hidden;
+      background-size: cover; background-position: center; background-color: var(--opt-navy);
+      min-height: 230px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
+    }
+    .sim-hero-inner { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr; gap: 12px; align-items: center; }
+    .sim-hero-inner.split { grid-template-columns: 1.25fr 0.9fr; }
+    .mobile-mode .sim-hero-inner.split { grid-template-columns: 1fr; }
+    .hero-eyebrow {
+      display: block; font-size: 9.5px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.14em; margin-bottom: 4px; color: var(--opt-hero-highlight);
+    }
+    .sim-hero h3 {
+      margin: 0 0 6px; font-size: 18px; font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; text-wrap: balance;
+    }
+    .sim-hero h3 .hi { color: var(--opt-hero-highlight); }
+    .sim-hero p { margin: 0 0 10px; font-size: 11px; color: rgba(255,255,255,0.9); line-height: 1.45; }
+    .hero-ctas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .cta-pill {
+      min-height: 40px; padding: 8px 15px; border-radius: 999px; font-size: 11px; font-weight: 800;
+      display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; cursor: pointer;
+    }
+    .cta-box {
+      min-height: 40px; padding: 8px 14px; border-radius: 9px; font-size: 11px; font-weight: 800;
+      display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; cursor: pointer;
+    }
+    .cta-ghost {
+      min-height: 40px; padding: 8px 13px; border-radius: 999px; font-size: 10.5px; font-weight: 700;
+      background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.32); cursor: pointer;
+    }
+    .hero-sla-strip {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.16); font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.92);
+    }
+    .hero-sla-item { display: inline-flex; align-items: center; gap: 5px; }
+    .sla-ico {
+      width: 18px; height: 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35);
+      display: inline-flex; align-items: center; justify-content: center; font-size: 9px; color: var(--opt-hero-highlight);
+    }
+    .hero-tabs-row {
+      position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.14); flex-wrap: wrap;
+    }
+    .intent-tabs { display: flex; flex-wrap: wrap; gap: 5px; }
+    .intent-tab {
+      padding: 5px 9px; min-height: 30px; border-radius: 7px; font-size: 10px; font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.22); background: rgba(17,30,54,0.72); color: rgba(255,255,255,0.9); cursor: pointer;
+    }
+    .intent-tab.active { background: #fff; color: var(--opt-navy); border-color: #fff; }
+    .pause-btn {
+      padding: 5px 10px; min-height: 30px; border-radius: 7px; font-size: 10px; font-weight: 800;
+      background: rgba(17,30,54,0.8); color: #fff; border: 1px solid rgba(255,255,255,0.28); cursor: pointer;
+    }
+    .spotlight-card {
+      background: rgba(17,30,54,0.78); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;
+      padding: 10px; display: flex; gap: 10px; align-items: center; backdrop-filter: blur(8px);
+    }
+    .spotlight-card img {
+      width: 68px; height: 56px; object-fit: contain; background: #fff; border-radius: 8px; padding: 4px; flex-shrink: 0;
+    }
+
+    /* Section blocks inside simulated views */
+    .sim-sec { background: #fff; padding: 14px; border-top: 1px solid #f1f5f9; }
+    .sim-sec-muted { background: #f8f9fa; padding: 14px; border-top: 1px solid #e2e8f0; }
+    .sec-hdr { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+    .sec-hdr h4 { margin: 0; font-size: 13px; font-weight: 900; color: var(--opt-navy); letter-spacing: -0.01em; }
+    .sec-hdr span.view-all { font-size: 10.5px; font-weight: 700; color: var(--opt-aa); }
+
+    /* Categories: Before vs UPG-7 */
+    .cat-row-before { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .cat-sq { border: 1px solid #f1f5f9; background: #f8f9fa; border-radius: 10px; padding: 7px 4px; text-align: center; font-size: 9.5px; font-weight: 800; color: #334155; }
+    .cat-row-after { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .mobile-mode .cat-row-before, .mobile-mode .cat-row-after { grid-template-columns: repeat(3, 1fr); }
+    .cat-circle-card { text-align: center; }
+    .cat-ring {
+      width: 52px; height: 52px; margin: 0 auto 5px; border-radius: 999px; background: #f8f9fa;
+      border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 6px;
+    }
+    .cat-ring img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    .cat-ttl { font-size: 10px; font-weight: 800; color: var(--opt-navy); line-height: 1.2; }
+    .cat-sub { font-size: 9px; color: #64748b; }
+
+    /* Product Cards: Before vs UPG-8 */
+    .prod-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+    .mobile-mode .prod-grid { grid-template-columns: repeat(2, 1fr); }
+    .prod-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .prod-well {
+      position: relative; aspect-ratio: 4/3; background: #f8f9fa; display: flex; align-items: center; justify-content: center; padding: 8px;
+    }
+    .prod-well img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    .prod-badge {
+      position: absolute; top: 6px; left: 6px; font-size: 8.5px; font-weight: 800; padding: 2px 6px; border-radius: 999px;
+      background: #e0f2fe; color: var(--opt-aa);
+    }
+    .prod-body { padding: 9px; display: flex; flex-direction: column; flex: 1; }
+    .prod-title { font-size: 11px; font-weight: 800; color: var(--opt-navy); line-height: 1.25; margin-bottom: 2px; }
+    .prod-meta { font-size: 9.5px; color: #64748b; font-weight: 600; margin-bottom: 6px; }
+    .prod-prose { font-size: 9.5px; color: #64748b; line-height: 1.3; margin-bottom: 8px; }
+    .prod-foot {
+      margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 6px;
+      padding-top: 6px; border-top: 1px solid #f1f5f9;
+    }
+    .prod-price { font-size: 11.5px; font-weight: 900; color: var(--opt-navy); font-variant-numeric: tabular-nums; }
+    .btn-quote-wide {
+      background: var(--opt-navy); color: #fff; font-size: 9px; font-weight: 800; padding: 5px 8px; border-radius: 6px;
+    }
+    .btn-quote-sq {
+      width: 32px; height: 32px; border-radius: 8px; background: #f1f5f9; border: 1px solid #e2e8f0; color: var(--opt-navy);
+      display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; flex-shrink: 0;
+    }
+
+    /* UPG-9: 3-Up Promo Trio */
+    .promo-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .mobile-mode .promo-trio { grid-template-columns: 1fr; }
+    .promo-tile {
+      position: relative; border-radius: 12px; overflow: hidden; min-height: 118px; padding: 12px;
+      background-size: cover; background-position: center; color: #fff; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .promo-tile::before {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(110deg, rgba(17,30,54,0.93) 10%, rgba(26,43,76,0.58) 100%);
+    }
+    .promo-tile > * { position: relative; z-index: 1; }
+    .promo-tile h5 { margin: 0 0 3px; font-size: 12px; font-weight: 900; line-height: 1.15; text-transform: uppercase; }
+    .promo-tile p { margin: 0 0 8px; font-size: 9.5px; color: rgba(255,255,255,0.88); }
+    .promo-cta {
+      align-self: flex-start; padding: 4px 9px; border-radius: 999px; font-size: 9.5px; font-weight: 800;
+      background: var(--opt-promo-cta-bg); color: var(--opt-promo-cta-fg);
+    }
+
+    /* UPG-10: 4-Pillar Engineering Guarantee Bar */
+    .guarantee-bar {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 12px; padding: 10px;
+    }
+    .mobile-mode .guarantee-bar { grid-template-columns: repeat(2, 1fr); }
+    .guar-item { display: flex; align-items: flex-start; gap: 7px; }
+    .guar-ico {
+      width: 24px; height: 24px; border-radius: 7px; background: #f0f9ff; color: var(--opt-sla-check);
+      display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; flex-shrink: 0;
+    }
+    .guar-t { font-size: 10px; font-weight: 800; color: var(--opt-navy); line-height: 1.2; }
+    .guar-s { font-size: 9px; color: #64748b; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: #f8fafc; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; background: #f1f5f9; padding: 2px 5px; border-radius: 4px; }
+    .tier { font-weight: 800; font-size: 11px; white-space: nowrap; }
+    .tier-1 { color: var(--ok); }
+    .tier-2 { color: var(--warn); }
+    .tier-0 { color: var(--danger); }
+
+    .gate-bar {
+      position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--border);
+      padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.08); z-index: 100;
+    }
+    .decision-out { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; color: var(--brand); }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn {
+      min-height: 44px; padding: 9px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .btn-approve { background: var(--ok); color: #fff; border-color: var(--ok); }
+    .btn-edit { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .btn-reject { background: #fff; color: var(--danger); border-color: #fecaca; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="page-hdr">
+      <div>
+        <div class="kicker">UIUX Surgical Enhancer v2 · Phase 3 Human Gate (Read-Only · Zero Storefront Files Modified)</div>
+        <h1 class="page-title">AV Live Reference-Adapted UI, Hero Slider &amp; CTA Options Lab</h1>
+      </div>
+      <div class="meta">
+        Run ID: avlive-ref-2026-11-23 · Ref: image_e982880c.png · Tailwind + Custom Tokens
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>A. Hard Constraints (Machine-Checked — Verbatim from SKILL.md)</h2>
+      <div class="constraints">
+        <div class="constraint-item"><strong>1. Logo Frozen (Tier 0)</strong>IoU &ge; 0.98 · Position &Delta; &le; 2px</div>
+        <div class="constraint-item"><strong>2. Brand Colors (&Delta;E00 &le; 3.0)</strong>#1A2B4C &amp; #00B4D8 anchored</div>
+        <div class="constraint-item"><strong>3. Typography &amp; H1</strong>Inter font intact · #111E36 H1 preserved</div>
+        <div class="constraint-item"><strong>4. UX Flow &amp; Slides</strong>Nav order intact · 3 CMS hero slides kept</div>
+        <div class="constraint-item"><strong>5. Accessibility (WCAG 2.2 AA)</strong>0 new axe violations · &ge; 44px touch targets</div>
+        <div class="constraint-item"><strong>6. Performance Budgets</strong>LCP &le; 2.5s · CLS = 0.000 · CSS &Delta; &le; 15%</div>
+        <div class="constraint-item"><strong>7. Surgical Bounds</strong>&le; 30% viewport pixels · &le; 3 restructured sections</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Interactive Reference Adaptation Studio</h2>
+      <p class="sub-copy">Pick a <strong>Color Palette (RC1–RC3)</strong>, <strong>Hero Slider Layout (R-H1 vs R-H2)</strong>, and <strong>Reference Sections (UPG-7–UPG-10)</strong> to compare directly against the attached reference image and your current AV Live storefront.</p>
+      <div class="studio-grid">
+        <div class="opt-box">
+          <h3>1. Color &amp; CTA Palette (&Delta;E00 &le; 3.0)</h3>
+          <div class="opt-choices">
+            <button type="button" class="opt-btn active" onclick="selectColor('RC1', this)">
+              <div>
+                <span class="opt-title">RC1 (Recommended) — Broadcast Navy &amp; Electric Ice</span>
+                <span class="opt-desc">Two-tone #38BDF8 hero accent &amp; pill CTA (#111E36 ink = 7.76:1 AAA); #0077B6 light links (4.87:1 AA). &Delta;E00 = 0.00.</span>
+              </div>
+              <span class="swatches"><span class="sw" style="background:#1A2B4C"></span><span class="sw" style="background:#38BDF8"></span><span class="sw" style="background:#0077B6"></span></span>
+            </button>
+            <button type="button" class="opt-btn" onclick="selectColor('RC2', this)">
+              <div>
+                <span class="opt-title">RC2 — Signature Aqua Pill &amp; Deep Ocean Teal</span>
+                <span class="opt-desc">Moveix-style vivid pill CTA using #00B4D8 fill + #1A2B4C ink (5.70:1 AA); #026896 light links (6.13:1 AA). &Delta;E00 = 0.00.</span>
+              </div>
+              <span class="swatches"><span class="sw" style="background:#1A2B4C"></span><span class="sw" style="background:#00B4D8"></span><span class="sw" style="background:#026896"></span></span>
+            </button>
+            <button type="button" class="opt-btn" onclick="selectColor('RC3', this)">
+              <div>
+                <span class="opt-title">RC3 — Cobalt Slate &amp; Emerald-Teal SLA</span>
+                <span class="opt-desc">#172848 Cobalt (&Delta;E00 = 0.99) + crisp #0F766E verified SLA icons (5.47:1 AA) bridging Moveix green freshness.</span>
+              </div>
+              <span class="swatches"><span class="sw" style="background:#172848"></span><span class="sw" style="background:#38BDF8"></span><span class="sw" style="background:#0F766E"></span></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="opt-box">
+          <h3>2. Hero Slider Architecture (Tier 2 Struct #1/3)</h3>
+          <div class="opt-choices">
+            <button type="button" class="opt-btn active" onclick="selectHero('R-H1', this)">
+              <div>
+                <span class="opt-title">R-H1 (Recommended) — Two-Tone Headline + 3-Icon SLA Strip</span>
+                <span class="opt-desc">Adapts reference highlighted keyword + pill Primary CTA + pinned 3-icon value strip above Intent Tabs &amp; Pause/Play.</span>
+              </div>
+            </button>
+            <button type="button" class="opt-btn" onclick="selectHero('R-H2', this)">
+              <div>
+                <span class="opt-title">R-H2 — Reference Two-Tone Left + Right Hardware Cutout Card</span>
+                <span class="opt-desc">Pairs Moveix headline/CTA + 3-icon SLA bar on left with framed active hardware/event visual spotlight card on right.</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="opt-box">
+          <h3>3. Storefront Blocks from Reference (Cap &le; 3 Struct)</h3>
+          <div class="opt-choices">
+            <label class="check-opt">
+              <input type="checkbox" id="chk-upg7" checked onchange="toggleSection()" />
+              <div>
+                <strong>UPG-7: Circular Category Avatars + View All</strong> <span class="tier-badge">Tier 2 Struct</span>
+                <div class="opt-desc">Hardware silhouettes in crisp #F8F9FA circles + 1-line capability sub-label.</div>
+              </div>
+            </label>
+            <label class="check-opt">
+              <input type="checkbox" id="chk-upg8" checked onchange="toggleSection()" />
+              <div>
+                <strong>UPG-8: Minimal Product Cards + Action Square</strong> <span class="tier-badge">Tier 2 Struct</span>
+                <div class="opt-desc">Drop card prose wall; keep Model, Brand · SKU, tabular PKR + 44px Quick-Quote button.</div>
+              </div>
+            </label>
+            <label class="check-opt">
+              <input type="checkbox" id="chk-upg9" onchange="toggleSection()" />
+              <div>
+                <strong>UPG-9: 3-Up Commercial Promo Trio</strong> <span class="tier-badge">Tier 2 Struct</span>
+                <div class="opt-desc">Boardroom Kits · SMD &amp; Hologram Events · VoIP &amp; Delegate Bundles (swap UPG-7 to stay &le; 3).</div>
+              </div>
+            </label>
+            <label class="check-opt">
+              <input type="checkbox" id="chk-upg10" checked onchange="toggleSection()" />
+              <div>
+                <strong>UPG-10: 4-Pillar Engineering Guarantee Strip</strong> <span class="tier-badge t1">Tier 1 Style</span>
+                <div class="opt-desc">Same-Day Lahore Dispatch · Official OEM Warranty · FBR GST · 15-Min SLA.</div>
+              </div>
+            </label>
+          </div>
+          <div class="cap-meter" id="cap-meter">
+            <span>Structural Cap: <strong id="cap-count">3 / 3</strong></span>
+            <span id="cap-status">WITHIN BOUNDS (PASS)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="controls-row">
+        <div>
+          <h2>Reference Attachment vs. Current Baseline vs. Proposed Mockup</h2>
+          <div class="metric-badges">
+            <span>Active Color: <strong id="lbl-color">RC1</strong></span>
+            <span>Hero: <strong id="lbl-hero">R-H1</strong></span>
+            <span>Primary &Delta;E00: <strong id="lbl-de">0.00 (&le; 3.0)</strong></span>
+            <span>Light Link Contrast: <strong id="lbl-cr">4.87:1 AA</strong></span>
+          </div>
+        </div>
+        <div class="viewport-tabs">
+          <button type="button" class="tab-btn active" onclick="setViewport('desktop', this)">Desktop (1280&times;800)</button>
+          <button type="button" class="tab-btn" onclick="setViewport('mobile', this)">Mobile (390&times;844)</button>
+        </div>
+      </div>
+
+      <div class="compare-grid" id="compare-grid">
+        <!-- Column 1: Attached Reference Image -->
+        <div class="shot-frame">
+          <div class="shot-label"><span>Attached Reference</span><span>image_e982880c.png</span></div>
+          <div class="ref-scroll">
+            <img src="/assets/aistudio/image_e982880c.png" alt="User attached Moveix UI/UX reference screenshot" />
+          </div>
+        </div>
+
+        <!-- Column 2: Current AV Live Storefront (Post-Phase 4 Baseline) -->
+        <div class="shot-frame">
+          <div class="shot-label"><span>Before (Current Storefront)</span><span class="vp-tag">1280&times;800</span></div>
+          <div class="sim-bar">
+            <span>Video Conference in Pakistan · <span class="cyan">AV Live (Est. 2011)</span></span>
+            <span>Lahore · Karachi · ISB</span>
+          </div>
+          <div class="sim-nav">
+            <div class="sim-logo"><span class="av">AV</span><span class="live">Live</span></div>
+            <div class="sim-nav-links">
+              <span>Video Conf</span><span>IP Phones</span><span>Events</span><span>Brands</span><span>Services</span>
+            </div>
+            <span style="font-size:10px;color:#0077b6;font-weight:800;">0321-4256263</span>
+          </div>
+
+          <div class="sim-hero" style="background-image: linear-gradient(95deg, rgba(26,43,76,0.95) 28%, rgba(26,43,76,0.45) 100%), url('/images/projects/world-bank-president-stage.webp');">
+            <div class="sim-hero-inner">
+              <div>
+                <span class="hero-eyebrow" style="color:#38bdf8;">ENTERPRISE AV &amp; EVENTS PAKISTAN &middot; EST. 2011</span>
+                <h3 style="color:#fff;">Video Conference in Pakistan | Corporate Event Management | AV Live</h3>
+                <p>1,000+ Events &amp; Boardrooms Engineered for Meta, World Bank, Nestl&eacute; &amp; USAID.</p>
+                <div class="hero-ctas">
+                  <span class="cta-box" style="background:#fff;color:#1a2b4c;">Explore Catalog &rarr;</span>
+                  <span class="cta-ghost" style="border-radius:9px;">Get 15-Min BoQ Quote</span>
+                </div>
+              </div>
+            </div>
+            <div class="hero-tabs-row">
+              <div class="intent-tabs">
+                <span class="intent-tab active">01 &middot; Boardroom Video</span>
+                <span class="intent-tab">02 &middot; Corporate Events &amp; LED</span>
+                <span class="intent-tab">03 &middot; Executive Codecs</span>
+              </div>
+              <span class="pause-btn">Pause</span>
+            </div>
+          </div>
+
+          <div class="sim-sec">
+            <div class="cat-row-before">
+              <div class="cat-sq">Video Conf</div>
+              <div class="cat-sq">Boardroom</div>
+              <div class="cat-sq">PTZ Cams</div>
+              <div class="cat-sq">Speakerphones</div>
+              <div class="cat-sq">IP Phones</div>
+            </div>
+          </div>
+
+          <div class="sim-sec-muted">
+            <div class="sec-hdr">
+              <h4>Featured Enterprise AV Hardware</h4>
+              <span class="view-all" style="color:#1a2b4c;">VIEW ALL 53 MODELS &rarr;</span>
+            </div>
+            <div class="prod-grid">
+              <div class="prod-card">
+                <div class="prod-well"><img src="/images/products/poly-x70-studio.webp" alt="Poly Studio X70" /></div>
+                <div class="prod-body">
+                  <div class="prod-title">Poly Studio X70</div>
+                  <div class="prod-meta">HP Poly &middot; SKU 7200-87350</div>
+                  <div class="prod-prose">All-in-one dual 4K 20MP video bar for large executive boardrooms...</div>
+                  <div class="prod-foot">
+                    <span class="prod-price">PKR 950,000</span>
+                    <span class="btn-quote-wide">Specs &amp; Quote</span>
+                  </div>
+                </div>
+              </div>
+              <div class="prod-card">
+                <div class="prod-well"><img src="/images/products/cisco-room-kit-eq.webp" alt="Cisco Room Kit EQ" /></div>
+                <div class="prod-body">
+                  <div class="prod-title">Cisco Room Kit EQ</div>
+                  <div class="prod-meta">Cisco &middot; SKU CS-KIT-EQ</div>
+                  <div class="prod-prose">AI-powered Quad Camera bundle for multi-screen auditoriums...</div>
+                  <div class="prod-foot">
+                    <span class="prod-price">PKR 2,450,000</span>
+                    <span class="btn-quote-wide">Specs &amp; Quote</span>
+                  </div>
+                </div>
+              </div>
+              <div class="prod-card">
+                <div class="prod-well"><img src="/images/products/polycom-group-500-eagleeye-iv.webp" alt="Polycom Group 500" /></div>
+                <div class="prod-body">
+                  <div class="prod-title">Polycom Group 500</div>
+                  <div class="prod-meta">Polycom &middot; SKU 7200-64550</div>
+                  <div class="prod-prose">Enterprise H.323 / SIP codec with 12x EagleEye IV PTZ optics...</div>
+                  <div class="prod-foot">
+                    <span class="prod-price">PKR 1,450,000</span>
+                    <span class="btn-quote-wide">Specs &amp; Quote</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Live Proposed Mockup -->
+        <div class="shot-frame" id="after-frame">
+          <div class="shot-label"><span>After (Reference-Adapted Preview)</span><span class="vp-tag">1280&times;800</span></div>
+          <div class="sim-bar">
+            <span>Video Conference in Pakistan · <span class="cyan">AV Live (Est. 2011)</span></span>
+            <span>Lahore · Karachi · ISB</span>
+          </div>
+          <div class="sim-nav">
+            <div class="sim-logo"><span class="av">AV</span><span class="live">Live</span></div>
+            <div class="sim-nav-links">
+              <span>Video Conf</span><span>IP Phones</span><span>Events</span><span>Brands</span><span>Services</span>
+            </div>
+            <span style="font-size:10px;font-weight:800;color:var(--opt-aa);">0321-4256263</span>
+          </div>
+
+          <!-- Dynamic Hero -->
+          <div class="sim-hero" id="after-hero" style="background-image: linear-gradient(95deg, rgba(17,30,54,0.96) 28%, rgba(26,43,76,0.42) 100%), url('/images/projects/world-bank-president-stage.webp');">
+            <div class="sim-hero-inner" id="after-hero-inner">
+              <div>
+                <span class="hero-eyebrow" id="after-eyebrow">ENTERPRISE AV &amp; EVENTS PAKISTAN &middot; EST. 2011</span>
+                <h3 id="after-title">Video Conference &amp; <span class="hi">Event Precision.</span></h3>
+                <p id="after-sub">1,000+ Boardrooms, SMD Stages &amp; Hybrid Broadcasts engineered for Meta, World Bank &amp; Nestl&eacute;.</p>
+                <div class="hero-ctas">
+                  <button type="button" class="cta-pill" id="after-cta-primary" style="background:var(--opt-cta-bg);color:var(--opt-cta-fg);">Explore Catalog &rarr;</button>
+                  <button type="button" class="cta-ghost">15-Min BoQ Quote</button>
+                </div>
+              </div>
+              <div class="spotlight-card" id="after-spotlight" style="display:none;">
+                <img id="spotlight-img" src="/images/products/poly-x70-studio.webp" alt="Featured Hardware" />
+                <div>
+                  <span style="font-size:9px;font-weight:800;color:var(--opt-hero-highlight);text-transform:uppercase;">Active Spotlight</span>
+                  <div id="spotlight-name" style="font-size:12px;font-weight:900;color:#fff;">Poly Studio X70 Dual-4K</div>
+                  <div id="spotlight-price" style="font-size:10.5px;color:rgba(255,255,255,0.85);">Ready Lahore Stock &middot; PKR 950,000</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-sla-strip">
+              <span class="hero-sla-item"><span class="sla-ico">&#9889;</span> 15-Min Engineering SLA</span>
+              <span class="hero-sla-item"><span class="sla-ico">&#10003;</span> Official OEM Warranty</span>
+              <span class="hero-sla-item"><span class="sla-ico">&#9673;</span> Lahore &middot; Karachi &middot; Islamabad</span>
+            </div>
+
+            <div class="hero-tabs-row">
+              <div class="intent-tabs">
+                <button type="button" class="intent-tab active" onclick="setSlide(0, this)">01 &middot; Boardroom Video</button>
+                <button type="button" class="intent-tab" onclick="setSlide(1, this)">02 &middot; SMD &amp; Events</button>
+                <button type="button" class="intent-tab" onclick="setSlide(2, this)">03 &middot; Delegate &amp; VoIP</button>
+              </div>
+              <button type="button" class="pause-btn" id="after-pause-btn" onclick="togglePause(this)">Pause</button>
+            </div>
+          </div>
+
+          <!-- UPG-7 Category Strip -->
+          <div class="sim-sec" id="sec-upg7">
+            <div class="sec-hdr">
+              <h4>Shop by AV Category</h4>
+              <span class="view-all">View All 12 Categories &rarr;</span>
+            </div>
+            <div class="cat-row-after">
+              <div class="cat-circle-card">
+                <div class="cat-ring"><img src="/images/products/poly-x70-studio.webp" alt="Video Bars" /></div>
+                <div class="cat-ttl">Video Bars</div>
+                <div class="cat-sub">4K AI Rooms</div>
+              </div>
+              <div class="cat-circle-card">
+                <div class="cat-ring"><img src="/images/products/polycom-group-500-eagleeye-iv.webp" alt="Boardroom Codecs" /></div>
+                <div class="cat-ttl">Codecs</div>
+                <div class="cat-sub">SIP &amp; H.323</div>
+              </div>
+              <div class="cat-circle-card">
+                <div class="cat-ring"><img src="/images/products/cisco-room-kit-eq.webp" alt="Large Room AV" /></div>
+                <div class="cat-ttl">Large Room</div>
+                <div class="cat-sub">Quad Optics</div>
+              </div>
+              <div class="cat-circle-card">
+                <div class="cat-ring"><img src="/images/products/poly-vvx-411-main.webp" alt="IP Phones" /></div>
+                <div class="cat-ttl">IP Phones</div>
+                <div class="cat-sub">PoE HD Voice</div>
+              </div>
+              <div class="cat-circle-card">
+                <div class="cat-ring"><img src="/images/products/3d-hologram-display.webp" alt="3D Hologram & SMD" /></div>
+                <div class="cat-ttl">3D &amp; SMD</div>
+                <div class="cat-sub">Event Stages</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UPG-8 Minimal Product Cards -->
+          <div class="sim-sec-muted" id="sec-upg8">
+            <div class="sec-hdr">
+              <h4>Featured Enterprise Systems</h4>
+              <span class="view-all">View All 53 Models &rarr;</span>
+            </div>
+            <div class="prod-grid">
+              <div class="prod-card">
+                <div class="prod-well">
+                  <span class="prod-badge">Flagship</span>
+                  <img src="/images/products/poly-x70-studio.webp" alt="Poly Studio X70" />
+                </div>
+                <div class="prod-body">
+                  <div class="prod-title">Poly Studio X70</div>
+                  <div class="prod-meta">HP Poly &middot; Dual 4K Bar</div>
+                  <div class="prod-foot">
+                    <span class="prod-price">Rs. 950,000</span>
+                    <span class="btn-quote-sq" title="Specs &amp; Quote">&rarr;</span>
+                  </div>
+                </div>
+              </div>
+              <div class="prod-card">
+                <div class="prod-well">
+                  <img src="/images/products/cisco-room-kit-eq.webp" alt="Cisco Room Kit EQ" />
+                </div>
+                <div class="prod-body">
+                  <div class="prod-title">Cisco Room Kit EQ</div>
+                  <div class="prod-meta">Cisco &middot; Auditorium Codec</div>
+                  <div class="prod-foot">
+                    <span class="prod-price">Rs. 2,450,000</span>
+                    <span class="btn-quote-sq" title="Specs &amp; Quote">&rarr;</span>
+                  </div>
+                </div>
+              </div>
+              <div class="prod-card">
+                <div class="prod-well">
+                  <span class="prod-badge">Special Offer</span>
+                  <img src="/images/products/polycom-group-500-eagleeye-iv.webp" alt="Polycom Group 500" />
+                </div>
+                <div class="prod-body">
+                  <div class="prod-title">Polycom Group 500</div>
+                  <div class="prod-meta">Polycom &middot; 12x Optical PTZ</div>
+                  <div class="prod-foot">
+                    <span class="prod-price">Rs. 1,450,000</span>
+                    <span class="btn-quote-sq" title="Specs &amp; Quote">&rarr;</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UPG-9 3-Up Commercial Promo Trio -->
+          <div class="sim-sec" id="sec-upg9" style="display:none;">
+            <div class="promo-trio">
+              <div class="promo-tile" style="background-image:url('/images/products/poly-x70-boardroom.webp');">
+                <div><h5>Turnkey Boardroom Kits</h5><p>Ready Stock &amp; Acoustic Setup</p></div>
+                <span class="promo-cta">Explore Kits &rarr;</span>
+              </div>
+              <div class="promo-tile" style="background-image:url('/images/projects/meta-values-summit.webp');">
+                <div><h5>P2.5 SMD &amp; 3D Hologram</h5><p>Meta &amp; World Bank Production</p></div>
+                <span class="promo-cta">Book Event &rarr;</span>
+              </div>
+              <div class="promo-tile" style="background-image:url('/images/projects/vissonic-delegate-boardroom.webp');">
+                <div><h5>VoIP &amp; Delegate Bundles</h5><p>Multi-City Council &amp; PBX</p></div>
+                <span class="promo-cta">Get BoQ &rarr;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- UPG-10 4-Pillar Engineering Guarantee Bar -->
+          <div class="sim-sec-muted" id="sec-upg10">
+            <div class="guarantee-bar">
+              <div class="guar-item">
+                <span class="guar-ico">&#9889;</span>
+                <div><div class="guar-t">Same-Day Dispatch</div><div class="guar-s">Verified Lahore Stock</div></div>
+              </div>
+              <div class="guar-item">
+                <span class="guar-ico">&#10003;</span>
+                <div><div class="guar-t">Official OEM Warranty</div><div class="guar-s">1–3 Yr Brand Cover</div></div>
+              </div>
+              <div class="guar-item">
+                <span class="guar-ico">&#9733;</span>
+                <div><div class="guar-t">FBR GST &amp; PPRA</div><div class="guar-s">Enterprise Compliance</div></div>
+              </div>
+              <div class="guar-item">
+                <span class="guar-ico">&#9990;</span>
+                <div><div class="guar-t">15-Min Tech SLA</div><div class="guar-s">LHR &middot; KHI &middot; ISB</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>B. Ordered Safe Upgrades &amp; C. Explicitly Rejected Ideas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Risk Tier</th>
+            <th>Component / Target</th>
+            <th>Token &amp; Visual Proof</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong><code>RC1/RC2/RC3</code></strong></td>
+            <td class="tier tier-1">Tier 1–2</td>
+            <td>Global Storefront Palette</td>
+            <td><code>#1A2B4C</code> (&Delta;E00 0.00), <code>#0077B6</code> (4.87:1 AA), <code>#026896</code> (6.13:1 AA), <code>#38BDF8</code>/<code>#00B4D8</code> Hero CTA (7.76:1 / 5.70:1)</td>
+            <td>Selectable Above</td>
+          </tr>
+          <tr>
+            <td><strong><code>R-H1 / R-H2</code></strong></td>
+            <td class="tier tier-2">Tier 2 (#1/3)</td>
+            <td>Hero Slider (`Home.tsx` L526–827)</td>
+            <td>Two-tone highlight headline + Reference pill CTA + Pinned 3-icon SLA bar + Intent Tabs &amp; WCAG 2.2 Pause/Play</td>
+            <td>Selectable Above</td>
+          </tr>
+          <tr>
+            <td><strong><code>UPG-7</code></strong></td>
+            <td class="tier tier-2">Tier 2 (#2/3)</td>
+            <td>Category Strip (`Home.tsx` L615–647, L830–844)</td>
+            <td><code>Shop by AV Category</code> + <code>View All &rarr;</code>; <code>rounded-full bg-[#F8F9FA]</code> product silhouettes + 2-word subline</td>
+            <td>Selectable Above</td>
+          </tr>
+          <tr>
+            <td><strong><code>UPG-8</code></strong></td>
+            <td class="tier tier-2">Tier 2 (#3/3)</td>
+            <td>Featured Hardware Cards (`Home.tsx` L991–1066)</td>
+            <td>Remove prose blurb on compact cards; Model + <code>Brand &middot; Category</code> + <code>tabular-nums</code> PKR + <code>44px</code> Quick-Quote square</td>
+            <td>Selectable Above</td>
+          </tr>
+          <tr>
+            <td><strong><code>UPG-9</code></strong></td>
+            <td class="tier tier-2">Tier 2 (Alt #3/3)</td>
+            <td>3-Up Commercial Promo Trio (`~L1082`)</td>
+            <td>3 dark-scrim horizontal promo cards (Boardroom Kits / SMD &amp; Hologram / VoIP Bundles) mirroring Moveix promo trio</td>
+            <td>Swap Option</td>
+          </tr>
+          <tr>
+            <td><strong><code>UPG-10</code></strong></td>
+            <td class="tier tier-1">Tier 1 (Style)</td>
+            <td>4-Pillar Engineering Guarantee Strip</td>
+            <td>4-column crisp icon guarantee bar (`Same-Day Dispatch`, `OEM Warranty`, `FBR GST/PPRA`, `15-Min SLA`)</td>
+            <td>Selectable Above</td>
+          </tr>
+          <tr>
+            <td><strong>Rejected</strong></td>
+            <td class="tier tier-0">Tier 0 / Guardrail</td>
+            <td>Moveix Mint/Charcoal Theme, Fake Reviews &amp; Newsletter Footer</td>
+            <td>Auto-blocked: Forest-mint violates &Delta;E00 &le; 3.0; synthetic reviews violate real enterprise proof; footer is Tier 0 frozen.</td>
+            <td>Auto-Rejected</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <div class="gate-bar">
+    <div class="decision-out" id="decision-output">Selected Stack: RC1 + R-H1 + UPG-7 + UPG-8 + UPG-10 (Cap 3/3 — Ready for APPROVE)</div>
+    <div class="btn-row">
+      <button type="button" class="btn btn-reject" onclick="recordDecision('REJECT')">REJECT</button>
+      <button type="button" class="btn btn-edit" onclick="recordDecision('EDIT')">REQUEST EDITS</button>
+      <button type="button" class="btn btn-approve" onclick="recordDecision('APPROVE')">APPROVE SELECTED STACK</button>
+    </div>
+  </div>
+
+  <script>
+    const THEMES = {
+      RC1: {
+        navy: '#1A2B4C', aa: '#0077B6', hi: '#38BDF8', ctaBg: '#38BDF8', ctaFg: '#111E36',
+        promoBg: '#38BDF8', promoFg: '#111E36', sla: '#0077B6', de: '0.00 (<= 3.0)', cr: '4.87:1 AA'
+      },
+      RC2: {
+        navy: '#1A2B4C', aa: '#026896', hi: '#00B4D8', ctaBg: '#00B4D8', ctaFg: '#1A2B4C',
+        promoBg: '#00B4D8', promoFg: '#1A2B4C', sla: '#026896', de: '0.00 (<= 3.0)', cr: '6.13:1 AA'
+      },
+      RC3: {
+        navy: '#172848', aa: '#0077B6', hi: '#38BDF8', ctaBg: '#38BDF8', ctaFg: '#111E36',
+        promoBg: '#38BDF8', promoFg: '#111E36', sla: '#0F766E', de: '0.99 (<= 3.0)', cr: '5.47:1 AA'
+      }
+    };
+
+    const SLIDES = [
+      {
+        eyebrow: 'ENTERPRISE AV & EVENTS PAKISTAN · EST. 2011',
+        title: 'Video Conference & <span class="hi">Event Precision.</span>',
+        sub: '1,000+ Boardrooms, SMD Stages & Hybrid Broadcasts engineered for Meta, World Bank & Nestlé.',
+        cta: 'Explore Catalog →',
+        bg: '/images/projects/world-bank-president-stage.webp',
+        spotImg: '/images/products/poly-x70-studio.webp',
+        spotName: 'Poly Studio X70 Dual-4K',
+        spotPrice: 'Ready Lahore Stock · Rs. 950,000'
+      },
+      {
+        eyebrow: 'TURNKEY PRODUCTION · P2.5 SMD & 3D HOLOGRAMS',
+        title: 'Corporate Events & <span class="hi">SMD LED Stages.</span>',
+        sub: 'In-house P2.5 3840Hz LED Walls, Multi-Cam 4K SDI Broadcast & 3D Hologram Displays.',
+        cta: 'Plan Your Event →',
+        bg: '/images/projects/meta-values-summit.webp',
+        spotImg: '/images/products/3d-hologram-stage.webp',
+        spotName: '3D Hologram Stage & P2.5 LED',
+        spotPrice: 'Full On-Site Crew · Lahore / KHI / ISB'
+      },
+      {
+        eyebrow: 'DELEGATE CONFERENCING · SIP & MICROSOFT TEAMS',
+        title: 'Executive Boardrooms & <span class="hi">Delegate Systems.</span>',
+        sub: 'HP Poly X72, Cisco Room Kit EQ, Logitech Rally Bar & VISSONIC Digital Microphones.',
+        cta: 'Video Conference Hub →',
+        bg: '/images/projects/vissonic-delegate-boardroom.webp',
+        spotImg: '/images/products/cisco-room-kit-eq.webp',
+        spotName: 'Cisco Room Kit EQ Bundle',
+        spotPrice: '15-Min BoQ Quote · Rs. 2,450,000'
+      }
+    ];
+
+    let state = { color: 'RC1', hero: 'R-H1', slide: 0, paused: false };
+
+    function selectColor(id, btn) {
+      state.color = id;
+      btn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const t = THEMES[id];
+      const r = document.documentElement.style;
+      r.setProperty('--opt-navy', t.navy);
+      r.setProperty('--opt-aa', t.aa);
+      r.setProperty('--opt-hero-highlight', t.hi);
+      r.setProperty('--opt-cta-bg', t.ctaBg);
+      r.setProperty('--opt-cta-fg', t.ctaFg);
+      r.setProperty('--opt-promo-cta-bg', t.promoBg);
+      r.setProperty('--opt-promo-cta-fg', t.promoFg);
+      r.setProperty('--opt-sla-check', t.sla);
+      document.getElementById('lbl-color').textContent = id;
+      document.getElementById('lbl-de').textContent = t.de;
+      document.getElementById('lbl-cr').textContent = t.cr;
+      updateDecisionBanner();
+    }
+
+    function selectHero(id, btn) {
+      state.hero = id;
+      btn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const inner = document.getElementById('after-hero-inner');
+      const spot = document.getElementById('after-spotlight');
+      if (id === 'R-H2') {
+        inner.classList.add('split');
+        spot.style.display = 'flex';
+      } else {
+        inner.classList.remove('split');
+        spot.style.display = 'none';
+      }
+      document.getElementById('lbl-hero').textContent = id;
+      updateDecisionBanner();
+    }
+
+    function setSlide(idx, btn) {
+      state.slide = idx;
+      btn.parentElement.querySelectorAll('.intent-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const s = SLIDES[idx];
+      document.getElementById('after-eyebrow').textContent = s.eyebrow;
+      document.getElementById('after-title').innerHTML = s.title;
+      document.getElementById('after-sub').textContent = s.sub;
+      document.getElementById('after-cta-primary').textContent = s.cta;
+      document.getElementById('after-hero').style.backgroundImage =
+        `linear-gradient(95deg, rgba(17,30,54,0.96) 28%, rgba(26,43,76,0.42) 100%), url('${s.bg}')`;
+      document.getElementById('spotlight-img').src = s.spotImg;
+      document.getElementById('spotlight-name').textContent = s.spotName;
+      document.getElementById('spotlight-price').textContent = s.spotPrice;
+    }
+
+    function togglePause(btn) {
+      state.paused = !state.paused;
+      btn.textContent = state.paused ? 'Play' : 'Pause';
+    }
+
+    function toggleSection() {
+      const u7 = document.getElementById('chk-upg7').checked;
+      const u8 = document.getElementById('chk-upg8').checked;
+      const u9 = document.getElementById('chk-upg9').checked;
+      const u10 = document.getElementById('chk-upg10').checked;
+      document.getElementById('sec-upg7').style.display = u7 ? 'block' : 'none';
+      document.getElementById('sec-upg8').style.display = u8 ? 'block' : 'none';
+      document.getElementById('sec-upg9').style.display = u9 ? 'block' : 'none';
+      document.getElementById('sec-upg10').style.display = u10 ? 'block' : 'none';
+
+      const structCount = 1 + (u7 ? 1 : 0) + (u8 ? 1 : 0) + (u9 ? 1 : 0);
+      const meter = document.getElementById('cap-meter');
+      document.getElementById('cap-count').textContent = `${structCount} / 3`;
+      if (structCount > 3) {
+        meter.classList.add('over');
+        document.getElementById('cap-status').textContent = 'EXCEEDS CAP — UNCHECK 1 STRUCT BLOCK';
+      } else {
+        meter.classList.remove('over');
+        document.getElementById('cap-status').textContent = 'WITHIN BOUNDS (PASS)';
+      }
+      updateDecisionBanner();
+    }
+
+    function setViewport(vp, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const grid = document.getElementById('compare-grid');
+      const tags = document.querySelectorAll('.vp-tag');
+      if (vp === 'mobile') {
+        grid.classList.add('mobile-mode');
+        tags.forEach(t => t.textContent = '390×844');
+      } else {
+        grid.classList.remove('mobile-mode');
+        tags.forEach(t => t.textContent = '1280×800');
+      }
+    }
+
+    function getStackString() {
+      const picks = [state.color, state.hero];
+      if (document.getElementById('chk-upg7').checked) picks.push('UPG-7');
+      if (document.getElementById('chk-upg8').checked) picks.push('UPG-8');
+      if (document.getElementById('chk-upg9').checked) picks.push('UPG-9');
+      if (document.getElementById('chk-upg10').checked) picks.push('UPG-10');
+      return picks.join(', ');
+    }
+
+    function updateDecisionBanner() {
+      const structCount = 1 +
+        (document.getElementById('chk-upg7').checked ? 1 : 0) +
+        (document.getElementById('chk-upg8').checked ? 1 : 0) +
+        (document.getElementById('chk-upg9').checked ? 1 : 0);
+      const capMsg = structCount > 3 ? 'CAP 4/3 EXCEEDED (uncheck 1 structural section)' : `Cap ${structCount}/3`;
+      document.getElementById('decision-output').textContent =
+        `Selected Stack: ${getStackString()} (${capMsg})`;
+    }
+
+    function recordDecision(action) {
+      const stack = getStackString();
+      if (action === 'APPROVE') {
+        document.getElementById('decision-output').textContent =
+          `Reply in chat with: APPROVE ${stack}`;
+      } else if (action === 'EDIT') {
+        document.getElementById('decision-output').textContent =
+          `Reply in chat with: EDIT <your feedback> (based on ${stack})`;
+      } else {
+        document.getElementById('decision-output').textContent =
+          'Reply in chat with: REJECT';
+      }
+    }
+  </script>
+</body>
+</html>

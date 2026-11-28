@@ -11,12 +11,14 @@ export function AdminLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fbSdkReady, setFbSdkReady] = useState(false);
-  const { login, signInWithGoogle, signInWithFacebook } = useAuth();
+  const { login, signInWithGoogle, signInWithFacebook, preloadAuth, isAuthenticated, isAdmin, isEditor, isSupport } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect') || '/admin/overview';
 
   useEffect(() => {
+    // Eagerly preload Firebase Auth runtime so Sign In With Google fires synchronously inside the click gesture
+    preloadAuth();
     let mounted = true;
     ensureFacebookSdkReady()
       .then((res) => {
@@ -26,17 +28,37 @@ export function AdminLogin() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [preloadAuth]);
+
+  useEffect(() => {
+    if (isAuthenticated && (isAdmin || isEditor || isSupport)) {
+      navigate(redirect, { replace: true });
+    }
+  }, [isAuthenticated, isAdmin, isEditor, isSupport, navigate, redirect]);
 
   const handleGoogleLogin = async () => {
     setError('');
     setLoading(true);
     try {
       await signInWithGoogle();
-      navigate(redirect);
+      navigate(redirect, { replace: true });
     } catch (err: any) {
-      console.error(err);
-      setError('Google authentication failed. Please try again.');
+      console.error('Google Sign-In error:', err);
+      const code = err?.code || '';
+      if (code === 'auth/popup-blocked') {
+        setError('Sign-in popup was blocked by your browser. Please allow popups for this site and try again.');
+      } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        setError('Google sign-in popup was closed before finishing. Please try again and select infowarspakistan@gmail.com.');
+      } else if (code === 'auth/unauthorized-domain') {
+        const host = typeof window !== 'undefined' ? window.location.hostname : 'this domain';
+        setError(`Domain "${host}" is not authorized in Firebase Auth. Open via avlive.com.pk or add "${host}" under Firebase Console → Authentication → Settings → Authorized domains.`);
+      } else if (code === 'auth/operation-not-allowed') {
+        setError('Google Sign-In is not enabled in Firebase Authentication. Enable Google under Firebase Console → Authentication → Sign-in method.');
+      } else if (code === 'auth/network-request-failed') {
+        setError('Network error while contacting Google Auth. Please check your connection and try again.');
+      } else {
+        setError(`Google authentication failed (${code || 'unknown'}): ${err?.message || 'Please try again.'}`);
+      }
     } finally {
       setLoading(false);
     }

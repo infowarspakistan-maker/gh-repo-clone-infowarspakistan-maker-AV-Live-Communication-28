@@ -8,29 +8,30 @@ Welcome to the **AV Live Communications** source code repository and platform bl
 
 | Endpoint / File | Purpose | Live Count / Status |
 | :--- | :--- | :--- |
-| **`/sitemap.xml`** (`public/sitemap.xml`) | Dynamic XML 1.0 Sitemap synced from Firestore + synchronous fallback catalogs | **166 Canonical URLs** (74 Static/Brand/Geo/Pillar including `/sitemap`, `/video-conference-in-pakistan`, `/event-management-in-pakistan` & `/user-data-deletion`, 60 Products, 12 Categories, 9 Services, 11 Blogs) |
-| **`/sitemap`** (`src/pages/HtmlSitemap.tsx`) | Human & Googlebot HTML Sitemap & Enterprise Hardware Directory (all 166 URLs within 2 clicks) | Active (Linked in Navbar & Footer) |
+| **`/sitemap.xml`** (`public/sitemap.xml`) | Dynamic XML 1.0 Sitemap synced from Firestore + synchronous fallback catalogs | **193 Canonical URLs** (72 Static/Brand/Geo/Pillar including `/sitemap`, `/video-conference-in-pakistan`, `/event-management-in-pakistan`, `/video-conference`, `/brands/samsung`, `/brands/tcl` & `/user-data-deletion`, 88 Products, 13 Categories, 9 Services, 11 Blogs) |
+| **`/sitemap`** (`src/pages/HtmlSitemap.tsx`) | Human & Googlebot HTML Sitemap & Enterprise Hardware Directory (all 193 URLs within 2 clicks) | Active (Linked in Navbar & Footer) |
 | **`/llms.txt`** (`public/llms.txt`) | Concise AI Search (ChatGPT, Perplexity, Claude, Gemini) index & entity directory | Active (HTTP 200 `text/plain`) |
-| **`/llms-full.txt`** (`public/llms-full.txt`) | Complete 32KB+ Markdown corpus of all 60 SKUs (MPNs, GTINs, real model-specific PKR prices), BoM tables & guides | Active (HTTP 200 `text/plain`) |
-| **`/api/gmc-feed.xml`** | Google Merchant Center RSS 2.0 XML Product Feed (`g:id`, `g:mpn`, `g:gtin`, `g:price` in PKR, multi-angle images, 5+ specs) | **60 Verified Hardware SKUs** |
-| **`/api/gmc-feed.tsv`** | Google Merchant Center Tab-Separated Values (TSV) Feed for Google Sheets scheduled fetch | **60 Verified Hardware SKUs** |
+| **`/llms-full.txt`** (`public/llms-full.txt`) | Complete 45KB+ Markdown corpus of all 88 SKUs (MPNs, GTINs, real model-specific PKR prices), BoM tables & guides | Active (HTTP 200 `text/plain`) |
+| **`/api/gmc-feed.xml`** | Google Merchant Center RSS 2.0 XML Product Feed (`g:id`, `g:size`, `g:item_group_id`, `g:price` in PKR, multi-angle images, 5+ specs) | **88 Verified Hardware & LED TV SKUs** |
+| **`/api/gmc-feed.tsv`** | Google Merchant Center Tab-Separated Values (TSV) Feed for Google Sheets scheduled fetch | **88 Verified Hardware & LED TV SKUs** |
 | **`/robots.txt`** (`public/robots.txt`) | Explicit `Allow: /` for `Googlebot`, `Google-Extended`, `GPTBot`, `OAI-SearchBot`, `PerplexityBot`, `ClaudeBot` | Active (Blocks `/admin/` & private `/api/`, allows GMC feeds & `X-Robots-Tag: noindex` observation) |
 
 ---
 
-## 2. Canonical Route Blueprint (166 Deduplicated Indexable URLs)
+## 2. Canonical Route Blueprint (193 Deduplicated Indexable URLs)
 
 ### A. Core Commercial, Geo & Solution Hubs (72 URLs)
-- **Storefront & Discovery**: `/`, `/shop`, `/brands`, `/solutions`, `/services`, `/events-services`, `/event-quote`, `/esports`, `/room-designer`, `/compare`, `/guides`, `/reviews`, `/blog`, `/faqs`, `/contact`, `/about`, `/sitemap`
-- **High-Intent Commercial Pillar Pages**: `/video-conference-in-pakistan`, `/event-management-in-pakistan`, `/video-conferencing`, `/video-conferencing-solutions`, `/corporate-event-management` (with permanent `301` redirect from `/corporate-event-management-pakistan`), `/conference-room-solutions`, `/zoom-rooms`, `/microsoft-teams-rooms`, `/3d-hologram`, `/projection-mapping`, `/voip-service-providers`
+- **Storefront & Discovery**: `/`, `/shop`, `/brands`, `/solutions`, `/services`, `/events-services`, `/event-quote`, `/esports`, `/room-designer`, `/podium-teleprompter`, `/compare`, `/guides`, `/reviews`, `/blog`, `/faqs`, `/contact`, `/about`, `/sitemap`
+- **High-Intent Commercial Pillar Pages**: `/video-conference-in-pakistan` *(absorbs `/video-conferencing`, `/video-conferencing-solutions`, `/conference-room-solutions` via `301`)*, `/event-management-in-pakistan` *(absorbs `/corporate-event-management`, `/corporate-event-management-pakistan` via `301`)*, `/video-conference` *(Interactive Boardroom Configurator & Protocol Hub)*, `/zoom-rooms`, `/microsoft-teams-rooms`, `/3d-hologram`, `/projection-mapping`, `/live-streaming-services`, `/av-equipment-rental`, `/voip-service-providers`
 - **Regional Local SEO Hubs**: `/lahore`, `/karachi`, `/islamabad`
 - **B2B Procurement Programs (`/programs/*`)**: `/programs/quote`, `/programs/blind-drop-shipping`, `/programs/government-education-pricing`, `/programs/fulfillment-services`, `/programs/promotions`, `/programs/provisioning-services`, `/programs/reseller-program`
 - **Trust & Policy Pages**: `/returns`, `/shipping`, `/payment`, `/rma`, `/privacy-policy`, `/terms-of-service`, `/user-data-deletion`
-- **25 Authorized Brand Pages (`/brands/:brandSlug`)**:
-  `/brands/poly`, `/brands/cisco`, `/brands/logitech`, `/brands/yealink`, `/brands/jabra`, `/brands/bosch`, `/brands/hikvision`, `/brands/dahua`, `/brands/axis`, `/brands/grandstream`, `/brands/fanvil`, `/brands/2n`, `/brands/epson`, `/brands/benq`, `/brands/optoma`, `/brands/panasonic`, `/brands/sony`, `/brands/viewsonic`, `/brands/uniview`, `/brands/itc`, `/brands/3cx`, `/brands/freepbx`, `/brands/sangoma`, `/brands/horion`, `/brands/google`
+- **27 Authorized Brand Pages (`/brands/:brandSlug`)**:
+  `/brands/poly`, `/brands/cisco`, `/brands/logitech`, `/brands/yealink`, `/brands/jabra`, `/brands/bosch`, `/brands/hikvision`, `/brands/dahua`, `/brands/axis`, `/brands/grandstream`, `/brands/fanvil`, `/brands/2n`, `/brands/epson`, `/brands/benq`, `/brands/optoma`, `/brands/panasonic`, `/brands/sony`, `/brands/viewsonic`, `/brands/uniview`, `/brands/itc`, `/brands/3cx`, `/brands/freepbx`, `/brands/sangoma`, `/brands/horion`, `/brands/samsung`, `/brands/tcl`, `/brands/google`
 
-### B. Canonical Hardware Categories (12 URLs — `/category/:slug`)
+### B. Canonical Hardware Categories (13 URLs — `/category/:slug`)
 - `/category/video-conferencing`
+- `/category/led-tv-displays` *(Samsung Crystal UHD, TCL 4K Google & Smart LED TVs, Horion Interactive Panels)*
 - `/category/touch-panels`
 - `/category/large-room`
 - `/category/speakerphones`
@@ -62,8 +63,8 @@ Welcome to the **AV Live Communications** source code repository and platform bl
   - `/blog/av-live-communications-15-years-pakistan`
   - *(Legacy IDs `/blog/1..11` and old Firestore slugs 301-redirect permanently to the canonical slugs above).*
 
-### E. Verified Enterprise Hardware Products (54 URLs — `/product/:slug`)
-- All 54 hardware SKUs defined in `PRODUCT_GMC_METADATA` (`src/lib/gmc-feed.ts`) resolve via canonical `-pakistan` slugs (e.g., `/product/polycom-realpresence-group-500-pakistan`, `/product/poly-studio-x72-pakistan`, `/product/podium-prompter-17-compact-pakistan`), with 1-hop `301` server redirects from raw MPNs or legacy Firestore IDs (`kl5wGaNLxqQByn3oPd1Z`, `T1XLMubVYmFzeIfC7V9B`).
+### E. Verified Enterprise Hardware & LED TV Products (88 URLs — `/product/:slug`)
+- All 88 hardware & LED TV SKUs defined in `PRODUCT_GMC_METADATA` (`src/lib/gmc-feed.ts` + `src/lib/tv-catalog.ts`) resolve via canonical `-pakistan` slugs (e.g., `/product/polycom-realpresence-group-500-pakistan`, `/product/samsung-u8000f-55-inch-4k-crystal-uhd-smart-tv-pakistan`, `/product/tcl-v6d-55-inch-4k-google-tv-pakistan`), with 1-hop `301` server redirects from raw MPNs, GMC TV SKU IDs (`TCL-*`, `SAM-*`), or legacy Firestore IDs.
 
 ---
 
@@ -93,10 +94,10 @@ Welcome to the **AV Live Communications** source code repository and platform bl
 # Start full-stack development server (port 3000 with SSR SEO injection)
 npm run dev
 
-# Regenerate public/sitemap.xml (155 deduplicated canonical URLs) and public/llms-full.txt
+# Regenerate public/sitemap.xml (193 deduplicated canonical URLs) and public/llms-full.txt
 npx tsx scripts/generate-sitemap.ts
 
-# Run 20-parameter Hub-and-Spoke Silo & Technical SEO Audit across all 155 canonical URLs + 28 alias redirects
+# Run 20-parameter Hub-and-Spoke Silo & Technical SEO Audit across all 193 canonical URLs + 301 consolidation redirects
 npx tsx scripts/seo-silo-audit.ts
 
 # Type-check codebase
@@ -118,6 +119,6 @@ npm run build
 | **`docs/AI_AGENT_PROFILES_COMPLETE.md`** | Dialectical reasoning and standalone system prompts for the **1st Agent** (Systems/SSR/Lighthouse), **2nd Agent** (GSC/Schema/GMC/Site Structure), **3rd Agent** (AEO/GEO/UX/Competitor Outranker), and **Unified Apex Master Agent**. |
 | **`docs/WEBSITE_BUILDING_MECHANISM_REPORT.md`** | Complete engineering report of the Dual-Wave Express SSR + Frame-0 Synchronous Hydration + Hub-and-Spoke Silo + AEO/GEO/GMC mechanism. |
 | **`NICHE_WEBSITE_BLUEPRINT.md`** | Universal parameterized starter blueprint (`{{BRAND_NAME}}`, `{{PRIMARY_DOMAIN}}`, `{{NICHE_INDUSTRY}}`, etc.) to recreate this entire architecture for any new niche. |
-| **`SITE_CHANGE_LOG.md`** | Chronological append-only engineering change log (`v1.0`–`v4.4`), modified files ledger, and deterministic state recovery commands. |
-| **`WEBSITE_STRUCTURE_BLUEPRINT.md`** | Complete 157-route Website Structure Map, 54-SKU inventory, 6-stage SSR/hydration architecture, and Single-Hop 301 Redirect Matrix. |
+| **`SITE_CHANGE_LOG.md`** | Chronological append-only engineering change log (`v1.0`–`v4.27`), modified files ledger, and deterministic state recovery commands. |
+| **`WEBSITE_STRUCTURE_BLUEPRINT.md`** | Complete 193-route Website Structure Map, 88-SKU inventory, 6-stage SSR/hydration architecture, and Single-Hop 301 Redirect Matrix. |
 | **`/admin/blueprint-hub` & `/blueprint-hub`** | Interactive browser UI (`src/pages/admin/BlueprintGeneratorHub.tsx`) to inspect the mechanism report, evolve `SKILL.md` monotonically, audit GSC link health, and download `SITE_CHANGE_LOG.md` & `WEBSITE_STRUCTURE_BLUEPRINT.md`. |

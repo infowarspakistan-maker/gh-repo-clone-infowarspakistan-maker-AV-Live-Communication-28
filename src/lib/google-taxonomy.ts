@@ -136,7 +136,7 @@ export const GOOGLE_PRODUCT_TAXONOMY: GoogleTaxonomyCategory[] = [
   {
     id: 305,
     path: 'Electronics > Video > Televisions',
-    keywords: ['commercial display', '4k display', 'smart tv', 'signage'],
+    keywords: ['commercial display', '4k display', 'smart tv', 'signage', 'led tv', 'samsung', 'tcl', 'google tv', 'crystal uhd', 'qled', 'television'],
   },
   {
     id: 3001,
@@ -406,6 +406,9 @@ export function inferDefaultGoogleCategory(
   }
   if (/license|google meet hardware/.test(text)) {
     return 'Software > Computer Software > Business & Productivity Software';
+  }
+  if (/led-tv-displays|google tv|crystal uhd|smart tv|smart led tv|android tv|tcl-|sam-|television/.test(text)) {
+    return 'Electronics > Video > Televisions';
   }
   if (/horion|interactive|display|smd|led wall/.test(text)) {
     return 'Electronics > Video > Computer Monitors';

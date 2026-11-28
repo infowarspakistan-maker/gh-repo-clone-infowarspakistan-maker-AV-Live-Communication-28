@@ -80,6 +80,7 @@ const CategoryManagement = React.lazy(() => import('./pages/admin/CategoryManage
 const MediaGuide = React.lazy(() => import('./pages/admin/MediaGuide').then(m => ({ default: m.MediaGuide })));
 const WorkspaceHub = React.lazy(() => import('./pages/admin/WorkspaceHub').then(m => ({ default: m.WorkspaceHub })));
 const WorkflowAutomation = React.lazy(() => import('./pages/admin/WorkflowAutomation').then(m => ({ default: m.WorkflowAutomation })));
+const AIAgentConsole = React.lazy(() => import('./pages/admin/AIAgentConsole').then(m => ({ default: m.AIAgentConsole })));
 const GoogleBusinessExport = React.lazy(() => import('./pages/admin/GoogleBusinessExport').then(m => ({ default: m.GoogleBusinessExport })));
 const FacebookPublisher = React.lazy(() => import('./pages/admin/FacebookPublisher').then(m => ({ default: m.FacebookPublisher })));
 const BlueprintGeneratorHub = React.lazy(() => import('./pages/admin/BlueprintGeneratorHub').then(m => ({ default: m.BlueprintGeneratorHub })));
@@ -108,6 +109,7 @@ const DEFAULT_NAV_CATEGORIES = [
   { id: 'cat-voip', name: 'VoIP Phone Systems', slug: 'voip-phone-systems', isActive: true, parentId: null, type: 'product' },
   { id: 'cat-headsets', name: 'Headsets', slug: 'headsets', isActive: true, parentId: null, type: 'product' },
   { id: 'cat-projectors', name: 'Projectors', slug: 'projectors', isActive: true, parentId: null, type: 'product' },
+  { id: 'cat-led-tv', name: 'LED TVs & Commercial Displays', slug: 'led-tv-displays', isActive: true, parentId: null, type: 'product' },
   { id: 'cat-cameras', name: 'IP Cameras', slug: 'ip-cameras', isActive: true, parentId: null, type: 'product' },
   { id: 'cat-intercom', name: 'Intercom, Paging & Access', slug: 'intercom-paging-access', isActive: true, parentId: null, type: 'product' },
 ];
@@ -173,13 +175,12 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
     pathname === '/voip-service-providers' || pathname === '/services/voip-telephony';
 
   const isCorporateEventsActive =
-    pathname === '/corporate-event-management' || pathname === '/services/corporate-events';
+    pathname === '/event-management-in-pakistan' || pathname === '/services/corporate-events';
 
   const isVideoConfActive =
     pathname.includes('video-conferenc') ||
     pathname === '/zoom-rooms' ||
-    pathname === '/microsoft-teams-rooms' ||
-    pathname === '/conference-room-solutions';
+    pathname === '/microsoft-teams-rooms';
 
   const isServicesActive =
     !isAiSolutionsActive &&
@@ -223,7 +224,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
               <li><Link to="/contact" className="hover:text-[#00B4D8] focus-visible:text-[#00B4D8] transition-colors block">Contact Us</Link></li>
               <li><Link to="/blog" className="hover:text-[#00B4D8] focus-visible:text-[#00B4D8] transition-colors block">Company Blog</Link></li>
               <li><Link to="/guides" className="hover:text-[#00B4D8] focus-visible:text-[#00B4D8] transition-colors block">Buyer's Guides</Link></li>
-              <li className="pt-2 border-t border-gray-100"><Link to="/sitemap" className="text-[#00B4D8] hover:text-[#1A2B4C] focus-visible:text-[#1A2B4C] font-bold transition-colors block">Complete Site Directory (153+ Pages)</Link></li>
+              <li className="pt-2 border-t border-gray-100"><Link to="/sitemap" className="text-[#00B4D8] hover:text-[#1A2B4C] focus-visible:text-[#1A2B4C] font-bold transition-colors block">Complete Site Directory (193 Pages)</Link></li>
             </ul>
           </div>
         </div>
@@ -253,19 +254,19 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
                 </ul>
               </div>
 
-              {/* Silo 2: Displays, Projectors & Video Walls */}
+              {/* Silo 2: Displays, LED TVs & Projectors */}
               <div>
-                <Link to="/category/projectors" className="font-black text-[11px] text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider block pb-2 mb-2.5 border-b border-gray-100">
-                  2. Displays, Projectors &amp; LED
+                <Link to="/category/led-tv-displays" className="font-black text-[11px] text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider block pb-2 mb-2.5 border-b border-gray-100">
+                  2. LED TVs, Displays &amp; Projectors
                 </Link>
                 <ul className="space-y-1.5 text-[12px] text-gray-600 font-semibold">
-                  <li><Link to="/podium-teleprompter" className="text-[#00B4D8] hover:text-[#1A2B4C] font-bold block">Fold-Flat Podium Teleprompter (17&Prime; &amp; 22&Prime;)</Link></li>
-                  <li><Link to="/product/horion-k6a-bundle-special-offer" className="hover:text-[#00B4D8] block">Horion K6a Interactive Panel</Link></li>
+                  <li><Link to="/category/led-tv-displays" className="text-[#00B4D8] hover:text-[#1A2B4C] font-bold block">LED TVs &amp; Commercial Displays (28+)</Link></li>
+                  <li><Link to="/brands/samsung" className="hover:text-[#00B4D8] block">Samsung Crystal UHD &amp; Smart TVs</Link></li>
+                  <li><Link to="/brands/tcl" className="hover:text-[#00B4D8] block">TCL 4K Google &amp; Smart LED TVs</Link></li>
+                  <li><Link to="/brands/horion" className="hover:text-[#00B4D8] block">Horion Interactive Flat Panels</Link></li>
+                  <li><Link to="/podium-teleprompter" className="hover:text-[#00B4D8] block">Fold-Flat Podium Teleprompter (17&Prime; &amp; 22&Prime;)</Link></li>
+                  <li><Link to="/category/projectors" className="hover:text-[#00B4D8] block">4K Laser Projectors (BenQ, Panasonic)</Link></li>
                   <li><Link to="/av-equipment-rental" className="hover:text-[#00B4D8] block">SMD LED Video Walls</Link></li>
-                  <li><Link to="/product/benq-tk705i-pakistan" className="hover:text-[#00B4D8] block">BenQ TK705i 4K Projector</Link></li>
-                  <li><Link to="/product/benq-w4100i-pakistan" className="hover:text-[#00B4D8] block">BenQ W4100i Laser Projector</Link></li>
-                  <li><Link to="/product/panasonic-pt-rq45k-pakistan" className="hover:text-[#00B4D8] block">Panasonic PT-RQ45K Laser</Link></li>
-                  <li><Link to="/product/bosch-paviro-pva-4cr12-pakistan" className="hover:text-[#00B4D8] block">Bosch PAVIRO Controller</Link></li>
                 </ul>
               </div>
 
@@ -315,7 +316,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
                   <ArrowRight size={13} />
                 </Link>
                 <Link to="/shop" className="text-xs font-black text-[#00B4D8] hover:text-[#1A2B4C] flex items-center gap-1">
-                  <span>ALL 53+ SKUS</span>
+                  <span>ALL 88 SKUS</span>
                   <ArrowRight size={13} />
                 </Link>
               </div>
@@ -335,9 +336,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
             <ul className="space-y-2 text-[12px] text-gray-700 font-bold capitalize tracking-normal whitespace-normal">
               <li><Link to="/video-conference-in-pakistan" className="hover:text-[#00B4D8] transition-colors block">Video Conference in Pakistan (Pillar)</Link></li>
               <li><Link to="/event-management-in-pakistan" className="hover:text-[#00B4D8] transition-colors block">Event Management in Pakistan (Pillar)</Link></li>
-              <li><Link to="/video-conference" className="hover:text-[#00B4D8] transition-colors block">Video Conference Systems &amp; Configurator</Link></li>
-              <li><Link to="/video-conferencing-solutions" className="hover:text-[#00B4D8] transition-colors block">Video Conferencing Solutions</Link></li>
-              <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors block">Corporate Event Management</Link></li>
+              <li><Link to="/video-conference" className="hover:text-[#00B4D8] transition-colors block">Boardroom Configurator &amp; SIP Planner</Link></li>
               <li><Link to="/projection-mapping" className="hover:text-[#00B4D8] transition-colors block">3D Projection Mapping &amp; Hologram Stages</Link></li>
               <li><Link to="/services/ai-automation" className="hover:text-[#00B4D8] transition-colors block">AI Business Automation &amp; Digital Workers</Link></li>
               <li><Link to="/services/corporate-events" className="hover:text-[#00B4D8] transition-colors block font-semibold text-gray-600">Corporate Event Production</Link></li>
@@ -368,8 +367,8 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
               <Link to="/video-conference" className="font-bold text-[11px] text-[#00B4D8] hover:underline block normal-case">
                 Video Conference Systems, Protocol Architecture &amp; Interactive PKR Room Configurator →
               </Link>
-              <Link to="/video-conferencing-solutions" className="font-semibold text-[11px] text-gray-600 hover:text-[#00B4D8] hover:underline block normal-case">
-                Explore Turnkey Boardroom Solutions (Polycom Group 500, Poly X70, Cisco &amp; Logitech) →
+              <Link to="/services/boardroom-integration" className="font-semibold text-[11px] text-gray-600 hover:text-[#00B4D8] hover:underline block normal-case">
+                Explore Turnkey Boardroom AV Integration &amp; Acoustic Calibration →
               </Link>
             </div>
             <div className="grid grid-cols-3 gap-5">
@@ -449,7 +448,7 @@ const StaticPrimaryNav = React.memo(function StaticPrimaryNav({ pathname }: { pa
 
         {/* Direct Quick-Links */}
         <Link
-          to="/corporate-event-management"
+          to="/event-management-in-pakistan"
           className={`h-10 flex items-center whitespace-nowrap border-b-[2px] transition-colors focus-visible:outline-none focus-visible:border-[#00B4D8] focus-visible:text-[#00B4D8] ${isCorporateEventsActive ? 'border-[#00B4D8] text-[#00B4D8]' : 'border-transparent hover:text-[#00B4D8]'}`}
         >
           CORPORATE EVENTS
@@ -523,15 +522,30 @@ function Navbar() {
           if (cancelled) return;
           unsubProducts = subscribeToProducts((data) => {
             if (data && data.length > 0) {
-              setProducts(data);
+              const mergedBySlug = new Map<string, any>();
+              for (const fp of FALLBACK_NAV_PRODUCTS) {
+                mergedBySlug.set(getCanonicalProductSlug(fp, fp.id), fp);
+              }
+              for (const lp of data) {
+                mergedBySlug.set(getCanonicalProductSlug(lp, lp.id), lp);
+              }
+              setProducts(Array.from(mergedBySlug.values()));
             }
           }, { isActive: true });
 
           unsubCategories = subscribeToCategories((cats) => {
             const productCats = cats.filter(c => c.isActive && ((c as any).type === 'product' || !('type' in c)));
             if (productCats.length > 0) {
-              setNavCategories(productCats);
-              setCategories(productCats.filter(c => !c.parentId));
+              const mergedBySlug = new Map<string, any>();
+              for (const fc of DEFAULT_NAV_CATEGORIES) {
+                mergedBySlug.set(fc.slug, fc);
+              }
+              for (const lc of productCats) {
+                mergedBySlug.set(lc.slug, lc);
+              }
+              const mergedList = Array.from(mergedBySlug.values());
+              setNavCategories(mergedList);
+              setCategories(mergedList.filter(c => !c.parentId));
             }
           });
         })
@@ -928,9 +942,9 @@ function Navbar() {
                                 {product.salePrice ? formatPrice(product.salePrice) : 'Contact for Price'}
                               </div>
                               {product.stockQuantity > 0 ? (
-                                <span className="inline-block text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full mt-0.5">In Stock</span>
+                                <span className="inline-block text-[10px] font-bold text-emerald-700 mt-0.5">· In Stock</span>
                               ) : (
-                                <span className="inline-block text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full mt-0.5">Special Order</span>
+                                <span className="inline-block text-[10px] font-bold text-orange-600 mt-0.5">· Special Order</span>
                               )}
                             </div>
                           </Link>
@@ -1011,7 +1025,7 @@ function Navbar() {
               <div className="px-1.5 pb-1.5 mb-1 text-[11px] font-black text-[#1A2B4C] uppercase tracking-wider border-b border-gray-50 flex items-center justify-between">
                 <span>Hardware Categories</span>
                 <Link to="/shop" onClick={() => setIsOpen(false)} className="text-[10px] font-bold text-[#00B4D8] inline-flex items-center">
-                  All 53 SKUs →
+                  All 88 SKUs →
                 </Link>
               </div>
               <div className="divide-y divide-gray-50">
@@ -1086,9 +1100,8 @@ function Navbar() {
                 {[
                   { label: 'Video Conference in Pakistan', path: '/video-conference-in-pakistan', badge: 'VH' },
                   { label: 'Event Management in Pakistan', path: '/event-management-in-pakistan', badge: 'EM' },
-                  { label: 'Corporate Event Management', path: '/corporate-event-management', badge: 'CE' },
-                  { label: 'Video Conference Systems & Configurator', path: '/video-conference', badge: 'VC' },
-                  { label: 'Video Conferencing Solutions', path: '/video-conferencing-solutions', badge: 'VS' },
+                  { label: 'Boardroom Configurator & SIP Planner', path: '/video-conference', badge: 'VC' },
+                  { label: 'Boardroom AV Integration Services', path: '/services/boardroom-integration', badge: 'BI' },
                   { label: '3D Projection Mapping & Holograms', path: '/projection-mapping', badge: '3D' },
                   { label: 'AV Equipment & SMD LED Rental', path: '/av-equipment-rental', badge: 'AV' },
                   { label: 'Live Streaming & Hybrid Events', path: '/live-streaming-services', badge: 'LS' },
@@ -1124,7 +1137,7 @@ function Navbar() {
                   { label: 'Enterprise AV Buyer’s Guides', path: '/guides', badge: 'BG' },
                   { label: 'Company Blog & Case Studies', path: '/blog', badge: 'BL' },
                   { label: 'RMA & Hardware Warranty Service', path: '/rma', badge: 'RM' },
-                  { label: 'Complete Site Directory (157 Pages)', path: '/sitemap', badge: 'SD' },
+                  { label: 'Complete Site Directory (193 Pages)', path: '/sitemap', badge: 'SD' },
                   { label: 'Contact Engineering Support', path: '/contact', badge: 'CS' },
                 ].map((item) => (
                   <Link
@@ -1386,14 +1399,14 @@ export default function App() {
             <Route path="/karachi" element={<KeywordLandingPage />} />
             <Route path="/islamabad" element={<KeywordLandingPage />} />
             <Route path="/video-conference" element={<VideoConferenceHub />} />
-            <Route path="/video-conferencing" element={<KeywordLandingPage />} />
-            <Route path="/video-conferencing-solutions" element={<KeywordLandingPage />} />
+            <Route path="/video-conferencing" element={<Navigate to="/video-conference-in-pakistan" replace />} />
+            <Route path="/video-conferencing-solutions" element={<Navigate to="/video-conference-in-pakistan" replace />} />
             <Route path="/video-conference-in-pakistan" element={<KeywordLandingPage />} />
             <Route path="/event-management-in-pakistan" element={<KeywordLandingPage />} />
-            <Route path="/corporate-event-management" element={<KeywordLandingPage />} />
+            <Route path="/corporate-event-management" element={<Navigate to="/event-management-in-pakistan" replace />} />
             <Route path="/live-streaming-services" element={<KeywordLandingPage />} />
             <Route path="/av-equipment-rental" element={<KeywordLandingPage />} />
-            <Route path="/conference-room-solutions" element={<KeywordLandingPage />} />
+            <Route path="/conference-room-solutions" element={<Navigate to="/video-conference-in-pakistan" replace />} />
             <Route path="/zoom-rooms" element={<KeywordLandingPage />} />
             <Route path="/microsoft-teams-rooms" element={<KeywordLandingPage />} />
 
@@ -1435,6 +1448,7 @@ export default function App() {
               <Route path="data-management" element={<DataManagement />} />
               <Route path="workspace" element={<WorkspaceHub />} />
               <Route path="automation" element={<WorkflowAutomation />} />
+              <Route path="ai-agent" element={<AIAgentConsole />} />
               <Route path="google-business" element={<GoogleBusinessExport />} />
               <Route path="facebook-publisher" element={<FacebookPublisher />} />
               <Route path="media-guide" element={<MediaGuide />} />
@@ -1498,7 +1512,7 @@ export default function App() {
           <Route path="/category/contact" element={<Navigate to="/contact" replace />} />
           <Route path="/category/privacy-policy" element={<Navigate to="/privacy-policy" replace />} />
           <Route path="/category/terms-of-service" element={<Navigate to="/terms-of-service" replace />} />
-          <Route path="/corporate-event-management-pakistan" element={<Navigate to="/corporate-event-management" replace />} />
+          <Route path="/corporate-event-management-pakistan" element={<Navigate to="/event-management-in-pakistan" replace />} />
           <Route path="/brands/polycom" element={<Navigate to="/brands/poly" replace />} />
           <Route path="/brands/hp-poly" element={<Navigate to="/brands/poly" replace />} />
           {/* Internal Link Map — Core Business & Service Alias Redirects */}
@@ -1544,8 +1558,8 @@ export default function App() {
           <Route path="/about-us" element={<Navigate to="/about" replace />} />
           <Route path="/contact-us" element={<Navigate to="/contact" replace />} />
           <Route path="/products" element={<Navigate to="/shop" replace />} />
-          <Route path="/services/video-conferencing-solutions" element={<Navigate to="/video-conferencing-solutions" replace />} />
-          <Route path="/services/corporate-event-management" element={<Navigate to="/corporate-event-management" replace />} />
+          <Route path="/services/video-conferencing-solutions" element={<Navigate to="/services/boardroom-integration" replace />} />
+          <Route path="/services/corporate-event-management" element={<Navigate to="/services/corporate-events" replace />} />
           <Route path="/product/poly-studio-x50-tc8-bundle-pakistan" element={<Navigate to="/product/poly-studio-x50-tc8-special-offer-pakistan" replace />} />
           <Route path="/product/poly-studio-x50-special-offer" element={<Navigate to="/product/poly-studio-x50-tc8-special-offer-pakistan" replace />} />
 

@@ -17,6 +17,7 @@ const DEFAULT_FOOTER_CATEGORIES = [
   { id: 'cat-voip', name: 'VoIP Phone Systems', slug: 'voip-phone-systems', isActive: true, type: 'product' },
   { id: 'cat-headsets', name: 'Headsets', slug: 'headsets', isActive: true, type: 'product' },
   { id: 'cat-projectors', name: 'Projectors', slug: 'projectors', isActive: true, type: 'product' },
+  { id: 'cat-led-tv', name: 'LED TVs & Commercial Displays', slug: 'led-tv-displays', isActive: true, type: 'product' },
   { id: 'cat-cameras', name: 'IP Cameras', slug: 'ip-cameras', isActive: true, type: 'product' },
   { id: 'cat-intercom', name: 'Intercom, Paging & Access', slug: 'intercom-paging-access', isActive: true, type: 'product' },
 ];
@@ -46,7 +47,14 @@ export function Footer() {
                 ((c as any).type === 'product' || c.id.startsWith('cat-') || c.id.startsWith('parent-') || c.id.startsWith('child-'))
             );
             if (filtered.length > 0) {
-              setCategories(filtered);
+              const mergedBySlug = new Map<string, any>();
+              for (const fc of DEFAULT_FOOTER_CATEGORIES) {
+                mergedBySlug.set(fc.slug, fc);
+              }
+              for (const lc of filtered) {
+                mergedBySlug.set(lc.slug, lc);
+              }
+              setCategories(Array.from(mergedBySlug.values()));
             }
           });
         })
@@ -86,7 +94,7 @@ export function Footer() {
               ))}
               <li>
                 <Link to="/shop" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">
-                  All Enterprise AV Hardware (53 SKUs)
+                  All Enterprise AV &amp; Display Hardware (88 SKUs)
                 </Link>
               </li>
             </ul>
@@ -99,9 +107,9 @@ export function Footer() {
               <li><Link to="/about" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">About AV Live</Link></li>
               <li><Link to="/video-conference-in-pakistan" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Video Conference in Pakistan</Link></li>
               <li><Link to="/event-management-in-pakistan" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Event Management in Pakistan</Link></li>
-              <li><Link to="/corporate-event-management" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Corporate Event Management</Link></li>
-              <li><Link to="/video-conference" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Video Conference Systems &amp; Configurator</Link></li>
-              <li><Link to="/video-conferencing" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Video Conferencing Room Architecture</Link></li>
+              <li><Link to="/services/corporate-events" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Corporate Event Production</Link></li>
+              <li><Link to="/video-conference" className="hover:text-[#00B4D8] transition-colors font-semibold text-white inline-flex items-center py-0.5">Boardroom Configurator &amp; SIP Planner</Link></li>
+              <li><Link to="/services/boardroom-integration" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Boardroom AV Integration Services</Link></li>
               <li><Link to="/events-services" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Event Production &amp; Staging</Link></li>
               <li><Link to="/3d-hologram" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">3D Hologram Displays</Link></li>
               <li><Link to="/projection-mapping" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">3D Projection Mapping</Link></li>
@@ -115,7 +123,7 @@ export function Footer() {
               <li><Link to="/rma" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">RMA Service Form</Link></li>
               <li><Link to="/shipping" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Nationwide Shipping Methods</Link></li>
               <li><Link to="/reviews" className="hover:text-[#00B4D8] transition-colors inline-flex items-center py-0.5">Verified Customer Reviews</Link></li>
-              <li><Link to="/sitemap" className="hover:text-[#00B4D8] transition-colors font-bold text-[#00B4D8] inline-flex items-center py-0.5">Complete HTML Sitemap (157 Pages)</Link></li>
+              <li><Link to="/sitemap" className="hover:text-[#00B4D8] transition-colors font-bold text-[#00B4D8] inline-flex items-center py-0.5">Complete HTML Sitemap (193 Pages)</Link></li>
             </ul>
           </div>
 

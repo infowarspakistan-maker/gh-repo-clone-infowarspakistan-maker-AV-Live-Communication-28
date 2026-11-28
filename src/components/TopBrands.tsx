@@ -79,7 +79,10 @@ export const brands = [
     <div className="flex flex-col items-center leading-none">
       <span className="text-2xl font-black text-[#C1121F]">ViewSonic</span>
     </div>
-  )}
+  )},
+  { id: 'samsung', name: 'Samsung', logo: <span className="text-2xl font-black text-[#1428A0] tracking-widest uppercase">SAMSUNG</span> },
+  { id: 'tcl', name: 'TCL', logo: <span className="text-3xl font-black text-[#D71921] tracking-tight">TCL</span> },
+  { id: 'horion', name: 'Horion', logo: <span className="text-2xl font-black text-[#1A2B4C] tracking-tight">Horion</span> },
 ];
 
 export const TopBrands = () => {
@@ -91,8 +94,8 @@ export const TopBrands = () => {
             <h2 className="text-3xl md:text-4xl font-black text-[#1A2B4C]">Authorized Pro-AV &amp; Unified Communications Brands</h2>
             <h3 className="text-sm font-semibold text-slate-600 mt-1">Official Pakistan Distributor &amp; Certified Integration Partner</h3>
           </div>
-          <Link to="/brands" className="text-sm font-bold text-[#1F558C] hover:text-[#00B4D8] py-2 px-4 rounded-xl bg-gray-50">
-            Explore All 25 Brands
+          <Link to="/brands" className="text-sm font-bold text-[#1F558C] hover:text-[#00B4D8] py-2 px-4 rounded-lg bg-gray-50">
+            Explore All 27 Brands
           </Link>
         </div>
         

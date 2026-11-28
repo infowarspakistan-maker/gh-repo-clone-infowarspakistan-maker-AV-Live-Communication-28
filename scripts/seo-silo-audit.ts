@@ -21,6 +21,7 @@ interface PageAuditResult {
   hasRoomDesignerLink: boolean;
   hasPillarLink: boolean;
   hasClusterProductLinks: boolean;
+  unsplashCount: number;
   internalLinks: string[];
   issues: string[];
 }
@@ -109,6 +110,8 @@ async function runAudit() {
     const imgTags = html.match(/<img\b[^>]*>/gi) || [];
     const missingImgAlts = imgTags.filter(tag => !/\balt=["'][^"']+["']/i.test(tag)).length;
     if (missingImgAlts > 0) issues.push(`Missing img alt=${missingImgAlts}`);
+    const unsplashCount = (html.match(/images\.unsplash\.com/gi) || []).length;
+    if (unsplashCount > 0) issues.push(`Unsplash URLs=${unsplashCount}`);
 
     const anchorMatches = [...html.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/gi)];
     const genericAnchors = anchorMatches.filter(a => {
@@ -122,8 +125,8 @@ async function runAudit() {
 
     const hasRoomDesignerLink = internalLinks.includes('/room-designer');
     const hasPillarLink =
-      internalLinks.includes('/video-conferencing-solutions') ||
-      internalLinks.includes('/corporate-event-management') ||
+      internalLinks.includes('/video-conference-in-pakistan') ||
+      internalLinks.includes('/event-management-in-pakistan') ||
       internalLinks.includes('/voip-service-providers') ||
       internalLinks.includes('/projection-mapping');
     const hasClusterProductLinks = internalLinks.some(l => l.startsWith('/product/'));
@@ -144,6 +147,7 @@ async function runAudit() {
       hasRoomDesignerLink,
       hasPillarLink,
       hasClusterProductLinks,
+      unsplashCount,
       internalLinks,
       issues
     });
@@ -151,13 +155,15 @@ async function runAudit() {
 
   // Add Navbar Mega-Menu global edges (present on every page via React Navbar + /sitemap)
   const navbarMegaMenuLinks = [
-    '/', '/shop', '/services', '/solutions', '/sitemap', '/about', '/contact', '/blog', '/guides',
-    '/video-conference', '/video-conference-in-pakistan', '/video-conferencing-solutions', '/corporate-event-management',
+    '/', '/shop', '/brands', '/services', '/solutions', '/sitemap', '/about', '/contact', '/blog', '/guides',
+    '/video-conference', '/video-conference-in-pakistan', '/event-management-in-pakistan',
+    '/services/boardroom-integration', '/services/corporate-events',
     '/projection-mapping', '/services/ai-automation', '/services/ai-development', '/services/ai-agents-workers',
     '/voip-service-providers', '/room-designer', '/av-equipment-rental', '/3d-hologram',
     '/category/boardroom-codecs', '/category/projectors', '/category/voip-phone-systems',
     '/category/intercom-paging-access', '/category/ip-phones', '/category/headsets',
     '/category/ptz-cameras', '/category/speakerphones', '/category/ip-cameras', '/category/video-conferencing',
+    '/category/led-tv-displays', '/brands/samsung', '/brands/tcl', '/brands/horion',
     '/product/polycom-realpresence-group-500-pakistan', '/product/poly-studio-x72-pakistan',
     '/product/poly-studio-x52-pakistan', '/product/poly-g7500-pakistan', '/product/poly-studio-usb-video-bar-pakistan',
     '/product/cisco-room-kit-plus-pakistan', '/product/cisco-room-bar-pakistan',
@@ -174,7 +180,7 @@ async function runAudit() {
   navbarMegaMenuLinks.forEach(l => rootSet.add(l));
   adjacency.set('/', rootSet);
 
-  // Also add /sitemap edges to all sitemap URLs (since HTML Sitemap links to all 153+ URLs)
+  // Also add /sitemap edges to all sitemap URLs (since HTML Sitemap links to all 193 canonical URLs)
   const sitemapSet = adjacency.get('/sitemap') || new Set<string>();
   allPaths.forEach(p => sitemapSet.add(p));
   adjacency.set('/sitemap', sitemapSet);
@@ -204,13 +210,14 @@ async function runAudit() {
   const h1ToH3PassCount = results.filter(r => r.h1Count === 1 && r.h2Count >= 1 && r.h3Count >= 1).length;
   const zeroInlineStyleCount = results.filter(r => r.inlineStyles === 0).length;
   const zeroMissingAltCount = results.filter(r => r.missingImgAlts === 0).length;
+  const zeroUnsplashCount = results.filter(r => r.unsplashCount === 0).length;
   const zeroGenericAnchorCount = results.filter(r => r.genericAnchors === 0).length;
 
   const productResults = results.filter(r => r.path.startsWith('/product/'));
   const productReturnPillarPass = productResults.filter(r => r.hasPillarLink && r.hasRoomDesignerLink).length;
 
   const serviceAndPillarResults = results.filter(
-    r => r.path.startsWith('/services/') || ['/video-conferencing-solutions', '/corporate-event-management'].includes(r.path)
+    r => r.path.startsWith('/services/') || ['/video-conference-in-pakistan', '/event-management-in-pakistan'].includes(r.path)
   );
   const pillarToClusterPass = serviceAndPillarResults.filter(r => r.hasClusterProductLinks && r.hasRoomDesignerLink).length;
 
@@ -231,6 +238,7 @@ async function runAudit() {
   console.log(`H1-H2-H3 Hierarchy: ${h1ToH3PassCount}/${results.length}`);
   console.log(`Zero Inline Styles (SSR): ${zeroInlineStyleCount}/${results.length}`);
   console.log(`100% Image Alt Coverage: ${zeroMissingAltCount}/${results.length}`);
+  console.log(`Zero Unsplash URLs (SSR): ${zeroUnsplashCount}/${results.length}`);
   console.log(`Zero Generic Anchors: ${zeroGenericAnchorCount}/${results.length}`);
   console.log(`Rule 1 (Product -> Parent Pillar + /room-designer): ${productReturnPillarPass}/${productResults.length}`);
   console.log(`Rule 1 & 3 (Service/Pillar -> Product Clusters + /room-designer): ${pillarToClusterPass}/${serviceAndPillarResults.length}`);
@@ -285,7 +293,15 @@ async function runAudit() {
     '/category/retired-unknown-cat-999': '/shop',
     '/brands/retired-unknown-brand-999': '/brands',
     '/services/retired-unknown-service-999': '/services',
-    '/blog/retired-unknown-post-999': '/blog'
+    '/blog/retired-unknown-post-999': '/blog',
+    // v4.27 Cannibalizing URL Consolidation Single-Hop 301s
+    '/video-conferencing': '/video-conference-in-pakistan',
+    '/video-conferencing-solutions': '/video-conference-in-pakistan',
+    '/conference-room-solutions': '/video-conference-in-pakistan',
+    '/corporate-event-management': '/event-management-in-pakistan',
+    '/corporate-event-management-pakistan': '/event-management-in-pakistan',
+    '/services/video-conferencing-solutions': '/services/boardroom-integration',
+    '/services/corporate-event-management': '/services/corporate-events'
   };
 
   let redirectPassCount = 0;

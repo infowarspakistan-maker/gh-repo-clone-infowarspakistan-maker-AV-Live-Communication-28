@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "uiux-surgical-state",
+  "type": "object",
+  "required": ["run_id", "baseline", "iterations", "worktree"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "status": {
+      "type": "string",
+      "enum": ["preflight", "awaiting_approval", "running", "completed", "budget_exceeded", "halted_auth"]
+    },
+    "degraded": { "type": "boolean" },
+    "cost_usd": { "type": "number", "minimum": 0 },
+    "worktree": {
+      "type": "object",
+      "required": ["path", "branch", "base_commit"],
+      "properties": {
+        "path": { "type": "string" },
+        "branch": { "type": "string" },
+        "base_commit": { "type": "string" }
+      }
+    },
+    "design_system": { "type": "object" },
+    "baseline": {
+      "type": "object",
+      "required": ["screenshots", "tokens", "dom_hash"],
+      "properties": {
+        "screenshots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["viewport", "path", "sha256"],
+            "properties": {
+              "viewport": { "type": "string" },
+              "path": { "type": "string" },
+              "sha256": { "type": "string" }
+            }
+          }
+        },
+        "tokens": { "type": "object" },
+        "dom_hash": { "type": "string" },
+        "axe_violations": { "type": "array" },
+        "lighthouse": { "type": "object" }
+      }
+    },
+    "niche_profile": { "type": "object" },
+    "inspiration_set": { "type": "array" },
+    "human_gate": {
+      "type": "object",
+      "properties": {
+        "decision": { "type": "string", "enum": ["pending", "approve", "edit", "reject"] },
+        "decided_at": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" }
+      }
+    },
+    "iterations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "changes", "scores", "verdict"],
+        "properties": {
+          "id": { "type": "integer" },
+          "section": { "type": "string" },
+          "changes": { "type": "array" },
+          "scores": {
+            "type": "object",
+            "properties": {
+              "fidelity": { "type": "number" },
+              "enhancement_delta": { "type": "number" },
+              "axe_new_violations": { "type": "integer" },
+              "budgets_pass": { "type": "boolean" },
+              "bounds_pass": { "type": "boolean" }
+            }
+          },
+          "verdict": { "enum": ["accepted", "reverted", "dropped"] },
+          "revert_reason": { "type": "string" }
+        }
+      }
+    }
+  }
+}

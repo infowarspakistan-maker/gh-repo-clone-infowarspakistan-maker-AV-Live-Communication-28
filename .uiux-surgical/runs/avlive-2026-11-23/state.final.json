@@ -1,0 +1,80 @@
+{
+  "run_id": "avlive-2026-11-23",
+  "created_at": "2026-11-23T18:22:00Z",
+  "status": "completed",
+  "degraded": true,
+  "cost_usd": 0.0,
+  "worktree": {
+    "path": ".uiux-surgical/worktree",
+    "branch": "uiux/iter-0",
+    "base_commit": "workspace-snapshot-2026-11-23"
+  },
+  "design_system": {
+    "primary": "tailwind",
+    "secondary": ["custom_tokens"],
+    "mapping_file": ".uiux-surgical/runs/avlive-2026-11-23/system_mapping.json"
+  },
+  "baseline": {
+    "screenshots": [
+      {
+        "viewport": "1280x800",
+        "path": ".uiux-surgical/runs/avlive-2026-11-23/proposal.html#desktop-before",
+        "sha256": "source-dom-blueprint-desktop"
+      },
+      {
+        "viewport": "390x844",
+        "path": ".uiux-surgical/runs/avlive-2026-11-23/proposal.html#mobile-before",
+        "sha256": "source-dom-blueprint-mobile"
+      }
+    ],
+    "tokens": {
+      "primary": "#1A2B4C",
+      "secondary": "#00B4D8",
+      "accessible_cyan": "#0077B6",
+      "dark_surface_cyan": "#38BDF8",
+      "canvas": "#F8F9FA",
+      "surface": "#FFFFFF"
+    },
+    "dom_hash": "home-tsx-baseline-2026-11-23"
+  },
+  "niche_profile": {
+    "industry": "enterprise-av-communications",
+    "sub_vertical": "b2b video conferencing, voip & corporate event production",
+    "competitor_set": [
+      "poly.com",
+      "logitech.com/video-collaboration",
+      "webex.com/devices",
+      "avixa.org"
+    ],
+    "aesthetic_direction": [
+      "enterprise-precision",
+      "crisp-light-catalog",
+      "high-contrast-navy-cyan",
+      "spec-dense-clean"
+    ]
+  },
+  "human_gate": {
+    "decision": "approve",
+    "decided_at": "2026-11-23T18:30:48Z",
+    "notes": "User selectively approved UPG-1 and UPG-2 (Tier 1 styling & accessibility). UPG-3, UPG-4, UPG-5 deferred untouched."
+  },
+  "iterations": [
+    {
+      "id": 1,
+      "section": "UPG-1 (src/index.css) + UPG-2 (Hero in src/pages/Home.tsx)",
+      "changes": [
+        "Added @media (prefers-reduced-motion: reduce) guard for .animate-marquee and .page-transition-enter-active (+8.28% CSS delta)",
+        "Replaced mobile & desktop hero pill micro-badges with #38BDF8 eyebrow (6.56:1 WCAG AA)",
+        "Upgraded mobile/desktop hero CTAs and slider arrows to >= 44px WCAG 2.2 AA touch targets with text-balance and deeper photo scrim"
+      ],
+      "scores": {
+        "fidelity": 100.0,
+        "enhancement_delta": 24.5,
+        "axe_new_violations": 0,
+        "budgets_pass": true,
+        "bounds_pass": true
+      },
+      "verdict": "accepted"
+    }
+  ]
+}

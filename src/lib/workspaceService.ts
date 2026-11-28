@@ -1,9 +1,13 @@
 import { signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut } from 'firebase/auth';
-import { auth, googleProvider } from './firebase/client';
+import { auth } from './firebase/client';
 
 // In-memory cache for the Google OAuth access token
 let cachedAccessToken: string | null = null;
 let isSigningIn = false;
+
+// Dedicated provider so Workspace OAuth scopes never pollute standard Firebase Auth Google Sign-In
+const workspaceGoogleProvider = new GoogleAuthProvider();
+workspaceGoogleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // List of required Google Workspace scopes
 export const WORKSPACE_SCOPES = [
@@ -23,12 +27,13 @@ export const WORKSPACE_SCOPES = [
   'https://www.googleapis.com/auth/contacts.readonly',
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
+  'https://www.googleapis.com/auth/spreadsheets',
 ];
 
-// Configure the provider with required scopes
+// Configure the dedicated Workspace provider with required scopes
 export function configureWorkspaceScopes() {
   WORKSPACE_SCOPES.forEach(scope => {
-    googleProvider.addScope(scope);
+    workspaceGoogleProvider.addScope(scope);
   });
 }
 
@@ -39,7 +44,7 @@ export async function connectWorkspace(): Promise<string> {
   configureWorkspaceScopes();
   isSigningIn = true;
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(auth, workspaceGoogleProvider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     if (!credential?.accessToken) {
       throw new Error('Failed to retrieve OAuth access token from Google.');
@@ -295,3 +300,148 @@ export async function searchContacts(query: string): Promise<{ results?: Array<{
   const url = `https://people.googleapis.com/v1/people:searchContacts?query=${encodeURIComponent(query)}&readMask=names,emailAddresses,phoneNumbers,photos`;
   return googleApiFetch<{ results?: Array<{ person: ContactPerson }> }>(url);
 }
+
+// ==========================================
+// GOOGLE SHEETS API v4 SERVICES
+// ==========================================
+
+export interface SpreadsheetMetadata {
+  spreadsheetId: string;
+  spreadsheetUrl?: string;
+  properties: {
+    title: string;
+  };
+  sheets: Array<{
+    properties: {
+      sheetId: number;
+      title: string;
+      index: number;
+    };
+  }>;
+}
+
+export interface SheetValuesResponse {
+  range?: string;
+  majorDimension?: string;
+  values?: string[][];
+}
+
+function escapeSheetTitle(sheetTitle: string): string {
+  const safe = sheetTitle.replace(/'/g, "''");
+  return `'${safe}'`;
+}
+
+export async function getSpreadsheetMetadata(spreadsheetId: string): Promise<SpreadsheetMetadata> {
+  const cleanId = encodeURIComponent(spreadsheetId.trim());
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cleanId}?fields=spreadsheetId,spreadsheetUrl,properties.title,sheets.properties(sheetId,title,index)`;
+  return googleApiFetch<SpreadsheetMetadata>(url);
+}
+
+export async function createSpreadsheet(
+  title: string,
+  tabDefinitions: Array<{ title: string; headers: string[] }>
+): Promise<SpreadsheetMetadata> {
+  const createUrl = 'https://sheets.googleapis.com/v4/spreadsheets';
+  const created = await googleApiFetch<SpreadsheetMetadata>(createUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      properties: { title },
+      sheets: tabDefinitions.map((tab, idx) => ({
+        properties: { title: tab.title, index: idx },
+      })),
+    }),
+  });
+
+  // Populate header rows for all newly created tabs
+  if (tabDefinitions.length > 0 && created.spreadsheetId) {
+    const batchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(created.spreadsheetId)}/values:batchUpdate`;
+    await googleApiFetch<unknown>(batchUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        valueInputOption: 'USER_ENTERED',
+        data: tabDefinitions.map((tab) => ({
+          range: `${escapeSheetTitle(tab.title)}!A1`,
+          values: [tab.headers],
+        })),
+      }),
+    });
+  }
+
+  return created;
+}
+
+export async function readSheetRange(spreadsheetId: string, range: string): Promise<SheetValuesResponse> {
+  const cleanId = encodeURIComponent(spreadsheetId.trim());
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cleanId}/values/${encodeURIComponent(range)}`;
+  return googleApiFetch<SheetValuesResponse>(url);
+}
+
+export async function ensureSheetTabs(
+  spreadsheetId: string,
+  tabDefinitions: Array<{ title: string; headers: string[] }>
+): Promise<{ spreadsheetTitle: string; createdTabs: string[]; existingTabs: string[] }> {
+  const meta = await getSpreadsheetMetadata(spreadsheetId);
+  const existingTitles = meta.sheets.map((s) => s.properties.title);
+  const existingSet = new Set(existingTitles);
+  const missingTabs = tabDefinitions.filter((t) => !existingSet.has(t.title));
+
+  if (missingTabs.length > 0) {
+    const batchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId.trim())}:batchUpdate`;
+    await googleApiFetch<unknown>(batchUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: missingTabs.map((t) => ({
+          addSheet: { properties: { title: t.title } },
+        })),
+      }),
+    });
+
+    const headerBatchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId.trim())}/values:batchUpdate`;
+    await googleApiFetch<unknown>(headerBatchUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        valueInputOption: 'USER_ENTERED',
+        data: missingTabs.map((t) => ({
+          range: `${escapeSheetTitle(t.title)}!A1`,
+          values: [t.headers],
+        })),
+      }),
+    });
+  }
+
+  return {
+    spreadsheetTitle: meta.properties.title,
+    createdTabs: missingTabs.map((t) => t.title),
+    existingTabs: existingTitles,
+  };
+}
+
+export async function appendSheetRows(
+  spreadsheetId: string,
+  sheetTitle: string,
+  rows: Array<Array<string | number>>
+): Promise<{ updatedRows: number; updatedRange: string }> {
+  if (!rows.length) {
+    return { updatedRows: 0, updatedRange: '' };
+  }
+  const cleanId = encodeURIComponent(spreadsheetId.trim());
+  const range = encodeURIComponent(`${escapeSheetTitle(sheetTitle)}!A1`);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cleanId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+  const result = await googleApiFetch<{
+    updates?: { updatedRows?: number; updatedRange?: string };
+  }>(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: rows }),
+  });
+
+  return {
+    updatedRows: result.updates?.updatedRows || rows.length,
+    updatedRange: result.updates?.updatedRange || '',
+  };
+}
+

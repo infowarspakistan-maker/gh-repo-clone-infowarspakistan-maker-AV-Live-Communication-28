@@ -45,6 +45,7 @@ import {
   Product,
   Category,
   getCategories,
+  syncLedTvCatalogToFirestore,
 } from '../../lib/firebase/firestore-helpers';
 import { extractDirectImageUrls } from '../../lib/image-optimize';
 import {
@@ -242,6 +243,7 @@ export function ProductManagement() {
   const [showBackupsModal, setShowBackupsModal] = useState(false);
   const [isSavingImagesOnly, setIsSavingImagesOnly] = useState(false);
   const [isSyncingGmcPrices, setIsSyncingGmcPrices] = useState(false);
+  const [isSyncingLedTvs, setIsSyncingLedTvs] = useState(false);
   const [storageBusyUrl, setStorageBusyUrl] = useState<string | null>(null);
 
   const normalizeProductImageUrl = (raw: string): string => {
@@ -765,6 +767,22 @@ export function ProductManagement() {
     }
   };
 
+  const handleSyncLedTvsToFirestore = async () => {
+    setIsSyncingLedTvs(true);
+    try {
+      const res = await syncLedTvCatalogToFirestore();
+      showNotice(
+        `Synced ${res.productsSynced} Samsung & TCL LED TV SKUs + LED TVs & Commercial Displays category to Firestore!`
+      );
+      getCategories().then(setCategories).catch(() => {});
+    } catch (error: any) {
+      console.error('Error syncing LED TV catalog:', error);
+      showNotice(error?.message || 'Failed to sync LED TV catalog. Verify admin permissions.', 'error');
+    } finally {
+      setIsSyncingLedTvs(false);
+    }
+  };
+
   const handleSyncGmcPricesToFirestore = async () => {
     setIsSyncingGmcPrices(true);
     try {
@@ -1012,6 +1030,16 @@ export function ProductManagement() {
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            disabled={isSyncingLedTvs}
+            onClick={handleSyncLedTvsToFirestore}
+            className="bg-cyan-50 hover:bg-cyan-100 text-[#0077B6] px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-cyan-200 shadow-sm flex items-center gap-2 disabled:opacity-60"
+            title="Upsert the LED TVs & Commercial Displays category and all 28 Samsung & TCL LED TV SKUs into Firestore"
+          >
+            <RefreshCw size={14} className={isSyncingLedTvs ? 'animate-spin text-[#00B4D8]' : 'text-[#00B4D8]'} />
+            {isSyncingLedTvs ? 'Syncing 28 TVs...' : 'Sync LED TVs (28 SKUs)'}
+          </button>
           <button
             type="button"
             disabled={isSyncingGmcPrices}

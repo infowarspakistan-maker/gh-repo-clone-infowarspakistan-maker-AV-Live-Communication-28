@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>UIUX Surgical Enhancer v2 — AV Live UX, Color, Hero & CTA Options Lab</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --brand: #1a2b4c;
+      --accent: #00b4d8;
+      --accent-aa: #0077b6;
+      --ok: #047857;
+      --warn: #b45309;
+      --danger: #b91c1c;
+
+      /* Dynamic theme tokens controlled by Color Selector C1 / C2 / C3 */
+      --opt-navy: #1a2b4c;
+      --opt-navy-deep: #111e36;
+      --opt-aa: #0077b6;
+      --opt-hero-eyebrow: #38bdf8;
+      --opt-cta-bg: #ffffff;
+      --opt-cta-fg: #1a2b4c;
+      --opt-cta-border: rgba(56, 189, 248, 0.7);
+      --opt-card-cta-bg: #1a2b4c;
+      --opt-card-cta-fg: #ffffff;
+      --opt-trust-accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 1380px; margin: 0 auto; padding: 26px 24px 120px; }
+    header.page-hdr {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
+      gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 22px;
+    }
+    .kicker { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-aa); }
+    h1.page-title { margin: 4px 0 0; font-size: 24px; color: var(--brand); letter-spacing: -0.02em; }
+    .meta { font-size: 12px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+      margin-bottom: 20px;
+    }
+    .card h2 { margin: 0 0 10px; font-size: 16px; color: var(--brand); letter-spacing: -0.01em; }
+    .sub-copy { margin: -4px 0 14px; font-size: 13px; color: var(--muted); }
+
+    /* Research Option Studio Bar */
+    .studio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .opt-box { border: 1px solid var(--border); border-radius: 10px; padding: 14px; background: #fbfdff; }
+    .opt-box h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+    .opt-choices { display: flex; flex-direction: column; gap: 8px; }
+    .opt-btn {
+      width: 100%; text-align: left; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: #fff; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+      transition: border-color 140ms, box-shadow 140ms;
+    }
+    .opt-btn:hover { border-color: #94a3b8; }
+    .opt-btn.active { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(26,43,76,0.14); background: #f8fbff; }
+    .opt-title { font-size: 12.5px; font-weight: 800; color: var(--brand); display: block; }
+    .opt-desc { font-size: 11.5px; color: var(--muted); display: block; margin-top: 2px; }
+    .swatches { display: inline-flex; gap: 3px; shrink: 0; margin-top: 2px; }
+    .sw { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.14); display: inline-block; }
+
+    .constraints { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+    .constraint-item { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12px; background: #fbfdff; }
+    .constraint-item strong { display: block; color: var(--brand); margin-bottom: 2px; }
+    .pass-tag { color: var(--ok); font-weight: 700; font-size: 11px; }
+    .fail-tag { color: var(--danger); font-weight: 700; font-size: 11px; }
+
+    /* Controls bar above comparison */
+    .controls-row {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .viewport-tabs { display: inline-flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 9px; border: 1px solid var(--border); }
+    .tab-btn {
+      padding: 8px 14px; border: none; background: transparent; border-radius: 6px;
+      font-size: 12px; font-weight: 700; cursor: pointer; color: #475569; min-height: 36px;
+    }
+    .tab-btn.active { background: #ffffff; color: var(--brand); box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+    .metric-badges { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted); }
+    .metric-badges strong { color: var(--ink); }
+
+    /* Side-by-side preview */
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 1080px) { .compare-grid { grid-template-columns: 1fr; } }
+    .compare-grid.mobile-mode { grid-template-columns: repeat(auto-fit, minmax(360px, 410px)); justify-content: center; }
+
+    .shot-frame {
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #f8f9fa;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    }
+    .shot-label {
+      padding: 10px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      background: #fff; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
+    }
+    .sim-bar {
+      background: #111e36; color: #fff; padding: 8px 14px; font-size: 10.5px; font-weight: 800;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sim-bar .cyan { color: #00b4d8; }
+    .sim-nav {
+      background: #fff; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #f1f5f9; font-size: 11px; font-weight: 700; color: #1a2b4c;
+    }
+    .sim-logo { display: inline-flex; align-items: stretch; font-weight: 900; letter-spacing: -0.02em; }
+    .sim-logo .av { background: #000; color: #f0f0f0; padding: 2px 6px; font-size: 13px; }
+    .sim-logo .live { color: #000; padding-left: 5px; font-size: 15px; display: flex; align-items: center; }
+    .sim-nav-links { display: flex; gap: 11px; color: #334155; font-size: 10.5px; }
+    .mobile-mode .sim-nav-links { display: none; }
+
+    /* BEFORE HERO (Post UPG-2) */
+    .sim-hero-before {
+      position: relative; padding: 24px 18px 34px; color: #fff; overflow: hidden; min-height: 230px;
+      background-size: cover; background-position: center; background-color: #1a2b4c;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .hero-eyebrow {
+      display: block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.14em; margin-bottom: 6px;
+    }
+    .sim-hero-before h3, .sim-hero-after h3 {
+      margin: 0 0 6px; font-size: 18px; font-weight: 900; line-height: 1.2; text-wrap: balance; letter-spacing: -0.015em;
+    }
+    .sim-hero-before p, .sim-hero-after p {
+      margin: 0 0 12px; font-size: 11.5px; color: rgba(255,255,255,0.9); line-height: 1.45;
+    }
+    .hero-ctas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .cta-btn-sim {
+      min-height: 44px; padding: 10px 15px; border-radius: 10px; font-size: 10.5px; font-weight: 800;
+      display: inline-flex; align-items: center; gap: 6px; text-decoration: none; cursor: pointer; border: 1px solid transparent;
+    }
+    .dots-before {
+      position: absolute; bottom: 10px; right: 16px; display: flex; gap: 6px;
+    }
+    .dot-bar { width: 22px; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.28); cursor: pointer; border: none; }
+    .dot-bar.on { background: #00b4d8; }
+
+    /* AFTER HERO (Dynamic Option H1 vs H2 + Color C1/C2/C3) */
+    .sim-hero-after {
+      position: relative; padding: 22px 18px 14px; color: #fff; overflow: hidden; min-height: 230px;
+      background-size: cover; background-position: center; background-color: var(--opt-navy);
+      display: flex; flex-direction: column; justify-content: space-between; gap: 14px;
+    }
+    .hero-after-grid { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: center; }
+    .hero-after-grid.split { grid-template-columns: 1.25fr 0.95fr; }
+    .mobile-mode .hero-after-grid.split { grid-template-columns: 1fr; }
+
+    .trust-micro {
+      margin-top: 10px; font-size: 10.5px; color: rgba(255,255,255,0.82); font-weight: 600;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    }
+    .trust-micro span.accent { color: var(--opt-trust-accent); font-weight: 800; }
+
+    /* Option H1: Intent Tabs + Pause/Play Bar */
+    .hero-tab-strip {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      border-top: 1px solid rgba(255,255,255,0.14); padding-top: 10px; flex-wrap: wrap;
+    }
+    .intent-tabs { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+    .intent-tab {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); color: rgba(255,255,255,0.85);
+      border-radius: 8px; padding: 6px 10px; font-size: 10px; font-weight: 700; cursor: pointer; min-height: 36px;
+    }
+    .intent-tab.active {
+      background: #ffffff; color: var(--opt-navy); border-color: #ffffff;
+    }
+    .pause-btn {
+      min-width: 44px; min-height: 36px; padding: 6px 10px; border-radius: 8px;
+      background: rgba(15,23,42,0.55); border: 1px solid rgba(255,255,255,0.28); color: #fff;
+      font-size: 10px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    /* Option H2: Split Spotlight Card */
+    .spotlight-card {
+      background: rgba(255,255,255,0.97); color: #0f172a; border-radius: 12px; padding: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.22); border: 1px solid rgba(255,255,255,0.4);
+    }
+    .spot-top { display: flex; justify-content: space-between; align-items: center; font-size: 9.5px; font-weight: 800; text-transform: uppercase; color: var(--opt-aa); margin-bottom: 6px; }
+    .spot-img { height: 74px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 6px; margin-bottom: 8px; }
+    .spot-img img { max-height: 62px; max-width: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    .spot-title { font-size: 11.5px; font-weight: 800; color: var(--opt-navy); margin-bottom: 2px; }
+    .spot-price { font-size: 11px; font-weight: 800; color: var(--opt-aa); font-variant-numeric: tabular-nums; margin-bottom: 8px; }
+    .spot-nav { display: flex; gap: 4px; }
+    .spot-pill { flex: 1; font-size: 9.5px; font-weight: 700; padding: 5px 4px; border-radius: 6px; border: 1px solid #e2e8f0; background: #f8fafc; color: #334155; cursor: pointer; text-align: center; }
+    .spot-pill.active { background: var(--opt-navy); color: #fff; border-color: var(--opt-navy); }
+
+    /* Below-the-fold comparison (Pillars + Catalog Cards) */
+    .sim-sec { padding: 16px; background: #fff; border-top: 1px solid #f1f5f9; }
+    .kicker-bad { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.18em; color: #00b4d8; text-align: center; margin-bottom: 3px; }
+    .kicker-good { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: var(--opt-aa); text-align: center; margin-bottom: 3px; }
+    .sec-h2 { margin: 0 0 10px; font-size: 14.5px; font-weight: 900; color: var(--opt-navy); text-align: center; letter-spacing: -0.015em; }
+
+    .tabs-before { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
+    .pill-tab { padding: 6px 12px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+    .pill-tab.on { background: #1a2b4c; color: #fff; }
+    .pill-tab.off { background: #f3f4f6; color: #334155; }
+
+    .seg-wrap { display: flex; justify-content: center; margin-bottom: 12px; }
+    .seg { display: inline-flex; background: #f1f5f9; padding: 4px; border-radius: 10px; border: 1px solid #e2e8f0; gap: 4px; }
+    .seg span { padding: 7px 12px; min-height: 36px; border-radius: 7px; font-size: 10.5px; font-weight: 800; display: inline-flex; align-items: center; }
+    .seg span.on { background: #fff; color: var(--opt-navy); box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+    .seg span.off { color: #475569; }
+
+    .prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pcard-before { background: #fff; border: 1px solid #f3f4f6; border-radius: 18px; overflow: hidden; }
+    .pcard-after { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .pimg-b { height: 96px; background: linear-gradient(135deg, rgba(26,43,76,0.05), rgba(0,180,216,0.1)); display: flex; align-items: center; justify-content: center; padding: 8px; }
+    .pimg-a { height: 96px; background: #f8f9fa; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: center; padding: 8px; }
+    .pimg-b img, .pimg-a img { max-height: 78px; max-width: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    .pbody { padding: 10px 12px; }
+    .ptitle { font-size: 12px; font-weight: 800; color: var(--opt-navy); margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chips-b { display: flex; gap: 4px; margin-bottom: 6px; }
+    .chips-b span { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #475569; border: 1px solid #e5e7eb; padding: 1px 4px; border-radius: 3px; }
+    .meta-a { font-size: 10px; font-weight: 600; color: #64748b; margin-bottom: 6px; }
+    .pfoot { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 7px; border-top: 1px solid #f1f5f9; }
+    .price-b { font-size: 12px; font-weight: 900; color: #00b4d8; }
+    .price-a { font-size: 12px; font-weight: 800; color: var(--opt-aa); font-variant-numeric: tabular-nums; }
+    .btn-b { background: #1a2b4c; color: #fff; font-size: 9.5px; font-weight: 700; padding: 5px 9px; border-radius: 6px; }
+    .btn-a { background: var(--opt-card-cta-bg); color: var(--opt-card-cta-fg); font-size: 9.5px; font-weight: 800; padding: 6px 10px; border-radius: 7px; }
+
+    .callout-strip { padding: 8px 14px; font-size: 11px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .callout-strip.bad { background: #fef2f2; color: #991b1b; }
+    .callout-strip.good { background: #ecfdf5; color: #065f46; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: #f8fafc; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; background: #f1f5f9; padding: 2px 5px; border-radius: 4px; }
+    .tier { font-weight: 700; font-size: 11px; white-space: nowrap; }
+    .tier-0 { color: var(--danger); }
+    .tier-1 { color: var(--brand); }
+    .tier-2 { color: var(--warn); }
+
+    /* Fixed Gate Bar */
+    .gate-bar {
+      position: fixed; left: 0; right: 0; bottom: 0; background: #ffffff; border-top: 1px solid var(--border);
+      padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08); z-index: 50;
+    }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      padding: 10px 16px; min-height: 44px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; border: 1px solid var(--border);
+    }
+    .btn-approve { background: var(--ok); color: #fff; border-color: var(--ok); }
+    .btn-edit { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .btn-reject { background: #fff; color: var(--danger); border-color: #fecaca; }
+    .decision-out { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; color: var(--brand); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="page-hdr">
+      <div>
+        <div class="kicker">UIUX Surgical Enhancer v2 · Phase 3 UX, Color, Hero Slider &amp; CTA Options Lab (Read-Only)</div>
+        <h1 class="page-title">AV Live Communications — Researched UI Options &amp; Proposal</h1>
+      </div>
+      <div class="meta">
+        Run ID: avlive-research-2026-11-23 · Baseline: Post-UPG-1/UPG-2 · Storefront Files Modified: 0
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>A. Hard Constraints (Machine-Checked by scripts/validate_bounds.py)</h2>
+      <div class="constraints">
+        <div class="constraint-item"><strong>1. Logo Frozen (Tier 0)</strong>IoU &ge; 0.98 · Position &Delta; &le; 2px <span class="pass-tag">LOCKED</span></div>
+        <div class="constraint-item"><strong>2. Brand Colors (&Delta;E00 &le; 3)</strong>C1: 0.00 · C2: 1.68 · C3: 0.72 <span class="pass-tag">PASS</span></div>
+        <div class="constraint-item"><strong>3. Typography</strong>Identical Inter family · H1&rarr;H2&rarr;H3 intact <span class="pass-tag">PASS</span></div>
+        <div class="constraint-item"><strong>4. UX Flow</strong>Nav order unchanged · 0 removed controls <span class="pass-tag">PASS</span></div>
+        <div class="constraint-item"><strong>5. WCAG 2.2 AA &amp; Carousel</strong>Fixes 2.46:1 fail + adds Pause/Play <span class="pass-tag">UPGRADE</span></div>
+        <div class="constraint-item"><strong>6. Performance</strong>LCP &le; 2.5s · CLS = 0.000 · CSS &Delta; ~5% <span class="pass-tag">PASS</span></div>
+        <div class="constraint-item"><strong>7. Surgical Bounds</strong>~22% viewport pixels (&le; 30%) · 3/3 Tier-2 <span class="pass-tag">PASS</span></div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE OPTIONS LAB -->
+    <section class="card">
+      <h2>Interactive Option Picker — Test Color, Look, Hero Slider &amp; CTA Fits Live</h2>
+      <p class="sub-copy">Grounded in 2025/2026 B2B Pro-AV UX research (HP Poly, Cisco Webex Devices, Logitech Video Collaboration, WCAG 2.2 Carousel Guidelines). Click any option below to update the live Before/After preview immediately.</p>
+      <div class="studio-grid">
+        <div class="opt-box">
+          <h3>1. Color &amp; Visual Look Option (Delta E00 &le; 3.0)</h3>
+          <div class="opt-choices" id="color-choices">
+            <button type="button" class="opt-btn active" onclick="selectColor('C1', this)">
+              <div>
+                <span class="opt-title">C1: Executive Broadcast Blue (Recommended)</span>
+                <span class="opt-desc">#1A2B4C (&Delta;E 0.00) + #0077B6 AA light-surface accent (4.87:1)</span>
+              </div>
+              <span class="swatches"><span class="sw" style="background:#1A2B4C"></span><span class="sw" style="background:#0077B6"></span><span class="sw" style="background:#38BDF8"></span></span>
+            </button>
+            <button type="button" class="opt-btn" onclick="selectColor('C2', this)">
+              <div>
+                <span class="opt-title">C2: Command Navy &amp; Signal Amber CTA</span>
+                <span class="opt-desc">#162645 (&Delta;E 1.68) + #026896 Teal (6.13:1) + High-Conversion Amber Quote CTA (8.26:1)</span>
+              </div>
+              <span class="swatches"><span class="sw" style="background:#162645"></span><span class="sw" style="background:#026896"></span><span class="sw" style="background:#F59E0B"></span></span>
+            </button>
+            <button type="button" class="opt-btn" onclick="selectColor('C3', this)">
+              <div>
+                <span class="opt-title">C3: Architectural Slate &amp; Deep Cyan</span>
+                <span class="opt-desc">#1B2D4F (&Delta;E 0.72) + #0077B6 Primary CTAs + #047857 SLA Signal (5.48:1)</span>
+              </div>
+              <span class="swatches"><span class="sw" style="background:#1B2D4F"></span><span class="sw" style="background:#0077B6"></span><span class="sw" style="background:#047857"></span></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="opt-box">
+          <h3>2. Hero Slider &amp; CTA Architecture Option</h3>
+          <div class="opt-choices" id="hero-choices">
+            <button type="button" class="opt-btn active" onclick="selectHero('H1', this)">
+              <div>
+                <span class="opt-title">H1: Intent-Tabbed Hero + Pause/Play Control (Recommended)</span>
+                <span class="opt-desc">Poly/Logitech pattern: replaces blind dots with named solution tabs, 44px Pause/Play button, 1 Primary + 1 Ghost CTA &amp; SLA trust line.</span>
+              </div>
+            </button>
+            <button type="button" class="opt-btn" onclick="selectHero('H2', this)">
+              <div>
+                <span class="opt-title">H2: Split Stage + Framed Hardware Spotlight Card</span>
+                <span class="opt-desc">Cisco Webex pattern: clean narrative + CTA on left 60%; right floating card previews the active slide&rsquo;s flagship hardware &amp; switcher.</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIDE-BY-SIDE LIVE PREVIEW -->
+    <section class="card">
+      <h2>Side-by-Side Live Before / After Comparison</h2>
+      <div class="controls-row">
+        <div class="viewport-tabs">
+          <button type="button" class="tab-btn active" onclick="switchViewport('desktop', this)">Desktop (1280&times;800)</button>
+          <button type="button" class="tab-btn" onclick="switchViewport('mobile', this)">Mobile (390&times;844)</button>
+        </div>
+        <div class="metric-badges" id="live-metrics">
+          <span>Active Theme: <strong>C1 Executive Broadcast Blue</strong></span>
+          <span>Hero Mode: <strong>H1 Intent Tabs + Pause</strong></span>
+          <span>Light-Surface Cyan AA: <strong>4.87:1 (PASS)</strong></span>
+        </div>
+      </div>
+
+      <div class="compare-grid" id="compare-grid">
+        <!-- BEFORE: Current Post-UPG-2 Baseline -->
+        <div class="shot-frame">
+          <div class="shot-label">
+            <span>Before (Current Post-UPG-2 Baseline)</span>
+            <span class="vp-meta">1280&times;800</span>
+          </div>
+          <div class="sim-bar">
+            <span>Video Conference in Pakistan &amp; Corporate Event Production &mdash; <span class="cyan">AV Live (Est. 2011)</span></span>
+          </div>
+          <div class="sim-nav">
+            <span class="sim-logo"><span class="av">AV</span><span class="live">Live</span></span>
+            <span class="sim-nav-links"><span>Video Conference</span><span>Events</span><span>Shop</span><span>3D Designer</span><span>Contact</span></span>
+          </div>
+          <div class="sim-hero-before" id="before-hero-bg" style="background-image: linear-gradient(90deg, rgba(26,43,76,0.96) 0%, rgba(26,43,76,0.8) 58%, rgba(26,43,76,0.25) 100%), url('/images/projects/world-bank-president-stage.webp');">
+            <span class="hero-eyebrow" style="color:#38BDF8;">Enterprise AV &amp; Events Pakistan &middot; Est. 2011</span>
+            <h3 id="before-slide-title">Video Conference in Pakistan | Corporate Event Management | AV Live</h3>
+            <p id="before-slide-sub">1,000+ Events &amp; Boardrooms Engineered for Meta, World Bank, Nestl&eacute; &amp; USAID.</p>
+            <div class="hero-ctas">
+              <span class="cta-btn-sim" style="background:#fff; color:#1a2b4c;">Explore Catalog &rarr;</span>
+              <span class="cta-btn-sim" style="background:rgba(255,255,255,0.1); border-color:rgba(56,189,248,0.7); color:#fff;">15-Min Event / AV Quote</span>
+            </div>
+            <div class="dots-before">
+              <button type="button" class="dot-bar on" onclick="setSlideIdx(0)"></button>
+              <button type="button" class="dot-bar" onclick="setSlideIdx(1)"></button>
+              <button type="button" class="dot-bar" onclick="setSlideIdx(2)"></button>
+            </div>
+          </div>
+          <div class="sim-sec">
+            <div class="kicker-bad">Dual Commercial Pillars</div>
+            <div class="sec-h2" style="color:#1a2b4c;">Turnkey Corporate Event Management, AI &amp; Pro-AV Solutions</div>
+            <div class="tabs-before">
+              <span class="pill-tab on">Event &amp; AI Solutions (9)</span>
+              <span class="pill-tab off">Professional AV Shop</span>
+            </div>
+            <div class="prod-grid">
+              <div class="pcard-before">
+                <div class="pimg-b"><img src="/images/products/poly-x70-studio.webp" alt="Poly Studio X70" /></div>
+                <div class="pbody">
+                  <div class="ptitle" style="color:#1a2b4c;">Poly Studio X70 All-in-One Bar</div>
+                  <div class="chips-b"><span>POLY</span><span>7200-87820</span></div>
+                  <div class="pfoot"><span class="price-b">PKR 1,295,000</span><span class="btn-b">View Specs</span></div>
+                </div>
+              </div>
+              <div class="pcard-before">
+                <div class="pimg-b"><img src="/images/products/cisco-room-kit-eq.webp" alt="Cisco Room Kit EQ" /></div>
+                <div class="pbody">
+                  <div class="ptitle" style="color:#1a2b4c;">Cisco Room Kit EQ Bundle</div>
+                  <div class="chips-b"><span>CISCO</span><span>CS-KIT-EQ</span></div>
+                  <div class="pfoot"><span class="price-b">PKR 2,450,000</span><span class="btn-b">View Specs</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="callout-strip bad">
+            <span>No Pause/Play button · Blind dots</span>
+            <span>Below-fold #00B4D8 on #FFF = 2.46:1 FAIL</span>
+          </div>
+        </div>
+
+        <!-- AFTER: Live Selected Combination -->
+        <div class="shot-frame" id="after-preview">
+          <div class="shot-label">
+            <span id="after-label">After (Option C1 + H1 Proposed)</span>
+            <span class="vp-meta">1280&times;800</span>
+          </div>
+          <div class="sim-bar">
+            <span>Video Conference in Pakistan &amp; Corporate Event Production &mdash; <span class="cyan">AV Live (Est. 2011)</span></span>
+          </div>
+          <div class="sim-nav">
+            <span class="sim-logo"><span class="av">AV</span><span class="live">Live</span></span>
+            <span class="sim-nav-links"><span>Video Conference</span><span>Events</span><span>Shop</span><span>3D Designer</span><span>Contact</span></span>
+          </div>
+
+          <div class="sim-hero-after" id="after-hero-bg">
+            <div class="hero-after-grid" id="hero-after-grid">
+              <div>
+                <span class="hero-eyebrow" id="after-eyebrow" style="color: var(--opt-hero-eyebrow);">Enterprise AV &amp; Events Pakistan &middot; Est. 2011</span>
+                <h3 id="after-slide-title">Video Conference in Pakistan | Corporate Event Management | AV Live</h3>
+                <p id="after-slide-sub">1,000+ Events &amp; Boardrooms Engineered for Meta, World Bank, Nestl&eacute; &amp; USAID.</p>
+                <div class="hero-ctas">
+                  <span class="cta-btn-sim" id="after-cta-1" style="background: var(--opt-cta-bg); color: var(--opt-cta-fg);">Get 15-Min BoQ Quote &rarr;</span>
+                  <span class="cta-btn-sim" id="after-cta-2" style="background: rgba(255,255,255,0.08); border-color: var(--opt-cta-border); color:#fff;">Explore Hardware Catalog</span>
+                </div>
+                <div class="trust-micro">
+                  <span class="accent">&#10003; 15-Min Engineering SLA</span>
+                  <span>&middot; Official OEM Warranty</span>
+                  <span>&middot; Lahore, Karachi &amp; Islamabad</span>
+                </div>
+              </div>
+
+              <!-- Only visible in H2 mode -->
+              <div class="spotlight-card" id="spotlight-card" style="display:none;">
+                <div class="spot-top"><span id="spot-tag">Flagship Solution</span><button type="button" onclick="togglePause()" id="pause-btn-h2" style="border:1px solid #cbd5e1; background:#fff; border-radius:6px; padding:2px 7px; font-size:9.5px; font-weight:700; cursor:pointer;">Pause</button></div>
+                <div class="spot-img"><img id="spot-img" src="/images/products/poly-x70-studio.webp" alt="Featured Hardware" /></div>
+                <div class="spot-title" id="spot-title">Poly Studio X70 / X72 All-in-One Bar</div>
+                <div class="spot-price" id="spot-price">From PKR 1,295,000 · Official Warranty</div>
+                <div class="spot-nav">
+                  <button type="button" class="spot-pill active" onclick="setSlideIdx(0)">Boardroom</button>
+                  <button type="button" class="spot-pill" onclick="setSlideIdx(1)">Events/LED</button>
+                  <button type="button" class="spot-pill" onclick="setSlideIdx(2)">Codecs</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Only visible in H1 mode -->
+            <div class="hero-tab-strip" id="hero-tab-strip">
+              <div class="intent-tabs">
+                <button type="button" class="intent-tab active" onclick="setSlideIdx(0)">01 &middot; Boardroom Video</button>
+                <button type="button" class="intent-tab" onclick="setSlideIdx(1)">02 &middot; Corporate Events &amp; LED</button>
+                <button type="button" class="intent-tab" onclick="setSlideIdx(2)">03 &middot; Executive Codecs</button>
+              </div>
+              <button type="button" class="pause-btn" id="pause-btn-h1" onclick="togglePause()">&#10074;&#10074; Pause</button>
+            </div>
+          </div>
+
+          <div class="sim-sec">
+            <div class="kicker-good">Dual Commercial Pillars</div>
+            <div class="sec-h2">Turnkey Corporate Event Management, AI &amp; Pro-AV Solutions</div>
+            <div class="seg-wrap">
+              <div class="seg">
+                <span class="on">Event &amp; AI Solutions (9)</span>
+                <span class="off">Professional AV Shop</span>
+              </div>
+            </div>
+            <div class="prod-grid">
+              <div class="pcard-after">
+                <div class="pimg-a"><img src="/images/products/poly-x70-studio.webp" alt="Poly Studio X70" /></div>
+                <div class="pbody">
+                  <div class="ptitle">Poly Studio X70 All-in-One Bar</div>
+                  <div class="meta-a">Poly &middot; SKU 7200-87820</div>
+                  <div class="pfoot"><span class="price-a">PKR 1,295,000</span><span class="btn-a">Specs &amp; Quote</span></div>
+                </div>
+              </div>
+              <div class="pcard-after">
+                <div class="pimg-a"><img src="/images/products/cisco-room-kit-eq.webp" alt="Cisco Room Kit EQ" /></div>
+                <div class="pbody">
+                  <div class="ptitle">Cisco Room Kit EQ Bundle</div>
+                  <div class="meta-a">Cisco &middot; SKU CS-KIT-EQ</div>
+                  <div class="pfoot"><span class="price-a">PKR 2,450,000</span><span class="btn-a">Specs &amp; Quote</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout-strip good" id="after-callout">
+            <span>PASS: WCAG 2.2 Carousel Pause + Intent Tabs</span>
+            <span>PASS: Light-Surface Contrast 4.87:1 &middot; &Delta;E00 = 0.00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- UPGRADES TABLE -->
+    <section class="card">
+      <h2>B. Ordered Safe Upgrades (System-Token Mapped — Customize Before Approval)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Include</th>
+            <th>Risk Tier</th>
+            <th>Component / Scope</th>
+            <th>Before</th>
+            <th>After (Selected Option)</th>
+            <th>Proof / Research Benchmark</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox" checked data-id="HERO-OPT" onchange="updateSelection()" /> Hero</td>
+            <td class="tier tier-2">Tier 2 (Struct #1/3)</td>
+            <td><strong>Hero Slider &amp; CTA Hierarchy</strong><br/><code>src/pages/Home.tsx</code></td>
+            <td>10s auto-play only; anonymous right dots; hover-only arrows; competing equal CTAs</td>
+            <td id="tbl-hero-desc"><strong>H1:</strong> Named intent tabs (<code>01 Boardroom</code>, <code>02 Events</code>, <code>03 Codecs</code>), 44px <code>Pause/Play</code> + focus-pause, 1 Primary + 1 Ghost CTA + 1-line SLA trust proof</td>
+            <td>WCAG 2.2 SC 2.2.2 PASS<br/>HP Poly / Logitech Pattern</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked data-id="UPG-3" onchange="updateSelection()" /> #3</td>
+            <td class="tier tier-2">Tier 2 (Struct #2/3)</td>
+            <td><strong>Dual Pillars &amp; Service Cards</strong><br/><code>src/pages/Home.tsx</code></td>
+            <td><code>#00B4D8</code> kickers/links (<code>2.46:1</code> FAIL); detached <code>rounded-full</code> pills; <code>bg-gray-50 rounded-3xl p-8</code></td>
+            <td>Selected AA accent (<code>4.87:1</code>–<code>6.13:1</code>); unified <code>bg-slate-100 p-1 rounded-xl</code> segmented control; <code>bg-white rounded-2xl p-6</code></td>
+            <td>WCAG 2.2 AA PASS<br/>Spacing CV &minus;30%+</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked data-id="UPG-4" onchange="updateSelection()" /> #4</td>
+            <td class="tier tier-2">Tier 2 (Struct #3/3)</td>
+            <td><strong>Featured Hardware Cards &amp; CTAs</strong><br/><code>src/pages/Home.tsx</code></td>
+            <td>Boxed Brand/SKU chips; <code>rounded-3xl</code>; non-tabular PKR price</td>
+            <td>Inline <code>Brand &middot; SKU</code> text; <code>rounded-2xl</code> card rhythm; <code>tabular-nums</code> price; clear <code>Specs &amp; Quote</code> CTA</td>
+            <td>Zero pill clutter<br/>Poly.com Catalog Pattern</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked data-id="UPG-5" onchange="updateSelection()" /> #5</td>
+            <td class="tier tier-1">Tier 1 (Styling)</td>
+            <td><strong>Flagship Video Bento Grid</strong><br/><code>src/pages/Home.tsx</code></td>
+            <td><code>#00B4D8</code> PKR price &amp; kicker on white (<code>2.46:1</code> FAIL); mixed radii</td>
+            <td>AA accent (<code>4.87:1</code>+) + <code>tabular-nums</code>; unified <code>rounded-2xl</code></td>
+            <td>Fixes 6 WCAG AA fails<br/>0 DOM restructures</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked data-id="UPG-6" onchange="updateSelection()" /> #6</td>
+            <td class="tier tier-1">Tier 1 (Styling)</td>
+            <td><strong>Trust Stats, AEO Table &amp; FAQ Cleanup</strong><br/><code>src/pages/Home.tsx</code></td>
+            <td><code>#00B4D8</code> table header &amp; FAQ pills on white (<code>2.46:1</code> FAIL)</td>
+            <td>AA accent on white, <code>#38BDF8</code> (<code>6.56:1</code>) on navy trust block, unboxed FAQ kickers, <code>tabular-nums</code> matrix</td>
+            <td>100% Homepage WCAG AA<br/>0 DOM restructures</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>C. Explicitly Rejected Ideas</h2>
+      <table>
+        <thead><tr><th>Rejected Idea</th><th>Reason / Violated Constraint</th></tr></thead>
+        <tbody>
+          <tr><td>Delete the 3-slide hero carousel entirely</td><td><strong>Hard Constraint #4</strong> — Preserves CMS <code>heroSlides</code> workflow while fixing UX &amp; Pause/Play compliance.</td></tr>
+          <tr><td>Modify <code>AV Live</code> header logo, nav order, or footer</td><td><span class="tier tier-0">Tier 0 Frozen</span> — Logo IoU &ge; 0.98 and 166-URL &le; 2-click SEO silo depth locked.</td></tr>
+          <tr><td>Convert storefront to dark mode or replace <code>Inter</code></td><td><strong>Hard Constraints #2, #3 &amp; #7</strong> — Breaches &Delta;E00 &le; 3.0, font lock, and 30% pixel cap.</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <div class="gate-bar">
+    <div class="decision-out" id="decision-output">Selection: C1 + H1 + HERO-OPT, UPG-3, UPG-4, UPG-5, UPG-6 (Phase 4 blocked until APPROVE)</div>
+    <div class="btn-row">
+      <button type="button" class="btn btn-reject" onclick="recordDecision('REJECT')">REJECT</button>
+      <button type="button" class="btn btn-edit" onclick="recordDecision('EDIT')">REQUEST EDITS</button>
+      <button type="button" class="btn btn-approve" onclick="recordDecision('APPROVE')">APPROVE SELECTED &amp; UNLOCK PHASE 4</button>
+    </div>
+  </div>
+
+  <script>
+    const SLIDES = [
+      {
+        title: 'Video Conference in Pakistan | Corporate Event Management | AV Live',
+        sub: '1,000+ Events & Boardrooms Engineered for Meta, World Bank, Nestl\u00e9 & USAID.',
+        cta1: 'Get 15-Min BoQ Quote \u2192',
+        cta2: 'Explore Hardware Catalog',
+        bg: '/images/projects/world-bank-president-stage.webp',
+        spotImg: '/images/products/poly-x70-studio.webp',
+        spotTag: 'Flagship Boardroom AI',
+        spotTitle: 'Poly Studio X70 / X72 All-in-One Bar',
+        spotPrice: 'PKR 1,295,000 \u00b7 Official Warranty'
+      },
+      {
+        title: '1,000+ Corporate Events & Hybrid Broadcast Stages Across Pakistan',
+        sub: 'In-House P2.5 3840Hz SMD LED Walls, Multi-Cam 4K SDI Broadcast Switchers & 3D Hologram Displays.',
+        cta1: 'Plan Corporate Event \u2192',
+        cta2: '3D Room & LED Calculator',
+        bg: '/images/projects/meta-values-summit.webp',
+        spotImg: '/images/products/3d-hologram-stage.webp',
+        spotTag: 'Turnkey Event Stage',
+        spotTitle: 'P2.5 SMD LED + 3D Hologram Stage',
+        spotPrice: 'Custom Rental / Turnkey BoQ'
+      },
+      {
+        title: 'Turnkey Executive Boardrooms & Delegate Conference Systems',
+        sub: 'HP Poly Studio X72, Cisco Room Kit Plus, Logitech Rally Bar & VISSONIC Digital Delegate Mics.',
+        cta1: 'Compare Boardroom Kits \u2192',
+        cta2: '60-Sec Bundle Wizard',
+        bg: '/images/projects/vissonic-delegate-boardroom.webp',
+        spotImg: '/images/products/cisco-room-kit-eq.webp',
+        spotTag: 'Enterprise Codec Suite',
+        spotTitle: 'Cisco Room Kit EQ + Poly Group 500',
+        spotPrice: 'PKR 2,450,000 \u00b7 PPRA/FBR Ready'
+      }
+    ];
+
+    const COLORS = {
+      C1: {
+        name: 'C1 Executive Broadcast Blue',
+        contrast: '4.87:1 (PASS)',
+        de: '0.00',
+        navy: '#1a2b4c',
+        aa: '#0077b6',
+        eyebrow: '#38bdf8',
+        ctaBg: '#ffffff',
+        ctaFg: '#1a2b4c',
+        ctaBorder: 'rgba(56,189,248,0.75)',
+        cardBtnBg: '#1a2b4c',
+        cardBtnFg: '#ffffff',
+        trust: '#38bdf8'
+      },
+      C2: {
+        name: 'C2 Command Navy & Signal Amber CTA',
+        contrast: '6.13:1 + 8.26:1 CTA (AAA)',
+        de: '1.68',
+        navy: '#162645',
+        aa: '#026896',
+        eyebrow: '#38bdf8',
+        ctaBg: '#f59e0b',
+        ctaFg: '#111827',
+        ctaBorder: 'rgba(255,255,255,0.45)',
+        cardBtnBg: '#026896',
+        cardBtnFg: '#ffffff',
+        trust: '#34d399'
+      },
+      C3: {
+        name: 'C3 Architectural Slate & Deep Cyan',
+        contrast: '4.87:1 + 5.48:1 SLA (PASS)',
+        de: '0.72',
+        navy: '#1b2d4f',
+        aa: '#0077b6',
+        eyebrow: '#38bdf8',
+        ctaBg: '#0077b6',
+        ctaFg: '#ffffff',
+        ctaBorder: 'rgba(255,255,255,0.55)',
+        cardBtnBg: '#1b2d4f',
+        cardBtnFg: '#ffffff',
+        trust: '#34d399'
+      }
+    };
+
+    let activeColor = 'C1';
+    let activeHero = 'H1';
+    let slideIdx = 0;
+    let isPaused = false;
+
+    function applyTheme() {
+      const c = COLORS[activeColor];
+      const root = document.documentElement;
+      root.style.setProperty('--opt-navy', c.navy);
+      root.style.setProperty('--opt-aa', c.aa);
+      root.style.setProperty('--opt-hero-eyebrow', c.eyebrow);
+      root.style.setProperty('--opt-cta-bg', c.ctaBg);
+      root.style.setProperty('--opt-cta-fg', c.ctaFg);
+      root.style.setProperty('--opt-cta-border', c.ctaBorder);
+      root.style.setProperty('--opt-card-cta-bg', c.cardBtnBg);
+      root.style.setProperty('--opt-card-cta-fg', c.cardBtnFg);
+      root.style.setProperty('--opt-trust-accent', c.trust);
+
+      const s = SLIDES[slideIdx];
+      document.getElementById('before-hero-bg').style.backgroundImage =
+        `linear-gradient(90deg, rgba(26,43,76,0.96) 0%, rgba(26,43,76,0.8) 58%, rgba(26,43,76,0.25) 100%), url('${s.bg}')`;
+      document.getElementById('after-hero-bg').style.backgroundImage =
+        `linear-gradient(90deg, rgba(22,38,69,0.96) 0%, rgba(22,38,69,0.82) 58%, rgba(22,38,69,0.32) 100%), url('${s.bg}')`;
+
+      document.getElementById('before-slide-title').textContent = s.title;
+      document.getElementById('before-slide-sub').textContent = s.sub;
+      document.getElementById('after-slide-title').textContent = s.title;
+      document.getElementById('after-slide-sub').textContent = s.sub;
+      document.getElementById('after-cta-1').textContent = s.cta1;
+      document.getElementById('after-cta-2').textContent = s.cta2;
+
+      document.getElementById('spot-tag').textContent = s.spotTag;
+      document.getElementById('spot-img').src = s.spotImg;
+      document.getElementById('spot-title').textContent = s.spotTitle;
+      document.getElementById('spot-price').textContent = s.spotPrice;
+
+      document.querySelectorAll('.dot-bar').forEach((el, i) => el.classList.toggle('on', i === slideIdx));
+      document.querySelectorAll('.intent-tab').forEach((el, i) => el.classList.toggle('active', i === slideIdx));
+      document.querySelectorAll('.spot-pill').forEach((el, i) => el.classList.toggle('active', i === slideIdx));
+
+      const grid = document.getElementById('hero-after-grid');
+      const spot = document.getElementById('spotlight-card');
+      const tabStrip = document.getElementById('hero-tab-strip');
+      if (activeHero === 'H2') {
+        grid.classList.add('split');
+        spot.style.display = 'block';
+        tabStrip.style.display = 'none';
+        document.getElementById('tbl-hero-desc').innerHTML =
+          '<strong>H2:</strong> Split hero with right Hardware Spotlight card, slide quick-pills, 44px <code>Pause</code> toggle, 1 Primary + 1 Ghost CTA &amp; SLA line';
+      } else {
+        grid.classList.remove('split');
+        spot.style.display = 'none';
+        tabStrip.style.display = 'flex';
+        document.getElementById('tbl-hero-desc').innerHTML =
+          '<strong>H1:</strong> Named intent tabs (<code>01 Boardroom</code>, <code>02 Events</code>, <code>03 Codecs</code>), 44px <code>Pause/Play</code> + focus-pause, 1 Primary + 1 Ghost CTA &amp; SLA line';
+      }
+
+      document.getElementById('after-label').textContent = `After (Option ${activeColor} + ${activeHero} Proposed)`;
+      document.getElementById('live-metrics').innerHTML =
+        `<span>Active Theme: <strong>${c.name}</strong></span>` +
+        `<span>Hero Mode: <strong>${activeHero === 'H1' ? 'H1 Intent Tabs + Pause' : 'H2 Split Spotlight Card'}</strong></span>` +
+        `<span>Contrast: <strong>${c.contrast}</strong></span>`;
+      document.getElementById('after-callout').innerHTML =
+        `<span>PASS: WCAG 2.2 Carousel Pause (${isPaused ? 'Paused' : 'Interactive'})</span>` +
+        `<span>PASS: ${c.contrast} &middot; Brand &Delta;E00 = ${c.de} (&le; 3.0)</span>`;
+      updateSelection();
+    }
+
+    function selectColor(id, btn) {
+      activeColor = id;
+      document.querySelectorAll('#color-choices .opt-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyTheme();
+    }
+
+    function selectHero(id, btn) {
+      activeHero = id;
+      document.querySelectorAll('#hero-choices .opt-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyTheme();
+    }
+
+    function setSlideIdx(idx) {
+      slideIdx = idx;
+      applyTheme();
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      const txt1 = isPaused ? '\u25B6 Play' : '\u275A\u275A Pause';
+      const txt2 = isPaused ? 'Play' : 'Pause';
+      document.getElementById('pause-btn-h1').textContent = txt1;
+      document.getElementById('pause-btn-h2').textContent = txt2;
+      applyTheme();
+    }
+
+    function switchViewport(vp, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const grid = document.getElementById('compare-grid');
+      const label = vp === 'mobile' ? '390\u00d7844' : '1280\u00d7800';
+      grid.classList.toggle('mobile-mode', vp === 'mobile');
+      document.querySelectorAll('.vp-meta').forEach(el => { el.textContent = label; });
+    }
+
+    function getSelectedIds() {
+      return Array.from(document.querySelectorAll('input[type="checkbox"][data-id]:checked')).map(el => el.dataset.id);
+    }
+
+    function updateSelection() {
+      const ids = getSelectedIds();
+      document.getElementById('decision-output').textContent =
+        `Selection: ${activeColor} + ${activeHero} + [${ids.join(', ')}] (Phase 4 blocked until APPROVE)`;
+    }
+
+    function recordDecision(decision) {
+      const ids = getSelectedIds();
+      const cmd = decision === 'APPROVE' ? `APPROVE ${activeColor}, ${activeHero}, ${ids.join(', ')}` : decision;
+      document.getElementById('decision-output').textContent =
+        `Ready — copy/reply in chat: "${cmd}"`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cmd).catch(() => {});
+      }
+    }
+
+    applyTheme();
+  </script>
+</body>
+</html>

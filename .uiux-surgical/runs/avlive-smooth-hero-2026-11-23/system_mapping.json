@@ -1,0 +1,58 @@
+{
+  "primary_design_system": "tailwind",
+  "secondary_systems": [
+    "custom_tokens"
+  ],
+  "confidence_scores": {
+    "tailwind": 906,
+    "mui": 0,
+    "chakra": 0,
+    "radix": 0,
+    "custom_tokens": 44
+  },
+  "files_scanned": 172,
+  "css_custom_properties": [
+    "--brand",
+    "--font-body",
+    "--font-headline",
+    "--font-label",
+    "--font-sans",
+    "--space-2xl",
+    "--space-3xl",
+    "--space-lg",
+    "--space-md",
+    "--space-sm",
+    "--space-xl",
+    "--space-xs"
+  ],
+  "dominant_hex_tokens": [
+    "#00B4D8",
+    "#1A2B4C",
+    "#F8F9FA",
+    "#0077B6",
+    "#38BDF8",
+    "#1D1D1F",
+    "#0F172A",
+    "#6E6E73",
+    "#E5E5EA",
+    "#141816",
+    "#006BD6",
+    "#E2E8F0"
+  ],
+  "detected_font_families": [
+    "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, Roboto, sans-serif",
+    "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+    "Inter, system-ui, sans-serif",
+    "Inter,Arial,sans-serif",
+    "inherit",
+    "monospace",
+    "sans-serif",
+    "ui-monospace, SFMono-Regular, Menlo, monospace",
+    "var(--font-body)",
+    "var(--font-headline)"
+  ],
+  "token_enforcement_policy": {
+    "require_system_tokens": true,
+    "escape_hatch_flag": "--allow-escape-hatch"
+  }
+}

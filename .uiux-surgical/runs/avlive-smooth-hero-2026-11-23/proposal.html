@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>AV Live — Hero Redesign &amp; 60fps UI Smoothness Proposal (Mockup)</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --brand: #1a2b4c;
+      --navy-deep: #111e36;
+      --accent: #00b4d8;
+      --sky: #38bdf8;
+      --aa-blue: #0077b6;
+      --ok: #047857;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --ease-broadcast: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 1360px; margin: 0 auto; padding: 24px 20px 104px; }
+    header.top-bar {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
+      gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px;
+    }
+    .kicker { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em; color: var(--aa-blue); }
+    h1 { margin: 4px 0 0; font-size: 22px; color: var(--brand); letter-spacing: -0.02em; }
+    .meta { font-size: 12px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px;
+      margin-bottom: 20px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .card h2 { margin: 0 0 10px; font-size: 16px; color: var(--brand); letter-spacing: -0.01em; }
+    .constraints { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+    .constraint-item {
+      border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 12px; background: #f8fafc;
+    }
+    .constraint-item strong { display: block; color: var(--brand); margin-bottom: 2px; }
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-radius: 12px; background: #f8fafc; border: 1px solid var(--border); margin-bottom: 16px;
+    }
+    .pill-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .pill-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-right: 4px; }
+    .opt-btn {
+      padding: 8px 13px; border-radius: 9px; border: 1px solid var(--border); background: #fff;
+      font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer;
+      transition: transform 0.2s var(--ease-broadcast), background-color 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .opt-btn:hover { border-color: var(--aa-blue); color: var(--aa-blue); }
+    .opt-btn:active { transform: scale(0.97); }
+    .opt-btn.active { background: var(--brand); color: #fff; border-color: var(--brand); box-shadow: 0 2px 8px rgba(26, 43, 76, 0.2); }
+    .compare-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    @media (min-width: 1120px) { .compare-grid.split { grid-template-columns: 1fr 1fr; } }
+    .compare-grid.mobile-view { max-width: 430px; margin: 0 auto; }
+    .mock-shell {
+      border: 1px solid #cbd5e1; border-radius: 14px; overflow: hidden; background: #f8f9fa;
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+    }
+    .mock-chrome {
+      background: #fff; border-bottom: 1px solid var(--border); padding: 9px 14px;
+      display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 800;
+    }
+    .badge-before { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; }
+    .badge-after { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; }
+    .av-auth-bar {
+      background: var(--navy-deep); color: #fff; padding: 7px 14px; font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .av-auth-bar span.hl { color: var(--accent); }
+    .before-hero {
+      position: relative; height: 290px; background: var(--brand); overflow: hidden; display: flex; align-items: center;
+      padding: 0 42px 46px; color: #fff;
+    }
+    .before-hero img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.45; }
+    .before-hero::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(26,43,76,0.96) 0%, rgba(26,43,76,0.82) 55%, rgba(26,43,76,0.28) 100%);
+    }
+    .before-hero .content { position: relative; z-index: 2; max-width: 520px; }
+    .before-hero h3 { margin: 4px 0 6px; font-size: 20px; line-height: 1.15; font-weight: 900; }
+    .before-hero p { margin: 0 0 10px; font-size: 11.5px; color: rgba(255,255,255,0.85); }
+    .before-tabs {
+      position: absolute; bottom: 8px; left: 42px; right: 42px; z-index: 3; display: flex; gap: 6px;
+      border-top: 1px solid rgba(255,255,255,0.16); padding-top: 7px; align-items: center; justify-content: space-between;
+    }
+    .before-tab {
+      font-size: 10.5px; font-weight: 700; padding: 6px 10px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(17,30,54,0.75); color: rgba(255,255,255,0.9); cursor: pointer;
+    }
+    .before-tab.active { background: #fff; color: var(--brand); border-color: #fff; }
+    .arrow-float {
+      position: absolute; top: 44%; transform: translateY(-50%); z-index: 4;
+      width: 32px; height: 32px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(17,30,54,0.7); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .arrow-float.l { left: 8px; }
+    .arrow-float.r { right: 8px; }
+    .after-hero {
+      position: relative; min-height: 360px; background: var(--navy-deep); overflow: hidden;
+      display: flex; flex-direction: column; justify-content: space-between; color: #fff;
+    }
+    .compare-grid.mobile-view .after-hero { min-height: 390px; }
+    .after-slide-bg {
+      position: absolute; inset: 0; transition: opacity 0.65s var(--ease-broadcast), transform 6.5s ease-out;
+      will-change: transform, opacity;
+    }
+    .after-slide-bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .after-slide-scrim {
+      position: absolute; inset: 0;
+      background: linear-gradient(100deg, rgba(17,30,54,0.96) 0%, rgba(26,43,76,0.88) 54%, rgba(17,30,54,0.52) 100%);
+    }
+    .after-hero-inner {
+      position: relative; z-index: 2; padding: 26px 28px 14px;
+      display: grid; grid-template-columns: 1.35fr 1fr; gap: 22px; align-items: center; flex: 1;
+    }
+    .compare-grid.mobile-view .after-hero-inner { grid-template-columns: 1fr; padding: 18px 16px 12px; gap: 14px; }
+    @keyframes heroFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .hero-anim-text { animation: heroFadeUp 0.48s var(--ease-broadcast) both; will-change: transform, opacity; }
+    .after-hero h3 { margin: 6px 0 8px; font-size: 24px; line-height: 1.15; font-weight: 900; letter-spacing: -0.02em; color: #fff; }
+    .compare-grid.mobile-view .after-hero h3 { font-size: 19px; }
+    .after-hero .sub { margin: 0 0 14px; font-size: 12.5px; color: rgba(241, 245, 249, 0.9); line-height: 1.5; max-width: 520px; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .btn-sky {
+      padding: 10px 18px; border-radius: 999px; background: var(--sky); color: var(--navy-deep);
+      font-weight: 900; font-size: 12px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.28);
+      transition: transform 0.22s var(--ease-broadcast), background-color 0.22s;
+      will-change: transform;
+    }
+    .btn-sky:hover { background: #fff; transform: translateY(-1px); }
+    .btn-sky:active { transform: scale(0.97); }
+    .btn-ghost {
+      padding: 9px 16px; border-radius: 999px; background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.34); color: #fff; font-weight: 700; font-size: 12px; cursor: pointer;
+      transition: transform 0.22s var(--ease-broadcast), background-color 0.22s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.18); transform: translateY(-1px); }
+    .sla-strip {
+      margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.14);
+      display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.92);
+    }
+    .sla-pill { display: inline-flex; align-items: center; gap: 5px; }
+    .sla-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sky); display: inline-block; }
+    .spotlight-card {
+      background: rgba(17, 30, 54, 0.78); border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px; padding: 14px; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+      animation: heroFadeUp 0.54s var(--ease-broadcast) 0.05s both;
+      transition: transform 0.35s var(--ease-broadcast), border-color 0.3s;
+    }
+    .spotlight-card:hover { transform: translateY(-3px); border-color: rgba(56, 189, 248, 0.55); }
+    .spot-img-box {
+      background: #fff; border-radius: 12px; height: 138px; display: flex; align-items: center; justify-content: center;
+      padding: 10px; margin-bottom: 10px; overflow: hidden;
+    }
+    .spot-img-box img { max-height: 100%; max-width: 100%; object-fit: contain; transition: transform 0.45s var(--ease-broadcast); }
+    .spotlight-card:hover .spot-img-box img { transform: scale(1.05); }
+    .spot-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .spot-name { font-size: 13px; font-weight: 800; color: #fff; }
+    .spot-price { font-size: 12.5px; font-weight: 900; color: var(--sky); font-variant-numeric: tabular-nums; }
+    .spot-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .spot-chip {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.16); color: #e2e8f0;
+    }
+    .space-stack { display: flex; flex-direction: column; gap: 8px; }
+    .space-btn {
+      text-align: left; padding: 11px 13px; border-radius: 12px; background: rgba(17, 30, 54, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.16); color: #fff; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      transition: transform 0.25s var(--ease-broadcast), background-color 0.25s, border-color 0.25s;
+    }
+    .space-btn:hover { background: rgba(26, 43, 76, 0.92); transform: translateX(3px); }
+    .space-btn.active { background: rgba(56, 189, 248, 0.16); border-color: var(--sky); box-shadow: inset 3px 0 0 var(--sky); }
+    .space-btn strong { display: block; font-size: 12.5px; font-weight: 800; }
+    .space-btn span { font-size: 11px; color: #cbd5e1; }
+    .hero-dock {
+      position: relative; z-index: 3; padding: 10px 28px 14px;
+      background: linear-gradient(180deg, rgba(17,30,54,0) 0%, rgba(17,30,54,0.85) 100%);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .compare-grid.mobile-view .hero-dock { padding: 8px 14px 12px; }
+    .dock-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dock-tab {
+      position: relative; overflow: hidden; padding: 8px 12px; border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.2); background: rgba(17,30,54,0.75);
+      color: rgba(255,255,255,0.88); font-size: 11.5px; font-weight: 700; cursor: pointer;
+      transition: transform 0.2s var(--ease-broadcast), background-color 0.2s, color 0.2s;
+    }
+    .dock-tab:active { transform: scale(0.97); }
+    .dock-tab.active { background: #fff; color: var(--brand); border-color: #fff; }
+    .dock-progress { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--sky); width: 0%; transition: width 0.1s linear; }
+    .dock-controls { display: flex; gap: 6px; align-items: center; }
+    .dock-icon-btn {
+      min-width: 36px; height: 36px; padding: 0 10px; border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.24); background: rgba(17,30,54,0.82); color: #fff;
+      font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+      transition: transform 0.2s var(--ease-broadcast), background-color 0.2s;
+    }
+    .dock-icon-btn:hover { background: var(--sky); color: var(--navy-deep); border-color: var(--sky); }
+    .carousel-demo { padding: 16px 20px; background: #fff; border-top: 1px solid var(--border); }
+    .carousel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .carousel-title { font-size: 14px; font-weight: 900; color: var(--brand); }
+    .chip-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; }
+    .filter-chip {
+      padding: 6px 12px; border-radius: 9px; border: 1px solid var(--border); background: #fff;
+      font-size: 11px; font-weight: 800; color: var(--muted); cursor: pointer; white-space: nowrap;
+      transition: transform 0.2s var(--ease-broadcast), background-color 0.2s, color 0.2s;
+    }
+    .filter-chip.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .filter-chip:active { transform: scale(0.96); }
+    .cards-track { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; animation: heroFadeUp 0.3s var(--ease-broadcast) both; }
+    .compare-grid.mobile-view .cards-track { grid-template-columns: repeat(2, 1fr); }
+    .prod-card {
+      border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: #fff;
+      transition: transform 0.3s var(--ease-broadcast), box-shadow 0.3s var(--ease-broadcast), border-color 0.25s;
+      will-change: transform;
+    }
+    .prod-card.after-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(26, 43, 76, 0.08); border-color: rgba(0, 119, 182, 0.35); }
+    .prod-card.before-card { transition: none; }
+    .prod-thumb {
+      background: #f8f9fa; height: 104px; display: flex; align-items: center; justify-content: center; padding: 10px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .prod-thumb img { max-height: 100%; max-width: 100%; object-fit: contain; transition: transform 0.4s var(--ease-broadcast); }
+    .prod-card.after-card:hover .prod-thumb img { transform: scale(1.06); }
+    .prod-body { padding: 10px 12px; }
+    .prod-name { font-size: 12px; font-weight: 800; color: var(--brand); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prod-sku { font-size: 10.5px; color: var(--muted); margin-bottom: 6px; }
+    .prod-foot { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding-top: 6px; border-top: 1px solid #f1f5f9; }
+    .prod-price { font-size: 12px; font-weight: 900; color: var(--brand); font-variant-numeric: tabular-nums; }
+    .sq-btn {
+      width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--border); background: #f1f5f9;
+      color: var(--brand); font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+      transition: transform 0.2s var(--ease-broadcast), background-color 0.2s, color 0.2s;
+    }
+    .sq-btn:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .sq-btn:active { transform: scale(0.92); }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: #f8fafc; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; background: #f1f5f9; padding: 2px 5px; border-radius: 4px; }
+    .tier { font-weight: 800; font-size: 11px; white-space: nowrap; }
+    .tier-1 { color: var(--aa-blue); }
+    .tier-2 { color: var(--warn); }
+    .gate-bar {
+      position: fixed; left: 0; right: 0; bottom: 0; background: #ffffff; border-top: 1px solid var(--border);
+      padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.08); z-index: 50;
+    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn {
+      padding: 9px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; border: 1px solid var(--border);
+      transition: transform 0.2s var(--ease-broadcast);
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-approve { background: var(--ok); color: #fff; border-color: var(--ok); }
+    .btn-edit { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .btn-reject { background: #fff; color: var(--danger); border-color: #fecaca; }
+    .decision-out { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--brand); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="top-bar">
+      <div>
+        <div class="kicker">UIUX Surgical Enhancer v2 &middot; Phase 3 Human Gate (Read-Only Mockup — Storefront Untouched)</div>
+        <h1>AV Live — Smooth 60fps UI &amp; Hero Slider Interactive Mockup</h1>
+      </div>
+      <div class="meta">Run ID: avlive-smooth-hero-2026-11-23 &middot; System: Tailwind + Custom Tokens</div>
+    </header>
+    <section class="card">
+      <h2>A. Hard Constraints (Machine-Verified Bounds)</h2>
+      <div class="constraints">
+        <div class="constraint-item"><strong>1. Logo Frozen (Tier 0)</strong>IoU &ge; 0.98 &middot; Position &Delta; &le; 2px</div>
+        <div class="constraint-item"><strong>2. Brand Tokens</strong>#1A2B4C / #00B4D8 / #38BDF8 (&Delta;E00 &le; 3.0)</div>
+        <div class="constraint-item"><strong>3. Typography &amp; H1</strong>Inter sans &middot; Single H1 authority bar preserved</div>
+        <div class="constraint-item"><strong>4. Motion Discipline</strong>Strictly GPU <code>transform</code> + <code>opacity</code> + reduced-motion</div>
+        <div class="constraint-item"><strong>5. Accessibility</strong>WCAG 2.2 AA &ge; 4.5:1 &middot; Touch &ge; 44px &middot; Pause/Play</div>
+        <div class="constraint-item"><strong>6. Surgical Bounds</strong>&le; 30% viewport pixels &middot; &le; 3 restructured sections</div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Interactive Before vs. After Mockup — Test Hero Smoothness &amp; Options Live</h2>
+      <div class="toolbar">
+        <div class="pill-group">
+          <span class="pill-label">Hero Option:</span>
+          <button type="button" class="opt-btn active" onclick="setHeroMode('HS-1', this)">HS-1: Split-Stage + Hardware Card (Recommended)</button>
+          <button type="button" class="opt-btn" onclick="setHeroMode('HS-2', this)">HS-2: Choose Your Space Selector</button>
+          <button type="button" class="opt-btn" onclick="setHeroMode('HS-3', this)">HS-3: Pure Motion Polish</button>
+        </div>
+        <div class="pill-group">
+          <span class="pill-label">Viewport:</span>
+          <button type="button" class="opt-btn active" onclick="setViewportMode('desktop', this)">Desktop (1280&times;800)</button>
+          <button type="button" class="opt-btn" onclick="setViewportMode('mobile', this)">Mobile (390&times;844)</button>
+        </div>
+      </div>
+      <div id="compare-grid" class="compare-grid split">
+        <div class="mock-shell">
+          <div class="mock-chrome"><span>Current Storefront (Baseline)</span><span class="badge-before">Cramped Hero + Instant Text Snap + transition-all</span></div>
+          <div class="av-auth-bar"><span>Video Conference in Pakistan &amp; Corporate Event Production &mdash; <span class="hl">AV Live</span></span></div>
+          <div class="before-hero" id="before-hero">
+            <img class="bg" id="before-bg" src="/images/projects/world-bank-president-stage.webp" alt="Current hero slide" />
+            <button type="button" class="arrow-float l" onclick="stepBefore(-1)" aria-label="Previous">&#8592;</button>
+            <button type="button" class="arrow-float r" onclick="stepBefore(1)" aria-label="Next">&#8594;</button>
+            <div class="content">
+              <div style="font-size:10px;font-weight:800;letter-spacing:0.12em;color:#38bdf8;text-transform:uppercase;">Enterprise AV &amp; Events Pakistan &middot; Est. 2011</div>
+              <h3 id="before-title">Video Conference in Pakistan <span style="color:#38bdf8">Corporate Event Management</span></h3>
+              <p id="before-sub">Pakistan’s premier Video Conference &amp; Corporate Event Management company — 1,000+ Events &amp; Boardrooms.</p>
+              <div class="cta-row">
+                <button type="button" class="btn-sky" style="padding:7px 14px;font-size:11px;">Explore Catalog &rarr;</button>
+                <button type="button" class="btn-ghost" style="padding:7px 12px;font-size:11px;">Get 15-Min BoQ Quote</button>
+              </div>
+            </div>
+            <div class="before-tabs">
+              <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                <button type="button" class="before-tab active" onclick="setBeforeSlide(0)">01 &middot; Boardroom Video</button>
+                <button type="button" class="before-tab" onclick="setBeforeSlide(1)">02 &middot; Corporate Events</button>
+                <button type="button" class="before-tab" onclick="setBeforeSlide(2)">03 &middot; Executive Codecs</button>
+              </div>
+              <button type="button" class="before-tab" style="padding:6px 10px;">Pause</button>
+            </div>
+          </div>
+          <div class="carousel-demo">
+            <div class="carousel-head"><div class="carousel-title">Featured Hardware (Snap Filter &amp; Hover-Only Arrows)</div><span style="font-size:11px;font-weight:700;color:#64748b;">Arrows hidden until hover</span></div>
+            <div class="chip-row">
+              <button type="button" class="filter-chip active" onclick="filterBefore('All', this)">All Models</button>
+              <button type="button" class="filter-chip" onclick="filterBefore('Video', this)">Video Bars</button>
+              <button type="button" class="filter-chip" onclick="filterBefore('Events', this)">SMD &amp; 3D</button>
+            </div>
+            <div class="cards-track" id="before-cards"></div>
+          </div>
+        </div>
+        <div class="mock-shell">
+          <div class="mock-chrome"><span>Proposed Upgrade (<strong id="active-option-label">HS-1 + SM-1..3</strong>)</span><span class="badge-after">GPU 60fps &middot; Staggered Choreography &middot; Live Progress</span></div>
+          <div class="av-auth-bar"><span>Video Conference in Pakistan &amp; Corporate Event Production &mdash; <span class="hl">AV Live</span></span></div>
+          <div class="after-hero" id="after-hero">
+            <div class="after-slide-bg" id="after-slide-bg"><img id="after-bg-img" src="/images/projects/world-bank-president-stage.webp" alt="Proposed hero stage" /></div>
+            <div class="after-slide-scrim"></div>
+            <div class="after-hero-inner" id="after-hero-inner">
+              <div class="hero-anim-text" id="after-left-col">
+                <span style="font-size:10.5px;font-weight:800;letter-spacing:0.14em;color:#38bdf8;text-transform:uppercase;">Enterprise AV &amp; Events Pakistan &middot; Est. 2011</span>
+                <h3 id="after-title">Video Conference in Pakistan <span style="color:#38bdf8">Corporate Event Management</span></h3>
+                <p class="sub" id="after-sub">Turnkey executive boardrooms, P2.5 SMD stages &amp; authorized Poly/Cisco hardware — engineered for Meta, World Bank &amp; Nestlé.</p>
+                <div class="cta-row"><button type="button" class="btn-sky" id="after-cta">Explore Catalog &rarr;</button><button type="button" class="btn-ghost">Get 15-Min BoQ Quote</button></div>
+                <div class="sla-strip">
+                  <span class="sla-pill"><span class="sla-dot"></span> 15-Min Engineering SLA</span>
+                  <span class="sla-pill"><span class="sla-dot"></span> Official OEM Warranty</span>
+                  <span class="sla-pill"><span class="sla-dot"></span> Lahore &middot; Karachi &middot; Islamabad</span>
+                </div>
+              </div>
+              <div id="after-right-col"></div>
+            </div>
+            <div class="hero-dock">
+              <div class="dock-tabs" id="after-dock-tabs">
+                <button type="button" class="dock-tab active" onclick="setAfterSlide(0)">01 &middot; Boardroom Video<span class="dock-progress" id="prog-0"></span></button>
+                <button type="button" class="dock-tab" onclick="setAfterSlide(1)">02 &middot; Corporate Events &amp; LED<span class="dock-progress" id="prog-1"></span></button>
+                <button type="button" class="dock-tab" onclick="setAfterSlide(2)">03 &middot; Executive Codecs<span class="dock-progress" id="prog-2"></span></button>
+              </div>
+              <div class="dock-controls">
+                <button type="button" class="dock-icon-btn" onclick="stepAfter(-1)" aria-label="Previous slide">&#8592;</button>
+                <button type="button" class="dock-icon-btn" onclick="stepAfter(1)" aria-label="Next slide">&#8594;</button>
+                <button type="button" class="dock-icon-btn" id="after-pause-btn" onclick="toggleAfterPause()">Pause</button>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-demo">
+            <div class="carousel-head">
+              <div class="carousel-title">Featured Hardware (60fps GPU Glide + Header Steppers)</div>
+              <div style="display:flex;gap:6px;align-items:center;"><button type="button" class="sq-btn" style="width:30px;height:30px;" aria-label="Scroll left">&#8592;</button><button type="button" class="sq-btn" style="width:30px;height:30px;" aria-label="Scroll right">&#8594;</button><span style="font-size:11px;font-weight:800;color:#0077b6;">View All 53 &rarr;</span></div>
+            </div>
+            <div class="chip-row">
+              <button type="button" class="filter-chip active" onclick="filterAfter('All', this)">All Models</button>
+              <button type="button" class="filter-chip" onclick="filterAfter('Video', this)">Video Bars</button>
+              <button type="button" class="filter-chip" onclick="filterAfter('Events', this)">SMD &amp; 3D</button>
+            </div>
+            <div class="cards-track" id="after-cards"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="gate-bar">
+    <div class="decision-out" id="decision-output">Status: Awaiting Human Decision &mdash; Storefront untouched until APPROVE</div>
+    <div class="btn-row">
+      <button type="button" class="btn btn-reject" onclick="recordDecision('REJECT')">REJECT</button>
+      <button type="button" class="btn btn-edit" onclick="recordDecision('EDIT')">REQUEST EDITS</button>
+      <button type="button" class="btn btn-approve" id="approve-btn" onclick="recordDecision('APPROVE')">APPROVE SELECTED (HS-1 + SM-1..3)</button>
+    </div>
+  </div>
+  <script>
+    const SLIDES = [
+      { titleMain: 'Video Conference in Pakistan', titleHi: 'Corporate Event Management', sub: 'Turnkey executive boardrooms, P2.5 SMD stages & authorized Poly/Cisco hardware — engineered for Meta, World Bank & Nestlé.', cta: 'Explore Catalog', bg: '/images/projects/world-bank-president-stage.webp', spotImg: '/images/products/poly-x70-studio.webp', spotName: 'Poly Studio X70 + TC8', spotPrice: 'PKR 1,250,000', chips: ['Teams & Zoom Native', 'Dual 4K 20MP Optics', 'Official PK Stock'] },
+      { titleMain: '1,000+ Corporate Events &', titleHi: '3D Hologram SMD Stages', sub: 'In-house P2.5 3840Hz broadcast LED walls, multi-cam 4K SDI switchers & turnkey summit production across Lahore, Karachi & Islamabad.', cta: 'Plan Your Event', bg: '/images/projects/meta-values-summit.webp', spotImg: '/images/products/3d-hologram-display.webp', spotName: 'Turnkey 3D Hologram & SMD Rig', spotPrice: '15-Min BoQ Quote', chips: ['P2.5 3840Hz LED', 'On-Site Engineers', '4K SDI Broadcast'] },
+      { titleMain: 'Executive Boardrooms &', titleHi: 'Delegate Conference Audio', sub: 'Cisco Room Kit EQ, Poly G7500 & VISSONIC digital chairman/delegate microphones with PPRA tender compliance.', cta: 'Video Conference Hub', bg: '/images/projects/vissonic-delegate-boardroom.webp', spotImg: '/images/products/cisco-room-kit-eq.webp', spotName: 'Cisco Room Kit EQ Bundle', spotPrice: 'PKR 2,450,000', chips: ['Quad Camera 80MP', 'Webex & SIP/H.323', '3-Yr OEM Care'] }
+    ];
+    const PRODUCTS = [
+      { name: 'Poly Studio X70', sku: 'Poly · Dual 4K Bar', cat: 'Video', price: 'PKR 1,250,000', img: '/images/products/poly-x70-studio.webp' },
+      { name: 'Poly Studio X50 + TC8', sku: 'Poly · Bundle', cat: 'Video', price: 'PKR 895,000', img: '/images/products/poly-studio-x50-tc8.webp' },
+      { name: '3D Hologram Display', sku: 'AV Live · Stage Rig', cat: 'Events', price: 'PKR 480,000', img: '/images/products/3d-hologram-display.webp' }
+    ];
+    let heroMode = 'HS-1', beforeSlide = 0, afterSlide = 0, afterPaused = false, tickPct = 0;
+    function setHeroMode(mode, btn) { heroMode = mode; btn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('active-option-label').textContent = mode === 'HS-3' ? 'HS-3 + SM-1..2' : mode + ' + SM-1..3'; document.getElementById('approve-btn').textContent = mode === 'HS-3' ? 'APPROVE SELECTED (HS-3 + SM-1..2)' : 'APPROVE SELECTED (' + mode + ' + SM-1..3)'; renderAfterSlide(); }
+    function setViewportMode(vp, btn) { btn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); const grid = document.getElementById('compare-grid'); if (vp === 'mobile') { grid.classList.remove('split'); grid.classList.add('mobile-view'); } else { grid.classList.add('split'); grid.classList.remove('mobile-view'); } }
+    function setBeforeSlide(idx) { beforeSlide = idx; const s = SLIDES[idx]; document.getElementById('before-bg').src = s.bg; document.getElementById('before-title').innerHTML = s.titleMain + ' <span style="color:#38bdf8">' + s.titleHi + '</span>'; document.getElementById('before-sub').textContent = s.sub; document.querySelectorAll('.before-tab').forEach((t, i) => { if (i < 3) t.classList.toggle('active', i === idx); }); }
+    function stepBefore(delta) { setBeforeSlide((beforeSlide + delta + 3) % 3); }
+    function setAfterSlide(idx) { afterSlide = idx; tickPct = 0; renderAfterSlide(); }
+    function stepAfter(delta) { setAfterSlide((afterSlide + delta + 3) % 3); }
+    function toggleAfterPause() { afterPaused = !afterPaused; document.getElementById('after-pause-btn').textContent = afterPaused ? 'Play' : 'Pause'; }
+    function renderAfterSlide() {
+      const s = SLIDES[afterSlide]; const bg = document.getElementById('after-slide-bg'); bg.style.transform = 'scale(1.04)'; document.getElementById('after-bg-img').src = s.bg; requestAnimationFrame(() => { bg.style.transform = 'scale(1)'; });
+      const left = document.getElementById('after-left-col'); left.classList.remove('hero-anim-text'); void left.offsetWidth; left.classList.add('hero-anim-text');
+      document.getElementById('after-title').innerHTML = s.titleMain + ' <span style="color:#38bdf8">' + s.titleHi + '</span>'; document.getElementById('after-sub').textContent = s.sub; document.getElementById('after-cta').innerHTML = s.cta + ' &rarr;';
+      const inner = document.getElementById('after-hero-inner'), right = document.getElementById('after-right-col');
+      if (heroMode === 'HS-1') { inner.style.gridTemplateColumns = ''; right.style.display = 'block'; right.innerHTML = `<div class="spotlight-card"><div class="spot-img-box"><img src="${s.spotImg}" alt="${s.spotName}" /></div><div class="spot-meta"><div class="spot-name">${s.spotName}</div><div class="spot-price">${s.spotPrice}</div></div><div class="spot-chips">${s.chips.map(c => `<span class="spot-chip">${c}</span>`).join('')}</div></div>`; }
+      else if (heroMode === 'HS-2') { inner.style.gridTemplateColumns = ''; right.style.display = 'block'; const spaces = [{ label: 'Executive Boardroom (8–20 Seats)', sub: 'Poly X70 & Cisco Room Kits' }, { label: 'Corporate Events & 3D Stages', sub: 'P2.5 SMD LED & Multi-Cam Live' }, { label: 'Delegate & Hybrid Summits', sub: 'VISSONIC Mics & Cisco EQ' }]; right.innerHTML = `<div class="space-stack"><div style="font-size:10px;font-weight:800;letter-spacing:0.12em;color:#38bdf8;text-transform:uppercase;">Choose Your Deployment Space</div>${spaces.map((sp, i) => `<button type="button" class="space-btn ${i === afterSlide ? 'active' : ''}" onclick="setAfterSlide(${i})"><div><strong>${sp.label}</strong><span>${sp.sub}</span></div><span style="color:#38bdf8;font-weight:900;">&rarr;</span></button>`).join('')}</div>`; }
+      else { inner.style.gridTemplateColumns = '1fr'; right.style.display = 'none'; }
+      document.querySelectorAll('#after-dock-tabs .dock-tab').forEach((t, i) => { t.classList.toggle('active', i === afterSlide); const prog = document.getElementById('prog-' + i); if (prog) prog.style.width = i === afterSlide ? tickPct + '%' : '0%'; });
+    }
+    function renderCards(containerId, filter, isAfter) { const el = document.getElementById(containerId); const list = filter === 'All' ? PRODUCTS : PRODUCTS.filter(p => p.cat === filter); if (isAfter) { el.style.animation = 'none'; void el.offsetWidth; el.style.animation = 'heroFadeUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) both'; } el.innerHTML = list.map(p => `<div class="prod-card ${isAfter ? 'after-card' : 'before-card'}"><div class="prod-thumb"><img src="${p.img}" alt="${p.name}" /></div><div class="prod-body"><div class="prod-name">${p.name}</div><div class="prod-sku">${p.sku}</div><div class="prod-foot"><div class="prod-price">${p.price}</div><button type="button" class="sq-btn" title="Quick Add">+</button></div></div></div>`).join(''); }
+    function filterBefore(cat, btn) { btn.parentElement.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderCards('before-cards', cat, false); }
+    function filterAfter(cat, btn) { btn.parentElement.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderCards('after-cards', cat, true); }
+    function recordDecision(decision) { const cmd = decision === 'APPROVE' ? (heroMode === 'HS-3' ? 'APPROVE HS-3, SM-1, SM-2' : 'APPROVE ' + heroMode + ', SM-1, SM-2, SM-3') : decision; document.getElementById('decision-output').textContent = 'Copy into chat to proceed: ' + cmd; }
+    setInterval(() => { if (afterPaused) return; tickPct += 2; if (tickPct >= 100) { tickPct = 0; setAfterSlide((afterSlide + 1) % 3); } else { const prog = document.getElementById('prog-' + afterSlide); if (prog) prog.style.width = tickPct + '%'; } }, 140);
+    renderAfterSlide(); renderCards('before-cards', 'All', false); renderCards('after-cards', 'All', true);
+  </script>
+</body>
+</html>

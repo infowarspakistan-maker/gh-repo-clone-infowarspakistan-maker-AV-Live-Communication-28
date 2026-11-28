@@ -1,0 +1,28 @@
+pixel_change:
+  max_fraction_of_viewport: 0.30
+  exclude_regions: [logo, legal_footer]
+
+components:
+  max_restructured_per_page: 3      # styling-only changes not counted
+  max_dom_reorders_top_level: 0
+  max_removed_interactive: 0
+
+css:
+  max_delta_fraction_of_original: 0.15
+  max_new_blocking_resources: 0
+  forbidden: [hardcoded_hex_when_system_token_exists]
+
+motion:
+  max_animated_properties_per_view: 3
+  allowed_properties: [transform, opacity]
+  requires_reduced_motion_variant: true
+
+touch:
+  min_target_px: 44                  # WCAG 2.2 SC 2.5.8 target size
+
+iterations:
+  max_per_section: 3
+
+cost:
+  max_usd_per_run: 3.00
+  pairwise_trials: 3

@@ -13,25 +13,36 @@ export function ProtectedRoute({
   allowedRoles = ['admin', 'editor', 'support'],
   redirectTo = '/admin/login',
 }: ProtectedRouteProps) {
-  const { user, userRole, loading, isAuthenticated } = useAuth();
+  const { user, userRole, loading, isAuthenticated, preloadAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
+    preloadAuth();
+  }, [preloadAuth]);
+
+  useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {
+        setIsAuthorized(false);
         navigate(`${redirectTo}?redirect=${encodeURIComponent(location.pathname)}`);
         return;
       }
 
-      if (userRole && allowedRoles.includes(userRole)) {
+      // Wait briefly if Firebase user just signed in and Firestore role document is still hydrating
+      if (!userRole) {
+        return;
+      }
+
+      if (allowedRoles.includes(userRole)) {
         setIsAuthorized(true);
       } else {
+        setIsAuthorized(false);
         navigate('/admin/unauthorized');
       }
     }
-  }, [loading, isAuthenticated, userRole, allowedRoles, navigate, location, redirectTo]);
+  }, [loading, isAuthenticated, user, userRole, allowedRoles, navigate, location, redirectTo]);
 
   if (loading || !isAuthorized) {
     return (

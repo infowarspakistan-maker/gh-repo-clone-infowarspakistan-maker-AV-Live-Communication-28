@@ -61,7 +61,7 @@ export function VoipService() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-6 lg:mt-10 space-y-10 lg:space-y-14">
         {/* Answer-First Verdict & Semantic IP-PBX Comparison Table */}
         <div className="bg-white rounded-2xl lg:rounded-3xl border border-gray-200 p-5 sm:p-7 shadow-xs space-y-5">
-          <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-xl p-4">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
             <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
               Direct Engineering Verdict (TL;DR) — Pakistan Enterprise VoIP &amp; SIP Trunking
             </span>

@@ -20,7 +20,7 @@ export function About() {
   const data = {
     heroHeading: content?.heroHeading || 'Unifying People and Ideas Since 2010',
     heroSubheading: content?.heroSubheading || 'We are an experienced leader in the audio-visual collaboration field.',
-    heroImageUrl: content?.heroImageUrl || 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=2000',
+    heroImageUrl: content?.heroImageUrl || '/images/projects/novo-nordisk-arena-wide-stage.webp',
     mission: content?.mission || 'To provide integrated multimedia tools that drive business innovation and profitability.',
     vision: content?.vision || 'To lead Pakistan\'s digital transformation by making enterprise-grade communication tools accessible, secure, and simple to use.',
     history: content?.history || 'Founded in 2010, AV Live Communications began with a single vision: to bridge the communication gap in Pakistan using world-class technology. Over the last decade, we have evolved from a small hardware supplier into a full-scale systems integrator.',
@@ -41,7 +41,7 @@ export function About() {
         title="About AV Live | Pro-AV & Event Engineering Pakistan"
         description="Learn how AV Live Communications delivers enterprise video conferencing, unified communications, 3D hologram stages & corporate events in Pakistan."
         url="https://avlive.com.pk/about"
-        image="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
+        image="/images/video-conference/boardroom-hero.webp"
         imageAlt="About AV Live Communications Pakistan"
         schema={{
           "@context": "https://schema.org",
@@ -211,7 +211,7 @@ export function About() {
              </div>
           </div>
           <div className="lg:w-1/3 flex justify-center lg:justify-end relative z-10">
-             <div className="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center border border-white/30 animate-pulse">
+             <div className="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center border border-white/30">
                 <Users size={64} className="text-white" />
              </div>
           </div>

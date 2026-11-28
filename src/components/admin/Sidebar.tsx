@@ -18,7 +18,8 @@ import {
   Sparkles,
   Database,
   Workflow,
-  Facebook
+  Facebook,
+  Bot
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -43,6 +44,7 @@ export function Sidebar() {
     { id: 'settings-general', label: 'General', icon: Settings, path: '/admin/settings-general', group: 'Settings' },
     { id: 'settings-payment', label: 'Payment Gateways', icon: CreditCard, path: '/admin/settings-payment', group: 'Settings' },
     { id: 'data-management', label: 'Data Export / Import', icon: Database, path: '/admin/data-management', group: 'Settings' },
+    { id: 'ai-agent', label: 'AI Sales & Voice Agent', icon: Bot, path: '/admin/ai-agent', group: 'Automation' },
     { id: 'automation', label: 'n8n Workflows', icon: Workflow, path: '/admin/automation', group: 'Automation' },
     { id: 'workspace', label: 'Workspace Hub', icon: Sparkles, path: '/admin/workspace', group: 'Google Workspace' },
     { id: 'google-business', label: 'Google Business Profile', icon: Sparkles, path: '/admin/google-business', group: 'Marketing' },

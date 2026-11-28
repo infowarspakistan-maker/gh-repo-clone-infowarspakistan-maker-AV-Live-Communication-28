@@ -1,0 +1,62 @@
+{
+  "industry": "enterprise-av-communications",
+  "sub_vertical": "b2b video conferencing, voip & corporate event production",
+  "competitor_set": [
+    "poly.com",
+    "logitech.com/video-collaboration",
+    "webex.com/devices",
+    "avixa.org"
+  ],
+  "aesthetic_direction": [
+    "enterprise-precision",
+    "crisp-light-catalog",
+    "high-contrast-navy-cyan",
+    "spec-dense-clean"
+  ],
+  "inspiration_queries": [
+    "enterprise-av-communications b2b video conferencing, voip & corporate event production modern web ui design",
+    "poly.com inspired product catalog clean ui",
+    "enterprise-precision crisp-light-catalog web design system"
+  ],
+  "extracted_signals": {
+    "title": "Video Conference in Pakistan | Event Management | AV Live",
+    "meta_description": "Video Conference in Pakistan, Corporate Event Management by AV Live: Poly X70, Cisco Room Kit, 3D Hologram Display price PKR.",
+    "h1": [
+      "Video Conference in Pakistan | Corporate Event Management | AV Live"
+    ],
+    "h2": [
+      "2026 Video Conference in Pakistan & Boardroom Price PKR Reference Matrix",
+      "Corporate Event Management, 3D Hologram Display & Hybrid Broadcast Engineering",
+      "Nationwide Engineering Support, PPRA Tender Compliance & 15-Minute Technical SLA",
+      "Primary Enterprise AV & Unified Communications Categories",
+      "Turnkey Corporate Event Management, AV Integration & AI Services",
+      "Flagship Hardware & Pakistan B2B Buyer's Guides",
+      "Global OEM Technology Standards & Official AV Live Social Media"
+    ],
+    "nav_labels": [
+      "AV Live Communications",
+      "Video Conference in Pakistan",
+      "Event Management in Pakistan",
+      "Video Conference Systems",
+      "Corporate Events",
+      "Video Conferencing Solutions",
+      "Hardware Shop",
+      "3D Room Designer",
+      "Contact {{REDACTED:PHONE}})",
+      "Video Conferencing Systems in Pakistan (Poly X70, Logitech, Cisco Room Kit, Yealink)",
+      "Boardroom Touch Panels & PoE Room Controllers (Poly TC8/TC10, Logitech Tap)",
+      "Large Boardroom & Auditorium Video Conferencing Systems",
+      "Conference Room Speakerphones & Beamforming Microphone Arrays",
+      "Enterprise H.323 / SIP Boardroom Codecs (Polycom Group 500, Poly G7500)",
+      "4K Optical PTZ Conferencing & Broadcast Cameras (12x\u201330x Zoom)"
+    ],
+    "schema_org_types": [
+      "FAQPage",
+      "LocalBusiness",
+      "Organization",
+      "Service",
+      "WebPage",
+      "WebSite"
+    ]
+  }
+}

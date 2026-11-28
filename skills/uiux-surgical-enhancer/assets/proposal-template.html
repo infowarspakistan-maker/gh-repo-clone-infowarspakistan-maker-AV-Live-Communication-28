@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UIUX Surgical Enhancer v2 — Human-Gate Proposal</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --brand: #1a2b4c;
+      --accent: #00b4d8;
+      --ok: #047857;
+      --warn: #b45309;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 28px 24px 96px; }
+    header {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
+      gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 18px; margin-bottom: 24px;
+    }
+    .kicker { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    h1 { margin: 4px 0 0; font-size: 24px; color: var(--brand); }
+    .meta { font-size: 12px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px;
+      margin-bottom: 20px;
+    }
+    .card h2 { margin: 0 0 10px; font-size: 15px; color: var(--brand); }
+    .constraints { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .constraint-item {
+      border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12px; background: #fbfdff;
+    }
+    .constraint-item strong { display: block; color: var(--brand); margin-bottom: 2px; }
+    .viewport-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tab-btn {
+      padding: 6px 12px; border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
+      font-size: 12px; font-weight: 600; cursor: pointer; color: var(--ink);
+    }
+    .tab-btn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .shot-frame {
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #eef2f7;
+      min-height: 260px; display: flex; flex-direction: column;
+    }
+    .shot-label {
+      padding: 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      background: #fff; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;
+    }
+    .shot-frame img { width: 100%; height: auto; display: block; }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: #f8fafc; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; background: #f1f5f9; padding: 2px 5px; border-radius: 4px; }
+    .tier { font-weight: 700; font-size: 11px; white-space: nowrap; }
+    .tier-0 { color: var(--danger); }
+    .tier-1 { color: var(--brand); }
+    .tier-2 { color: var(--warn); }
+    .tier-3 { color: var(--ok); }
+    .gate-bar {
+      position: fixed; left: 0; right: 0; bottom: 0; background: #ffffff; border-top: 1px solid var(--border);
+      padding: 14px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06);
+    }
+    .btn-row { display: flex; gap: 10px; }
+    .btn {
+      padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid var(--border);
+    }
+    .btn-approve { background: var(--ok); color: #fff; border-color: var(--ok); }
+    .btn-edit { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .btn-reject { background: #fff; color: var(--danger); border-color: #fecaca; }
+    .decision-out { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--brand); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="kicker">UIUX Surgical Enhancer v2 · Phase 3 Human Gate (Not Yet Applied)</div>
+        <h1>{{PROJECT_NAME}} — Surgical Upgrade Proposal</h1>
+      </div>
+      <div class="meta">
+        Run ID: {{RUN_ID}} · Branch: {{WORKTREE_BRANCH}} · System: {{DESIGN_SYSTEM}}
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>A. Hard Constraints (Machine-Checked by scripts/validate_bounds.py)</h2>
+      <div class="constraints">
+        <div class="constraint-item"><strong>1. Logo Frozen (Tier 0)</strong>IoU &ge; 0.98 · Position &Delta; &le; 2px</div>
+        <div class="constraint-item"><strong>2. Brand Colors</strong>Primary/Secondary &Delta;E00 &le; 3.0</div>
+        <div class="constraint-item"><strong>3. Typography</strong>Identical font families · Heading order intact</div>
+        <div class="constraint-item"><strong>4. UX Flow</strong>Nav order unchanged · 0 removed controls</div>
+        <div class="constraint-item"><strong>5. Accessibility</strong>0 new WCAG 2.2 AA violations · Touch &ge; 44px</div>
+        <div class="constraint-item"><strong>6. Performance</strong>LCP &le; 2.5s · TBT &le; 300ms · CLS &le; 0.1 · CSS &Delta; &le; 15%</div>
+        <div class="constraint-item"><strong>7. Surgical Bounds</strong>&le; 30% viewport pixels · &le; 3 restructured components</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Side-by-Side Before / After Mockup</h2>
+      <div class="viewport-tabs">
+        <button type="button" class="tab-btn active" onclick="switchViewport('desktop', this)">Desktop (1280&times;800)</button>
+        <button type="button" class="tab-btn" onclick="switchViewport('mobile', this)">Mobile (390&times;844)</button>
+      </div>
+      <div class="grid-2">
+        <div class="shot-frame">
+          <div class="shot-label"><span>Before (Baseline)</span><span id="before-meta">1280&times;800</span></div>
+          <img id="before-img" src="{{BEFORE_DESKTOP_SRC}}" alt="Baseline screenshot before surgical upgrade" />
+        </div>
+        <div class="shot-frame">
+          <div class="shot-label"><span>After (Proposed Mockup)</span><span id="after-meta">1280&times;800</span></div>
+          <img id="after-img" src="{{AFTER_DESKTOP_SRC}}" alt="Proposed surgical upgrade mockup" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>B. Ordered Safe Upgrades (System-Token Mapped)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Risk Tier</th>
+            <th>Component / Section</th>
+            <th>Before Token</th>
+            <th>After Token</th>
+            <th>Color / A11y Proof</th>
+            <th>Inspiration Ref</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{UPGRADE_ROWS}}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>C. Explicitly Rejected Ideas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Rejected Idea</th>
+            <th>Reason / Violated Constraint</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{REJECTED_ROWS}}
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <div class="gate-bar">
+    <div class="decision-out" id="decision-output">Status: Awaiting Human Decision (Phase 4 blocked until APPROVE)</div>
+    <div class="btn-row">
+      <button type="button" class="btn btn-reject" onclick="recordDecision('REJECT')">REJECT</button>
+      <button type="button" class="btn btn-edit" onclick="recordDecision('EDIT')">REQUEST EDITS</button>
+      <button type="button" class="btn btn-approve" onclick="recordDecision('APPROVE')">APPROVE &amp; UNLOCK PHASE 4</button>
+    </div>
+  </div>
+
+  <script>
+    const SHOTS = {
+      desktop: { label: '1280\u00d7800', before: '{{BEFORE_DESKTOP_SRC}}', after: '{{AFTER_DESKTOP_SRC}}' },
+      mobile: { label: '390\u00d7844', before: '{{BEFORE_MOBILE_SRC}}', after: '{{AFTER_MOBILE_SRC}}' }
+    };
+    function switchViewport(vp, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('before-meta').textContent = SHOTS[vp].label;
+      document.getElementById('after-meta').textContent = SHOTS[vp].label;
+      document.getElementById('before-img').src = SHOTS[vp].before;
+      document.getElementById('after-img').src = SHOTS[vp].after;
+    }
+    function recordDecision(decision) {
+      const payload = { decision, run_id: '{{RUN_ID}}', decided_at: new Date().toISOString() };
+      document.getElementById('decision-output').textContent = 'Decision recorded: ' + JSON.stringify(payload);
+    }
+  </script>
+</body>
+</html>

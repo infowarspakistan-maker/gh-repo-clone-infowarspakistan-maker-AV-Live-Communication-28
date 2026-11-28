@@ -10,7 +10,7 @@
 If you ever need to verify, regenerate, or restore the full canonical state of `avlive.com.pk`, run the following deterministic recovery pipeline from the workspace root:
 
 ```bash
-# 1. Regenerate public/sitemap.xml (156 deduplicated canonical URLs) & public/llms-full.txt (32KB+ AI RAG Corpus)
+# 1. Regenerate public/sitemap.xml (193 deduplicated canonical URLs) & public/llms-full.txt (45KB+ AI RAG Corpus)
 npx tsx scripts/generate-sitemap.ts
 
 # 2. Execute the 20-parameter Hub-and-Spoke Silo, 1-Hop 301 Redirect & Zero-5xx GSC Audit
@@ -26,8 +26,8 @@ npm run build
 ### Core Source-of-Truth Recovery Files
 | Subsystem | Primary Source of Truth File | Fallback / Sync Mechanism |
 | :--- | :--- | :--- |
-| **54 Hardware SKUs, MPNs, GTINs, PKR Prices & Direct External Images** | `/src/lib/gmc-feed.ts` (`PRODUCT_GMC_METADATA`) | `buildFallbackProductFromGmcMeta()` + `/public/google_merchant_feed.tsv` |
-| **12 Hardware Categories** | `/src/pages/Category.tsx` (`FALLBACK_PRODUCT_CATEGORIES`) | `src/lib/firebase/firestore-helpers.ts` (`FALLBACK_CATEGORIES_LIST`) |
+| **88 Hardware & LED TV SKUs, MPNs, GTINs, PKR Prices & Direct/Local Images** | `/src/lib/gmc-feed.ts` + `/src/lib/tv-catalog.ts` (`PRODUCT_GMC_METADATA`) | `buildFallbackProductFromGmcMeta()` + `/public/google_merchant_feed.tsv` |
+| **13 Hardware Categories** | `/src/pages/Category.tsx` (`FALLBACK_PRODUCT_CATEGORIES`) | `src/lib/firebase/firestore-helpers.ts` (`FALLBACK_CATEGORIES_LIST`) |
 | **9 Enterprise Turnkey Services** | `/src/lib/services-catalog.ts` (`FALLBACK_SERVICES_CATALOG`) | `ServiceDetail.tsx` + `server.ts` SSR service snapshot |
 | **11 BoFu Engineering Blog Guides** | `/src/pages/Blog.tsx` (`INITIAL_BLOG_POSTS`) | `server.ts` (`blogMeta` & `legacyBlogSlugRedirects`) |
 | **Wave-1 SSR, 1-Hop 301 Normalizer & Zero-5xx Guard** | `/server.ts` (`resolveSingleHopCanonicalTarget`, `injectRouteSeoIntoHtml`) | Static `index.html` + `seoHtml` fault-tolerant fallback |
@@ -38,6 +38,20 @@ npm run build
 ---
 
 ## 2. Chronological Engineering Change Log (Append-Only)
+
+### `[v4.27]` — 2026-11-28 — Canonical Pillar Consolidation (`-in-pakistan`), Deterministic Sitemap `<lastmod>`, Enterprise Catalog UI Refactor & Verified AI Image SEO
+- **Trigger**: User requested a full-site consistency & ranking audit (specifically reviewing `-in-pakistan` URLs, sitemap performance, eliminating AI-generated UI feel, simplifying the hero slider to be cleaner/more CTA-driven, and improving image recognition for Google Images & AI chatbots).
+- **Implementation Summary**:
+  1. **Pillar De-Cannibalization & Single-Hop 301 Consolidation (`/server.ts`, `src/App.tsx`, `src/lib/sitemap-generator.ts`, `src/pages/KeywordLandingPage.tsx`, `src/components/Footer.tsx`, `src/components/FooterAccordion.tsx`, `src/pages/HtmlSitemap.tsx`, `scripts/seo-silo-audit.ts`)**:
+     - Consolidated cannibalizing routes into single-hop `301` redirects targeting the authoritative legacy pillars: `/video-conferencing`, `/video-conferencing-solutions`, and `/conference-room-solutions` $\rightarrow$ `/video-conference-in-pakistan`; `/corporate-event-management` and `/corporate-event-management-pakistan` $\rightarrow$ `/event-management-in-pakistan`; `/services/video-conferencing-solutions` $\rightarrow$ `/services/boardroom-integration`; `/services/corporate-event-management` $\rightarrow$ `/services/corporate-events`.
+     - Preserved `/category/video-conferencing` for e-commerce hardware SKUs and scoped `/video-conference` specifically as the Interactive Boardroom Configurator & Protocol Hub (**`193` deduplicated canonical URLs**: `72` static/brand/geo/pillar, `88` products, `13` categories, `9` services, `11` blogs).
+     - Replaced blanket today `<lastmod>` generation in `sitemap-generator.ts` with deterministic per-route release timestamps so Googlebot prioritizes genuine updates.
+  2. **Enterprise Catalog UI Refactor & Hero Simplification (`index.html`, `src/index.css`, `src/pages/Home.tsx`, `src/pages/*`, `src/components/*`)**:
+     - Standardized typography on `Plus Jakarta Sans` + `JetBrains Mono` in `index.html` and `src/index.css`.
+     - Streamlined hero slides on `Home.tsx` to concise ~5-word headlines, 1-line subtitle, and dual high-contrast `rounded-lg` CTAs; replaced `border-l-4` Answer-First sidebars with crisp bordered cards (`bg-slate-50 border border-slate-200 rounded-xl`), removed `Sparkles` icons, `animate-pulse` status dots, and decorative blur blobs across all public storefront pages and popups.
+  3. **Verified AI & Google Image SEO Upgrade (`/public/images/categories/*.webp`, `src/lib/image-seo.ts`, `src/lib/sitemap-generator.ts`, `src/pages/*`)**:
+     - Replaced all remaining `images.unsplash.com` URLs across public storefront pages (`Solutions.tsx`, `BuyersGuides.tsx`, `Esports.tsx`, `Blog.tsx`, `SetupWizard.tsx`, `About.tsx`, `Contact.tsx`, `seed.ts`) with descriptive local `/images/categories/*.webp` and `/images/projects/*.webp` hardware/event photography.
+     - Enriched `src/lib/image-seo.ts` and exported explicit `Verified Image URL` metadata in `/public/llms-full.txt` so Google Images and AI assistants resolve every asset accurately.
 
 ### `[v4.14]` — 2026-11-21 — Sitewide Image SEO Registry, Descriptive Filenames, HTML `title` + Rich `alt` Coverage, `Schema.org` `ImageObject` & Zero Broken Local Links
 - **Trigger**: User requested a complete audit and upgrade of every uploaded image across the site so that every image carries a well-briefed HTML `title` attribute, rich descriptive `alt` text (hardware + client/venue + Pakistan), SEO-friendly filenames, `Schema.org` `ImageObject` structured data, and zero broken local image links.

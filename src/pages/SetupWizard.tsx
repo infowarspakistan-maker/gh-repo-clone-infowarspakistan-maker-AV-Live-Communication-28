@@ -4,7 +4,7 @@ import {
   Users, 
   Video, 
   Phone, 
-  Sparkles, 
+  Wifi, 
   ChevronRight, 
   ChevronLeft, 
   Check, 
@@ -167,7 +167,7 @@ export function SetupWizard() {
           id: 'wireless',
           label: 'Wireless Roaming & Hot-Swappable',
           description: 'DECT-powered handsets and portable high-fidelity speakerphones.',
-          icon: Sparkles
+          icon: Wifi
         }
       ]
     }
@@ -183,7 +183,7 @@ export function SetupWizard() {
       basePrice: 175000,
       retailPrice: 198000,
       badge: 'Bestseller • Small Spaces',
-      image: 'https://images.unsplash.com/photo-1517502884422-41eaaced0168?q=80&w=800&auto=format&fit=crop',
+      image: '/images/video-conference/huddle-space.webp',
       description: 'An elite, small-footprint video conferencing system featuring true 4K resolution, auto-framing intelligence, and stereo audio. Ideal for high-impact communication with zero setup hassle.',
       keyFeatures: [
         'Plug & Play USB connectivity to any laptop/PC',
@@ -200,7 +200,7 @@ export function SetupWizard() {
           description: 'High-performance 4K camera bar with auto-tracking, integrated stereo speakers, and smart microphones.',
           quantity: 1,
           price: 135000,
-          image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400&auto=format&fit=crop'
+          image: '/images/categories/video-conferencing-4k-bars-pakistan.webp'
         },
         {
           id: 'poly-sync20',
@@ -210,7 +210,7 @@ export function SetupWizard() {
           description: 'USB/Bluetooth speakerphone with triple-microphone array and bass reflex audio, serving as desk audio expansion.',
           quantity: 1,
           price: 40000,
-          image: 'https://images.unsplash.com/photo-1589003077984-894e133dabab?q=80&w=400&auto=format&fit=crop'
+          image: '/images/video-conference/huddle-space.webp'
         }
       ]
     },
@@ -222,7 +222,7 @@ export function SetupWizard() {
       basePrice: 105000,
       retailPrice: 122000,
       badge: 'Audio Leader • High Productivity',
-      image: 'https://images.unsplash.com/photo-1557425955-df376b5903c8?q=80&w=800&auto=format&fit=crop',
+      image: '/images/products/poly-vvx-411-main.webp',
       description: 'Equip your desk with standard-setting IP Telephony. Pairs Yealink’s flagship prime business color-display phone with premium noise-cancelling active wireless headset.',
       keyFeatures: [
         '16 SIP accounts with high-res adjustable color LCD screen',
@@ -239,7 +239,7 @@ export function SetupWizard() {
           description: 'Adjustable 4.3" pixel color screen, built-in Bluetooth and dual-band Wi-Fi, supporting 16 SIP accounts.',
           quantity: 1,
           price: 45000,
-          image: 'https://images.unsplash.com/photo-1520607162513-87226c69f244?q=80&w=400&auto=format&fit=crop'
+          image: '/images/products/poly-vvx-411-main.webp'
         },
         {
           id: 'poly-voyager-focus',
@@ -249,7 +249,7 @@ export function SetupWizard() {
           description: 'Stereo Bluetooth headset with Hybrid ANC, smart sensor answer, and premium comfort ear cups.',
           quantity: 1,
           price: 42000,
-          image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400&auto=format&fit=crop'
+          image: '/images/categories/enterprise-anc-headsets-pakistan.webp'
         },
         {
           id: 'yealink-w73h',
@@ -259,7 +259,7 @@ export function SetupWizard() {
           description: 'High-definition voice roaming handset, pairing with standard business DECT bases.',
           quantity: 1,
           price: 18000,
-          image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=400&auto=format&fit=crop'
+          image: '/images/categories/voip-ip-pbx-phone-systems-pakistan.webp'
         }
       ]
     },
@@ -271,7 +271,7 @@ export function SetupWizard() {
       basePrice: 365000,
       retailPrice: 415000,
       badge: 'Most Popular • Conference Rooms',
-      image: 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?q=80&w=800&auto=format&fit=crop',
+      image: '/images/products/poly-studio-x50-tc8.webp',
       description: 'A complete standalone Android room solution. Eliminates the need for a dedicated room PC by running Microsoft Teams or Zoom Rooms natively right on the smart bar hardware.',
       keyFeatures: [
         'Powerful Android OS built-in, runs native UC applications',
@@ -288,7 +288,7 @@ export function SetupWizard() {
           description: '20MP camera with 133° field-of-view, 8 MEMS microphone array, and premium speaker. Android powered.',
           quantity: 1,
           price: 265000,
-          image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=400&auto=format&fit=crop'
+          image: '/images/products/poly-studio-x50-tc8.webp'
         },
         {
           id: 'yealink-ctp18',
@@ -298,7 +298,7 @@ export function SetupWizard() {
           description: '8" touch screen controller, lets users join, control cameras, and adjust layouts directly from the conference table.',
           quantity: 1,
           price: 100000,
-          image: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=400&auto=format&fit=crop'
+          image: '/images/categories/touch-panels-interactive-displays-pakistan.webp'
         }
       ]
     },
@@ -310,7 +310,7 @@ export function SetupWizard() {
       basePrice: 745000,
       retailPrice: 835000,
       badge: 'Enterprise Flagship • Large Rooms',
-      image: 'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?q=80&w=800&auto=format&fit=crop',
+      image: '/images/products/poly-x70-boardroom.webp',
       description: 'Our ultimate boardroom deployment. Uses intelligent dual-cameras to dynamically pan, scan, and switch views between speaker close-ups and full room overviews, paired with tabletop central smart dialer.',
       keyFeatures: [
         'Dual 4K ultra-wide and telephoto lenses with seamless camera transition',
@@ -327,7 +327,7 @@ export function SetupWizard() {
           description: 'State-of-the-art dual 20MP camera bar with stereo speakers and specialized noise-reduction algorithm.',
           quantity: 1,
           price: 545000,
-          image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=400&auto=format&fit=crop'
+          image: '/images/products/poly-x70-studio.webp'
         },
         {
           id: 'yealink-cp965',
@@ -337,7 +337,7 @@ export function SetupWizard() {
           description: 'Flagship conference phone with 5-inch touch screen, built-in 13-microphone array, and black acoustic fabric design.',
           quantity: 1,
           price: 200000,
-          image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=400&auto=format&fit=crop'
+          image: '/images/projects/vissonic-delegate-boardroom.webp'
         }
       ]
     },
@@ -349,7 +349,7 @@ export function SetupWizard() {
       basePrice: 135000,
       retailPrice: 155000,
       badge: 'Agile • 100% Wireless Audio',
-      image: 'https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?q=80&w=800&auto=format&fit=crop',
+      image: '/images/projects/multicity-teams-boardrooms.webp',
       description: 'Unbind your meeting space from legacy floor wires. Uses high-performance DECT cordless base stations and daisy-chainable smart Bluetooth speakerphones to establish clear voice links anywhere instantly.',
       keyFeatures: [
         'Smart conference speakerphone with automated daisy-chain capability',
@@ -366,7 +366,7 @@ export function SetupWizard() {
           description: 'Large room Bluetooth speakerphone with dual-passive radiators, status bars, and smartphone charge port.',
           quantity: 1,
           price: 85000,
-          image: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?q=80&w=400&auto=format&fit=crop'
+          image: '/images/video-conference/huddle-space.webp'
         },
         {
           id: 'yealink-w73p',
@@ -376,7 +376,7 @@ export function SetupWizard() {
           description: 'Includes W70B DECT base station and one W73H cordless handset with high HD voice quality.',
           quantity: 1,
           price: 32000,
-          image: 'https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=400&auto=format&fit=crop'
+          image: '/images/categories/voip-ip-pbx-phone-systems-pakistan.webp'
         },
         {
           id: 'logi-brio500',
@@ -386,7 +386,7 @@ export function SetupWizard() {
           description: '1080p full-HD webcam with auto-framing, dual noise-reducing mics, and dynamic exposure adjustment.',
           quantity: 1,
           price: 18000,
-          image: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=400&auto=format&fit=crop'
+          image: '/images/categories/ptz-optical-conference-cameras-pakistan.webp'
         }
       ]
     }
@@ -513,7 +513,7 @@ export function SetupWizard() {
           id: `addon-${addonId}-${currentRecommended.id}`,
           name: `${addon.name} (${currentRecommended.name})`,
           price: addon.price,
-          image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=200&auto=format&fit=crop',
+          image: '/images/categories/video-conferencing-4k-bars-pakistan.webp',
           brand: 'Professional Services'
         }, 1);
       }
@@ -603,17 +603,13 @@ export function SetupWizard() {
           <motion.div 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-[3rem] shadow-xl border border-gray-100 p-8 sm:p-16 text-center relative overflow-hidden mt-6"
+            className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 sm:p-14 text-center relative overflow-hidden mt-6"
             id="wizard-intro-card"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#00B4D8]/10 to-transparent rounded-full translate-x-20 -translate-y-20"></div>
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-gray-50 to-transparent rounded-full -translate-x-32 translate-y-32"></div>
-
             <div className="relative z-10 max-w-2xl mx-auto">
-              <div className="inline-flex items-center gap-2 bg-[#00B4D8]/10 text-[#00B4D8] px-4 py-2 rounded-full mb-6">
-                <Sparkles size={14} className="animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Smart Hardware Configurator</span>
-              </div>
+              <p className="text-[11px] font-black uppercase tracking-widest text-[#0077B6] mb-3">
+                Hardware Sizing Wizard
+              </p>
               
               <h1 className="text-4xl sm:text-5xl font-black text-[#1A2B4C] tracking-tight leading-tight mb-6">
                 Discover Your Perfect Meeting Space Setup in 60 Seconds
@@ -763,14 +759,11 @@ export function SetupWizard() {
             className="space-y-10 mt-6"
           >
             {/* Recommendation Title */}
-            <div className="bg-[#1A2B4C] rounded-[2.5rem] p-8 sm:p-12 text-white relative overflow-hidden shadow-xl border border-gray-800">
-              <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-[#00B4D8]/10 to-transparent rounded-full translate-x-32 -translate-y-32"></div>
-              
+            <div className="bg-[#1A2B4C] rounded-2xl p-8 sm:p-10 text-white relative overflow-hidden border border-slate-700">
               <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 bg-[#00B4D8] text-white px-4 py-1.5 rounded-full mb-6">
-                  <Sparkles size={12} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Optimal Match Identified</span>
-                </div>
+                <p className="text-[11px] font-black uppercase tracking-widest text-[#00B4D8] mb-3">
+                  Recommended Specification
+                </p>
 
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                   <div>

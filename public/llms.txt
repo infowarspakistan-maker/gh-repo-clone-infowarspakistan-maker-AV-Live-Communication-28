@@ -1,14 +1,16 @@
 # AV Live Communications (avlive.com.pk)
 
-> AV Live Communications is Pakistan's premier enterprise Audio-Visual (AV) systems integrator, Video Conferencing hardware distributor, and Corporate Event Management company. Operating across Lahore, Karachi, Islamabad, and nationwide, AV Live specializes in two primary commercial pillars: (1) Video Conferencing in Pakistan (Polycom Group 500, Poly Studio X70/X72, Logitech Rally Bar, Cisco Room Kits, Yealink, Zoom Rooms, Microsoft Teams Rooms) and (2) Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Displays, and 3D Projection Mapping. All pricing is denominated in Pakistani Rupees (PKR / Rs.) with official FBR GST/NTN invoicing and a 15-minute technical callback SLA.
+> AV Live Communications is Pakistan's premier enterprise Audio-Visual (AV) systems integrator, Video Conferencing & Commercial Display distributor, and Corporate Event Management company. Operating across Lahore, Karachi, Islamabad, and nationwide, AV Live specializes in two primary commercial pillars: (1) Video Conferencing in Pakistan & Enterprise Displays (Polycom Group 500, Poly Studio X70/X72, Logitech Rally Bar, Cisco Room Kits, Yealink, Samsung Crystal UHD, TCL Google TV, Horion IFP, Zoom Rooms, Microsoft Teams Rooms) and (2) Turnkey Corporate Event Management, Hybrid Events, 3D Hologram Displays, and 3D Projection Mapping. All pricing is denominated in Pakistani Rupees (PKR / Rs.) with official FBR GST/NTN invoicing and a 15-minute technical callback SLA.
 
 ## Pillar 1: Video Conferencing in Pakistan & Enterprise Hardware Categories
-- [Video Conferencing in Pakistan Hub](https://avlive.com.pk/video-conferencing): Complete boardroom AV design, acoustic calibration, and multi-camera tracking systems.
+- [Video Conference in Pakistan Pillar](https://avlive.com.pk/video-conference-in-pakistan): Complete boardroom AV design, acoustic calibration, PKR pricing, and multi-camera tracking systems.
+- [Interactive Boardroom Configurator & SIP Architecture](https://avlive.com.pk/video-conference): Interactive room sizing calculator and H.323/SIP deployment topology tool.
 - [Video Conferencing Hardware Category](https://avlive.com.pk/category/video-conferencing): Genuine Polycom Group 500 codecs, Poly Studio X70/X72 dual-4K AI video bars, Poly Studio X52/X50, Logitech Rally Bar, and Cisco Room Kits.
 - [Boardroom Codecs](https://avlive.com.pk/category/boardroom-codecs): Standards-based H.323/SIP and native Teams/Zoom room codecs.
 - [Large Room & Auditorium AV](https://avlive.com.pk/category/large-room): 14-to-40+ seat executive boardroom and auditorium video collaboration bundles.
 - [4K Optical PTZ Cameras](https://avlive.com.pk/category/ptz-cameras): Motorized 12x to 25x optical zoom cameras for boardrooms and lecture halls.
 - [Touch Panels & Room Controllers](https://avlive.com.pk/category/touch-panels): 10-inch PoE scheduling panels and interactive 4K flat panels (Horion K6A).
+- [LED TVs & Commercial Displays](https://avlive.com.pk/category/led-tv-displays): Official Samsung Crystal UHD, TCL 4K Google TV, and Horion commercial display series in 32" to 85" sizes.
 - [Conference Speakerphones & Ceiling Mics](https://avlive.com.pk/category/speakerphones): Beamforming microphone arrays and daisy-chained table speakerphones.
 - [IP Phones & Executive Desk Endpoints](https://avlive.com.pk/category/ip-phones): Cisco, Yealink, Polycom VVX, Grandstream, and Fanvil Gigabit PoE IP phones.
 - [VoIP Phone Systems & IP PBX Servers](https://avlive.com.pk/category/voip-phone-systems): Grandstream UCM6304/UCM6308, 3CX Pro/Enterprise, FreePBX, and Cisco CUCM.
@@ -17,7 +19,8 @@
 - [IP Security Cameras](https://avlive.com.pk/category/ip-cameras): Axis, Hikvision ColorVu, Dahua Starlight, and Uniview NDAA-compliant IP surveillance.
 - [SIP Intercom, Paging & PA Systems](https://avlive.com.pk/category/intercom-paging-access): Bosch PAVIRO EN 54-16 voice evacuation, ITC Audio PA, and 2N SIP intercoms.
 
-## Pillar 2: Corporate Event Management, Hybrid Events & 3D Hologram Displays
+## Pillar 2: Event Management in Pakistan, Hybrid Events & 3D Hologram Displays
+- [Event Management in Pakistan Pillar](https://avlive.com.pk/event-management-in-pakistan): Flagship national turnkey corporate event production, SMD LED video walls, and stage engineering.
 - [Corporate Event Management & Turnkey Stage Production in Pakistan](https://avlive.com.pk/services/corporate-events): End-to-end Corporate event management, executive summit staging, fine-pitch SMD LED video walls, line-array PA sound, and 3D Hologram Display production across Lahore, Karachi, and Islamabad.
 - [Hybrid Event Production & Live Video Conference Broadcasting in Pakistan](https://avlive.com.pk/services/hybrid-events): Broadcast-grade hybrid event engineering combining multi-camera SDI switching, zero-echo acoustic mix-minus, and enterprise Video Conference in Pakistan via Poly X70 and Polycom Group 500.
 - [Expo Organizing, Custom Exhibition Booths & Hologram Display Pavilions](https://avlive.com.pk/services/expo-organizing): Turnkey trade show and expo organizing in Pakistan featuring custom 3D exhibition stalls, SMD video walls, interactive kiosks, and 3D Hologram Display attractors at Expo Centre Lahore & Karachi.
@@ -60,7 +63,7 @@
 
 ## Structured Feeds, Full LLM Catalog & Sitemaps
 - **Full LLM Hardware & Pricing Knowledge Base**: https://avlive.com.pk/llms-full.txt
-- **XML Sitemap (157 Canonical URLs)**: https://avlive.com.pk/sitemap.xml
+- **XML Sitemap (193 Canonical URLs)**: https://avlive.com.pk/sitemap.xml
 - **HTML Sitemap Directory**: https://avlive.com.pk/sitemap
 - **Google Merchant Center Product Feed (XML)**: https://avlive.com.pk/feed/google-merchant.xml
 - **Google Merchant Center Product Feed (CSV)**: https://avlive.com.pk/feed/google-merchant.csv

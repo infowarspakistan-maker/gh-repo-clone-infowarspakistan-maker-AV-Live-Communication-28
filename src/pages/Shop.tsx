@@ -67,8 +67,9 @@ const FALLBACK_SHOP_CATEGORIES: Category[] = [
   { id: 'voip-phone-systems', name: 'VoIP PBX & Gateways', slug: 'voip-phone-systems', description: 'Enterprise IP PBX & VoIP Gateways', parentId: null, displayOrder: 8, isActive: true },
   { id: 'headsets', name: 'Enterprise Headsets', slug: 'headsets', description: 'ANC Call Center & UC Headsets', parentId: null, displayOrder: 9, isActive: true },
   { id: 'projectors', name: 'Projectors & Displays', slug: 'projectors', description: 'Laser Projectors & Interactive Displays', parentId: null, displayOrder: 10, isActive: true },
-  { id: 'ip-cameras', name: 'IP Security Cameras', slug: 'ip-cameras', description: 'Enterprise IP Surveillance & NVRs', parentId: null, displayOrder: 11, isActive: true },
-  { id: 'intercom-paging-access', name: 'PA, Intercom & Access', slug: 'intercom-paging-access', description: 'SIP Intercom, Paging & Access Control', parentId: null, displayOrder: 12, isActive: true },
+  { id: 'led-tv-displays', name: 'LED TVs & Commercial Displays', slug: 'led-tv-displays', description: 'Samsung Crystal UHD, TCL 4K Google TVs & Horion Interactive Panels', parentId: null, displayOrder: 11, isActive: true },
+  { id: 'ip-cameras', name: 'IP Security Cameras', slug: 'ip-cameras', description: 'Enterprise IP Surveillance & NVRs', parentId: null, displayOrder: 12, isActive: true },
+  { id: 'intercom-paging-access', name: 'PA, Intercom & Access', slug: 'intercom-paging-access', description: 'SIP Intercom, Paging & Access Control', parentId: null, displayOrder: 13, isActive: true },
 ];
 
 export function Shop() {
@@ -147,13 +148,27 @@ export function Shop() {
           (!(c as any).type || (c as any).type === 'product')
       );
       if (productOnlyCats.length > 0) {
-        setCategories(productOnlyCats);
+        const mergedCatsBySlug = new Map<string, Category>();
+        for (const fc of FALLBACK_SHOP_CATEGORIES) {
+          mergedCatsBySlug.set(fc.slug, fc);
+        }
+        for (const lc of productOnlyCats) {
+          mergedCatsBySlug.set(lc.slug, lc);
+        }
+        setCategories(Array.from(mergedCatsBySlug.values()));
       }
     });
 
     const unsubscribeProducts = subscribeToProducts((data) => {
       if (data && data.length > 0) {
-        setProducts(data);
+        const mergedBySlug = new Map<string, Product>();
+        for (const fp of INITIAL_FALLBACK_SHOP_PRODUCTS) {
+          mergedBySlug.set(getCanonicalProductSlug(fp, fp.id), fp);
+        }
+        for (const lp of data) {
+          mergedBySlug.set(getCanonicalProductSlug(lp, lp.id), lp);
+        }
+        setProducts(Array.from(mergedBySlug.values()));
       }
       setLoading(false);
     }, { isActive: true });
@@ -559,18 +574,26 @@ export function Shop() {
       : 'https://avlive.com.pk/shop';
 
   const shopSeoTitle = activeSingleBrandName
-    ? `${activeSingleBrandName} Official Dealer & Price in Pakistan | AV Live`
+    ? activeSingleBrandSlug === 'samsung'
+      ? 'Samsung LED & Crystal UHD TV Price in Pakistan | Official Dealer | AV Live'
+      : activeSingleBrandSlug === 'tcl'
+        ? 'TCL 4K Google & Smart LED TV Price in Pakistan | Official Dealer | AV Live'
+        : `${activeSingleBrandName} Official Dealer & Price in Pakistan | AV Live`
     : isBrandsIndexPage
-      ? 'Authorized Enterprise AV Brands in Pakistan | AV Live'
+      ? 'Authorized Enterprise AV & Display Brands in Pakistan | AV Live'
       : selectedCategoryName
         ? `${selectedCategoryName} Price in Pakistan | Enterprise AV Store | AV Live`
-        : 'Enterprise AV Shop | Poly, Logitech & Cisco | AV Live';
+        : 'Enterprise AV Shop | Poly, Cisco, Samsung & TCL | AV Live';
 
   const shopSeoDescription = activeSingleBrandName
-    ? `Buy genuine ${activeSingleBrandName} video conferencing, IP phones, projectors, and professional AV hardware in Pakistan with official warranty and nationwide delivery.`
+    ? activeSingleBrandSlug === 'samsung'
+      ? 'Buy genuine Samsung Crystal UHD (U8000F, DU8000, DU7000) and Full HD/HD Smart LED TVs (32" to 85") in Pakistan with verified PKR pricing, official warranty, and nationwide delivery.'
+      : activeSingleBrandSlug === 'tcl'
+        ? 'Buy genuine TCL 4K Google TVs (V6D, P6L, P755, P6K, P79L, T6D) and Smart LED TVs (32" to 75") in Pakistan with verified PKR pricing, official warranty, and nationwide delivery.'
+        : `Buy genuine ${activeSingleBrandName} video conferencing, displays, IP phones, projectors, and professional AV hardware in Pakistan with official warranty and nationwide delivery.`
     : isBrandsIndexPage
-      ? 'Browse official enterprise hardware by authorized brand in Pakistan: HP Poly, Cisco, Logitech, Yealink, Jabra, Bosch, Hikvision, Dahua & Epson.'
-      : 'Buy genuine video conferencing hardware in Pakistan: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Cisco Room Kits & Yealink IP phones.';
+      ? 'Browse official enterprise hardware & displays by authorized brand in Pakistan: HP Poly, Cisco, Logitech, Samsung, TCL, Horion, Yealink, Jabra, Bosch, Hikvision & Epson.'
+      : 'Buy genuine video conferencing hardware & LED TV displays in Pakistan: Polycom Group 500, Cisco Room Kits, Logitech Rally Bar, Samsung Crystal UHD & TCL 4K Google TVs.';
 
   const shopSchema = {
     '@context': 'https://schema.org',
@@ -2060,7 +2083,7 @@ export function Shop() {
 
       {/* Answer-First Brand & Enterprise Catalog Summary Table for Google & AI Answer Engines */}
       <section className="mt-16 bg-white rounded-[2.5rem] p-8 sm:p-10 border border-gray-100 shadow-sm space-y-6">
-        <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-5">
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
           <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
             Answer-First Procurement Summary
           </span>

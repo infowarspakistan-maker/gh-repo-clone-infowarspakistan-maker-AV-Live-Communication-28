@@ -2028,8 +2028,8 @@ export function VideoConferenceHub() {
           <div className="pt-5 border-t border-white/15 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-300">
             <span className="font-semibold text-white">Related Hubs:</span>
             <Link to="/video-conference-in-pakistan" className="hover:text-[#7DD3FC] hover:underline">Video Conference in Pakistan</Link>
-            <Link to="/video-conferencing-solutions" className="hover:text-[#7DD3FC] hover:underline">Boardroom Solutions</Link>
-            <Link to="/conference-room-solutions" className="hover:text-[#7DD3FC] hover:underline">Conference Room AV</Link>
+            <Link to="/services/boardroom-integration" className="hover:text-[#7DD3FC] hover:underline">Boardroom Integration</Link>
+            <Link to="/category/boardroom-codecs" className="hover:text-[#7DD3FC] hover:underline">Boardroom Codecs</Link>
             <Link to="/compare" className="hover:text-[#7DD3FC] hover:underline">Hardware Comparator</Link>
             <Link to="/lahore" className="hover:text-[#7DD3FC] hover:underline">Lahore HQ</Link>
             <Link to="/karachi" className="hover:text-[#7DD3FC] hover:underline">Karachi Hub</Link>

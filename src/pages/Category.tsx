@@ -45,6 +45,11 @@ import {
   isProductBundleOrKit,
   getProductListingBadges,
 } from '../lib/ebay-facets';
+import {
+  LED_TV_CATEGORY_PRODUCT_SLUGS,
+  getScreenSizeVariantsForSlug,
+  getTvCatalogEntry,
+} from '../lib/tv-catalog';
 
 const FALLBACK_PRODUCT_CATEGORIES: Record<
   string,
@@ -242,6 +247,13 @@ const FALLBACK_PRODUCT_CATEGORIES: Record<
       'itc-va-6200ma-pakistan',
     ],
   },
+  'led-tv-displays': {
+    name: 'LED TVs & Commercial Displays',
+    imageUrl: '/images/products/tv-samsung-u8000f.webp',
+    description:
+      'Official Samsung Crystal UHD & Smart TVs (32"–85"), TCL 4K Google & Smart LED TVs (32"–75"), and Horion 4K Interactive Flat Panels in Pakistan with verified PKR pricing, in-stock nationwide delivery, and official warranty.',
+    productSlugs: LED_TV_CATEGORY_PRODUCT_SLUGS,
+  },
 };
 
 function getFallbackCategoryProducts(slug?: string): Product[] {
@@ -284,6 +296,7 @@ export function Category() {
   // eBay-style client-side facet states on Category page
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedScreenSize, setSelectedScreenSize] = useState<string>('');
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [listingTab, setListingTab] = useState<'all' | 'sale' | 'bundles' | 'free-shipping'>('all');
@@ -299,6 +312,7 @@ export function Category() {
   useEffect(() => {
     setSearchQuery('');
     setSelectedBrands([]);
+    setSelectedScreenSize('');
     setSelectedRooms([]);
     setSelectedTypes([]);
     setListingTab('all');
@@ -412,6 +426,22 @@ export function Category() {
     );
   }, [categoryProducts]);
 
+  const isLedTvCategory = categorySlug === 'led-tv-displays';
+
+  const availableScreenSizes = useMemo(() => {
+    if (!isLedTvCategory) return [] as Array<{ size: string; count: number }>;
+    const counts = new Map<string, number>();
+    categoryProducts.forEach((p) => {
+      const slug = getCanonicalProductSlug(p, p.id);
+      const tvEntry = getTvCatalogEntry(slug);
+      const sz = tvEntry?.size || p.size || (/\b(32|40|43|50|55|65|75|85)\s*(?:inch|")/i.exec(p.productName || '')?.[1] ? `${/\b(32|40|43|50|55|65|75|85)\s*(?:inch|")/i.exec(p.productName || '')![1]}"` : '');
+      if (sz) counts.set(sz, (counts.get(sz) || 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .map(([size, count]) => ({ size, count }))
+      .sort((a, b) => parseInt(a.size, 10) - parseInt(b.size, 10));
+  }, [categoryProducts, isLedTvCategory]);
+
   const roomFacetCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     categoryProducts.forEach((p) => {
@@ -486,6 +516,17 @@ export function Category() {
       });
     }
 
+    if (selectedScreenSize) {
+      result = result.filter((p) => {
+        const slug = getCanonicalProductSlug(p, p.id);
+        const tvEntry = getTvCatalogEntry(slug);
+        const sz = tvEntry?.size || p.size || '';
+        if (sz === selectedScreenSize) return true;
+        const inches = selectedScreenSize.replace('"', '');
+        return new RegExp(`\\b${inches}\\s*(?:inch|")`, 'i').test(p.productName || '');
+      });
+    }
+
     if (selectedRooms.length > 0) {
       result = result.filter((p) => {
         const pRooms = getProductRoomSizeFacets(p);
@@ -542,7 +583,7 @@ export function Category() {
     }
 
     return result;
-  }, [categoryProducts, searchQuery, listingTab, selectedBrands, selectedRooms, selectedTypes, minPrice, maxPrice, sortOption]);
+  }, [categoryProducts, searchQuery, listingTab, selectedBrands, selectedScreenSize, selectedRooms, selectedTypes, minPrice, maxPrice, sortOption]);
 
   const toggleBrand = (brandName: string) => {
     const norm = brandName.toLowerCase();
@@ -560,6 +601,7 @@ export function Category() {
   const clearCategoryFilters = () => {
     setSearchQuery('');
     setSelectedBrands([]);
+    setSelectedScreenSize('');
     setSelectedRooms([]);
     setSelectedTypes([]);
     setListingTab('all');
@@ -573,6 +615,7 @@ export function Category() {
   const isAnyFilterActive = Boolean(
     searchQuery ||
       selectedBrands.length > 0 ||
+      selectedScreenSize ||
       selectedRooms.length > 0 ||
       selectedTypes.length > 0 ||
       listingTab !== 'all' ||
@@ -937,16 +980,27 @@ export function Category() {
             {
               "@type": "FAQPage",
               "@id": `${canonicalCategoryUrl}#faq`,
-              "mainEntity": [
-                {
-                  "@type": "Question",
-                  "name": `Which ${currentCategory.name} models are recommended for Video Conference in Pakistan?`,
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": `For enterprise boardrooms and hybrid events in Pakistan, our top-performing ${currentCategory.name} systems include the Cisco Webex Room Kit Pro P60, Cisco Room Kit EQ, Cisco Room Bar Pro, Polycom RealPresence Group 500, Poly Studio X72, and Logitech Rally Bar—all backed by local warranty and engineering support in Lahore, Karachi, and Islamabad.`
-                  }
-                }
-              ]
+              "mainEntity": isLedTvCategory
+                ? [
+                    {
+                      "@type": "Question",
+                      "name": "Which Samsung, TCL, and Horion LED TV models are available in Pakistan at AV Live?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "AV Live supplies 28+ official Samsung Crystal UHD & Smart TVs (U8000F, DU8000, DU7000, F6000, H5000, T5300 from 32\" to 85\"), TCL 4K Google & Smart LED TVs (V6D, P6L, P755, P6K, S51K, P79L, T6D, P8US from 32\" to 75\"), and Horion 4K Interactive Flat Panels with verified PKR pricing and nationwide delivery."
+                      }
+                    }
+                  ]
+                : [
+                    {
+                      "@type": "Question",
+                      "name": `Which ${currentCategory.name} models are recommended for Video Conference in Pakistan?`,
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": `For enterprise boardrooms and hybrid events in Pakistan, our top-performing ${currentCategory.name} systems include the Cisco Webex Room Kit Pro P60, Cisco Room Kit EQ, Cisco Room Bar Pro, Polycom RealPresence Group 500, Poly Studio X72, and Logitech Rally Bar—all backed by local warranty and engineering support in Lahore, Karachi, and Islamabad.`
+                      }
+                    }
+                  ]
             }
           ]
         }}
@@ -1130,6 +1184,79 @@ export function Category() {
               </div>
             )}
 
+            {isLedTvCategory && (
+              <div className="mb-4 bg-white rounded-2xl border border-gray-200 p-4 shadow-xs space-y-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-gray-500 mr-1">Brand:</span>
+                    {[
+                      { label: 'All Brands', value: '' },
+                      { label: 'Samsung', value: 'samsung' },
+                      { label: 'TCL', value: 'tcl' },
+                      { label: 'Horion', value: 'horion' },
+                    ].map((b) => {
+                      const isActive =
+                        b.value === ''
+                          ? selectedBrands.length === 0
+                          : selectedBrands.length === 1 && selectedBrands[0] === b.value;
+                      return (
+                        <button
+                          key={b.label}
+                          type="button"
+                          onClick={() => setSelectedBrands(b.value ? [b.value] : [])}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer border ${
+                            isActive
+                              ? 'bg-[#1A2B4C] text-white border-[#1A2B4C]'
+                              : 'bg-gray-50 text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8]'
+                          }`}
+                        >
+                          {b.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center gap-3 text-[11px] font-bold">
+                    <Link to="/brands/samsung" className="text-[#0088A8] hover:underline">Samsung Store →</Link>
+                    <Link to="/brands/tcl" className="text-[#0088A8] hover:underline">TCL Store →</Link>
+                    <Link to="/brands/horion" className="text-[#0088A8] hover:underline">Horion Store →</Link>
+                  </div>
+                </div>
+                {availableScreenSizes.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-2.5 border-t border-gray-100">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-gray-500 mr-1">Screen Size:</span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedScreenSize('')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
+                        !selectedScreenSize
+                          ? 'bg-[#00B4D8] text-white border-[#00B4D8]'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-[#1A2B4C]'
+                      }`}
+                    >
+                      All Sizes
+                    </button>
+                    {availableScreenSizes.map(({ size, count }) => {
+                      const active = selectedScreenSize === size;
+                      return (
+                        <button
+                          key={size}
+                          type="button"
+                          onClick={() => setSelectedScreenSize(active ? '' : size)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold tabular-nums transition-all cursor-pointer border ${
+                            active
+                              ? 'bg-[#00B4D8] text-white border-[#00B4D8]'
+                              : 'bg-white text-[#1A2B4C] border-gray-200 hover:border-[#00B4D8]'
+                          }`}
+                        >
+                          {size} <span className="opacity-70 font-semibold">({count})</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* eBay-Style Top Control Bar (Format Tabs + Sort + Grid/List View) */}
             <div className="bg-white rounded-2xl border border-gray-200 p-3 sm:p-4 mb-4 shadow-xs space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-gray-100">
@@ -1236,6 +1363,8 @@ export function Category() {
                 const rawImg = (Array.isArray(product.images) ? product.images : (typeof product.images === 'string' ? [product.images] : (product.image ? [product.image] : [])))[0] || '/images/products/poly-x70-studio.webp';
                 const imgUrl = optimizeGalleryImageUrl(rawImg, 480, 75);
                 const prodImgSeo = buildProductImageSeo(product, rawImg, 0);
+                const tvCardMeta = getTvCatalogEntry(prodSlug);
+                const tvCardSizes = tvCardMeta ? getScreenSizeVariantsForSlug(prodSlug) : [];
 
                 return viewMode === 'grid' ? (
                   <React.Fragment key={product.id || prodSlug}>
@@ -1281,34 +1410,47 @@ export function Category() {
                       <div className="p-4 flex flex-col flex-1 justify-between border-t border-gray-100">
                         <div>
                           <div className="flex items-center justify-between gap-2 mb-1.5">
-                            <span className="text-[10px] text-[#0088A8] font-black uppercase tracking-wider truncate">{product.brand}</span>
-                            {badges.mpn && (
+                            <span className="text-[10px] text-[#0088A8] font-black uppercase tracking-wider truncate">
+                              {product.brand}{tvCardMeta ? ` · ${tvCardMeta.size}` : ''}
+                            </span>
+                            {tvCardMeta ? (
+                              <span className="text-[10px] font-semibold text-gray-500 truncate">
+                                {tvCardMeta.modelSeries}
+                              </span>
+                            ) : badges.mpn ? (
                               <span className="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                                 {badges.mpn}
                               </span>
-                            )}
+                            ) : null}
                           </div>
                           <Link to={prodHref} className="block mb-2">
                             <h3 className="font-bold text-sm text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2 leading-snug min-h-[2.5rem]">
                               {product.productName}
                             </h3>
                           </Link>
-                          <div className="flex flex-wrap gap-1 mb-3">
-                            <span className="text-[10px] font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded">
-                              Brand New
-                            </span>
-                            {badges.roomLabel && (
-                              <span className="text-[10px] font-semibold text-[#1A2B4C] bg-[#00B4D8]/10 px-2 py-0.5 rounded truncate max-w-[130px]">
-                                {badges.roomLabel}
+                          {tvCardMeta ? (
+                            <p className="text-[11px] font-semibold text-gray-500 mb-3 truncate">
+                              {tvCardMeta.typeKeyFeature}
+                              {tvCardSizes.length > 1 ? ` · Sizes: ${tvCardSizes.map((s) => s.size).join(', ')}` : ''}
+                            </p>
+                          ) : (
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              <span className="text-[10px] font-semibold text-gray-600 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded">
+                                Brand New
                               </span>
-                            )}
-                          </div>
+                              {badges.roomLabel && (
+                                <span className="text-[10px] font-semibold text-[#1A2B4C] bg-[#00B4D8]/10 px-2 py-0.5 rounded truncate max-w-[130px]">
+                                  {badges.roomLabel}
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <div className="pt-3 border-t border-gray-100">
                           <div className="flex items-baseline gap-2 mb-1">
-                            <span className="text-lg font-black text-[#1A2B4C]">{formatPrice(effectivePrice)}</span>
+                            <span className="text-lg font-black text-[#1A2B4C] tabular-nums">{formatPrice(effectivePrice)}</span>
                             {hasSale && (
-                              <span className="text-xs text-gray-400 line-through font-semibold">{formatPrice(regularPrice)}</span>
+                              <span className="text-xs text-gray-400 line-through font-semibold tabular-nums">{formatPrice(regularPrice)}</span>
                             )}
                           </div>
                           <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-700 mb-3">
@@ -1445,12 +1587,14 @@ export function Category() {
       </div>
       
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-white rounded-[32px] p-8 sm:p-10 border border-gray-100 shadow-sm space-y-6">
-        <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-5">
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
           <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
             Answer-First Procurement Summary ({currentCategory.name})
           </span>
           <p className="text-sm sm:text-base font-bold text-[#1A2B4C] leading-relaxed">
-            For enterprise deployments in Pakistan, AV Live supplies {categoryProducts.length} verified <strong>{currentCategory.name}</strong> models from {brandsIncategory.slice(0, 5).join(', ') || 'HP Poly, Cisco, Logitech, and Yealink'}—complete with GS1 GTIN/MPN verification, official 1-to-3 year Pakistan warranty, and turnkey installation in Lahore, Karachi, and Islamabad.
+            {isLedTvCategory
+              ? `For corporate boardrooms, reception displays, hospitality lounges, and homes across Pakistan, AV Live supplies ${categoryProducts.length} in-stock Samsung Crystal UHD & Smart TVs (32"–85"), TCL 4K Google & Smart LED TVs (32"–75"), and Horion 4K Interactive Flat Panels—complete with transparent PKR pricing, official local warranty, FBR GST corporate billing, and optional wall-mount installation in Lahore, Karachi, and Islamabad.`
+              : `For enterprise deployments in Pakistan, AV Live supplies ${categoryProducts.length} verified ${currentCategory.name} models from ${brandsIncategory.slice(0, 5).join(', ') || 'HP Poly, Cisco, Logitech, and Yealink'}—complete with GS1 GTIN/MPN verification, official 1-to-3 year Pakistan warranty, and turnkey installation in Lahore, Karachi, and Islamabad.`}
           </p>
         </div>
 
@@ -1468,16 +1612,17 @@ export function Category() {
                 <tr className="bg-gray-50 border-b border-gray-200 text-[#1A2B4C] font-black uppercase text-[11px] tracking-wider">
                   <th className="py-3 px-4">Hardware Model</th>
                   <th className="py-3 px-4">Brand</th>
-                  <th className="py-3 px-4">Part Number (SKU/MPN)</th>
+                  <th className="py-3 px-4">{isLedTvCategory ? 'Screen Size & Series' : 'Part Number (SKU/MPN)'}</th>
                   <th className="py-3 px-4">Reference Price ({currency})</th>
                   <th className="py-3 px-4">Warranty &amp; Availability</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {categoryProducts.slice(0, 8).map((prod) => {
+                {categoryProducts.slice(0, isLedTvCategory ? 12 : 8).map((prod) => {
                   const slug = getCanonicalProductSlug(prod);
                   const prodHref = getProductHref(prod, prod.id);
                   const { effectivePrice } = resolveProductPricing(prod);
+                  const tvRow = getTvCatalogEntry(slug);
                   return (
                     <tr key={prod.id || slug} className="hover:bg-gray-50/80 transition-colors">
                       <td className="py-3 px-4 font-black text-[#1A2B4C]">
@@ -1486,9 +1631,13 @@ export function Category() {
                         </Link>
                       </td>
                       <td className="py-3 px-4 font-bold text-gray-600">{prod.brand}</td>
-                      <td className="py-3 px-4 font-mono text-xs text-gray-500">{prod.sku || prod.mpn || 'Official OEM'}</td>
-                      <td className="py-3 px-4 font-black text-[#00B4D8]">{formatPrice(effectivePrice)}</td>
-                      <td className="py-3 px-4 font-bold text-emerald-600">In Stock • 1-Yr Official PK Warranty</td>
+                      <td className="py-3 px-4 font-mono text-xs text-gray-500">
+                        {isLedTvCategory && tvRow
+                          ? `${tvRow.size} · ${tvRow.modelSeries}`
+                          : prod.sku || prod.mpn || 'Official OEM'}
+                      </td>
+                      <td className="py-3 px-4 font-black text-[#00B4D8] tabular-nums">{formatPrice(effectivePrice)}</td>
+                      <td className="py-3 px-4 font-bold text-emerald-600">In Stock • Official PK Warranty</td>
                     </tr>
                   );
                 })}
@@ -1498,32 +1647,34 @@ export function Category() {
         )}
 
         <p className="text-gray-600 leading-relaxed">
-          When investing in <strong>{currentCategory.name.toLowerCase()}</strong> for your corporate boardroom, <strong>hybrid event</strong>, or <strong>Corporate event management</strong> infrastructure in Pakistan, selecting genuine, PTA-compliant hardware is critical. At AV Live, we supply and integrate flagship <strong>Video conference</strong> systems—including the <strong>Polycom Group 500</strong> and <strong>Poly X70</strong>—alongside commercial audio, IP telephony, and <strong>Hologram Display</strong> solutions.
+          {isLedTvCategory
+            ? 'Compare Samsung Crystal UHD (U8000F, DU8000, DU7000) with Tizen OS, TCL 4K Google TV (V6D, P6L, P755, P6K, P79L, T6D) with AiPQ imaging and Dolby Audio, and Horion 4K interactive displays for executive boardrooms, auditoriums, and commercial signage in Pakistan.'
+            : <>When investing in <strong>{currentCategory.name.toLowerCase()}</strong> for your corporate boardroom, <strong>hybrid event</strong>, or <strong>Corporate event management</strong> infrastructure in Pakistan, selecting genuine, PTA-compliant hardware is critical. At AV Live, we supply and integrate flagship <strong>Video conference</strong> systems—including the <strong>Polycom Group 500</strong> and <strong>Poly X70</strong>—alongside commercial audio, IP telephony, and <strong>Hologram Display</strong> solutions.</>}
         </p>
         <p className="text-gray-600 leading-relaxed">
           Our certified technical consultants in <strong>Lahore, Karachi, and Islamabad</strong> provide acoustic room surveys, GS1-verified hardware procurement, and turnkey onsite installation for all <strong>{currentCategory.name.toLowerCase()}</strong> deployments.
         </p>
 
         <div className="pt-4 border-t border-gray-100 flex flex-wrap gap-3">
-          <Link to="/room-designer" className="text-xs font-black text-white bg-[#00B4D8] hover:bg-[#1A2B4C] px-4 py-2 rounded-full transition-colors">
+          <Link to="/room-designer" className="text-xs font-black text-white bg-[#00B4D8] hover:bg-[#1A2B4C] px-4 py-2 rounded-lg transition-colors">
             Launch 3D Room Designer &amp; LED Calculator →
           </Link>
-          <Link to="/video-conferencing-solutions" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
-            Parent Pillar: Video Conferencing Solutions →
+          <Link to="/video-conference-in-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 transition-colors">
+            Parent Pillar: Video Conference in Pakistan →
           </Link>
-          <Link to="/corporate-event-management" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
-            Parent Pillar: Corporate Event Management →
+          <Link to="/event-management-in-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 transition-colors">
+            Parent Pillar: Event Management in Pakistan →
           </Link>
-          <Link to="/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+          <Link to="/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 transition-colors">
             Logitech Rally Bar vs. Poly Studio X50 Guide →
           </Link>
-          <Link to="/blog/yealink-vs-cisco-video-conferencing-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+          <Link to="/blog/yealink-vs-cisco-video-conferencing-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 transition-colors">
             Yealink vs. Cisco Room Kits Comparison →
           </Link>
-          <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+          <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 transition-colors">
             6–30 Person Boardroom BoM Price Guide →
           </Link>
-          <Link to="/blog/banking-healthcare-university-av-solutions-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-full border border-gray-200 transition-colors">
+          <Link to="/blog/banking-healthcare-university-av-solutions-pakistan" className="text-xs font-bold text-[#1A2B4C] hover:text-[#00B4D8] bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 transition-colors">
             Banking, Healthcare &amp; University AV Guide →
           </Link>
         </div>

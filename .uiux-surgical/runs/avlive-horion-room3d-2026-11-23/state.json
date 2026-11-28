@@ -1,0 +1,33 @@
+{
+  "run_id": "avlive-horion-room3d-2026-11-23",
+  "created_at": "2026-11-23T22:14:00-08:00",
+  "status": "rejected",
+  "target_route": "/room-designer",
+  "inspiration_url": "https://global.horion.com/solutions-corporate/",
+  "degraded": false,
+  "cost_usd": 0.0,
+  "design_system": {
+    "primary": "tailwind",
+    "secondary": ["three", "custom_tokens"],
+    "mapping_file": ".uiux-surgical/runs/avlive-smooth-hero-2026-11-23/system_mapping.json"
+  },
+  "baseline": {
+    "tokens": {
+      "workspace_bg": "#F8F9FA",
+      "canvas_bg": "#F1F5F9",
+      "brand_navy": "#1A2B4C",
+      "brand_cyan": "#00B4D8",
+      "hero_sky": "#38BDF8"
+    },
+    "gaps_vs_horion": [
+      "3D canvas backdrop is flat #F1F5F9 light grey, causing low architectural depth and weak screen/FOV contrast.",
+      "Presets are size-only (Focus/Small/Medium/Large) instead of corporate verticals (Executive Office, Boardroom, Training Room, Exhibition/SMD Lobby).",
+      "No Horion 86-inch K6A / mobile U-stand IFPD model or 4-split wireless casting / whiteboard / CMS signage screen textures.",
+      "No 3-state room lighting switcher (Daylight / Studio / Keynote Glow) or RT60 acoustic + optimal legibility deep-dive metrics."
+    ]
+  },
+  "human_gate": {
+    "decision": "rejected",
+    "notes": "User rejected the Horion 3D Room Designer proposal at Phase 3 Human Gate. Public preview removed; storefront untouched."
+  }
+}

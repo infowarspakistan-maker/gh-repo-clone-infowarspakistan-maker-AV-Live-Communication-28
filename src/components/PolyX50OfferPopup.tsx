@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { ShoppingBag, ArrowRight, Truck, ShieldCheck, Sparkles, Check } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Truck, ShieldCheck, Check } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { buildFallbackProductFromGmcMeta } from '../lib/gmc-feed';
 
@@ -336,8 +336,8 @@ export function PolyX50OfferPopup() {
 
               {/* Right White Product Showcase Panel */}
               <div className="relative bg-white flex flex-col items-center justify-center px-6 py-7 md:pl-12 md:pr-7 md:py-9 z-0">
-                <span className="mb-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-900 text-[10px] font-extrabold uppercase tracking-wider">
-                  <Sparkles size={11} /> MPN: 2215-86399-001 • Genuine Kit
+                <span className="mb-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 text-[10px] font-extrabold uppercase tracking-wider">
+                  <ShieldCheck size={11} /> MPN: 2215-86399-001 • Genuine Kit
                 </span>
 
                 <Link

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
-import { ArrowRight, Phone, Sparkles, CheckCircle2, ShieldCheck, MapPin, Award, Clock } from 'lucide-react';
+import { ArrowRight, Phone, CheckCircle2, ShieldCheck, MapPin, Award, Clock } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { RealProjectsAndClients } from '../components/RealProjectsAndClients';
@@ -154,44 +154,6 @@ const LANDING_CONFIGS: Record<string, LandingConfig> = {
       }
     ]
   },
-  'video-conferencing': {
-    title: 'Video Conferencing Room Architecture & Integration | AV Live',
-    description: 'Certified Zoom Rooms, Microsoft Teams Rooms (MTR) & H.323/SIP boardroom architecture in Lahore, Karachi & Islamabad with 15-min SLA.',
-    keywords: 'Video conferencing room architecture Pakistan, SIP H.323 codec integration, Zoom Rooms Pakistan, Microsoft Teams Rooms Pakistan, boardroom acoustic calibration, AV Live',
-    heroHeading: 'Video Conferencing Room Architecture, SIP/H.323 Codecs & Cloud Integration',
-    heroSubheading: 'Engineered room acoustics, PoE+ structured cabling, ceiling beamforming microphone arrays, and encrypted H.323/SIP & MTR/Zoom Room integration across Lahore, Karachi, and Islamabad.',
-    pillar: 'Video Conferencing',
-    primaryCtaText: 'Book a Free Conference Room Acoustic Survey',
-    primaryCtaLink: '/contact',
-    locationCta: '15-Minute Engineering SLA across Lahore, Karachi & Islamabad',
-    answerFirstVerdict: 'Successful enterprise video conferencing integration requires matching room acoustics (RT60 < 0.6s) and table geometry with the right platform architecture: standards-based H.323/SIP hardware codecs for encrypted banking/defense boardrooms, Android all-in-one collaboration bars for 4–14 seat cloud rooms, or modular Windows MTR/Zoom Room bundles for multi-camera townhalls.',
-    comparisonTable: {
-      caption: 'Enterprise Video Conferencing Room Topologies & Integration Standards',
-      headers: ['Architecture Topology', 'Core Codec / Appliance', 'Network & Protocol Stack', 'Best Room Deployment', 'Turnkey SLA & Warranty'],
-      rows: [
-        ['Encrypted H.323 / SIP Hardware Codec', 'Polycom RealPresence Group 500 / Cisco Room Kit Plus', 'Dedicated Voice/Video VLAN, AES-256, H.323, SIP,On-Prem MCU', 'Commercial Banks, Defense, Ministries, 16–30 Seat Boardrooms', '15-Min SLA + On-Site Engineer'],
-        ['Native Cloud Appliance Video Bar', 'HP Poly Studio X52 / X72 / Logitech Rally Bar / Yealink A30', 'CollabOS / Poly VideoOS Native Zoom Rooms & Teams Rooms + USB BYOD', 'Huddle Spaces & 6–16 Seat Corporate Conference Rooms', '1-to-3 Year Local Swap Warranty'],
-        ['Multi-Camera Modular Pro-AV Matrix', 'Poly G7500 / Cisco Codec Pro + Dual 20x PTZ + Bosch Ceiling Mics', 'Dante Audio over IP, Dual 4K60 HDMI Matrix, QSC/Bosch DSP', '30–100+ Seat Auditoriums, HEC Lecture Halls & Hybrid Townhalls', 'Custom CAD Blueprint + Acoustic Tuning']
-      ]
-    },
-    features: [
-      'RT60 Reverberation Modeling, Acoustic Paneling & NoiseBlockAI Tuning',
-      'Standards-Based H.323 / SIP Hardware Codec Provisioning & Firewall Traversal',
-      'Dante Ceiling Beamforming Microphone Arrays & Multi-Zone DSP Matrices',
-      'Single-Cable USB-C BYOD & Wireless 4K Content Sharing (AirPlay, Miracast, Barco/Poly)',
-      'Complete CAD Wiring Schematics, FBR GST Invoicing & 15-Minute Nationwide SLA'
-    ],
-    faqs: [
-      {
-        question: 'How is /video-conferencing different from our Video Conference in Pakistan hardware catalog?',
-        answer: 'This hub focuses on boardroom acoustic engineering, H.323/SIP network topology, and multi-camera room integration. For direct model-by-model PKR hardware pricing and in-stock endpoints, visit our flagship Video Conference in Pakistan pillar at /video-conference-in-pakistan.'
-      },
-      {
-        question: 'Can you integrate existing Bosch or Shure conference microphones with Zoom and Microsoft Teams?',
-        answer: 'Yes. Using Dante-to-USB audio bridges and acoustic echo cancellation (AEC) DSPs, we integrate Bosch CCS 1000 D, Bosch PAVIRO, and ceiling arrays directly into Poly, Cisco, and Logitech rooms.'
-      }
-    ]
-  },
   'video-conference-in-pakistan': {
     title: 'Video Conference in Pakistan | Poly, Cisco & Logitech | AV Live',
     description: 'Complete B2B Video Conference in Pakistan solutions. Official Polycom Group 500, Poly X70, Zoom Rooms, Microsoft Teams Rooms & boardroom AV.',
@@ -280,30 +242,6 @@ const LANDING_CONFIGS: Record<string, LandingConfig> = {
       }
     ]
   },
-  'conference-room-solutions': {
-    title: 'Conference Room AV Setup Pakistan | Boardroom Solutions | AV Live',
-    description: 'Professional conference room AV design, acoustic treatment, smart displays, ceiling mics, and video bars for corporate offices in Pakistan.',
-    keywords: 'Conference room AV setup, boardroom AV installation Pakistan, ceiling mic array Lahore, video bar Karachi, AV Live',
-    heroHeading: 'Turnkey Conference Room AV Setup & Integration',
-    heroSubheading: 'Upgrade your corporate meeting spaces with ultra-clear audio arrays, crisp 4K displays, and seamless room automation designed for modern hybrid collaboration.',
-    pillar: 'Video Conferencing',
-    primaryCtaText: 'Get a Custom Quote in 24 Hours',
-    primaryCtaLink: '/contact',
-    locationCta: 'Request a Free On-Site Survey in Lahore, Karachi, or Islamabad',
-    features: [
-      'Custom Acoustic Analysis & Room Design Blueprint',
-      'Ceiling Beamforming Microphone Arrays & DSP Tuning',
-      '4K Interactive Touchscreens & Video Wall Deployments',
-      'Cable Management & Wireless Touch-Panel Controllers',
-      'Full Training & Nationwide Service Level Agreements'
-    ],
-    faqs: [
-      {
-        question: 'What is included in a complete conference room AV setup?',
-        answer: 'Our turnkey service includes acoustic site assessment, display mounting, video bar/camera setup, ceiling microphone array integration, cable routing, touch console configuration, and end-user training.'
-      }
-    ]
-  },
   'zoom-rooms': {
     title: 'Zoom Rooms Setup & Integration Pakistan | AV Live',
     description: 'Certified Zoom Meeting Room setup in Pakistan. Neat, Poly, Logitech, and Yealink Zoom Rooms appliances for small huddle spaces to large boardrooms.',
@@ -349,70 +287,6 @@ const LANDING_CONFIGS: Record<string, LandingConfig> = {
       {
         question: 'What is the difference between MTR on Windows vs Android?',
         answer: 'MTR on Windows offers dual 4K display capabilities, advanced multi-camera switching, and complex room audio DSPs, whereas Android MTR bars provide compact, rapid all-in-one deployment for huddle spaces.'
-      }
-    ]
-  },
-  'video-conferencing-solutions': {
-    title: 'Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad | Poly, Cisco, Yealink | AV Live',
-    description: 'Authorized Polycom video conferencing distributors Lahore, Cisco Room Kit installation Karachi, Boardroom AV integration services Islamabad, and Horion interactive flat panels.',
-    keywords: 'Polycom video conferencing distributors Lahore, Cisco Room Kit installation Karachi, Enterprise VoIP PBX setup Pakistan, Boardroom AV integration services Islamabad, Interactive flat panel displays for business Lahore, Video Conference in Pakistan',
-    heroHeading: 'Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad',
-    heroSubheading: 'Deploy certified Cisco, Poly, Yealink, Logitech, Horion, and Grandstream boardroom integration, huddle room kits, and 4K interactive flat panels—backed by a guaranteed 15-minute technical SLA.',
-    pillar: 'Video Conferencing',
-    primaryCtaText: 'Request a 15-Minute Quote',
-    primaryCtaLink: '/contact',
-    locationCta: 'Live Experience Centers & Standby Engineers in Johar Town (Lahore), Clifton (Karachi) & Blue Area (Islamabad)',
-    features: [
-      'Authorized Polycom Video Conferencing Distributors in Lahore (Poly Studio X72, X52 & Group 500)',
-      'Certified Cisco Room Kit Installation in Karachi & Boardroom AV Integration Services in Islamabad',
-      'Interactive Flat Panel Displays for Business in Lahore (Horion 65"–98" 4K Touch Boards)',
-      'Enterprise VoIP PBX Setup in Pakistan (Grandstream UCM6308, 3CX, FreePBX & Cisco CUCM)',
-      'Guaranteed 15-Minute Technical SLA Response, Zero-Downtime & On-Site Standby Engineers'
-    ],
-    faqs: [
-      {
-        question: 'What is the cost of a 30-person executive boardroom AV setup in Pakistan?',
-        answer: 'A turnkey 30-person executive boardroom AV setup in Lahore, Karachi, or Islamabad ranges from PKR 1,450,000 to PKR 3,200,000, including dual 4K Horion interactive flat panels, an optical PTZ codec or AI bar (Poly Studio X72, Polycom Group 500, or Cisco Room Kit Plus), ceiling/table microphone arrays, and acoustic calibration.'
-      },
-      {
-        question: 'Do you provide Polycom video conferencing in Lahore and Cisco Room Kit installation in Karachi?',
-        answer: 'Yes. AV Live Communications is an authorized partner for Cisco, Poly, Yealink, Logitech, Horion, and Grandstream with engineering hubs in Johar Town (Lahore), Clifton (Karachi), and Blue Area (Islamabad).'
-      },
-      {
-        question: 'What is included in your 15-minute technical SLA?',
-        answer: 'Our 15-minute SLA guarantees immediate engineering response via WhatsApp/hotline (0321 425 6263 / 0339 0000 921), 24-hour custom Bill of Materials (BoM) turnaround, and on-site standby engineer dispatch for critical executive meetings.'
-      }
-    ]
-  },
-  'corporate-event-management': {
-    title: 'Corporate Event Management & Hybrid Event Production in Lahore, Karachi & Islamabad | AV Live',
-    description: 'Turnkey Corporate hybrid event live streaming Lahore, SMD LED screen rental for corporate events, 3D hologram display stages Pakistan, and multi-camera event broadcasting Karachi.',
-    keywords: 'Corporate hybrid event live streaming Lahore, SMD LED screen rental for corporate events, 3D hologram display stages Pakistan, Multi-camera event broadcasting Karachi, Corporate event management, Event management',
-    heroHeading: 'Corporate Event Management & Hybrid Staging in Lahore, Karachi & Islamabad',
-    heroSubheading: 'Execute flawless executive summits, 3D hologram display stages, fine-pitch SMD LED video walls, and multi-camera hybrid event broadcasting with zero-downtime guarantees and on-site standby engineers.',
-    pillar: 'Event Management',
-    primaryCtaText: 'Request a 15-Minute Quote',
-    primaryCtaLink: '/event-quote',
-    locationCta: 'On-Site Production Teams in Johar Town & DHA (Lahore), Clifton (Karachi) & Blue Area (Islamabad)',
-    features: [
-      'Corporate Hybrid Event Live Streaming in Lahore with Two-Way Zoom/Teams & Poly X70 Bridging',
-      'Fine-Pitch P2.5 SMD LED Screen Rental for Corporate Events, AGMs & Product Launches',
-      '3D Hologram Display Stages in Pakistan (HoloGauze Mesh, Pepper’s Ghost & 3D LED Fan Matrices)',
-      'Multi-Camera Event Broadcasting in Karachi with 4K SDI Switching & Digital Line-Array Sound',
-      'Guaranteed 15-Minute Technical SLA, Redundant Signal Paths & Standby Broadcast Engineers'
-    ],
-    faqs: [
-      {
-        question: 'What is included in your corporate hybrid event live streaming and stage production packages?',
-        answer: 'Our turnkey packages include fine-pitch SMD LED screen rental for corporate events, 3D hologram display stages, multi-camera SDI broadcasting, line-array PA sound, and zero-echo Video conference bridging via Poly Studio X70 and Cisco codecs.'
-      },
-      {
-        question: 'Can you execute 3D hologram display stages and multi-camera event broadcasting in Lahore, Karachi, and Islamabad?',
-        answer: 'Yes. We own and operate all staging, SMD LED, 3D hologram, and broadcast switching inventory across Johar Town/DHA (Lahore), Clifton (Karachi), and Blue Area (Islamabad).'
-      },
-      {
-        question: 'How fast can we get an event or boardroom AV quotation?',
-        answer: 'Call 0321 425 6263 or 0339 0000 921 for an immediate 15-minute technical consultation and a complete itemized Bill of Quantities (BoQ) within 24 hours.'
       }
     ]
   },
@@ -496,11 +370,11 @@ export function KeywordLandingPage() {
           The URL <code className="bg-gray-200 px-2 py-0.5 rounded text-[#1A2B4C]">/{slug}</code> does not exist or has moved. Explore our core enterprise solutions below:
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Link to="/video-conferencing" className="bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all">
-            Video Conferencing in Pakistan
+          <Link to="/video-conference-in-pakistan" className="bg-[#1A2B4C] hover:bg-[#00B4D8] text-white font-black px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all">
+            Video Conference in Pakistan
           </Link>
-          <Link to="/events-services" className="bg-[#00B4D8] hover:bg-[#0096B4] text-white font-black px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all">
-            Corporate Event Management
+          <Link to="/event-management-in-pakistan" className="bg-[#00B4D8] hover:bg-[#0096B4] text-white font-black px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all">
+            Event Management in Pakistan
           </Link>
           <Link to="/shop" className="bg-white border border-gray-200 hover:border-[#1A2B4C] text-[#1A2B4C] font-black px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all">
             Browse Hardware Catalog
@@ -563,8 +437,7 @@ export function KeywordLandingPage() {
       <section className="relative bg-gradient-to-br from-[#1A2B4C] via-[#0F1B33] to-[#0A1120] text-white py-6 lg:py-10 px-3 sm:px-6 overflow-hidden border-b border-[#00B4D8]/20">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#00B4D8_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00B4D8]/10 border border-[#00B4D8]/30 text-[#00B4D8] font-black text-[10px] uppercase tracking-widest mb-2.5">
-            <Sparkles size={13} />
+          <div className="inline-flex items-center gap-1.5 text-[#38BDF8] font-bold text-xs uppercase tracking-widest mb-2">
             <span>{config.pillar} {config.city ? `• ${config.city}` : '• Pakistan-Wide'}</span>
           </div>
 
@@ -869,8 +742,8 @@ export function KeywordLandingPage() {
               <ul className="space-y-1.5 font-bold text-[#00B4D8]">
                 <li><Link to="/video-conference-in-pakistan" className="hover:underline">Video Conference in Pakistan (Pillar)</Link></li>
                 <li><Link to="/event-management-in-pakistan" className="hover:underline">Event Management in Pakistan (Pillar)</Link></li>
-                <li><Link to="/video-conferencing-solutions" className="hover:underline">Enterprise Video Conferencing Solutions</Link></li>
-                <li><Link to="/corporate-event-management" className="hover:underline">Corporate Event Management</Link></li>
+                <li><Link to="/video-conference" className="hover:underline">Interactive Boardroom BoM Configurator</Link></li>
+                <li><Link to="/services/corporate-events" className="hover:underline">Corporate Event Production Services</Link></li>
                 <li><Link to="/services/hybrid-events" className="hover:underline">Hybrid Event Production</Link></li>
                 <li><Link to="/av-equipment-rental" className="hover:underline">AV &amp; SMD Screen Equipment Rental</Link></li>
                 <li><Link to="/live-streaming-services" className="hover:underline">Live Streaming Services</Link></li>
@@ -884,6 +757,7 @@ export function KeywordLandingPage() {
             <div className="p-5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-2">
               <h3 className="font-black text-[#1A2B4C] uppercase tracking-wider">Product Category Hubs</h3>
               <ul className="space-y-1.5 font-bold text-[#00B4D8]">
+                <li><Link to="/category/led-tv-displays" className="hover:underline">LED TVs &amp; Commercial Displays</Link></li>
                 <li><Link to="/category/boardroom-codecs" className="hover:underline">Video Conference Systems / Codecs</Link></li>
                 <li><Link to="/category/video-conferencing" className="hover:underline">All-in-One Video Bars / USB Bars</Link></li>
                 <li><Link to="/category/touch-panels" className="hover:underline">Interactive Displays &amp; Touch Panels</Link></li>

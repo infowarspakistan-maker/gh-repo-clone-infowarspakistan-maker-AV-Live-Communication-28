@@ -28,14 +28,12 @@ import {
 
 const CORE_PILLAR_LINKS = [
   { path: '/', label: 'Home — Enterprise AV, Video Conferencing & Event Management Pakistan', tag: 'Core Hub' },
-  { path: '/shop', label: 'Hardware Storefront — All 53+ Verified AV & VoIP Products', tag: 'Storefront' },
+  { path: '/shop', label: 'Hardware Storefront — All 88 Verified AV, VoIP & LED TV Products', tag: 'Storefront' },
   { path: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan — Polycom Group 500, Poly X70, Cisco & Logitech', tag: 'Top Keyword' },
   { path: '/event-management-in-pakistan', label: 'Event Management in Pakistan — Turnkey Corporate Events, SMD Stages & Concert Sound', tag: 'Top Keyword' },
-  { path: '/corporate-event-management', label: 'Corporate Event Management Pakistan — SMD Screens, Hybrid Staging & Holograms', tag: 'Top Keyword' },
-  { path: '/video-conference', label: 'Video Conference Systems, Architecture & Interactive Room Configurator', tag: 'Pillar Hub' },
-  { path: '/video-conferencing', label: 'Video Conferencing Room Architecture & H.323/SIP Integration Hub', tag: 'Pillar' },
-  { path: '/video-conferencing-solutions', label: 'Turnkey Boardroom Video Conferencing Solutions Pakistan', tag: 'Pillar' },
-  { path: '/conference-room-solutions', label: 'Executive Conference Room AV & Acoustic Integration', tag: 'Pillar' },
+  { path: '/video-conference', label: 'Boardroom Configurator & SIP Architecture Calculator', tag: 'Interactive Tool' },
+  { path: '/services/boardroom-integration', label: 'Turnkey Boardroom AV Integration & Acoustic Calibration', tag: 'Service Pillar' },
+  { path: '/services/corporate-events', label: 'Corporate Event Production — SMD Screens, Hybrid Staging & Holograms', tag: 'Service Pillar' },
   { path: '/zoom-rooms', label: 'Zoom Rooms Hardware & Certified Integrator Pakistan', tag: 'Platform' },
   { path: '/microsoft-teams-rooms', label: 'Microsoft Teams Rooms (MTR) Certified Appliances Pakistan', tag: 'Platform' },
   { path: '/3d-hologram', label: '3D Hologram Display Stages, Fan Walls & HoloGauze Pakistan', tag: 'Experiential' },
@@ -83,6 +81,8 @@ const BRAND_PORTALS = [
   { slug: 'freepbx', name: 'FreePBX / Sangoma', focus: 'Open-Standards IP Telephony & Trunk Gateways' },
   { slug: 'sangoma', name: 'Sangoma', focus: 'PBXact Appliances, Vega Gateways & SBCs' },
   { slug: 'horion', name: 'Horion Interactive', focus: '65"–98" 4K UHD Interactive Flat Panel Smart Boards' },
+  { slug: 'samsung', name: 'Samsung Displays & TVs', focus: 'Crystal UHD 4K (U8000F, DU8000, DU7000) & Smart LED TVs (32"–85")' },
+  { slug: 'tcl', name: 'TCL LED & Google TVs', focus: '4K Google TV (V6D, P6L, P755, P6K, P79L, T6D) & Smart LED TVs (32"–75")' },
   { slug: 'google', name: 'Google Meet Hardware', focus: 'Enterprise Google Meet Room Licenses & Hardware' },
 ];
 
@@ -121,6 +121,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'ip-phones': 'Enterprise PoE SIP Desk IP Phones',
   'voip-phone-systems': 'IP PBX Appliances & VoIP Gateways',
   'projectors': 'Laser Boardroom & Venue Projectors',
+  'led-tv-displays': 'LED TVs & Commercial Displays (Samsung, TCL & Horion)',
   'headsets': 'ANC Wireless DECT & USB Call Center Headsets',
   'ip-cameras': 'NDAA Commercial IP Security Cameras',
   'intercom-paging-access': 'SIP Door Intercoms & 100V Public Address',
@@ -171,7 +172,7 @@ export function HtmlSitemap() {
     '@id': 'https://avlive.com.pk/sitemap#collection',
     name: 'AV Live Communications Complete HTML Sitemap & Enterprise Hardware Directory',
     description:
-      'Complete crawlable directory of all 153+ verified pages on avlive.com.pk including Polycom Group 500, Poly Studio X70, Cisco, Logitech, Yealink, Corporate Event Management, 3D Hologram Displays, and nationwide engineering hubs.',
+      `Complete crawlable directory of all ${totalUrlsCount} verified pages on avlive.com.pk including Polycom Group 500, Poly Studio X70, Cisco, Logitech, Yealink, Samsung & TCL LED TVs, Event Management in Pakistan, and 3D Hologram Displays.`,
     url: 'https://avlive.com.pk/sitemap',
     isPartOf: {
       '@id': 'https://avlive.com.pk/#website',
@@ -182,8 +183,8 @@ export function HtmlSitemap() {
     <div className="min-h-screen bg-[#F8F9FA] pb-20">
       <SEO
         title="HTML Sitemap & Complete Enterprise AV Directory | AV Live Pakistan"
-        description="Browse the complete directory of 153+ verified pages on AV Live Communications (avlive.com.pk): Video Conference in Pakistan, Corporate Event Management, 53 Hardware Products, 23 Brands, and Buyer's Guides."
-        keywords="AV Live sitemap, avlive.com.pk directory, Video Conference in Pakistan, Corporate event management Pakistan, Polycom Group 500, Poly Studio X70, Logitech Rally Bar Pakistan, Yealink Pakistan, 3D Hologram Display Pakistan"
+        description={`Browse the complete directory of ${totalUrlsCount} verified pages on AV Live Communications (avlive.com.pk): Video Conference in Pakistan, Event Management in Pakistan, ${allProducts.length} Hardware Products, ${BRAND_PORTALS.length} Brands, and Buyer's Guides.`}
+        keywords="AV Live sitemap, avlive.com.pk directory, Video Conference in Pakistan, Event Management in Pakistan, Polycom Group 500, Poly Studio X70, Logitech Rally Bar Pakistan, Samsung TCL LED TV Pakistan, 3D Hologram Display Pakistan"
         url="https://avlive.com.pk/sitemap"
         schema={sitemapSchema}
       />
@@ -193,9 +194,9 @@ export function HtmlSitemap() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00B4D8]/20 border border-[#00B4D8]/40 text-[#00B4D8] text-xs font-black uppercase tracking-widest mb-4">
+              <span className="inline-flex items-center gap-2 text-[#38BDF8] text-xs font-bold uppercase tracking-widest mb-3">
                 <Globe className="w-3.5 h-3.5" /> Official Search &amp; Crawl Index ({totalUrlsCount} Canonical Pages)
-              </div>
+              </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight mb-3">
                 Complete HTML Sitemap &amp; Site Directory
               </h1>
@@ -210,7 +211,7 @@ export function HtmlSitemap() {
                 href="/sitemap.xml"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#00B4D8] hover:bg-[#0096B4] text-white font-black text-xs uppercase tracking-wider shadow-lg transition-all"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#00B4D8] hover:bg-[#0096B4] text-white font-black text-xs uppercase tracking-wider shadow-lg transition-all"
               >
                 <FileCode2 className="w-4 h-4" /> Open XML Sitemap (/sitemap.xml) <ExternalLink className="w-3.5 h-3.5" />
               </a>
@@ -218,7 +219,7 @@ export function HtmlSitemap() {
                 href="/feed/google-merchant.tsv"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider border border-white/15 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider border border-white/15 transition-all"
               >
                 GMC Product Feed (/feed/google-merchant.tsv)
               </a>
@@ -226,12 +227,12 @@ export function HtmlSitemap() {
           </div>
 
           {/* Answer-First AEO Summary Box */}
-          <div className="mt-8 bg-white/5 border border-white/15 rounded-2xl p-5 text-xs sm:text-sm text-gray-200 leading-relaxed">
+          <div className="mt-8 bg-white/5 border border-white/15 rounded-xl p-5 text-xs sm:text-sm text-gray-200 leading-relaxed">
             <strong className="text-[#00B4D8] uppercase tracking-wider mr-2">Direct Architecture Summary:</strong>
             AV Live Communications (<code className="text-white font-mono">https://avlive.com.pk</code>) indexes {totalUrlsCount} canonical, self-referencing commercial URLs covering{' '}
             <Link to="/video-conference-in-pakistan" className="text-[#00B4D8] underline font-bold">Video Conference in Pakistan</Link>,{' '}
-            <Link to="/corporate-event-management" className="text-[#00B4D8] underline font-bold">Corporate Event Management</Link>,{' '}
-            {CANONICAL_CATEGORY_SLUGS.length} hardware categories, {BRAND_PORTALS.length} authorized OEM brand portals (HP Poly, Cisco, Logitech, Yealink, Bosch, Jabra), and {allProducts.length} in-stock enterprise SKUs with PKR pricing across Lahore, Karachi, and Islamabad.
+            <Link to="/event-management-in-pakistan" className="text-[#00B4D8] underline font-bold">Event Management in Pakistan</Link>,{' '}
+            {CANONICAL_CATEGORY_SLUGS.length} hardware categories, {BRAND_PORTALS.length} authorized OEM brand portals (HP Poly, Cisco, Logitech, Samsung, TCL, Horion, Yealink, Bosch), and {allProducts.length} in-stock enterprise SKUs with PKR pricing across Lahore, Karachi, and Islamabad.
           </div>
         </div>
       </section>
@@ -263,9 +264,10 @@ export function HtmlSitemap() {
               <h3 className="font-black text-[#1A2B4C] text-sm uppercase tracking-wider">Core Services (Pillar Pages)</h3>
               <ul className="space-y-1.5 font-bold text-[#00B4D8]">
                 <li><Link to="/video-conference-in-pakistan" className="hover:underline">Video Conference in Pakistan (Primary Pillar)</Link></li>
-                <li><Link to="/video-conference" className="hover:underline">Video Conference Systems &amp; Room Configurator</Link></li>
-                <li><Link to="/video-conferencing-solutions" className="hover:underline">Video Conferencing Solutions</Link></li>
-                <li><Link to="/corporate-event-management" className="hover:underline">Corporate Event Management</Link></li>
+                <li><Link to="/event-management-in-pakistan" className="hover:underline">Event Management in Pakistan (Primary Pillar)</Link></li>
+                <li><Link to="/video-conference" className="hover:underline">Boardroom Configurator &amp; SIP Planner</Link></li>
+                <li><Link to="/services/boardroom-integration" className="hover:underline">Turnkey Boardroom AV Integration</Link></li>
+                <li><Link to="/services/corporate-events" className="hover:underline">Corporate Event Production</Link></li>
                 <li><Link to="/projection-mapping" className="hover:underline">3D Projection Mapping &amp; Hologram Stages</Link></li>
                 <li><Link to="/services/ai-automation" className="hover:underline">AI Business Automation &amp; Digital Workers</Link></li>
               </ul>
@@ -334,9 +336,9 @@ export function HtmlSitemap() {
                 <div className="font-black text-[#1A2B4C] uppercase tracking-wider mb-1">Core Business &amp; Brand Anchors</div>
                 <ul className="space-y-1 font-bold text-[#00B4D8]">
                   <li><Link to="/video-conference-in-pakistan" className="hover:underline">Video Conference in Pakistan (/video-conference-in-pakistan)</Link></li>
-                  <li><Link to="/video-conference" className="hover:underline">Video Conference Systems &amp; Configurator (/video-conference)</Link></li>
-                  <li><Link to="/video-conferencing-solutions" className="hover:underline">Video Conferencing in Pakistan (/video-conferencing-solutions)</Link></li>
-                  <li><Link to="/corporate-event-management" className="hover:underline">Corporate Event Management (/corporate-event-management)</Link></li>
+                  <li><Link to="/event-management-in-pakistan" className="hover:underline">Event Management in Pakistan (/event-management-in-pakistan)</Link></li>
+                  <li><Link to="/video-conference" className="hover:underline">Boardroom Configurator (/video-conference)</Link></li>
+                  <li><Link to="/services/corporate-events" className="hover:underline">Corporate Event Production (/services/corporate-events)</Link></li>
                   <li><Link to="/services/hybrid-events" className="hover:underline">Hybrid Event Production (/services/hybrid-events)</Link></li>
                   <li><Link to="/av-equipment-rental" className="hover:underline">AV Equipment Rental (/av-equipment-rental)</Link></li>
                   <li><Link to="/live-streaming-services" className="hover:underline">Live Streaming Services (/live-streaming-services)</Link></li>

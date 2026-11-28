@@ -11,8 +11,8 @@ export function BuyersGuides() {
         title="Enterprise AV & Video Conferencing Buyers Guides | AV Live Pakistan"
         description="Comprehensive procurement guides for choosing the best boardroom video bars, IP-PBX phone systems, acoustic ceiling mics, and interactive flat panels in Pakistan."
         url="https://avlive.com.pk/guides"
-        image="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=1200"
-        imageAlt="AV Live Enterprise Equipment Buyers Guides"
+        image="/images/video-conference/boardroom-hero.webp"
+        imageAlt="AV Live Enterprise Video Conferencing and VoIP Buyers Guides Pakistan"
         schema={{
           '@context': 'https://schema.org',
           '@graph': [
@@ -66,10 +66,10 @@ export function BuyersGuides() {
               </div>
               <h2 className="text-2xl font-black text-[#1A2B4C] mb-4 leading-tight">The Ultimate IP Phone Buyer's Guide (2026)</h2>
               <div className="flex flex-col gap-3 w-full mt-4">
-                 <Link to="/blog/3cx-vs-freepbx-vs-cisco-cucm-voip-guide-pakistan" className="bg-[#00B4D8] text-white py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
+                 <Link to="/blog/3cx-vs-freepbx-vs-cisco-cucm-voip-guide-pakistan" className="bg-[#00B4D8] text-white py-3 px-6 min-h-[48px] rounded-lg font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
                    <Download size={16} /> Read Full Guide
                  </Link>
-                 <Link to="/compare" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
+                 <Link to="/compare" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 min-h-[48px] rounded-lg font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
                    Compare IP Phone Models
                  </Link>
               </div>
@@ -111,10 +111,10 @@ export function BuyersGuides() {
               </div>
               <h2 className="text-2xl font-black text-[#1A2B4C] mb-4 leading-tight">The Complete Video Conferencing Buyer's Guide</h2>
               <div className="flex flex-col gap-3 w-full mt-4">
-                 <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="bg-[#00B4D8] text-white py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
+                 <Link to="/blog/boardroom-av-system-price-guide-pakistan" className="bg-[#00B4D8] text-white py-3 px-6 min-h-[48px] rounded-lg font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
                    <Download size={16} /> Read Full Guide
                  </Link>
-                 <Link to="/contact" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
+                 <Link to="/contact" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 min-h-[48px] rounded-lg font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
                    Book a Consultation
                  </Link>
               </div>
@@ -156,10 +156,10 @@ export function BuyersGuides() {
               </div>
               <h2 className="text-2xl font-black text-[#1A2B4C] mb-4 leading-tight">The Public Address & Paging Systems Buyer's Guide</h2>
               <div className="flex flex-col gap-3 w-full mt-4">
-                 <Link to="/blog/bosch-paviro-pa-system-design-guide-pakistan" className="bg-[#00B4D8] text-white py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
+                 <Link to="/blog/bosch-paviro-pa-system-design-guide-pakistan" className="bg-[#00B4D8] text-white py-3 px-6 min-h-[48px] rounded-lg font-bold text-sm hover:bg-[#1A2B4C] transition-colors w-full flex items-center justify-center gap-2">
                    <Download size={16} /> Read Full Guide
                  </Link>
-                 <Link to="/contact" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 min-h-[48px] rounded-full font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
+                 <Link to="/contact" className="bg-white border border-[#1A2B4C] text-[#1A2B4C] py-3 px-6 min-h-[48px] rounded-lg font-bold text-sm hover:bg-gray-50 transition-colors w-full inline-flex items-center justify-center">
                    Request a Site Survey
                  </Link>
               </div>
@@ -237,8 +237,7 @@ export function BuyersGuides() {
         </div>
 
         {/* Still Not Sure CTA */}
-        <div className="bg-[#1A2B4C] rounded-[2rem] p-10 md:p-16 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-12">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#00B4D8] rounded-full blur-3xl opacity-20 -mr-32 -mt-32"></div>
+        <div className="bg-[#1A2B4C] rounded-2xl p-10 md:p-14 relative overflow-hidden border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-12">
           
           <div className="relative z-10 flex-1">
             <h2 className="text-3xl font-black text-white mb-4">Still Not Sure? Let Us Help.</h2>
@@ -267,7 +266,7 @@ export function BuyersGuides() {
           </div>
           
           <div className="relative z-10 shrink-0">
-             <Link to="/contact" className="bg-[#00B4D8] text-white px-8 py-5 rounded-full font-bold text-lg hover:bg-white hover:text-[#1A2B4C] transition-all inline-block text-center shadow-lg shadow-[#00B4D8]/30">
+             <Link to="/contact" className="bg-[#00B4D8] text-white px-8 py-4 rounded-lg font-bold text-base hover:bg-white hover:text-[#1A2B4C] transition-all inline-block text-center">
                Request a Free Consultation
              </Link>
           </div>

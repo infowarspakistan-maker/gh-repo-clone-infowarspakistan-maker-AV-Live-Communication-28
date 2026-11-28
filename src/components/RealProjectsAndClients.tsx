@@ -8,7 +8,6 @@ import {
   ChevronUp,
   MapPin,
   Search,
-  Sparkles,
   Video,
   X,
   ZoomIn,
@@ -770,7 +769,7 @@ export function RealProjectsAndClients({
                     : 'bg-white text-slate-700 border border-gray-200 hover:border-[#1A2B4C]'
                 }`}
               >
-                <Sparkles size={13} aria-hidden="true" />
+                <Building2 size={13} aria-hidden="true" />
                 1,000+ Events &amp; Stages ({eventCount})
               </button>
             </div>

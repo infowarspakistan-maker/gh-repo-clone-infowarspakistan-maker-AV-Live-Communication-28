@@ -17,6 +17,15 @@ import zlib from 'zlib';
 import crypto from 'crypto';
 import { updateSheetData } from './server-utils/sheets';
 import {
+  generateAgentTurn,
+  transcribeAudioNote,
+  buildFormalPkrQuoteDraft,
+  synthesizeDailyExecutiveReport,
+  dispatchWhatsAppCloudMessage,
+  verifyMetaWebhookSignature,
+  verify3cxBridgeSignature,
+} from './server-utils/ai-agent';
+import {
   generateGmcTsv,
   generateGmc20Tsv,
   generateGmcXml,
@@ -144,7 +153,14 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(
+    express.json({
+      limit: '2mb',
+      verify: (req, _res, buf) => {
+        (req as any).rawBody = buf;
+      },
+    })
+  );
 
   // Native HTTP Gzip compression for text/html, JS, CSS, JSON, XML, and SVG to boost Mobile & Desktop PageSpeed scores
   app.use((req, res, next) => {
@@ -378,10 +394,10 @@ async function startServer() {
   ];
 
   let products: any[] = [
-    { id: 1, name: 'Polycom Studio USB Bar', brand: 'Polycom', category: 'Video Conferencing', price: 999.00, image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=800&q=80', stock: 12 },
-    { id: 2, name: 'Cisco Webex Room Kit Plus', brand: 'Cisco', category: 'Video Conferencing', price: 4999.00, image: 'https://images.unsplash.com/photo-1585282263861-f55e341878f8?w=800&q=80', stock: 5 },
-    { id: 3, name: 'Indoor SMD Display Panel P2.5', brand: 'Generic Pro', category: 'LED Displays', price: 650.00, image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80', stock: 8 },
-    { id: 4, name: 'Bosch PA Amplifier (500W)', brand: 'Bosch', category: 'Audio Systems', price: 1450.00, image: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80', stock: 15 }
+    { id: 1, name: 'Polycom Studio USB Bar', brand: 'Polycom', category: 'Video Conferencing', price: 999.00, image: '/images/products/poly-studio-usb.webp', stock: 12 },
+    { id: 2, name: 'Cisco Webex Room Kit Plus', brand: 'Cisco', category: 'Video Conferencing', price: 4999.00, image: '/images/products/cisco-room-kit-plus.webp', stock: 5 },
+    { id: 3, name: 'Indoor SMD Display Panel P2.5', brand: 'Generic Pro', category: 'LED Displays', price: 650.00, image: '/images/projects/novo-nordisk-arena-wide-stage.webp', stock: 8 },
+    { id: 4, name: 'Bosch PA Amplifier (500W)', brand: 'Bosch', category: 'Audio Systems', price: 1450.00, image: '/images/products/bosch-paviro-pva-4cr12.webp', stock: 15 }
   ];
 
   let siteSettings = {
@@ -1120,6 +1136,511 @@ async function startServer() {
     } catch (error: any) {
       console.error('Error testing workflow:', error);
       res.status(500).json({ error: error.message || 'Failed to run test' });
+    }
+  });
+
+  // =========================================================================
+  // OMNICHANNEL AI SALES, VOICE & FOLLOW-UP AGENT ROUTES
+  // =========================================================================
+
+  const aiChatRateBuckets = new Map<string, { count: number; resetAt: number }>();
+  function checkAiChatRateLimit(ip: string): boolean {
+    const now = Date.now();
+    const bucket = aiChatRateBuckets.get(ip);
+    if (!bucket || bucket.resetAt <= now) {
+      aiChatRateBuckets.set(ip, { count: 1, resetAt: now + 60_000 });
+      return true;
+    }
+    if (bucket.count >= 35) return false;
+    bucket.count += 1;
+    return true;
+  }
+
+  // Safe boolean readiness status for Admin Console (never leaks secret values)
+  app.get('/api/admin/ai-agent/status', verifyAdmin, (req, res) => {
+    const appUrl =
+      process.env.APP_URL && process.env.APP_URL !== 'MY_APP_URL'
+        ? process.env.APP_URL.replace(/\/$/, '')
+        : `${req.protocol}://${req.get('host')}`;
+    res.json({
+      geminiConfigured: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY'),
+      whatsappConfigured: Boolean(process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID),
+      whatsappVerifyTokenConfigured: Boolean(process.env.WHATSAPP_VERIFY_TOKEN),
+      whatsappAppSecretConfigured: Boolean(process.env.WHATSAPP_APP_SECRET),
+      threecxBridgeConfigured: Boolean(process.env.THREECX_BRIDGE_SECRET),
+      appUrl,
+      webhooks: {
+        whatsapp: `${appUrl}/api/webhooks/whatsapp`,
+        threecxCallEvent: `${appUrl}/api/webhooks/3cx-call-event`,
+        publicChat: `${appUrl}/api/ai-agent/chat`,
+      },
+    });
+  });
+
+  // Omnichannel AI Agent Chat Endpoint (powers public AV Assist widget & Admin Simulator)
+  app.post('/api/ai-agent/chat', async (req, res) => {
+    try {
+      const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+      if (!checkAiChatRateLimit(clientIp)) {
+        return res.status(429).json({ error: 'Too many requests. Please wait a moment before messaging again.' });
+      }
+
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const message = typeof body.message === 'string' ? body.message.trim().slice(0, 1500) : '';
+      if (!message) {
+        return res.status(400).json({ error: 'Message text is required.' });
+      }
+
+      const channel =
+        body.channel === 'whatsapp' || body.channel === 'phone_3cx' || body.channel === 'web_chat'
+          ? body.channel
+          : 'web_chat';
+      const customerName = typeof body.customerName === 'string' ? body.customerName.trim().slice(0, 120) : undefined;
+      const customerPhone = typeof body.customerPhone === 'string' ? body.customerPhone.trim().slice(0, 40) : '';
+      const customerEmail = typeof body.customerEmail === 'string' ? body.customerEmail.trim().slice(0, 150) : '';
+      const allowWebSearch = body.allowWebSearch !== false;
+      const rawHistory = Array.isArray(body.history) ? body.history : [];
+      const history = rawHistory
+        .slice(-8)
+        .filter((h: any) => h && typeof h.text === 'string' && (h.role === 'customer' || h.role === 'agent'))
+        .map((h: any) => ({ role: h.role as 'customer' | 'agent', text: h.text.slice(0, 600) }));
+
+      const liveProducts = await getGmcProductsWithFallback();
+      const result = await generateAgentTurn({
+        message,
+        history,
+        channel,
+        customerName,
+        customerPhone,
+        customerEmail,
+        products: liveProducts,
+        allowWebSearch,
+      });
+
+      // Best-effort server-side lead & n8n trigger when contact info is shared on storefront chat
+      const hasLeadContact = Boolean(result.extractedLead.phone || result.extractedLead.email);
+      if (hasLeadContact || result.escalated) {
+        triggerN8NWorkflows(result.escalated ? 'ai_escalation' : 'ai_lead_captured', {
+          channel,
+          language: result.language,
+          escalated: result.escalated,
+          escalationReason: result.escalationReason || '',
+          lead: result.extractedLead,
+          customerMessage: message,
+          agentReply: result.replyText,
+        }).catch(() => {});
+      }
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('AI Agent chat error:', error);
+      res.status(500).json({ error: 'Unable to process AI agent turn right now.' });
+    }
+  });
+
+  // Meta WhatsApp Cloud API Webhook Verification (GET)
+  app.get('/api/webhooks/whatsapp', (req, res) => {
+    const mode = String(req.query['hub.mode'] || '');
+    const token = String(req.query['hub.verify_token'] || '');
+    const challenge = String(req.query['hub.challenge'] || '');
+    const expectedToken = process.env.WHATSAPP_VERIFY_TOKEN || '';
+
+    if (!expectedToken) {
+      return res.status(503).send('WHATSAPP_VERIFY_TOKEN not configured');
+    }
+
+    const tokenBuf = Buffer.from(token, 'utf8');
+    const expectedBuf = Buffer.from(expectedToken, 'utf8');
+    if (
+      mode === 'subscribe' &&
+      tokenBuf.length === expectedBuf.length &&
+      crypto.timingSafeEqual(tokenBuf, expectedBuf)
+    ) {
+      return res.status(200).send(challenge);
+    }
+    return res.status(403).send('Forbidden');
+  });
+
+  // Meta WhatsApp Cloud API Inbound Webhook (POST)
+  app.post('/api/webhooks/whatsapp', async (req, res) => {
+    try {
+      const appSecret = process.env.WHATSAPP_APP_SECRET;
+      const rawBody: Buffer = (req as any).rawBody || Buffer.from(JSON.stringify(req.body || {}), 'utf8');
+      const sigHeader = req.headers['x-hub-signature-256'] as string | undefined;
+
+      if (!appSecret || !verifyMetaWebhookSignature(rawBody, sigHeader, appSecret)) {
+        return res.status(401).json({ error: 'Invalid or unconfigured Meta webhook signature' });
+      }
+
+      const entry = req.body?.entry?.[0];
+      const change = entry?.changes?.[0]?.value;
+      const incomingMsg = change?.messages?.[0];
+      const contact = change?.contacts?.[0];
+
+      if (!incomingMsg) {
+        return res.status(200).json({ status: 'ignored_non_message_event' });
+      }
+
+      const senderPhone = String(incomingMsg.from || '').slice(0, 40);
+      const senderName = String(contact?.profile?.name || senderPhone || 'WhatsApp Lead').slice(0, 120);
+      let userText = '';
+
+      if (incomingMsg.type === 'text') {
+        userText = String(incomingMsg.text?.body || '').trim();
+      } else if (incomingMsg.type === 'interactive') {
+        userText = String(
+          incomingMsg.interactive?.button_reply?.title ||
+            incomingMsg.interactive?.list_reply?.title ||
+            ''
+        ).trim();
+      } else if (incomingMsg.type === 'audio' && incomingMsg.audio?.id && process.env.WHATSAPP_ACCESS_TOKEN) {
+        try {
+          const mediaMetaRes = await fetch(
+            `https://graph.facebook.com/v22.0/${encodeURIComponent(String(incomingMsg.audio.id))}`,
+            { headers: { Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}` } }
+          );
+          const mediaMeta: any = await mediaMetaRes.json();
+          if (mediaMeta?.url) {
+            const audioRes = await fetch(mediaMeta.url, {
+              headers: { Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}` },
+            });
+            const audioBuf = Buffer.from(await audioRes.arrayBuffer());
+            userText = await transcribeAudioNote(
+              audioBuf.toString('base64'),
+              String(incomingMsg.audio?.mime_type || 'audio/ogg')
+            );
+          }
+        } catch (audioErr) {
+          console.warn('WhatsApp voice note transcription warning:', audioErr);
+          userText = 'Voice note received — please help with AV Live products.';
+        }
+      }
+
+      if (!userText) {
+        return res.status(200).json({ status: 'unsupported_message_type' });
+      }
+
+      const liveProducts = await getGmcProductsWithFallback();
+      const agentTurn = await generateAgentTurn({
+        message: userText,
+        channel: 'whatsapp',
+        customerName: senderName,
+        customerPhone: senderPhone,
+        products: liveProducts,
+        allowWebSearch: true,
+      });
+
+      const dispatchResult = await dispatchWhatsAppCloudMessage({
+        recipientPhone: senderPhone,
+        replyText: agentTurn.replyText,
+        buttons: agentTurn.buttons,
+      });
+
+      // Best-effort Firestore logging via Admin SDK
+      try {
+        const nowIso = new Date().toISOString();
+        const leadRef = await db.collection('ai_leads').add({
+          name: agentTurn.extractedLead.name || senderName,
+          company: agentTurn.extractedLead.company || '',
+          phone: senderPhone,
+          email: agentTurn.extractedLead.email || '',
+          city: agentTurn.extractedLead.city || '',
+          channel: 'whatsapp',
+          language: agentTurn.language,
+          stage: 'new',
+          intentSummary: agentTurn.extractedLead.intentSummary || userText.slice(0, 300),
+          interestedSkus: agentTurn.extractedLead.interestedSkus || [],
+          estimatedValuePkr: agentTurn.extractedLead.estimatedValuePkr || 0,
+          escalated: agentTurn.escalated,
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+
+        await db.collection('ai_conversations').add({
+          leadId: leadRef.id,
+          customerName: senderName,
+          customerPhone: senderPhone,
+          channel: 'whatsapp',
+          language: agentTurn.language,
+          status: agentTurn.escalated ? 'escalated' : 'open',
+          lastMessage: agentTurn.replyText.slice(0, 300),
+          messages: [
+            { id: `m_${Date.now()}_in`, role: 'customer', text: userText, timestamp: nowIso },
+            {
+              id: `m_${Date.now()}_out`,
+              role: 'agent',
+              text: agentTurn.replyText,
+              language: agentTurn.language,
+              buttons: agentTurn.buttons,
+              groundingSource: agentTurn.groundingSource,
+              timestamp: nowIso,
+            },
+          ],
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+
+        if (agentTurn.suggestedTask) {
+          const dueDate = new Date(Date.now() + agentTurn.suggestedTask.dueInDays * 86_400_000)
+            .toISOString()
+            .slice(0, 10);
+          await db.collection('ai_tasks').add({
+            leadId: leadRef.id,
+            leadName: senderName,
+            title: agentTurn.suggestedTask.title,
+            notes: agentTurn.suggestedTask.notes,
+            cadenceStep: agentTurn.suggestedTask.cadenceStep,
+            channel: agentTurn.suggestedTask.channel,
+            priority: agentTurn.suggestedTask.priority,
+            status: 'pending',
+            dueAt: dueDate,
+            createdAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+        }
+      } catch (dbErr) {
+        console.warn('WhatsApp webhook Firestore write skipped (Admin IAM optional):', dbErr);
+      }
+
+      triggerN8NWorkflows(agentTurn.escalated ? 'ai_escalation' : 'ai_lead_captured', {
+        channel: 'whatsapp',
+        senderName,
+        senderPhone,
+        userText,
+        replyText: agentTurn.replyText,
+        buttons: agentTurn.buttons,
+        lead: agentTurn.extractedLead,
+      }).catch(() => {});
+
+      res.status(200).json({ status: 'processed', dispatch: dispatchResult });
+    } catch (error: any) {
+      console.error('WhatsApp webhook processing error:', error);
+      res.status(500).json({ error: 'Failed to process WhatsApp webhook' });
+    }
+  });
+
+  // 3CX SIP PBX + Gemini Live Voice Bridge Call Completion Webhook (POST)
+  app.post('/api/webhooks/3cx-call-event', async (req, res) => {
+    try {
+      const bridgeSecret = process.env.THREECX_BRIDGE_SECRET;
+      const rawBody: Buffer = (req as any).rawBody || Buffer.from(JSON.stringify(req.body || {}), 'utf8');
+      const sigHeader = req.headers['x-3cx-bridge-signature'] as string | undefined;
+
+      if (!bridgeSecret || !verify3cxBridgeSignature(rawBody, sigHeader, bridgeSecret)) {
+        return res.status(401).json({ error: 'Invalid or unconfigured 3CX bridge signature' });
+      }
+
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const callerPhone = String(body.callerPhone || '').trim().slice(0, 40);
+      const callerName = String(body.callerName || callerPhone || '3CX Caller').trim().slice(0, 120);
+      const transcript = String(body.transcript || '').trim().slice(0, 4000);
+      const sendWhatsappFollowup = body.sendWhatsappFollowup !== false;
+
+      if (!transcript) {
+        return res.status(400).json({ error: 'Call transcript is required.' });
+      }
+
+      const liveProducts = await getGmcProductsWithFallback();
+      const agentTurn = await generateAgentTurn({
+        message: `Post-call summary & WhatsApp link handoff for 3CX phone call transcript: ${transcript}`,
+        channel: 'phone_3cx',
+        customerName: callerName,
+        customerPhone: callerPhone,
+        products: liveProducts,
+        allowWebSearch: true,
+      });
+
+      let whatsappDispatch = null;
+      if (sendWhatsappFollowup && callerPhone) {
+        whatsappDispatch = await dispatchWhatsAppCloudMessage({
+          recipientPhone: callerPhone,
+          replyText: agentTurn.replyText,
+          buttons: agentTurn.buttons,
+        });
+      }
+
+      try {
+        const nowIso = new Date().toISOString();
+        const leadRef = await db.collection('ai_leads').add({
+          name: agentTurn.extractedLead.name || callerName,
+          company: agentTurn.extractedLead.company || '',
+          phone: callerPhone,
+          email: agentTurn.extractedLead.email || '',
+          city: agentTurn.extractedLead.city || '',
+          channel: 'phone_3cx',
+          language: agentTurn.language,
+          stage: 'qualified',
+          intentSummary: agentTurn.extractedLead.intentSummary || transcript.slice(0, 300),
+          interestedSkus: agentTurn.extractedLead.interestedSkus || [],
+          estimatedValuePkr: agentTurn.extractedLead.estimatedValuePkr || 0,
+          escalated: agentTurn.escalated,
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+
+        await db.collection('ai_conversations').add({
+          leadId: leadRef.id,
+          customerName: callerName,
+          customerPhone: callerPhone,
+          channel: 'phone_3cx',
+          language: agentTurn.language,
+          status: agentTurn.escalated ? 'escalated' : 'open',
+          lastMessage: agentTurn.replyText.slice(0, 300),
+          messages: [
+            { id: `call_${Date.now()}_in`, role: 'customer', text: transcript.slice(0, 1000), timestamp: nowIso },
+            {
+              id: `call_${Date.now()}_out`,
+              role: 'agent',
+              text: agentTurn.replyText,
+              language: agentTurn.language,
+              buttons: agentTurn.buttons,
+              timestamp: nowIso,
+            },
+          ],
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      } catch (dbErr) {
+        console.warn('3CX call webhook Firestore write skipped:', dbErr);
+      }
+
+      triggerN8NWorkflows('ai_3cx_call_completed', {
+        callerName,
+        callerPhone,
+        durationSeconds: Number(body.durationSeconds || 0),
+        lead: agentTurn.extractedLead,
+        whatsappFollowup: whatsappDispatch,
+      }).catch(() => {});
+
+      res.json({
+        success: true,
+        agentTurn,
+        whatsappFollowup: whatsappDispatch,
+      });
+    } catch (error: any) {
+      console.error('3CX call webhook error:', error);
+      res.status(500).json({ error: 'Failed to process 3CX call event' });
+    }
+  });
+
+  // Admin: Generate Formal Business-English PKR Quote Draft (held for approval before Gmail send)
+  app.post('/api/admin/ai-agent/draft-quote', verifyAdmin, async (req, res) => {
+    try {
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const recipientName = String(body.recipientName || '').trim().slice(0, 150);
+      const company = typeof body.company === 'string' ? body.company.trim().slice(0, 150) : '';
+      const recipientEmail = typeof body.recipientEmail === 'string' ? body.recipientEmail.trim().slice(0, 180) : '';
+      const includeGst = Boolean(body.includeGst);
+      const notes = typeof body.notes === 'string' ? body.notes.trim().slice(0, 1000) : '';
+      const rawItems = Array.isArray(body.items) ? body.items : [];
+
+      if (!recipientName || rawItems.length === 0) {
+        return res.status(400).json({ error: 'Recipient name and at least one product line item are required.' });
+      }
+
+      const items = rawItems.slice(0, 30).map((item: any) => ({
+        sku: String(item.sku || 'SKU').slice(0, 80),
+        productName: String(item.productName || 'AV Equipment').slice(0, 200),
+        unitPricePkr: Math.max(0, Number(item.unitPricePkr || 0)),
+        quantity: Math.max(1, Math.min(500, Math.round(Number(item.quantity || 1)))),
+        productUrl: typeof item.productUrl === 'string' ? item.productUrl.slice(0, 300) : undefined,
+      }));
+
+      const draft = buildFormalPkrQuoteDraft({
+        recipientName,
+        company,
+        recipientEmail,
+        items,
+        includeGst,
+        notes,
+      });
+
+      triggerN8NWorkflows('ai_quote_drafted', {
+        recipientName,
+        company,
+        recipientEmail,
+        totalPkr: draft.totalPkr,
+        itemCount: items.length,
+      }).catch(() => {});
+
+      res.json(draft);
+    } catch (error: any) {
+      console.error('Draft quote generation error:', error);
+      res.status(500).json({ error: 'Failed to draft PKR quotation' });
+    }
+  });
+
+  // Admin: Synthesize Daily Executive Briefing
+  app.post('/api/admin/ai-agent/daily-report', verifyAdmin, async (req, res) => {
+    try {
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const reportDate = String(body.reportDate || new Date().toISOString().slice(0, 10)).slice(0, 20);
+      const metrics = body.metrics || {
+        totalConversations: 0,
+        whatsappChats: 0,
+        phoneCalls3cx: 0,
+        webChats: 0,
+        newLeads: 0,
+        quotesDrafted: 0,
+        quotesSent: 0,
+        pipelinePkr: 0,
+        pendingTasks: 0,
+        overdueTasks: 0,
+        escalations: 0,
+      };
+      const topLeads = Array.isArray(body.topLeads) ? body.topLeads.slice(0, 10) : [];
+      const overdueTaskTitles = Array.isArray(body.overdueTaskTitles) ? body.overdueTaskTitles.slice(0, 10).map(String) : [];
+
+      const synthesized = await synthesizeDailyExecutiveReport({
+        reportDate,
+        metrics,
+        topLeads,
+        overdueTaskTitles,
+      });
+
+      res.json(synthesized);
+    } catch (error: any) {
+      console.error('Daily report synthesis error:', error);
+      res.status(500).json({ error: 'Failed to generate daily executive report' });
+    }
+  });
+
+  // Admin: Dispatch Confirmed WhatsApp Interactive Button Message
+  app.post('/api/admin/ai-agent/send-whatsapp', verifyAdmin, async (req, res) => {
+    try {
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const recipientPhone = String(body.recipientPhone || '').trim().slice(0, 40);
+      const replyText = String(body.replyText || '').trim().slice(0, 1000);
+      const buttons = Array.isArray(body.buttons) ? body.buttons.slice(0, 3) : [];
+
+      if (!recipientPhone || !replyText) {
+        return res.status(400).json({ error: 'Recipient phone and message body are required.' });
+      }
+
+      const result = await dispatchWhatsAppCloudMessage({
+        recipientPhone,
+        replyText,
+        buttons,
+      });
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Admin WhatsApp dispatch error:', error);
+      res.status(500).json({ error: 'Failed to dispatch WhatsApp message' });
+    }
+  });
+
+  // Admin: Trigger n8n AI Event Webhook
+  app.post('/api/admin/ai-agent/trigger-n8n', verifyAdmin, async (req, res) => {
+    try {
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const eventName = String(body.event || 'ai_lead_captured').slice(0, 64);
+      const payload = body.payload && typeof body.payload === 'object' ? body.payload : {};
+      await triggerN8NWorkflows(eventName, payload);
+      res.json({ success: true, event: eventName });
+    } catch (error: any) {
+      console.error('Admin trigger n8n AI event error:', error);
+      res.status(500).json({ error: 'Failed to trigger n8n workflows' });
     }
   });
 
@@ -2437,106 +2958,38 @@ async function startServer() {
       },
       '/sitemap': {
         title: 'HTML Sitemap & Enterprise AV Directory | AV Live',
-        description: 'Browse the complete directory of 155 verified pages on AV Live Pakistan: Video Conferencing, Event Management, 53 Products, 25 Brands & Guides.',
+        description: 'Browse the complete directory of 193 verified pages on AV Live Pakistan: Video Conferencing, Event Management, 88 Products, 27 Brands & Guides.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'CollectionPage',
           '@id': 'https://avlive.com.pk/sitemap#collection',
           name: 'AV Live Communications Complete HTML Sitemap & Enterprise Hardware Directory',
           url: 'https://avlive.com.pk/sitemap',
-          description: 'Complete crawlable directory of all 155 verified pages on avlive.com.pk including Polycom Group 500, Poly Studio X70, Cisco, Logitech, Yealink, Corporate Event Management, and 3D Hologram Displays.'
+          description: 'Complete crawlable directory of all 193 verified pages on avlive.com.pk including Polycom Group 500, Poly Studio X70, Cisco, Logitech, Yealink, Samsung & TCL LED TVs, Corporate Event Management, and 3D Hologram Displays.'
         }
       },
       '/shop': {
         title: 'Enterprise AV Shop | Poly, Logitech & Cisco | AV Live',
-        description: 'Buy genuine video conferencing hardware in Pakistan: Polycom Group 500, Poly Studio X70, Logitech Rally Bar, Cisco Room Kits & Yealink IP phones.',
+        description: 'Buy genuine video conferencing hardware, VoIP systems & Samsung/TCL LED TVs in Pakistan: Polycom Group 500, Poly Studio X70, Logitech Rally Bar & Cisco.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'CollectionPage',
           '@id': 'https://avlive.com.pk/shop#collection',
           name: 'Enterprise AV & Video Conferencing Hardware Store in Pakistan',
           url: 'https://avlive.com.pk/shop',
-          description: 'Official enterprise hardware store for Poly, Logitech, Cisco, Yealink, Jabra, and Bosch in Pakistan.'
+          description: 'Official enterprise hardware store for Poly, Logitech, Cisco, Yealink, Samsung, TCL, Horion, Jabra, and Bosch in Pakistan.'
         }
       },
       '/brands': {
         title: 'Authorized Enterprise AV Brands in Pakistan | AV Live',
-        description: 'Browse official enterprise hardware by authorized brand in Pakistan: HP Poly, Cisco, Logitech, Yealink, Jabra, Bosch, Hikvision, Dahua & Epson.',
+        description: 'Browse official enterprise hardware by authorized brand in Pakistan: HP Poly, Cisco, Logitech, Yealink, Samsung, TCL, Horion, Jabra & Bosch.',
         schema: {
           '@context': 'https://schema.org',
           '@type': 'CollectionPage',
           '@id': 'https://avlive.com.pk/brands#collection',
           name: 'Authorized Enterprise AV & Video Conferencing Brands in Pakistan',
           url: 'https://avlive.com.pk/brands',
-          description: 'Authorized distributor catalog for 25 OEM pro-AV and unified communications brands in Pakistan.'
-        }
-      },
-      '/video-conferencing': {
-        title: 'Video Conferencing Room Architecture & Integration | AV Live',
-        description: 'Certified Zoom Rooms, Microsoft Teams Rooms (MTR) & H.323/SIP boardroom architecture in Lahore, Karachi & Islamabad with 15-min SLA.'
-      },
-      '/video-conferencing-solutions': {
-        title: 'Video Conferencing Solutions in Pakistan | AV Live',
-        description: 'Authorized Polycom, Cisco & Logitech boardroom video conferencing integration in Lahore, Karachi & Islamabad. 15-Min SLA: 0321 425 6263.',
-        schema: {
-          '@context': 'https://schema.org',
-          '@graph': [
-            {
-              '@type': 'Service',
-              '@id': 'https://avlive.com.pk/video-conferencing-solutions#service',
-              name: 'Enterprise Video Conferencing Solutions in Lahore, Karachi & Islamabad',
-              serviceType: 'Boardroom AV Integration, Huddle Room Kits & Interactive Flat Panels',
-              description: 'Turnkey enterprise video conferencing solutions deploying Cisco, HP Poly (Polycom), Yealink, Logitech, Horion, and Grandstream across Lahore, Karachi, and Islamabad with a 15-minute technical SLA.',
-              provider: { '@id': 'https://avlive.com.pk/#organization' },
-              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
-            },
-            {
-              '@type': 'FAQPage',
-              '@id': 'https://avlive.com.pk/video-conferencing-solutions#faq',
-              mainEntity: [
-                {
-                  '@type': 'Question',
-                  name: 'What is the cost of a 30-person executive boardroom AV setup in Pakistan?',
-                  acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'In Pakistan, a turnkey 16-to-30 person executive boardroom AV setup costs between Rs. 1,450,000 and Rs. 3,200,000+ depending on whether you select Polycom RealPresence Group 500, HP Poly Studio X72, or Cisco Room Kit Plus, paired with dual 75"-85" 4K displays or a Horion Interactive Flat Panel, expansion or ceiling microphone arrays, and concealed table connectivity.'
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      },
-      '/corporate-event-management': {
-        title: 'Corporate Event Management & Hybrid Events | AV Live',
-        description: 'Corporate hybrid event live streaming, SMD LED screen rental & 3D hologram stage production in Lahore, Karachi & Islamabad. Call 0321 425 6263.',
-        schema: {
-          '@context': 'https://schema.org',
-          '@graph': [
-            {
-              '@type': 'Service',
-              '@id': 'https://avlive.com.pk/corporate-event-management#service',
-              name: 'Corporate Event Management, Hybrid Broadcasting & 3D Hologram Stages in Pakistan',
-              serviceType: 'Corporate Event Production, SMD LED Screen Rental & Multi-Camera Broadcasting',
-              description: 'Turnkey corporate hybrid event live streaming in Lahore, SMD LED screen rental, 3D hologram display stages in Pakistan, and multi-camera event broadcasting in Karachi and Islamabad with on-site standby engineers.',
-              provider: { '@id': 'https://avlive.com.pk/#organization' },
-              areaServed: ['Lahore', 'Karachi', 'Islamabad', 'Pakistan']
-            },
-            {
-              '@type': 'FAQPage',
-              '@id': 'https://avlive.com.pk/corporate-event-management#faq',
-              mainEntity: [
-                {
-                  '@type': 'Question',
-                  name: 'What does corporate hybrid event live streaming and SMD LED screen rental cost in Lahore and Karachi?',
-                  acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'Corporate hybrid event live streaming with multi-camera HD/4K SDI switching in Lahore or Karachi starts from Rs. 150,000–Rs. 350,000, while full-stage P2.5/P2.9 SMD LED screen rental, concert line-array sound, and 3D hologram stage production scales from Rs. 450,000 to Rs. 2,500,000+ based on screen square footage and venue duration.'
-                  }
-                }
-              ]
-            }
-          ]
+          description: 'Authorized distributor catalog for 27 OEM pro-AV, display, and unified communications brands in Pakistan.'
         }
       },
       '/live-streaming-services': {
@@ -2602,10 +3055,6 @@ async function startServer() {
             }
           ]
         }
-      },
-      '/conference-room-solutions': {
-        title: 'Conference Room AV Solutions in Pakistan | AV Live',
-        description: 'Turnkey conference room solutions in Pakistan: acoustic treatment, 4K PTZ cameras, beamforming ceiling microphones & touch control panels.'
       },
       '/zoom-rooms': {
         title: 'Zoom Rooms Hardware & Integration Pakistan | AV Live',
@@ -2775,8 +3224,8 @@ async function startServer() {
         description: 'Explore turnkey solutions for Video Conferencing in Pakistan (Poly, Cisco, Logitech), smart boardrooms, hybrid events & 3D Hologram Displays.'
       },
       '/video-conference': {
-        title: 'Video Conference Systems & Boardroom Configurator | AV Live',
-        description: 'Enterprise video conference systems in Pakistan: Poly, Cisco & Logitech hardware, SIP/Teams/Zoom design & PKR room calculator.',
+        title: 'Interactive Boardroom Configurator & SIP Architecture | AV Live',
+        description: 'Interactive video conference room configurator & SIP/H.323 boardroom architecture calculator in Pakistan with instant PKR BoM.',
         image: 'https://avlive.com.pk/images/video-conference/boardroom-hero-og.jpg',
         imageAlt: VIDEO_CONFERENCE_MEDIA_SEO['/images/video-conference/boardroom-hero.webp'].alt,
         schema: {
@@ -3244,6 +3693,8 @@ async function startServer() {
         freepbx: 'FreePBX (Sangoma)',
         sangoma: 'Sangoma',
         horion: 'Horion Interactive',
+        samsung: 'Samsung',
+        tcl: 'TCL',
         google: 'Google Meet'
       };
       const lowerBrand = brandSlug.toLowerCase();
@@ -3257,11 +3708,19 @@ async function startServer() {
           (lowerBrand === 'freepbx' && (String(p?.brand || '').toLowerCase().includes('freepbx') || String(p?.brand || '').toLowerCase().includes('sangoma')))
         ));
 
-      const title = clampSeoTitle(`${readableBrand} Distributor Pakistan | AV Hardware | AV Live`, 65);
-      const description = clampSeoDescription(
-        `Shop genuine ${readableBrand} video conferencing, IP phones & enterprise AV hardware in Pakistan with official warranty from AV Live.`,
-        128
-      );
+      const title = lowerBrand === 'samsung'
+        ? clampSeoTitle('Samsung LED & Crystal UHD TV Price in Pakistan | AV Live', 65)
+        : lowerBrand === 'tcl'
+          ? clampSeoTitle('TCL 4K Google & Smart LED TV Price in Pakistan | AV Live', 65)
+          : clampSeoTitle(`${readableBrand} Distributor Pakistan | AV Hardware | AV Live`, 65);
+      const description = lowerBrand === 'samsung'
+        ? clampSeoDescription('Shop genuine Samsung Crystal UHD (U8000F, DU8000, DU7000) & Smart LED TVs (32"–85") in Pakistan with official warranty from AV Live.', 140)
+        : lowerBrand === 'tcl'
+          ? clampSeoDescription('Shop genuine TCL 4K Google TVs (V6D, P6L, P755, P6K, P79L, T6D) & Smart LED TVs (32"–75") in Pakistan with official warranty from AV Live.', 140)
+          : clampSeoDescription(
+              `Shop genuine ${readableBrand} video conferencing, IP phones & enterprise AV hardware in Pakistan with official warranty from AV Live.`,
+              128
+            );
 
       const brandFaqs = [
         {
@@ -3402,7 +3861,7 @@ async function startServer() {
                 ${catLinksHtml}
                 ${peerBrandLinksHtml}
                 <li><a href="https://avlive.com.pk/room-designer">Launch the Interactive 3D Room Designer &amp; LED Calculator</a>.</li>
-                <li><a href="https://avlive.com.pk/video-conferencing-solutions">Explore the Enterprise Video Conferencing Solutions Pillar</a>.</li>
+                <li><a href="https://avlive.com.pk/video-conference-in-pakistan">Explore Video Conference in Pakistan (Hardware &amp; Solutions Pillar)</a>.</li>
                 <li><a href="https://avlive.com.pk/compare">Compare ${escapeHtmlText(readableBrand)} Specs Side-by-Side</a>.</li>
               </ul>
             </section>
@@ -3434,7 +3893,11 @@ async function startServer() {
           new Set(rawFallbackImgs.map((u) => normalizeGmcImageUrl(u) || (u.startsWith('/') ? `https://avlive.com.pk${u}` : u)).filter(Boolean))
         );
         const productImg = absSchemaImgs[0] || 'https://avlive.com.pk/og-image.jpg';
-        const candidateWithMpn = `${readableName} (${gmcMeta.mpn}) Pakistan | AV Live`;
+        const hasIdentifiers = gmcMeta.identifierExists !== 'no' && Boolean(gmcMeta.mpn || gmcMeta.gtin);
+        const displaySku = gmcMeta.mpn || gmcMeta.gmcId || resolvedSlug;
+        const candidateWithMpn = hasIdentifiers && gmcMeta.mpn
+          ? `${readableName} (${gmcMeta.mpn}) Pakistan | AV Live`
+          : `${readableName} Price in Pakistan | AV Live`;
         const candidateShort = `${readableName} Price in Pakistan | AV Live`;
         const baseTitlePrefix = readableName.split(/\s+[–—-]\s+/)[0]?.trim() || readableName;
         const candidateCompactPrice = `${baseTitlePrefix} Price in Pakistan | AV Live`;
@@ -3448,10 +3911,10 @@ async function startServer() {
           : candidateCompact.length <= 65
           ? candidateCompact
           : clampSeoTitle(`${readableName} | AV Live`, 65);
-        const fullSchemaDesc = gmcMeta.gmcDescription || gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} MPN ${gmcMeta.mpn} with 1-year Pakistan warranty and nationwide deployment.`;
+        const fullSchemaDesc = gmcMeta.gmcDescription || gmcMeta.defaultDescription || `${gmcMeta.highlight}. Official ${gmcMeta.brand} hardware with 1-year Pakistan warranty and nationwide deployment.`;
         const description = clampSeoDescription(
-          gmcMeta.seoMetaDescription || `${readableName} (${gmcMeta.mpn}) in Pakistan: Rs. ${effectivePrice.toLocaleString()}. ${gmcMeta.highlight}. Official ${gmcMeta.brand} warranty.`,
-          160
+          gmcMeta.seoMetaDescription || `${readableName}${hasIdentifiers && gmcMeta.mpn ? ` (${gmcMeta.mpn})` : ''} in Pakistan: Rs. ${effectivePrice.toLocaleString()}. ${gmcMeta.highlight}. Official ${gmcMeta.brand} warranty.`,
+          150
         );
         const specEntries = (gmcMeta.defaultSpecs || '')
           .split(';')
@@ -3482,7 +3945,8 @@ async function startServer() {
           const rp = buildFallbackProductFromGmcMeta(rSlug);
           const rPrice = rp ? resolveProductPricing(rp).effectivePrice : 0;
           const rHref = getProductHref(rp, rSlug);
-          return `<li><a href="https://avlive.com.pk${rHref}">${escapeHtmlText(rp?.productName || rSlug)} (${escapeHtmlText(rp?.mpn || '')}) — Rs. ${rPrice.toLocaleString()}</a></li>`;
+          const rCode = rp?.mpn || rp?.sku || '';
+          return `<li><a href="https://avlive.com.pk${rHref}">${escapeHtmlText(rp?.productName || rSlug)}${rCode ? ` (${escapeHtmlText(rCode)})` : ''} — Rs. ${rPrice.toLocaleString()}</a></li>`;
         }).join('');
 
         matched = {
@@ -3496,11 +3960,15 @@ async function startServer() {
                 '@id': `${canonicalUrl}#product`,
                 name: readableName,
                 image: absSchemaImgs.length > 0 ? absSchemaImgs : [productImg],
-                sku: gmcMeta.mpn,
-                mpn: gmcMeta.mpn,
-                ...(gmcMeta.gtin.replace(/\D/g, '').length === 13
-                  ? { gtin13: gmcMeta.gtin, gtin: gmcMeta.gtin }
-                  : { gtin12: gmcMeta.gtin, gtin: gmcMeta.gtin }),
+                sku: displaySku,
+                ...(hasIdentifiers && gmcMeta.mpn ? { mpn: gmcMeta.mpn } : {}),
+                ...(hasIdentifiers && gmcMeta.gtin
+                  ? gmcMeta.gtin.replace(/\D/g, '').length === 13
+                    ? { gtin13: gmcMeta.gtin, gtin: gmcMeta.gtin }
+                    : { gtin12: gmcMeta.gtin, gtin: gmcMeta.gtin }
+                  : {}),
+                ...(gmcMeta.size ? { size: gmcMeta.size } : {}),
+                ...(gmcMeta.itemGroupId ? { inProductGroupWithID: gmcMeta.itemGroupId } : {}),
                 description: fullSchemaDesc,
                 brand: { '@type': 'Brand', name: gmcMeta.brand },
                 aggregateRating: {
@@ -3514,7 +3982,7 @@ async function startServer() {
                   '@type': 'Review',
                   reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
                   author: { '@type': 'Organization', name: 'Enterprise IT Procurement Pakistan' },
-                  reviewBody: `Verified genuine ${readableName} (${gmcMeta.mpn}) deployed by AV Live Communications with full local Pakistan warranty.`
+                  reviewBody: `Verified genuine ${readableName} (${displaySku}) deployed by AV Live Communications with full local Pakistan warranty.`
                 },
                 offers: {
                   '@type': 'Offer',
@@ -3528,7 +3996,7 @@ async function startServer() {
                   seller: { '@type': 'Organization', name: 'AV Live Communications', url: 'https://avlive.com.pk' },
                   shippingDetails: {
                     '@type': 'OfferShippingDetails',
-                    shippingRate: { '@type': 'MonetaryAmount', value: '0', currency: 'PKR' },
+                    shippingRate: { '@type': 'MonetaryAmount', value: effectivePrice >= 100000 ? '0.00' : '1500.00', currency: 'PKR' },
                     shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'PK' },
                     deliveryTime: {
                       '@type': 'ShippingDeliveryTime',
@@ -3561,7 +4029,7 @@ async function startServer() {
                     {
                       '@type': 'VideoObject',
                       '@id': `${canonicalUrl}#video`,
-                      name: `${readableName} (${gmcMeta.mpn}) — Live Hardware Demonstration`,
+                      name: `${readableName} (${displaySku}) — Live Hardware Demonstration`,
                       description: fullSchemaDesc,
                       thumbnailUrl: [
                         'https://i.ytimg.com/vi/aZLEIxOzm24/hqdefault.jpg',
@@ -3576,22 +4044,25 @@ async function startServer() {
             ]
           }
         };
+        const idSummaryText = hasIdentifiers && gmcMeta.gtin
+          ? `${displaySku}, GTIN ${gmcMeta.gtin}`
+          : displaySku;
         ssrCustomBodyHtml = `
           <main class="ssr-seo-snapshot">
             <nav aria-label="Breadcrumb"><a href="https://avlive.com.pk">Home</a> &rsaquo; <a href="https://avlive.com.pk/shop">Shop</a> &rsaquo; <a href="https://avlive.com.pk/category/${primaryCatSlug}">${escapeHtmlText(fallbackProd?.category || 'Video Conferencing')}</a> &rsaquo; <a href="https://avlive.com.pk/brands/${brandSlugForLink}">${escapeHtmlText(gmcMeta.brand)}</a> &rsaquo; <span>${escapeHtmlText(readableName)}</span>.</nav>
             <article>
-              <h1>${escapeHtmlText(readableName)} (${escapeHtmlText(gmcMeta.mpn)}) — ${escapeHtmlText(gmcMeta.brand)} Pakistan.</h1>
-              <h2>${escapeHtmlText(readableName)} (${escapeHtmlText(gmcMeta.mpn)}) Specifications &amp; PKR Price.</h2>
+              <h1>${escapeHtmlText(readableName)} (${escapeHtmlText(displaySku)}) — ${escapeHtmlText(gmcMeta.brand)} Pakistan.</h1>
+              <h2>${escapeHtmlText(readableName)} Specifications &amp; PKR Price.</h2>
               <h3>${escapeHtmlText(gmcMeta.brand)} ${escapeHtmlText(readableName)} Architecture (${escapeHtmlText(fallbackProd?.subcategory || fallbackProd?.category || 'Pro-AV')}).</h3>
               <p>${escapeHtmlText(fullSchemaDesc)}</p>
-              <p>${escapeHtmlText(gmcMeta.brand)} ${escapeHtmlText(readableName)} (${escapeHtmlText(gmcMeta.mpn)}, GTIN ${escapeHtmlText(gmcMeta.gtin)}) is a ${escapeHtmlText(fallbackProd?.subcategory || fallbackProd?.category || 'Pro-AV')} solution available at Rs. ${effectivePrice.toLocaleString()} PKR (MSRP Rs. ${regularPrice.toLocaleString()} PKR). ${escapeHtmlText(gmcMeta.highlight)}. ${escapeHtmlText(specProse)}.</p>
+              <p>${escapeHtmlText(gmcMeta.brand)} ${escapeHtmlText(readableName)} (${escapeHtmlText(idSummaryText)}) is a ${escapeHtmlText(fallbackProd?.subcategory || fallbackProd?.category || 'Pro-AV')} solution available at Rs. ${effectivePrice.toLocaleString()} PKR (MSRP Rs. ${regularPrice.toLocaleString()} PKR). ${escapeHtmlText(gmcMeta.highlight)}. ${escapeHtmlText(specProse)}.</p>
               <table border="1" cellpadding="8" cellspacing="0">
-                <caption>${escapeHtmlText(readableName)} (${escapeHtmlText(gmcMeta.mpn)}) Specifications.</caption>
+                <caption>${escapeHtmlText(readableName)} (${escapeHtmlText(displaySku)}) Specifications.</caption>
                 <tbody>
-                  <tr><th>${escapeHtmlText(readableName)} MPN.</th><td>${escapeHtmlText(gmcMeta.mpn)} / GTIN ${escapeHtmlText(gmcMeta.gtin)}.</td></tr>
+                  <tr><th>${escapeHtmlText(readableName)} SKU.</th><td>${escapeHtmlText(idSummaryText)}.</td></tr>
                   <tr><th>${escapeHtmlText(gmcMeta.brand)} Line.</th><td><a href="https://avlive.com.pk/brands/${brandSlugForLink}">${escapeHtmlText(gmcMeta.brand)}</a> • <a href="https://avlive.com.pk/category/${primaryCatSlug}">${escapeHtmlText(fallbackProd?.category || 'Video Conferencing')}</a> (${escapeHtmlText(fallbackProd?.subcategory || 'Pro-AV')}).</td></tr>
                   <tr><th>${escapeHtmlText(readableName)} PKR.</th><td>Rs. ${effectivePrice.toLocaleString()} PKR (List: Rs. ${regularPrice.toLocaleString()} PKR)${gmcMeta.isBundle === 'yes' ? ' • Bundle' : ''}.</td></tr>
-                  <tr><th>${escapeHtmlText(gmcMeta.mpn)} Feature.</th><td>${escapeHtmlText(gmcMeta.highlight)}.</td></tr>
+                  <tr><th>${escapeHtmlText(displaySku)} Feature.</th><td>${escapeHtmlText(gmcMeta.highlight)}.</td></tr>
                   ${specRowsHtml}
                 </tbody>
               </table>
@@ -3600,8 +4071,8 @@ async function startServer() {
                 <h3>Compatible ${escapeHtmlText(gmcMeta.brand)} &amp; ${escapeHtmlText(fallbackProd?.category || 'Pro-AV')} Models.</h3>
                 <ul>
                   ${relatedLinksHtml}
-                  <li><a href="https://avlive.com.pk/video-conferencing-solutions">Parent Pillar: Video Conferencing Solutions in Pakistan</a>.</li>
-                  <li><a href="https://avlive.com.pk/corporate-event-management">Parent Pillar: Corporate Event Management &amp; LED Stages</a>.</li>
+                  <li><a href="https://avlive.com.pk/video-conference-in-pakistan">Parent Pillar: Video Conference in Pakistan</a>.</li>
+                  <li><a href="https://avlive.com.pk/event-management-in-pakistan">Parent Pillar: Event Management in Pakistan</a>.</li>
                   <li><a href="https://avlive.com.pk/voip-service-providers">Parent Pillar: VoIP &amp; Unified Communications</a>.</li>
                   <li><a href="https://avlive.com.pk/room-designer">Interactive 3D Room Designer &amp; LED Calculator</a>.</li>
                   <li><a href="https://avlive.com.pk/category/${primaryCatSlug}">${escapeHtmlText(fallbackProd?.category || 'Video Conferencing')} Catalog</a>.</li>
@@ -3722,10 +4193,12 @@ async function startServer() {
     // Dynamic Category Route SSR Metadata, Schema & Product Matrix Injection (/category/:categorySlug)
     if (!matched && cleanPath.startsWith('/category/')) {
       const catSlug = cleanPath.replace('/category/', '');
-      const readableCat = catSlug
-        .split('-')
-        .map(w => w.toUpperCase() === 'IP' || w.toUpperCase() === 'PTZ' || w.toUpperCase() === 'VOIP' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
+      const readableCat = catSlug === 'led-tv-displays'
+        ? 'LED TVs & Commercial Displays'
+        : catSlug
+            .split('-')
+            .map(w => w.toUpperCase() === 'IP' || w.toUpperCase() === 'PTZ' || w.toUpperCase() === 'VOIP' || w.toUpperCase() === 'LED' || w.toUpperCase() === 'TV' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' ');
 
       const allFallbackProds = Object.keys(PRODUCT_GMC_METADATA)
         .filter(k => !PRODUCT_ID_TO_SEO_SLUG[k])
@@ -3748,7 +4221,8 @@ async function startServer() {
         'ip-cameras': ['camera', 'hikvision', 'dahua', 'axis', 'uniview', 'nvr', 'dome', 'bullet'],
         'intercom-paging-access': ['intercom', 'paging', 'access', 'paviro', '2n', 'fanvil', 'itc', 'speaker', 'amplifier'],
         'voip-phone-systems': ['pbx', 'ucm', '3cx', 'freepbx', 'sangoma', 'gateway'],
-        'projectors': ['projector', 'epson', 'benq', 'optoma', 'panasonic', 'sony', 'viewsonic']
+        'projectors': ['projector', 'epson', 'benq', 'optoma', 'panasonic', 'sony', 'viewsonic'],
+        'led-tv-displays': ['samsung', 'tcl', 'horion', 'google tv', 'crystal uhd', 'smart tv', 'led tv', 'interactive flat panel']
       };
 
       const categoryUniqueGuide: Record<string, { overview: string; architectureNote: string; relatedCats: string[]; guideUrl: string }> = {
@@ -3823,6 +4297,12 @@ async function startServer() {
           architectureNote: 'Solid-state laser phosphor light engines deliver 20,000 hours of maintenance-free operation, motorized lens shift, HDBaseT long-distance signal input, and geometric corner-stone warping.',
           relatedCats: ['large-room', 'video-conferencing', 'ptz-cameras'],
           guideUrl: '/blog/hybrid-events-101-av-integration-pakistan'
+        },
+        'led-tv-displays': {
+          overview: 'Official Samsung Crystal UHD & Smart TVs (32"–85"), TCL 4K Google & Smart LED TVs (32"–75"), and Horion 4K Interactive Flat Panels for boardrooms, reception displays, hospitality lounges, and homes across Pakistan.',
+          architectureNote: 'Compare Samsung Crystal Processor 4K + Tizen OS (U8000F, DU8000, DU7000), TCL AiPQ 4K Google TV (V6D, P6L, P755, P6K, P79L, T6D), and Horion commercial interactive panels with standard VESA wall-mount compatibility and nationwide insured delivery.',
+          relatedCats: ['touch-panels', 'video-conferencing', 'projectors'],
+          guideUrl: '/blog/boardroom-av-system-price-guide-pakistan'
         }
       };
 
@@ -3846,10 +4326,15 @@ async function startServer() {
       const catBrands = Array.from(new Set(displayCatProducts.map(p => p.brand))).slice(0, 6);
 
       const title = clampSeoTitle(`${readableCat} in Pakistan | Enterprise AV | AV Live`, 65);
-      const description = clampSeoDescription(
-        `Explore genuine ${readableCat} in Pakistan: Poly, Cisco, Logitech & Yealink hardware with PKR pricing and official local warranty.`,
-        128
-      );
+      const description = catSlug === 'led-tv-displays'
+        ? clampSeoDescription(
+            'Shop official Samsung Crystal UHD, TCL 4K Google LED TVs (32"–85") & Horion interactive displays in Pakistan with verified PKR pricing and warranty.',
+            145
+          )
+        : clampSeoDescription(
+            `Explore genuine ${readableCat} in Pakistan: Poly, Cisco, Logitech & Yealink hardware with PKR pricing and official local warranty.`,
+            128
+          );
 
       matched = {
         title,
@@ -3925,8 +4410,8 @@ async function startServer() {
               <h3>Adjacent ${escapeHtmlText(readableCat)} Hardware &amp; Buyer's Guides</h3>
               <ul>
                 ${relatedCatLinksHtml}
-                <li><a href="https://avlive.com.pk/video-conferencing-solutions">Parent Pillar: Video Conferencing Solutions</a></li>
-                <li><a href="https://avlive.com.pk/corporate-event-management">Parent Pillar: Corporate Event Management</a></li>
+                <li><a href="https://avlive.com.pk/video-conference-in-pakistan">Parent Pillar: Video Conference in Pakistan</a></li>
+                <li><a href="https://avlive.com.pk/event-management-in-pakistan">Parent Pillar: Event Management in Pakistan</a></li>
                 <li><a href="https://avlive.com.pk/room-designer">Interactive 3D Room Designer &amp; LED Calculator</a></li>
                 ${['video-conferencing', 'large-room', 'touch-panels', 'boardroom-codecs'].includes(catSlug) ? '<li><a href="https://avlive.com.pk/podium-teleprompter">AV Live Fold-Flat Podium Teleprompter (17&quot; &amp; 22&quot; Stealth IPS)</a></li>' : ''}
                 <li><a href="https://avlive.com.pk${uniqueGuide.guideUrl}">${escapeHtmlText(readableCat)} Engineering &amp; Buyer's Guide</a></li>
@@ -4105,7 +4590,7 @@ async function startServer() {
           ]
         },
         '/shop': {
-          lead: 'The AV Live Enterprise Hardware Store stocks 53 serial-verified Pro-AV, Video Conferencing, SIP IP Telephony, Commercial Laser Projection, and NDAA Surveillance SKUs in Pakistan with immediate warehouse dispatch.',
+          lead: 'The AV Live Enterprise Hardware Store stocks 88 serial-verified Pro-AV, Video Conferencing, SIP IP Telephony, Commercial LED TVs (Samsung, TCL & Horion), Laser Projection, and NDAA Surveillance SKUs in Pakistan with immediate warehouse dispatch.',
           detail: 'All hardware includes official 1-year to 3-year local Pakistan warranty, PTA/PPRA tender compliance documentation, and FBR GST tax invoicing.',
           tableCaption: 'Enterprise Hardware Store — Category & Price Tier Overview',
           headers: ['Hardware Department', 'Flagship Models in Stock', 'PKR Price Range', 'Department Link'],
@@ -4113,21 +4598,23 @@ async function startServer() {
             ['Video Conferencing Bars & Kits', 'Poly Studio X52, Poly X72, Logitech Rally Bar, Cisco Room Bar', 'Rs. 85,000 – Rs. 2,850,000', '/category/video-conferencing'],
             ['Executive Boardroom Codecs', 'Polycom RealPresence Group 500, Poly G7500, Cisco Room Kit Plus', 'Rs. 545,000 – Rs. 2,850,000', '/category/boardroom-codecs'],
             ['SIP IP Phones & VoIP PBX', 'Yealink T31P/T46U/T54W, Poly VVX 450, Grandstream UCM6302', 'Rs. 21,500 – Rs. 295,000', '/category/ip-phones'],
+            ['LED TVs & Commercial Displays', 'Samsung Crystal UHD (32"–85"), TCL 4K Google TV, Horion K6a', 'Rs. 49,900 – Rs. 1,450,000', '/category/led-tv-displays'],
             ['4K Laser Projectors & Displays', 'Panasonic PT-RQ45K, Epson EB-L730U, Sony BRAVIA 7, BenQ LU960', 'Rs. 185,000 – Rs. 3,950,000', '/category/projectors']
           ],
           links: [
             { href: '/category/video-conferencing', label: 'Shop Video Conferencing Systems' },
             { href: '/category/boardroom-codecs', label: 'Shop Boardroom Codecs' },
+            { href: '/category/led-tv-displays', label: 'Shop Samsung, TCL & Horion LED TVs' },
             { href: '/category/ip-phones', label: 'Shop Enterprise IP Phones' },
             { href: '/category/projectors', label: 'Shop Commercial Projectors' },
             { href: '/podium-teleprompter', label: 'Fold-Flat Podium Teleprompter (17" & 22" Stealth IPS)' },
             { href: '/room-designer', label: '3D Room Designer & LED Calculator' },
-            { href: '/brands', label: 'Browse All 25 Authorized Brands' },
+            { href: '/brands', label: 'Browse All 27 Authorized Brands' },
             { href: '/compare', label: 'Side-by-Side Hardware Comparator' }
           ]
         },
         '/brands': {
-          lead: 'AV Live Communications is an authorized distribution and integration partner for 25 global Pro-AV, Unified Communications, Optical Projection, and IP Security manufacturers in Pakistan.',
+          lead: 'AV Live Communications is an authorized distribution and integration partner for 27 global Pro-AV, Unified Communications, Commercial Display (Samsung, TCL & Horion), Optical Projection, and IP Security manufacturers in Pakistan.',
           detail: 'Procuring through an authorized channel guarantees factory-sealed hardware, genuine firmware entitlement, local RMA swap coverage, and certified field installation.',
           tableCaption: 'Authorized OEM Brands & Flagship Product Lines in Pakistan',
           headers: ['OEM Brand', 'Primary Technology Domain', 'Flagship Pakistan Series', 'Brand Portal'],
@@ -4135,6 +4622,7 @@ async function startServer() {
             ['HP Poly (Polycom)', 'Boardroom Codecs, Studio Video Bars, VVX/Edge IP Phones, Voyager Headsets', 'RealPresence Group 500, Studio X52/X72, G7500', '/brands/poly'],
             ['Logitech', 'Rally Bar Series, MeetUp, Sight AI Camera, Tap IP Controllers', 'Rally Bar, Rally Bar Mini, Rally Plus', '/brands/logitech'],
             ['Cisco', 'Webex Room Kits, Codec Pro, Room Bar, 7800/8800 IP Phones, CUCM', 'Room Bar, Room Kit Plus, Codec Pro', '/brands/cisco'],
+            ['Samsung, TCL & Horion', 'Commercial 4K Crystal UHD TVs, Google TVs & Interactive Flat Panels', 'Samsung U8000F/DU8000, TCL P755/P6L, Horion K6a', '/category/led-tv-displays'],
             ['Yealink', 'MeetingBar A20/A30, MVC Teams Rooms, T3/T4/T5 SIP Phones', 'MeetingBar A30, MVC860, SIP-T46U', '/brands/yealink'],
             ['Bosch & ITC Audio', 'Digital Congress Microphones, EN54 PAVIRO Public Address & Line Arrays', 'CCS 1000 D, PAVIRO Controller, VA-6200MA', '/brands/bosch'],
             ['Panasonic, Epson & Sony', '20,000–45,000 Lumen 3-Chip DLP & 3LCD Laser Projectors', 'PT-RQ45K, PT-VMZ82, EB-L730U', '/brands/panasonic']
@@ -4143,36 +4631,18 @@ async function startServer() {
             { href: '/brands/poly', label: 'HP Poly (Polycom) Pakistan' },
             { href: '/brands/logitech', label: 'Logitech Video Conferencing Pakistan' },
             { href: '/brands/cisco', label: 'Cisco Collaboration Pakistan' },
+            { href: '/brands/samsung', label: 'Samsung LED TVs & Displays Pakistan' },
+            { href: '/brands/tcl', label: 'TCL Google TVs & LED TVs Pakistan' },
+            { href: '/brands/horion', label: 'Horion Interactive Flat Panels Pakistan' },
             { href: '/brands/yealink', label: 'Yealink Pakistan' },
-            { href: '/brands/jabra', label: 'Jabra Audio & Video Pakistan' },
             { href: '/brands/bosch', label: 'Bosch Conference & Public Address' },
             { href: '/room-designer', label: '3D Room Designer & LED Calculator' }
           ]
         },
-        '/video-conferencing': {
-          lead: 'Engineered video conferencing room architecture, RT60 acoustic calibration, PoE+ structured cabling, and encrypted H.323/SIP & native Zoom/Teams Room integration across Lahore, Karachi, and Islamabad.',
-          detail: 'Our acoustics and network engineers design multi-camera boardroom topologies, ceiling beamforming microphone arrays, Dante audio-over-IP matrices, and single-cable USB-C BYOD switching.',
-          tableCaption: 'Enterprise Video Conferencing Room Topologies & Integration Standards',
-          headers: ['Architecture Topology', 'Core Codec / Appliance', 'Network & Protocol Stack', 'Best Room Deployment'],
-          rows: [
-            ['Encrypted H.323 / SIP Hardware Codec', 'Polycom RealPresence Group 500 / Cisco Room Kit Plus', 'Dedicated Voice/Video VLAN, AES-256, H.323, SIP', 'Banks, Defense, Ministries, 16–30 Seat Boardrooms'],
-            ['Native Cloud Appliance Video Bar', 'HP Poly Studio X52 / X72 / Logitech Rally Bar / Yealink A30', 'CollabOS / Poly VideoOS Native Zoom & Teams Rooms', 'Huddle Spaces & 6–16 Seat Conference Rooms'],
-            ['Multi-Camera Modular Pro-AV Matrix', 'Poly G7500 / Cisco Codec Pro + Dual 20x PTZ + Bosch Mics', 'Dante Audio over IP, Dual 4K60 HDMI Matrix, AEC DSP', '30–100+ Seat Auditoriums & Hybrid Townhalls']
-          ],
-          links: [
-            { href: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan (Hardware & PKR Price Pillar)' },
-            { href: '/category/video-conferencing', label: 'Browse All Video Conferencing Hardware' },
-            { href: '/product/polycom-realpresence-group-500-pakistan', label: 'Polycom RealPresence Group 500' },
-            { href: '/product/poly-studio-x72-pakistan', label: 'HP Poly Studio X72 Large Room Bar' },
-            { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus' },
-            { href: '/product/logitech-rally-bar-pakistan', label: 'Logitech Rally Bar 4K' },
-            { href: '/room-designer', label: 'Interactive 3D Conference Room Planner' }
-          ]
-        },
         '/video-conference': {
-          lead: 'Enterprise video conference systems in Pakistan engineered by AV Live Communications span 20 years of institutional deployment (2006–2026) and 1,000+ boardrooms and hybrid summits across Lahore, Karachi, and Islamabad. Compare Cloud SaaS (Microsoft Teams Rooms, Zoom Rooms, Cisco Webex), Private On-Premises SIP/H.323 codecs, and Hybrid Broadcast architectures with verified PKR pricing from Rs. 248,000 (Poly Studio USB) to Rs. 2,980,000 (Cisco Room Kit EQ).',
-          detail: 'Trusted by Meta (Facebook), World Bank Group, USAID, Asian Development Bank (ADB), Nestlé Pakistan, AkzoNobel (Dulux), Lucky Core Industries (ICI), Berger Paints, Jazz & JazzCash, NIMA & Pakistan Navy, WAPDA, Novo Nordisk, Ferozsons Laboratories, Servier, CitiBank, Deutsche Bank, Allied Bank, OGDCL, LUMS, COMSATS, NETSOL, Adamjee Insurance, and PSHD/HISDU. Use our interactive Video Conference Room Configurator to calculate room acoustics, 120-degree camera FOV coverage, Mix-Minus AEC audio buses, and serialized HP Poly, Cisco, Logitech, Grandstream, and Bosch Bill of Materials (BoM) with FBR GST invoicing, PTA compliance, and a guaranteed 15-minute engineering SLA.',
-          tableCaption: '2026 Enterprise Video Conference Architecture & Verified PKR Hardware Matrix',
+          lead: 'Use our Interactive Boardroom Configurator & SIP Architecture Planner for Pakistan. Compare Cloud SaaS (Microsoft Teams Rooms, Zoom Rooms, Cisco Webex), Private On-Premises SIP/H.323 codecs, and Hybrid Broadcast architectures with verified PKR pricing from Rs. 248,000 (Poly Studio USB) to Rs. 2,980,000 (Cisco Room Kit EQ).',
+          detail: 'Trusted by Meta (Facebook), World Bank Group, USAID, Asian Development Bank (ADB), Nestlé Pakistan, AkzoNobel (Dulux), Lucky Core Industries (ICI), Berger Paints, Jazz & JazzCash, NIMA & Pakistan Navy, WAPDA, Novo Nordisk, Ferozsons Laboratories, Servier, CitiBank, Deutsche Bank, Allied Bank, OGDCL, LUMS, COMSATS, NETSOL, Adamjee Insurance, and PSHD/HISDU. Configure room acoustics, 120-degree camera FOV coverage, Mix-Minus AEC audio buses, and serialized HP Poly, Cisco, Logitech, Grandstream, and Bosch Bill of Materials (BoM) with FBR GST invoicing and a 15-minute engineering SLA.',
+          tableCaption: '2026 Interactive Boardroom Configurator — Protocol & Verified PKR Hardware Matrix',
           headers: ['Room Tier & Seating', 'Recommended Video Conference System', 'Protocol & Acoustic Engineering', 'Verified Price (PKR)'],
           rows: [
             ['Focus & Huddle Room (2–6 Pax).', 'Poly Studio USB Video Bar (7200-85830-012) / Logitech Rally Bar Mini (960-001336).', 'USB BYOD or Native Teams/Zoom appliance with 120° 4K framing and 4.5m beamforming pickup.', 'Rs. 248,000 – Rs. 620,000.'],
@@ -4188,7 +4658,7 @@ async function startServer() {
             { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus Quad Camera (Rs. 1,850,000)' },
             { href: '/podium-teleprompter', label: 'AV Live Fold-Flat Podium Teleprompter (17" & 22")' },
             { href: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan (National PKR Price Guide)' },
-            { href: '/video-conferencing-solutions', label: 'Turnkey Video Conferencing Solutions Hub' },
+            { href: '/services/boardroom-integration', label: 'Turnkey Boardroom AV Integration Service' },
             { href: '/room-designer', label: 'Interactive 3D Conference Room Designer & LED Calculator' }
           ]
         },
@@ -4211,7 +4681,8 @@ async function startServer() {
             { href: '/product/poly-studio-x72-pakistan', label: 'HP Poly Studio X72 / X70 Price in Pakistan' },
             { href: '/product/logitech-rally-bar-pakistan', label: 'Logitech Rally Bar Price in Pakistan' },
             { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus Price in Pakistan' },
-            { href: '/video-conferencing-solutions', label: 'Enterprise Video Conferencing Solutions Hub' },
+            { href: '/services/boardroom-integration', label: 'Boardroom AV Integration & Acoustic Engineering' },
+            { href: '/video-conference', label: 'Interactive Boardroom Configurator & SIP Architecture' },
             { href: '/event-management-in-pakistan', label: 'Event Management in Pakistan Pillar' },
             { href: '/room-designer', label: '3D Conference Room Designer & BoM Calculator' }
           ]
@@ -4228,64 +4699,19 @@ async function startServer() {
             ['Concert Sound, Stage Trussing & Arena AV', 'Dual 12" Line-Array Stacks, 18" Subwoofers, Heavy-Duty Goalpost Truss, Laser FX', 'Relies on third-party sound vendors with zero acoustic SPL calibration', 'Rs. 350,000 – Rs. 1,800,000']
           ],
           links: [
-            { href: '/corporate-event-management', label: 'Corporate Event Management & Hybrid Staging' },
+            { href: '/services/corporate-events', label: 'Corporate Event Production & Hybrid Staging Service' },
+            { href: '/product/indoor-smd-led-p2-5-cabinet-pakistan', label: 'P2.5 Indoor SMD LED Stage Wall Display' },
+            { href: '/podium-teleprompter', label: 'AV Live Fold-Flat Podium Teleprompter' },
             { href: '/av-equipment-rental', label: 'SMD LED Screen & Concert Sound System Rental' },
             { href: '/3d-hologram', label: '3D Hologram Display Stages Pakistan' },
             { href: '/projection-mapping', label: '3D Architectural & Stage Projection Mapping' },
             { href: '/live-streaming-services', label: 'Multi-Camera Event Broadcasting & Webcasting' },
             { href: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan Pillar' },
+            { href: '/room-designer', label: '3D Event Stage & SMD LED Wall Designer' },
             { href: '/lahore', label: 'Event Management Company in Lahore (Johar Town HQ)' },
             { href: '/islamabad', label: 'Event Management & AV Rental in Islamabad (Blue Area)' },
             { href: '/karachi', label: 'Event Management & Production in Karachi (Clifton)' },
             { href: '/event-quote', label: 'Instant 24-Hour Event Production Quote Calculator' }
-          ]
-        },
-        '/video-conferencing-solutions': {
-          lead: 'Turnkey enterprise video conferencing solutions engineered for zero-downtime executive communication in Lahore, Karachi, and Islamabad with a guaranteed 15-minute technical SLA response.',
-          detail: 'We integrate H.323/SIP hardware codecs, AI speaker-tracking optical PTZ cameras, ceiling beamforming microphone arrays, and 4K interactive flat panels.',
-          tableCaption: 'Turnkey Boardroom Integration Packages & SLA Commitments',
-          headers: ['Solution Tier', 'Hardware & Acoustic Deliverables', 'Primary Cities', 'Turnkey PKR Estimate'],
-          rows: [
-            ['Huddle & Medium MTR/Zoom Kit', 'All-in-one 4K video bar, PoE touch panel, single 65"–75" 4K commercial display', 'Lahore, Karachi, Islamabad', 'Rs. 550,000 – Rs. 1,250,000'],
-            ['Executive Boardroom Suite', 'Dual-camera 4K codec, 2–4 table/ceiling mic pods, dual 75"–85" displays, table connectivity box', 'Nationwide On-Site Deployment', 'Rs. 1,450,000 – Rs. 3,200,000'],
-            ['Townhall & Auditorium Broadcast', 'Dual 20x PTZ cameras, DSP matrix mixer, wireless gooseneck mics, laser projection', 'Custom CAD & Acoustic Survey', 'Rs. 2,800,000 – Rs. 6,500,000+']
-          ],
-          links: [
-            { href: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan Hardware Pillar' },
-            { href: '/room-designer', label: '3D Room Designer & LED Calculator' },
-            { href: '/product/polycom-realpresence-group-500-pakistan', label: 'Polycom RealPresence Group 500' },
-            { href: '/product/poly-studio-x72-pakistan', label: 'Poly Studio X72 / X70' },
-            { href: '/product/cisco-room-kit-plus-pakistan', label: 'Cisco Room Kit Plus' },
-            { href: '/product/logitech-rally-bar-pakistan', label: 'Logitech Rally Bar' },
-            { href: '/services/boardroom-integration', label: 'Boardroom AV Integration Service Details' },
-            { href: '/conference-room-solutions', label: 'Acoustic & Conference Room Solutions' },
-            { href: '/zoom-rooms', label: 'Certified Zoom Rooms Integration' },
-            { href: '/microsoft-teams-rooms', label: 'Microsoft Teams Rooms (MTR) Pakistan' },
-            { href: '/blog/boardroom-av-system-price-guide-pakistan', label: '2026 Boardroom BoM & Price Guide' }
-          ]
-        },
-        '/corporate-event-management': {
-          lead: 'End-to-end corporate event management, AGM townhall broadcasting, P2.5 SMD LED stage fabrication, and 3D hologram product launches across Lahore, Karachi, and Islamabad—backed by 1,000+ corporate events delivered.',
-          detail: 'Trusted by Meta (Facebook), World Bank Group, USAID, Nestlé Pakistan, Novo Nordisk, Servier, Ferozsons Laboratories, NIMA & Pakistan Navy, WAPDA, and JazzCash. Our event engineering crew manages stage trussing, DMX intelligent lighting, line-array sound reinforcement, and redundant multi-camera live streaming with on-site standby engineers.',
-          tableCaption: 'Corporate Event Production Tiers & Technical Scope in Pakistan',
-          headers: ['Event Format', 'Visual & Stage Production', 'Audio & Hybrid Broadcast', 'Reference Budget (PKR)'],
-          rows: [
-            ['Executive Townhall & AGM', '12x8 ft P2.5 SMD LED backdrop, confidence monitors, branded podium', '4x wireless mics, 2-camera HD SDI Zoom/Teams bridge', 'Rs. 250,000 – Rs. 550,000'],
-            ['Corporate Product Launch & Gala', 'Curved P2.5 LED wall + 3D HoloGauze stage, 24x DMX moving heads', 'Concert line-array PA, 4-camera 4K switching + live stream', 'Rs. 850,000 – Rs. 2,500,000'],
-            ['International Expo & Convention', 'Custom 3D fabricated pavilion, interactive touch kiosks, LED fascia', 'Multi-zone wireless audio, lead-capture AI agents', 'Rs. 1,200,000 – Rs. 4,500,000+']
-          ],
-          links: [
-            { href: '/event-management-in-pakistan', label: 'Event Management in Pakistan National Pillar' },
-            { href: '/room-designer', label: '3D Room Designer & LED Wall Calculator' },
-            { href: '/product/horion-k6a-bundle-special-offer', label: 'Horion K6a Interactive Flat Panel Bundle' },
-            { href: '/product/benq-tk705i-pakistan', label: 'BenQ TK705i 4K Projector' },
-            { href: '/product/bosch-paviro-pva-4cr12-pakistan', label: 'Bosch PAVIRO Public Address Controller' },
-            { href: '/services/corporate-events', label: 'Corporate Event Management Service Blueprint' },
-            { href: '/events-services', label: 'AV Rental Rate Card & Configurator' },
-            { href: '/live-streaming-services', label: 'Corporate Webcast & Live Streaming' },
-            { href: '/av-equipment-rental', label: 'SMD LED Screen & Audio Rental' },
-            { href: '/podium-teleprompter', label: 'AV Live Fold-Flat Podium Teleprompter (Executive Keynotes)' },
-            { href: '/event-quote', label: 'Calculate Your Event Production Quote' }
           ]
         }
       };
@@ -4361,8 +4787,8 @@ async function startServer() {
                 <ul>
                   ${prodLinksHtml}
                   <li><a href="https://avlive.com.pk/room-designer">3D Room Designer &amp; LED Calculator</a></li>
-                  <li><a href="https://avlive.com.pk/video-conferencing-solutions">Video Conferencing Solutions Pillar</a></li>
-                  <li><a href="https://avlive.com.pk/corporate-event-management">Corporate Event Management Pillar</a></li>
+                  <li><a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan Pillar</a></li>
+                  <li><a href="https://avlive.com.pk/event-management-in-pakistan">Event Management in Pakistan Pillar</a></li>
                   <li><a href="https://avlive.com.pk/services/${pickedSvc.slug}">${escapeHtmlText(pickedSvc.title)}</a></li>
                   <li><a href="https://avlive.com.pk/blog/${pickedBlog.slug}">${escapeHtmlText(pickedBlog.title)}</a></li>
                 </ul>
@@ -4417,7 +4843,7 @@ async function startServer() {
 
     if (matched) {
       const clampedTitle = clampSeoTitle(matched.title, 65);
-      const clampedDesc = clampSeoDescription(matched.description, 160);
+      const clampedDesc = clampSeoDescription(matched.description, 152);
       const safeTitleText = escapeHtmlText(clampedTitle);
       const safeTitleAttr = escapeHtmlAttr(clampedTitle);
       const safeDescAttr = escapeHtmlAttr(clampedDesc);
@@ -4562,8 +4988,8 @@ async function startServer() {
     }
 
     if (ssrCustomBodyHtml) {
-      const ssrHeaderHtml = `<header class="ssr-seo-header"><nav aria-label="Primary Header Navigation"><a href="https://avlive.com.pk">AV Live Communications</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/video-conference">Video Conference Systems</a> | <a href="https://avlive.com.pk/video-conferencing-solutions">Video Conferencing</a> | <a href="https://avlive.com.pk/corporate-event-management">Corporate Events</a> | <a href="https://avlive.com.pk/shop">Hardware Shop</a> | <a href="https://avlive.com.pk/room-designer">3D Room Designer</a> | <a href="https://avlive.com.pk/contact">Contact (0321-4256263)</a></nav></header>`;
-      const ssrFooterHtml = `<footer class="ssr-seo-footer"><nav aria-label="Footer Directory and Regional Hubs"><a href="https://avlive.com.pk/lahore">AV Live Lahore</a> | <a href="https://avlive.com.pk/karachi">AV Live Karachi</a> | <a href="https://avlive.com.pk/islamabad">AV Live Islamabad</a> | <a href="https://avlive.com.pk/solutions">Industry Solutions</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/video-conference">Video Conference Systems</a> | <a href="https://avlive.com.pk/video-conferencing">Video Conferencing Hub</a> | <a href="https://avlive.com.pk/esports">Esports Arena Production</a> | <a href="https://avlive.com.pk/sitemap">Complete HTML Sitemap</a> | <a href="https://avlive.com.pk/faqs">FAQs</a> | <a href="https://avlive.com.pk/reviews">Client Reviews</a> | <a href="https://avlive.com.pk/returns">30-Day Returns</a> | <a href="https://avlive.com.pk/shipping">Nationwide Shipping</a> | <a href="https://avlive.com.pk/payment">FBR GST Payment</a> | <a href="https://avlive.com.pk/rma">Warranty &amp; RMA</a> | <a href="https://avlive.com.pk/programs/government-education-pricing">Gov &amp; HEC Pricing</a> | <a href="https://avlive.com.pk/programs/reseller-program">Reseller Program</a> | <a href="https://avlive.com.pk/programs/blind-drop-shipping">Blind Drop Shipping</a> | <a href="https://avlive.com.pk/programs/fulfillment-services">3PL Fulfillment</a> | <a href="https://avlive.com.pk/programs/promotions">Bundles &amp; Rebates</a> | <a href="https://avlive.com.pk/programs/provisioning-services">Zero-Touch Provisioning</a> | <a href="https://avlive.com.pk/privacy-policy">Privacy Policy</a> | <a href="https://avlive.com.pk/terms-of-service">Terms of Service</a> | <a href="https://avlive.com.pk/user-data-deletion">User Data Deletion</a></nav></footer>`;
+      const ssrHeaderHtml = `<header class="ssr-seo-header"><nav aria-label="Primary Header Navigation"><a href="https://avlive.com.pk">AV Live Communications</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/event-management-in-pakistan">Event Management in Pakistan</a> | <a href="https://avlive.com.pk/video-conference">Room Configurator</a> | <a href="https://avlive.com.pk/category/led-tv-displays">LED TVs &amp; Displays</a> | <a href="https://avlive.com.pk/shop">Hardware Shop</a> | <a href="https://avlive.com.pk/brands">27 OEM Brands</a> | <a href="https://avlive.com.pk/room-designer">3D Room Designer</a> | <a href="https://avlive.com.pk/contact">Contact (0321-4256263)</a></nav></header>`;
+      const ssrFooterHtml = `<footer class="ssr-seo-footer"><nav aria-label="Footer Directory and Regional Hubs"><a href="https://avlive.com.pk/lahore">AV Live Lahore</a> | <a href="https://avlive.com.pk/karachi">AV Live Karachi</a> | <a href="https://avlive.com.pk/islamabad">AV Live Islamabad</a> | <a href="https://avlive.com.pk/solutions">Industry Solutions</a> | <a href="https://avlive.com.pk/video-conference-in-pakistan">Video Conference in Pakistan</a> | <a href="https://avlive.com.pk/event-management-in-pakistan">Event Management in Pakistan</a> | <a href="https://avlive.com.pk/video-conference">Boardroom Configurator</a> | <a href="https://avlive.com.pk/category/led-tv-displays">Samsung, TCL &amp; Horion LED TVs</a> | <a href="https://avlive.com.pk/esports">Esports Arena Production</a> | <a href="https://avlive.com.pk/sitemap">Complete HTML Sitemap</a> | <a href="https://avlive.com.pk/faqs">FAQs</a> | <a href="https://avlive.com.pk/reviews">Client Reviews</a> | <a href="https://avlive.com.pk/returns">30-Day Returns</a> | <a href="https://avlive.com.pk/shipping">Nationwide Shipping</a> | <a href="https://avlive.com.pk/payment">FBR GST Payment</a> | <a href="https://avlive.com.pk/rma">Warranty &amp; RMA</a> | <a href="https://avlive.com.pk/programs/government-education-pricing">Gov &amp; HEC Pricing</a> | <a href="https://avlive.com.pk/programs/reseller-program">Reseller Program</a> | <a href="https://avlive.com.pk/programs/blind-drop-shipping">Blind Drop Shipping</a> | <a href="https://avlive.com.pk/programs/fulfillment-services">3PL Fulfillment</a> | <a href="https://avlive.com.pk/programs/promotions">Bundles &amp; Rebates</a> | <a href="https://avlive.com.pk/programs/provisioning-services">Zero-Touch Provisioning</a> | <a href="https://avlive.com.pk/privacy-policy">Privacy Policy</a> | <a href="https://avlive.com.pk/terms-of-service">Terms of Service</a> | <a href="https://avlive.com.pk/user-data-deletion">User Data Deletion</a></nav></footer>`;
       updated = updated.replace(
         /<div id="root">[\s\S]*?<\/div><!--ssr-root-end-->|<div id="root"><\/div>/,
         () => `<div id="root">${ssrHeaderHtml}${ssrCustomBodyHtml}${ssrFooterHtml}</div><!--ssr-root-end-->`
@@ -4673,7 +5099,11 @@ async function startServer() {
     '/category/ai-development': '/services/ai-development',
     '/category/ai-agents-workers': '/services/ai-agents-workers',
     '/category/ai-automation': '/services/ai-automation',
-    '/corporate-event-management-pakistan': '/corporate-event-management',
+    '/video-conferencing': '/video-conference-in-pakistan',
+    '/video-conferencing-solutions': '/video-conference-in-pakistan',
+    '/conference-room-solutions': '/video-conference-in-pakistan',
+    '/corporate-event-management': '/event-management-in-pakistan',
+    '/corporate-event-management-pakistan': '/event-management-in-pakistan',
     '/brands/polycom': '/brands/poly',
     '/brands/hp-poly': '/brands/poly',
     '/brands/plantronics': '/brands/poly',
@@ -4747,12 +5177,13 @@ async function startServer() {
     'headsets',
     'ip-cameras',
     'intercom-paging-access',
+    'led-tv-displays',
   ]);
 
   const validCanonicalBrands = new Set<string>([
     'poly', 'cisco', 'logitech', 'yealink', 'jabra', 'bosch', 'hikvision', 'dahua', 'axis',
     'grandstream', 'fanvil', '2n', 'epson', 'benq', 'optoma', 'panasonic', 'sony', 'viewsonic',
-    'uniview', 'itc', '3cx', 'freepbx', 'sangoma', 'horion', 'google',
+    'uniview', 'itc', '3cx', 'freepbx', 'sangoma', 'horion', 'google', 'samsung', 'tcl',
   ]);
 
   const validCanonicalServices = new Set<string>([

@@ -1,0 +1,87 @@
+{
+  "run_id": "avlive-smooth-hero-2026-11-23",
+  "created_at": "2026-11-23T21:42:00-08:00",
+  "status": "awaiting_approval",
+  "degraded": false,
+  "cost_usd": 0.0,
+  "worktree": {
+    "path": ".uiux-surgical/worktree",
+    "branch": "uiux/smooth-hero-iter-0",
+    "base_commit": "workspace-snapshot-post-category-image-refresh"
+  },
+  "design_system": {
+    "primary": "tailwind",
+    "secondary": ["custom_tokens"],
+    "mapping_file": ".uiux-surgical/runs/avlive-smooth-hero-2026-11-23/system_mapping.json"
+  },
+  "baseline": {
+    "tokens": {
+      "primary": "#1A2B4C",
+      "deep_navy": "#111E36",
+      "secondary": "#00B4D8",
+      "hero_sky": "#38BDF8",
+      "accessible_cyan_aa": "#0077B6",
+      "surface": "#FFFFFF",
+      "canvas": "#F8F9FA"
+    },
+    "diagnosed_issues": [
+      "Hero desktop container capped at max-h-[380px] with pb-14 and bottom-2.5 tab dock causes vertical crowding and left/right arrow overlap.",
+      "Hero text overlay snaps with 0ms change while only background crossfades; zero Ken Burns depth, zero progress indicator on active tab, and empty right 45% dark gradient scrim.",
+      "Frequent transition-all on cards/controls triggers layout/paint recalculation instead of GPU-composited transform + opacity with broadcast ease cubic-bezier(0.22, 1, 0.36, 1).",
+      "Lazy content-visibility: auto + double-layer BlurProductImage + backdrop-blur inside overflow-x-auto horizontal carousels introduces scroll jitter on mobile/trackpad swipes.",
+      "Carousel left/right buttons are opacity-0 until hover (undiscoverable on touch/trackpad), and filter tab switching snaps instantaneously with 0ms feedback."
+    ],
+    "lighthouse": {
+      "lcp_ms": 1750,
+      "cls": 0.0,
+      "tbt_ms": 45
+    }
+  },
+  "niche_profile": {
+    "industry": "enterprise-av-communications",
+    "sub_vertical": "b2b video conferencing, voip & corporate event production",
+    "competitor_set": [
+      "poly.com",
+      "logitech.com/video-collaboration",
+      "webex.com/devices",
+      "avixa.org"
+    ],
+    "aesthetic_direction": [
+      "enterprise-precision",
+      "crisp-light-catalog",
+      "high-contrast-navy-cyan",
+      "spec-dense-clean"
+    ]
+  },
+  "inspiration_set": [
+    {
+      "source": "poly.com / webex.com/devices",
+      "title": "Split-Stage Enterprise AV Hero with In-Situ Backdrop + Floating Spec Spotlight Card & Ecosystem Badges",
+      "niche_score": 0.98,
+      "applicable_component": "Hero Option HS-1 (Flagship Split-Stage Hero + Live Progress Dock)"
+    },
+    {
+      "source": "logitech.com/video-collaboration",
+      "title": "Spatial 'Choose Your Space' Quick-Room Hero Selector (Huddle / Boardroom / SMD Stage)",
+      "niche_score": 0.96,
+      "applicable_component": "Hero Option HS-2 (Spatial Room-Size Hero Switcher)"
+    },
+    {
+      "source": "gpu_compositor_motion_audit",
+      "title": "60/120fps Compositor-Only Transitions (transform + opacity, cubic-bezier(0.22, 1, 0.36, 1))",
+      "niche_score": 0.99,
+      "applicable_component": "SM-1 & SM-2 (Zero-Jank UI Motion Layer + Sliding Filter/Pillar Transitions)"
+    },
+    {
+      "source": "enterprise_carousel_ergonomics",
+      "title": "Always-Discoverable Carousel Steppers + Edge Mask + Single-Layer Cached Image Reveal",
+      "niche_score": 0.95,
+      "applicable_component": "SM-3 (Tactile Horizontal Carousel & Card Glide)"
+    }
+  ],
+  "human_gate": {
+    "decision": "pending",
+    "notes": "Phase 0-3 READ-ONLY proposal ready at /uiux-proposal.html and .uiux-surgical/runs/avlive-smooth-hero-2026-11-23/changes.md. Storefront files untouched."
+  },
+  "iterations": []
+}

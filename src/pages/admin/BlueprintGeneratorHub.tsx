@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import {
   Cpu,
   ShieldCheck,
-  Sparkles,
   Download,
   Copy,
   Check,
@@ -90,6 +89,13 @@ const INITIAL_LEARNED_RULES: LearnedRule[] = [
     date: '2026-11-20',
     title: '360° Deep-Scan 30-Point Precision Remediation (CMS, GMC, Wave-1/2 Parity, 460+ Word Brand Hubs & AI SEO)',
     rule: 'Replaced all 7 remaining Unsplash URLs with direct external product photos (0 Unsplash URLs across 54 SKUs), separated YouTube links from <img> galleries into a zero-TBT click-to-load video player + VideoObject JSON-LD, sanitized &nbsp; chains and concatenated specs, unified PKR pricing and Answer-First <table> matrices on FAQs.tsx & RoomDesigner.tsx, expanded all 25 /brands/:slug SSR hubs to 460+ words with FAQPage JSON-LD, added terminal periods to SSR tables/lists for Flesch-Kincaid readability, generated /llms.txt, and added SpeakableSpecification JSON-LD sitewide.',
+  },
+  {
+    id: 'rule-10',
+    version: 'v4.27',
+    date: '2026-11-28',
+    title: 'Consolidated Cannibalizing URLs, Enterprise Catalog Visual System & Verified Image SEO',
+    rule: 'Consolidated overlapping -in-pakistan/solution/event URLs via 1-hop 301s into /video-conference-in-pakistan, /event-management-in-pakistan, /services/boardroom-integration, and /services/corporate-events; expanded catalog to 88 SKUs, 13 categories (including LED TVs & Displays), 27 brands (including Samsung, TCL, Horion), and 193 canonical URLs; replaced blanket sitemap lastmod dates with deterministic release dates; upgraded to Plus Jakarta Sans / JetBrains Mono enterprise visual hierarchy with zero Unsplash URLs and descriptive local WebP filenames + enriched alt/title metadata synced to /llms-full.txt.',
   },
 ];
 
@@ -305,15 +311,15 @@ ${ledgerLines}
 
 ## 1. Dual-Wave Express SSR + Frame-0 Synchronous Hydration
 - **Wave 1 (HTTP GET < 50ms TTFB)**: \`server.ts\` (\`injectRouteSeoIntoHtml\`) intercepts every canonical route, performs 301 redirects for legacy/MPN/ID paths, injects \`<title data-rh="true">\`, \`<link rel="canonical" data-rh="true">\`, \`@graph\` JSON-LD, and pre-renders \`<main class="ssr-seo-snapshot">\` (containing \`<h1>\`, 60-word Answer-First verdict, and native HTML \`<table>\` matrices) inside \`<div id="root">\`.
-- **Wave 2 (0ms Client Hydration)**: React 19 initializes state synchronously from \`PRODUCT_GMC_METADATA\` (53 SKUs), \`FALLBACK_PRODUCT_CATEGORIES\` (12 categories), and \`FALLBACK_SERVICES_CATALOG\` (9 services) before Firestore responds—eliminating 100% of Soft-404 loading spinners.
+- **Wave 2 (0ms Client Hydration)**: React 19 initializes state synchronously from \`PRODUCT_GMC_METADATA\` (88 SKUs), \`FALLBACK_PRODUCT_CATEGORIES\` (13 categories), and \`FALLBACK_SERVICES_CATALOG\` (9 services) before Firestore responds—eliminating 100% of Soft-404 loading spinners.
 
-## 2. Hub-and-Spoke Topical Silo & Anti-Cannibalization Graph (156 Canonical URLs)
-- **National Head Pillars**: \`/video-conference-in-pakistan\`, \`/event-management-in-pakistan\`, \`/corporate-event-management\`
-- **Category Hubs**: 12 dedicated \`/category/:slug\` hubs
-- **Brand Hubs**: 25 authorized OEM \`/brands/:slug\` hubs
+## 2. Hub-and-Spoke Topical Silo & Anti-Cannibalization Graph (193 Canonical URLs)
+- **National Head Pillars**: \`/video-conference-in-pakistan\`, \`/event-management-in-pakistan\` (with \`/video-conference\` scoped as the interactive Boardroom Configurator)
+- **Category Hubs**: 13 dedicated \`/category/:slug\` hubs (including \`/category/led-tv-displays\`)
+- **Brand Hubs**: 27 authorized OEM \`/brands/:slug\` hubs (including Samsung, TCL, and Horion)
 - **Regional Geo Hubs**: \`/lahore\`, \`/karachi\`, \`/islamabad\`
 - **BoFu Comparison Guides**: 11 \`/blog/:slug\` brand-vs-brand & room-cost guides
-- **Verified Hardware SKUs**: 53 \`/product/:slug-pakistan\` pages (strictly targeting \`[Brand] [Model] [MPN] Price in Pakistan\`)
+- **Verified Hardware SKUs**: 88 \`/product/:slug-pakistan\` pages (strictly targeting \`[Brand] [Model] [MPN] Price in Pakistan\`)
 
 ## 3. Google Lighthouse 100/100/100/100 Engineering Matrix
 - **Performance**: Rollup \`manualChunks\`, \`optimizeGalleryImageUrl(url, 480, 75)\`, \`fetchPriority="high"\` on first 2 cards, hover-only 2nd image render, \`IntersectionObserver\` 16-card DOM batching (<800 DOM nodes), explicit dimensions (\`CLS = 0.000\`).
@@ -344,19 +350,19 @@ ${learnedRules
 1. **Stage 1: Single-Hop 301 Canonical Normalizer (\`resolveSingleHopCanonicalTarget\` in \`server.ts\`)**: Collapses trailing slashes, uppercase paths, query parameters (\`?brand=\`, \`?sub=\`, \`?sort=\`, \`?utm_*\`), raw Firestore IDs (\`kl5wGaNLxqQByn3oPd1Z\`, \`T1XLMubVYmFzeIfC7V9B\`), MPNs, and multi-hop legacy paths in **1 single HTTP 301 jump**.
 2. **Stage 2: Wave-1 Express SSR HTML & JSON-LD Injection (\`injectRouteSeoIntoHtml\`)**: Injects route-specific \`<title data-rh="true">\`, \`<meta name="description">\`, self-referencing \`<link rel="canonical" data-rh="true">\`, \`@graph\` JSON-LD, and \`<main class="ssr-seo-snapshot">\` inside \`<div id="root">\`.
 3. **Stage 3: Zero-5xx Fault-Tolerant SSR Guard**: Wraps \`vite.transformIndexHtml\` and the Express global error handler so every HTML \`GET\`/\`HEAD\` request returns a valid \`200 OK\` pre-rendered \`seoHtml\` document.
-4. **Stage 4: Frame-0 Synchronous React 19 Hydration**: Initializes state at 0ms from \`PRODUCT_GMC_METADATA\` (54 SKUs), \`FALLBACK_PRODUCT_CATEGORIES\` (12 categories), and \`FALLBACK_SERVICES_CATALOG\` (9 services).
+4. **Stage 4: Frame-0 Synchronous React 19 Hydration**: Initializes state at 0ms from \`PRODUCT_GMC_METADATA\` (88 SKUs), \`FALLBACK_PRODUCT_CATEGORIES\` (13 categories), and \`FALLBACK_SERVICES_CATALOG\` (9 services).
 5. **Stage 5: Flat <=2-Click Internal Link Graph**: Header Mega-Menu + Siloed Footer + \`/sitemap\` (\`HtmlSitemap.tsx\`) keep 100% of canonical URLs within <=2 clicks.
 6. **Stage 6: Synchronized Crawler & Shopping Feeds**: \`/sitemap.xml\`, \`/llms.txt\`, \`/llms-full.txt\`, \`/api/gmc-feed.xml\`, \`/api/gmc-feed.tsv\`, \`/api/gmc-sheet-20.tsv\`.
 
-## 2. Complete Canonical Route Inventory (157 Deduplicated Indexable URLs)
-- **Storefront Core & National Pillars (28 URLs)**: \`/\`, \`/shop\`, \`/brands\`, \`/solutions\`, \`/services\`, \`/events-services\`, \`/event-quote\`, \`/room-designer\`, \`/compare\`, \`/guides\`, \`/blog\`, \`/reviews\`, \`/faqs\`, \`/about\`, \`/contact\`, \`/sitemap\`, \`/video-conference-in-pakistan\`, \`/event-management-in-pakistan\`, \`/video-conferencing\`, \`/video-conferencing-solutions\`, \`/corporate-event-management\`, \`/conference-room-solutions\`, \`/zoom-rooms\`, \`/microsoft-teams-rooms\`, \`/3d-hologram\`, \`/projection-mapping\`, \`/live-streaming-services\`, \`/av-equipment-rental\`
+## 2. Complete Canonical Route Inventory (193 Deduplicated Indexable URLs)
+- **Storefront Core & National Pillars (24 URLs)**: \`/\`, \`/shop\`, \`/brands\`, \`/solutions\`, \`/services\`, \`/events-services\`, \`/event-quote\`, \`/room-designer\`, \`/compare\`, \`/guides\`, \`/blog\`, \`/reviews\`, \`/faqs\`, \`/about\`, \`/contact\`, \`/sitemap\`, \`/video-conference\`, \`/video-conference-in-pakistan\`, \`/event-management-in-pakistan\`, \`/zoom-rooms\`, \`/microsoft-teams-rooms\`, \`/3d-hologram\`, \`/projection-mapping\`, \`/live-streaming-services\`, \`/av-equipment-rental\` (deprecated cannibalizing URLs 301-redirected in 1 hop)
 - **Regional Geo Hubs & Specialty Verticals (5 URLs)**: \`/lahore\`, \`/karachi\`, \`/islamabad\`, \`/esports\`, \`/voip-service-providers\`
 - **B2B Procurement Programs & Policies (13 URLs)**: \`/programs/quote\`, \`/programs/blind-drop-shipping\`, \`/programs/government-education-pricing\`, \`/programs/fulfillment-services\`, \`/programs/promotions\`, \`/programs/provisioning-services\`, \`/programs/reseller-program\`, \`/payment\`, \`/shipping\`, \`/returns\`, \`/rma\`, \`/privacy-policy\`, \`/terms-of-service\`
-- **Authorized OEM Brand Portals (25 URLs)**: \`/brands/poly\`, \`/brands/cisco\`, \`/brands/logitech\`, \`/brands/yealink\`, \`/brands/jabra\`, \`/brands/bosch\`, \`/brands/hikvision\`, \`/brands/dahua\`, \`/brands/axis\`, \`/brands/grandstream\`, \`/brands/fanvil\`, \`/brands/2n\`, \`/brands/epson\`, \`/brands/benq\`, \`/brands/optoma\`, \`/brands/panasonic\`, \`/brands/sony\`, \`/brands/viewsonic\`, \`/brands/uniview\`, \`/brands/itc\`, \`/brands/3cx\`, \`/brands/freepbx\`, \`/brands/sangoma\`, \`/brands/horion\`, \`/brands/google\`
-- **Canonical Hardware Categories (12 URLs)**: \`/category/video-conferencing\`, \`/category/boardroom-codecs\`, \`/category/large-room\`, \`/category/ptz-cameras\`, \`/category/touch-panels\`, \`/category/speakerphones\`, \`/category/ip-phones\`, \`/category/voip-phone-systems\`, \`/category/headsets\`, \`/category/projectors\`, \`/category/ip-cameras\`, \`/category/intercom-paging-access\`
+- **Authorized OEM Brand Portals (27 URLs)**: \`/brands/poly\`, \`/brands/cisco\`, \`/brands/logitech\`, \`/brands/yealink\`, \`/brands/jabra\`, \`/brands/bosch\`, \`/brands/hikvision\`, \`/brands/dahua\`, \`/brands/axis\`, \`/brands/grandstream\`, \`/brands/fanvil\`, \`/brands/2n\`, \`/brands/epson\`, \`/brands/benq\`, \`/brands/optoma\`, \`/brands/panasonic\`, \`/brands/sony\`, \`/brands/viewsonic\`, \`/brands/uniview\`, \`/brands/itc\`, \`/brands/3cx\`, \`/brands/freepbx\`, \`/brands/sangoma\`, \`/brands/horion\`, \`/brands/google\`, \`/brands/samsung\`, \`/brands/tcl\`
+- **Canonical Hardware Categories (13 URLs)**: \`/category/video-conferencing\`, \`/category/boardroom-codecs\`, \`/category/large-room\`, \`/category/ptz-cameras\`, \`/category/touch-panels\`, \`/category/led-tv-displays\`, \`/category/speakerphones\`, \`/category/ip-phones\`, \`/category/voip-phone-systems\`, \`/category/headsets\`, \`/category/projectors\`, \`/category/ip-cameras\`, \`/category/intercom-paging-access\`
 - **Turnkey Integration & Event Services (9 URLs)**: \`/services/boardroom-integration\`, \`/services/voip-telephony\`, \`/services/corporate-events\`, \`/services/hybrid-events\`, \`/services/esports-events\`, \`/services/expo-organizing\`, \`/services/ai-automation\`, \`/services/ai-development\`, \`/services/ai-agents-workers\`
 - **BoFu Comparison & Engineering Blog Guides (11 URLs)**: \`/blog/logitech-rally-bar-vs-poly-studio-x50-pakistan\`, \`/blog/yealink-vs-cisco-video-conferencing-pakistan\`, \`/blog/boardroom-av-system-price-guide-pakistan\`, \`/blog/banking-healthcare-university-av-solutions-pakistan\`, \`/blog/shure-bosch-ceiling-microphones-vs-table-mics-pakistan\`, \`/blog/future-of-video-conferencing-pakistan-2026\`, \`/blog/how-to-choose-video-conferencing-equipment\`, \`/blog/ip-phones-vs-softphones-pakistan\`, \`/blog/understanding-public-address-systems-pakistan\`, \`/blog/hybrid-events-101-av-integration-pakistan\`, \`/blog/av-live-communications-15-years-pakistan\`
-- **Verified Enterprise Hardware SKUs (54 URLs)**: All 54 canonical \`/product/*-pakistan\` SKUs in \`PRODUCT_GMC_METADATA\` (including \`/product/podium-prompter-17-compact-pakistan\`) with direct external \`https://lh3.googleusercontent.com/d/...\` image URLs.`;
+- **Verified Enterprise Hardware SKUs (88 URLs)**: All 88 canonical \`/product/*-pakistan\` SKUs in \`PRODUCT_GMC_METADATA\` & \`TV_CATALOG_ENTRIES\` with descriptive local WebP imagery & enriched alt/title metadata.`;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -364,9 +370,9 @@ ${learnedRules
       <div className="bg-gradient-to-r from-[#1A2B4C] via-[#162544] to-[#0F1B33] rounded-2xl p-6 lg:p-8 text-white shadow-xl border border-white/10">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00B4D8]/20 border border-[#00B4D8]/40 text-[#00B4D8] text-xs font-bold uppercase tracking-wider mb-3">
-              <Sparkles size={14} />
-              Apex SEO / AEO / Lighthouse 100 Engine (v4.0 Self-Evolving)
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#00B4D8]/20 border border-[#00B4D8]/40 text-[#00B4D8] text-xs font-bold uppercase tracking-wider mb-3">
+              <Cpu size={14} />
+              Apex SEO / AEO / Lighthouse 100 Engine (v4.27 Self-Evolving)
             </div>
             <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight">
               Website Building Mechanism, AI Agent Profiles & Universal Niche Compiler
@@ -399,7 +405,7 @@ ${learnedRules
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-6 pt-6 border-t border-white/10">
           <div className="bg-white/5 rounded-xl p-3 border border-white/10">
             <div className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Canonical Graph</div>
-            <div className="text-xl font-extrabold text-[#00B4D8] mt-0.5">157 / 157 URLs</div>
+            <div className="text-xl font-extrabold text-[#00B4D8] mt-0.5">193 / 193 URLs</div>
             <div className="text-[11px] text-emerald-400 font-medium">0 Duplicates • &le;2 Clicks</div>
           </div>
           <div className="bg-white/5 rounded-xl p-3 border border-white/10">
@@ -951,7 +957,7 @@ ${learnedRules
                   2. Frame-0 Zero Soft-404 Fallbacks
                 </h3>
                 <p className="text-xs text-gray-600 mt-2 leading-relaxed">
-                  Public routes initialize synchronously on Frame 0 from <code className="font-mono">PRODUCT_GMC_METADATA</code> (53 SKUs), <code className="font-mono">FALLBACK_PRODUCT_CATEGORIES</code> (12 categories), and <code className="font-mono">FALLBACK_SERVICES_CATALOG</code> (9 services) while Firestore hydrates in the background via silent long-polling.
+                  Public routes initialize synchronously on Frame 0 from <code className="font-mono">PRODUCT_GMC_METADATA</code> (88 SKUs), <code className="font-mono">FALLBACK_PRODUCT_CATEGORIES</code> (13 categories), and <code className="font-mono">FALLBACK_SERVICES_CATALOG</code> (9 services) while Firestore hydrates in the background via silent long-polling.
                 </p>
               </div>
 
@@ -1060,7 +1066,7 @@ ${learnedRules
                       Protected <code className="bg-gray-100 px-1 rounded">/admin/*</code>, <code className="bg-gray-100 px-1 rounded">/cart</code>, <code className="bg-gray-100 px-1 rounded">/checkout</code>, and <code className="bg-gray-100 px-1 rounded">/setup-wizard</code> routes.
                     </td>
                     <td className="p-3 text-emerald-800 font-medium">
-                      Verified 0 of the 157 canonical URLs have <code className="bg-emerald-50 px-1 rounded">noindex</code>; transactional routes remain strictly isolated with <code className="bg-emerald-50 px-1 rounded">X-Robots-Tag: noindex, nofollow</code>.
+                      Verified 0 of the 193 canonical URLs have <code className="bg-emerald-50 px-1 rounded">noindex</code>; transactional routes remain strictly isolated with <code className="bg-emerald-50 px-1 rounded">X-Robots-Tag: noindex, nofollow</code>.
                     </td>
                   </tr>
                   <tr>
@@ -1138,7 +1144,7 @@ ${learnedRules
                 <div>
                   <span className="text-xs font-mono text-[#00B4D8] font-bold">/WEBSITE_STRUCTURE_BLUEPRINT.md</span>
                   <h3 className="text-base font-bold text-white mt-0.5">
-                    157-Route Website Structure &amp; Canonical Blueprint
+                    193-Route Website Structure &amp; Canonical Blueprint
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">

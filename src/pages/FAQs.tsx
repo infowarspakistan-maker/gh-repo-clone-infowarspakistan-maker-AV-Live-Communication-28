@@ -105,7 +105,7 @@ export function FAQs() {
         <Breadcrumbs items={[{ label: 'FAQs' }]} />
 
         <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-          <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-xl p-4">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
             <span className="block text-[10px] font-black uppercase tracking-widest text-[#00B4D8] mb-1">
               Answer-First Procurement &amp; SLA Verdict
             </span>

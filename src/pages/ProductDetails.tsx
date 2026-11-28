@@ -40,6 +40,7 @@ import {
   buildFallbackProductFromGmcMeta,
   resolveCanonicalProductSlugByIdentifier,
 } from '../lib/gmc-feed';
+import { getScreenSizeVariantsForSlug, getTvCatalogEntry } from '../lib/tv-catalog';
 import {
   extractDirectImageUrls,
   extractVideoUrls,
@@ -289,10 +290,18 @@ export function ProductDetails() {
   );
 
   const gmcMeta = PRODUCT_GMC_METADATA[canonicalSlug] || PRODUCT_GMC_METADATA[product.id || ''];
-  const hasIdentifiers = product.identifierExists !== false;
+  const tvEntry = getTvCatalogEntry(canonicalSlug);
+  const sizeVariants = getScreenSizeVariantsForSlug(canonicalSlug);
+  const hasIdentifiers =
+    String(product.identifierExists ?? gmcMeta?.identifierExists ?? 'yes').toLowerCase() !== 'no' &&
+    (product.identifierExists as unknown) !== false;
   const resolvedGtin = hasIdentifiers ? (product.gtin || gmcMeta?.gtin || '610807990017') : '';
-  const resolvedMpn = cleanMpn(product.mpn || gmcMeta?.mpn || product.sku, canonicalSlug);
+  const resolvedMpn = hasIdentifiers
+    ? cleanMpn(product.mpn || gmcMeta?.mpn || product.sku, canonicalSlug)
+    : (product.gmcId || gmcMeta?.gmcId || product.sku || canonicalSlug);
   const resolvedBrand = (product.brand === 'Poly (HP' ? 'HP Poly' : product.brand) || gmcMeta?.brand || 'AV Live';
+  const resolvedSize = tvEntry?.size || product.size || gmcMeta?.size;
+  const resolvedItemGroupId = tvEntry?.itemGroupId || product.itemGroupId || gmcMeta?.itemGroupId;
   const schemaConditionMap: Record<string, string> = {
     new: 'https://schema.org/NewCondition',
     refurbished: 'https://schema.org/RefurbishedCondition',
@@ -319,24 +328,47 @@ export function ProductDetails() {
   const effectiveSpecsRaw = (!hasMalformedRawSpecs ? rawSpecsStr : gmcMeta?.defaultSpecs) || gmcMeta?.defaultSpecs || rawSpecsStr;
   const effectiveSpecificationsList = effectiveSpecsRaw ? effectiveSpecsRaw.split(';').filter(Boolean) : specificationsList;
 
-  const faqs = [
-    {
-      q: `Is the ${product.productName} certified for Video Conference in Pakistan and hybrid events?`,
-      a: `Yes, all ${resolvedBrand} systems supplied by AV Live Communications—including enterprise setups alongside Polycom Group 500 and Poly X70 series—are 100% PTA compliant and ready for corporate boardrooms and hybrid event deployments across Pakistan.`
-    },
-    {
-      q: `Does AV Live provide on-site installation and corporate event management integration in Lahore, Karachi, and Islamabad?`,
-      a: "Absolutely! We offer nationwide video conference installation, corporate event management, hybrid event streaming, and 3D Hologram Display integration. Select the 'Enterprise Deployment' option for complete on-site mounting, acoustic tuning, and SIP/Zoom/Teams provisioning."
-    },
-    {
-      q: "What is the delivery timeline and shipping cost across Pakistan?",
-      a: "We offer secure, insured logistics across Pakistan. Delivery takes 2-3 business days for Lahore, Karachi, Rawalpindi, and Islamabad, and 3-5 business days for other cities. Shipping is free on orders over Rs. 100,000."
-    },
-    {
-      q: "What warranty coverage and official GTIN/MPN verification is included?",
-      a: `This ${product.productName} (MPN: ${resolvedMpn}, GTIN/UPC: ${resolvedGtin}) includes a 1-year official local warranty with optional 3-Year Extended Premier Replacement Warranty for zero downtime.`
-    }
-  ];
+  const faqs = tvEntry
+    ? [
+        {
+          q: `Is the ${product.productName} genuine with official ${resolvedBrand} Pakistan warranty?`,
+          a: `Yes. AV Live Communications supplies 100% factory-sealed ${resolvedBrand} ${tvEntry.modelSeries} LED TVs in Pakistan with official brand warranty, FBR GST corporate invoicing, and optional 3-year extended protection.`
+        },
+        {
+          q: `What screen sizes are available in the ${resolvedBrand} ${tvEntry.modelSeries}?`,
+          a: sizeVariants.length > 1
+            ? `The ${resolvedBrand} ${tvEntry.modelSeries} is available at AV Live in ${sizeVariants.map((v) => v.size).join(', ')} configurations—use the Screen Size selector above to switch sizes and compare live PKR pricing.`
+            : `This ${resolvedBrand} ${tvEntry.modelSeries} model is configured in the ${tvEntry.size} screen size (${tvEntry.typeKeyFeature}), ideal for executive offices, boardrooms, and modern living spaces.`
+        },
+        {
+          q: `Does AV Live provide wall-mounting and boardroom HDMI/video conferencing integration?`,
+          a: `Yes! Select 'Enterprise Deployment' for professional VESA wall-mounting, concealed cabling, and HDMI integration with Cisco, Poly, or Logitech boardroom systems across Lahore, Karachi, and Islamabad.`
+        },
+        {
+          q: `What is the delivery timeline and shipping cost across Pakistan?`,
+          a: `In-stock ${resolvedBrand} displays ship via insured, shock-protected logistics within 2–3 business days to Lahore, Karachi, Rawalpindi, and Islamabad (3–5 business days nationwide). Shipping is free on orders over Rs. 100,000.`
+        }
+      ]
+    : [
+        {
+          q: `Is the ${product.productName} certified for Video Conference in Pakistan and hybrid events?`,
+          a: `Yes, all ${resolvedBrand} systems supplied by AV Live Communications—including enterprise setups alongside Polycom Group 500 and Poly X70 series—are 100% PTA compliant and ready for corporate boardrooms and hybrid event deployments across Pakistan.`
+        },
+        {
+          q: `Does AV Live provide on-site installation and corporate event management integration in Lahore, Karachi, and Islamabad?`,
+          a: "Absolutely! We offer nationwide video conference installation, corporate event management, hybrid event streaming, and 3D Hologram Display integration. Select the 'Enterprise Deployment' option for complete on-site mounting, acoustic tuning, and SIP/Zoom/Teams provisioning."
+        },
+        {
+          q: "What is the delivery timeline and shipping cost across Pakistan?",
+          a: "We offer secure, insured logistics across Pakistan. Delivery takes 2-3 business days for Lahore, Karachi, Rawalpindi, and Islamabad, and 3-5 business days for other cities. Shipping is free on orders over Rs. 100,000."
+        },
+        {
+          q: "What warranty coverage and official GTIN/MPN verification is included?",
+          a: hasIdentifiers
+            ? `This ${product.productName} (MPN: ${resolvedMpn}, GTIN/UPC: ${resolvedGtin}) includes a 1-year official local warranty with optional 3-Year Extended Premier Replacement Warranty for zero downtime.`
+            : `This ${product.productName} (Model ID: ${resolvedMpn}) includes a 1-year official local warranty with optional 3-Year Extended Premier Replacement Warranty for zero downtime.`
+        }
+      ];
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -354,6 +386,8 @@ export function ProductDetails() {
             ? { "gtin13": resolvedGtin, "gtin": resolvedGtin }
             : { "gtin12": resolvedGtin, "gtin": resolvedGtin }
           : {}),
+        ...(resolvedSize ? { "size": resolvedSize } : {}),
+        ...(resolvedItemGroupId ? { "inProductGroupWithID": resolvedItemGroupId } : {}),
         "brand": {
           "@type": "Brand",
           "name": resolvedBrand
@@ -604,7 +638,7 @@ export function ProductDetails() {
                    <div className="absolute inset-0 bg-[#0B0F19] text-white flex flex-col">
                      <div className="flex items-center justify-between px-4 py-2.5 bg-[#0B0F19] border-b border-white/10">
                        <div className="flex items-center gap-2">
-                         <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                         <span className="w-2 h-2 bg-red-500 rounded-full"></span>
                          <span className="text-[11px] font-black uppercase tracking-widest text-[#00B4D8]">
                            Official Hardware Video Demo
                          </span>
@@ -652,7 +686,7 @@ export function ProductDetails() {
                          {['h-3', 'h-6', 'h-9', 'h-4', 'h-11', 'h-7', 'h-9', 'h-5', 'h-2.5', 'h-8', 'h-12', 'h-4', 'h-7', 'h-10', 'h-3.5', 'h-5', 'h-8', 'h-11'].map((hClass, i) => (
                            <span 
                              key={i} 
-                             className={`w-1.5 ${hClass} bg-[#00B4D8]/60 rounded-full animate-pulse`}
+                             className={`w-1.5 ${hClass} bg-[#00B4D8]/60 rounded-full`}
                            ></span>
                          ))}
                        </div>
@@ -750,7 +784,7 @@ export function ProductDetails() {
                  aria-label="Play product demonstration video"
                  className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 transition-all shrink-0 bg-[#1A2B4C] text-white flex flex-col items-center justify-center relative ${activeVideo ? 'border-[#00B4D8] shadow-md scale-95' : 'border-transparent opacity-80 hover:opacity-100'}`}
                >
-                 <Play size={24} className="text-[#00B4D8] animate-pulse" />
+                 <Play size={24} className="text-[#00B4D8]" />
                  <span className="text-[8px] font-black uppercase tracking-widest mt-1 text-gray-300">Play Demo</span>
                 </button>
               </div>
@@ -780,7 +814,7 @@ export function ProductDetails() {
                   {/* All tab panels remain mounted in the DOM for Googlebot crawlability; visibility is toggled via CSS */}
                   <div className={activeTab === 'overview' ? 'prose prose-blue max-w-none block' : 'hidden'}>
                     {/* Answer-First AEO Executive Summary */}
-                    <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-4 sm:p-5 mb-6 not-prose">
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 mb-6 not-prose">
                       <span className="block text-xs font-black uppercase tracking-widest text-[#00B4D8] mb-1">
                         Answer-First Hardware Verdict
                       </span>
@@ -1059,13 +1093,18 @@ export function ProductDetails() {
                 <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6 w-full h-auto">
                   <div className="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 pb-6">
                     <div className="flex flex-col">
-                      <span className="text-[30px] font-black text-[#1A2B4C] tracking-tight">{formatPrice(getSelectedPrice())}</span>
+                      <span className="text-[30px] font-black text-[#1A2B4C] tracking-tight tabular-nums">{formatPrice(getSelectedPrice())}</span>
                       {currency !== 'PKR' && (
-                        <span className="text-[11px] font-bold text-gray-400 mt-0.5">Base PKR Rate: {formatExactPkr(getSelectedPrice())}</span>
+                        <span className="text-[11px] font-bold text-gray-400 mt-0.5 tabular-nums">Base PKR Rate: {formatExactPkr(getSelectedPrice())}</span>
+                      )}
+                      {tvEntry?.priceNote && (
+                        <span className="text-[11px] font-semibold text-gray-500 mt-1">
+                          {tvEntry.priceNote}
+                        </span>
                       )}
                       {product.salePrice < product.regularPrice && (
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-sm text-gray-400 line-through font-bold">{formatPrice(product.regularPrice + (deploymentVariant === 'enterprise' ? 15000 : 0) + (warrantyVariant === '3year' ? 25000 : 0))}</span>
+                          <span className="text-sm text-gray-400 line-through font-bold tabular-nums">{formatPrice(product.regularPrice + (deploymentVariant === 'enterprise' ? 15000 : 0) + (warrantyVariant === '3year' ? 25000 : 0))}</span>
                           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-1 rounded">
                             {Math.round(((product.regularPrice - product.salePrice) / product.regularPrice) * 100)}% OFF
                           </span>
@@ -1074,6 +1113,54 @@ export function ProductDetails() {
                     </div>
                     <CurrencySelector variant="pill" />
                   </div>
+
+                  {/* Screen Size Variant Switcher for Multi-Size LED TV Series */}
+                  {sizeVariants.length > 1 && tvEntry && (
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="block text-xs font-black uppercase tracking-wider text-gray-500">
+                          Screen Size · <span className="text-[#1A2B4C]">{tvEntry.size} Selected</span>
+                        </span>
+                        <span className="text-[11px] font-semibold text-gray-400">
+                          {tvEntry.modelSeries}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {sizeVariants.map((variant) => {
+                          const isCurrentSize = variant.slug === canonicalSlug;
+                          return (
+                            <Link
+                              key={variant.slug}
+                              to={`/product/${variant.slug}`}
+                              aria-current={isCurrentSize ? 'page' : undefined}
+                              className={`border-2 px-3 py-2.5 rounded-xl text-left transition-all block ${
+                                isCurrentSize
+                                  ? 'border-[#00B4D8] bg-[#00B4D8]/5 shadow-xs'
+                                  : 'border-gray-100 hover:border-[#1A2B4C]/40 bg-white'
+                              }`}
+                            >
+                              <span className={`block text-sm font-black tabular-nums ${isCurrentSize ? 'text-[#0088A8]' : 'text-[#1A2B4C]'}`}>
+                                {variant.size}
+                              </span>
+                              <span className="block text-[11px] font-bold text-gray-500 tabular-nums mt-0.5 truncate">
+                                {formatPrice(variant.price)}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {tvEntry && sizeVariants.length === 1 && (
+                    <div className="text-xs font-semibold text-gray-600 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="font-black text-[#1A2B4C]">Screen Size: {tvEntry.size}</span>
+                      <span className="text-gray-300">·</span>
+                      <span>{tvEntry.modelSeries}</span>
+                      <span className="text-gray-300">·</span>
+                      <span>{tvEntry.typeKeyFeature}</span>
+                    </div>
+                  )}
 
                   {/* Variant Selectors (Deployment & Warranty Options) */}
                   <div className="border-t border-b border-gray-100 py-6 space-y-4">
@@ -1205,10 +1292,10 @@ export function ProductDetails() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                     <Link
-                      to="/video-conferencing-solutions"
+                      to="/video-conference-in-pakistan"
                       className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
                     >
-                      <span>Video Conferencing Pillar</span>
+                      <span>Video Conference Pillar</span>
                       <span>→</span>
                     </Link>
                     <Link
@@ -1219,10 +1306,10 @@ export function ProductDetails() {
                       <span>→</span>
                     </Link>
                     <Link
-                      to="/corporate-event-management"
+                      to="/event-management-in-pakistan"
                       className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 rounded-xl bg-white/10 hover:bg-[#00B4D8] text-white text-[11px] font-bold transition-colors flex items-center justify-between"
                     >
-                      <span>Corporate Event Pillar</span>
+                      <span>Event Management Pillar</span>
                       <span>→</span>
                     </Link>
                     <Link

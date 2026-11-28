@@ -191,6 +191,96 @@ service cloud.firestore {
         && data.createdAt == request.time;
     }
 
+    function isValidAILead(data) {
+      return data.keys().hasAll(['name', 'phone', 'channel', 'language', 'stage', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly([
+          'name', 'company', 'phone', 'email', 'city', 'channel', 'language',
+          'stage', 'intentSummary', 'interestedSkus', 'estimatedValuePkr',
+          'escalated', 'sheetSyncedAt', 'lastContactAt', 'createdAt', 'updatedAt'
+        ])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 200
+        && (!('company' in data) || (data.company is string && data.company.size() <= 200))
+        && data.phone is string && data.phone.size() <= 50
+        && (!('email' in data) || (data.email is string && data.email.size() <= 200))
+        && (!('city' in data) || (data.city is string && data.city.size() <= 100))
+        && data.channel in ['whatsapp', 'phone_3cx', 'web_chat', 'email']
+        && data.language in ['en', 'ur', 'roman_ur']
+        && data.stage in ['new', 'qualified', 'quoted', 'follow_up', 'won', 'lost']
+        && (!('intentSummary' in data) || (data.intentSummary is string && data.intentSummary.size() <= 1000))
+        && (!('interestedSkus' in data) || (data.interestedSkus is list && data.interestedSkus.size() <= 20))
+        && (!('estimatedValuePkr' in data) || (data.estimatedValuePkr is number && data.estimatedValuePkr >= 0 && data.estimatedValuePkr <= 500000000))
+        && (!('escalated' in data) || data.escalated is bool)
+        && (!('sheetSyncedAt' in data) || (data.sheetSyncedAt is string && data.sheetSyncedAt.size() <= 64));
+    }
+
+    function isValidAIConversation(data) {
+      return data.keys().hasAll(['customerName', 'channel', 'language', 'status', 'messages', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly([
+          'leadId', 'customerName', 'customerPhone', 'channel', 'language',
+          'status', 'lastMessage', 'messages', 'createdAt', 'updatedAt'
+        ])
+        && (!('leadId' in data) || (data.leadId is string && data.leadId.size() <= 128))
+        && data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 200
+        && (!('customerPhone' in data) || (data.customerPhone is string && data.customerPhone.size() <= 50))
+        && data.channel in ['whatsapp', 'phone_3cx', 'web_chat']
+        && data.language in ['en', 'ur', 'roman_ur']
+        && data.status in ['open', 'escalated', 'resolved']
+        && (!('lastMessage' in data) || (data.lastMessage is string && data.lastMessage.size() <= 1000))
+        && data.messages is list && data.messages.size() <= 100;
+    }
+
+    function isValidAIApprovalItem(data) {
+      return data.keys().hasAll(['type', 'recipientName', 'subject', 'bodyText', 'status', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly([
+          'type', 'leadId', 'recipientName', 'recipientEmail', 'recipientPhone',
+          'subject', 'bodyHtml', 'bodyText', 'quoteTotalPkr', 'quoteItems',
+          'buttons', 'status', 'approvedBy', 'sentAt', 'createdAt', 'updatedAt'
+        ])
+        && data.type in ['gmail_quote', 'gmail_followup', 'gmail_daily_report', 'whatsapp_followup']
+        && (!('leadId' in data) || (data.leadId is string && data.leadId.size() <= 128))
+        && data.recipientName is string && data.recipientName.size() >= 1 && data.recipientName.size() <= 200
+        && (!('recipientEmail' in data) || (data.recipientEmail is string && data.recipientEmail.size() <= 200))
+        && (!('recipientPhone' in data) || (data.recipientPhone is string && data.recipientPhone.size() <= 50))
+        && data.subject is string && data.subject.size() >= 1 && data.subject.size() <= 300
+        && (!('bodyHtml' in data) || (data.bodyHtml is string && data.bodyHtml.size() <= 15000))
+        && data.bodyText is string && data.bodyText.size() >= 1 && data.bodyText.size() <= 5000
+        && (!('quoteTotalPkr' in data) || (data.quoteTotalPkr is number && data.quoteTotalPkr >= 0 && data.quoteTotalPkr <= 500000000))
+        && (!('quoteItems' in data) || (data.quoteItems is list && data.quoteItems.size() <= 50))
+        && (!('buttons' in data) || (data.buttons is list && data.buttons.size() <= 5))
+        && data.status in ['pending_approval', 'sent', 'rejected']
+        && (!('approvedBy' in data) || (data.approvedBy is string && data.approvedBy.size() <= 200))
+        && (!('sentAt' in data) || (data.sentAt is string && data.sentAt.size() <= 64));
+    }
+
+    function isValidAITask(data) {
+      return data.keys().hasAll(['title', 'cadenceStep', 'channel', 'priority', 'status', 'dueAt', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly([
+          'leadId', 'leadName', 'title', 'notes', 'cadenceStep', 'channel',
+          'priority', 'status', 'dueAt', 'googleTaskId', 'createdAt', 'updatedAt'
+        ])
+        && (!('leadId' in data) || (data.leadId is string && data.leadId.size() <= 128))
+        && (!('leadName' in data) || (data.leadName is string && data.leadName.size() <= 200))
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 300
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000))
+        && data.cadenceStep in ['day_1', 'day_3', 'day_7', 'custom']
+        && data.channel in ['whatsapp', 'phone_3cx', 'email', 'internal']
+        && data.priority in ['high', 'medium', 'low']
+        && data.status in ['pending', 'completed', 'snoozed']
+        && data.dueAt is string && data.dueAt.size() >= 4 && data.dueAt.size() <= 64
+        && (!('googleTaskId' in data) || (data.googleTaskId is string && data.googleTaskId.size() <= 200));
+    }
+
+    function isValidAIDailyReport(data) {
+      return data.keys().hasAll(['reportDate', 'summaryText', 'metrics', 'status', 'createdAt'])
+        && data.keys().hasOnly(['reportDate', 'summaryText', 'summaryHtml', 'metrics', 'status', 'sentTo', 'createdAt'])
+        && data.reportDate is string && data.reportDate.size() >= 4 && data.reportDate.size() <= 32
+        && data.summaryText is string && data.summaryText.size() >= 1 && data.summaryText.size() <= 6000
+        && (!('summaryHtml' in data) || (data.summaryHtml is string && data.summaryHtml.size() <= 15000))
+        && data.metrics is map && data.metrics.size() <= 20
+        && data.status in ['draft', 'sent']
+        && (!('sentTo' in data) || (data.sentTo is string && data.sentTo.size() <= 200));
+    }
+
     // 4. Collection Matches
 
     // Homepage - Public read, Staff Editor write
@@ -345,6 +435,42 @@ service cloud.firestore {
     match /admins/{adminId} {
       allow read: if isAdmin();
       allow write: if false;
+    }
+
+    // AI Sales & Follow-Up Agent Collections (Strictly Admin/Staff PII isolated)
+    match /ai_leads/{leadId} {
+      allow read: if isStaffEditor();
+      allow create: if isStaffEditor() && isValidId(leadId) && isValidAILead(incoming()) && incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isStaffEditor() && isValidId(leadId) && isValidAILead(incoming()) && incoming().createdAt == existing().createdAt && incoming().updatedAt == request.time;
+      allow delete: if isAdmin() && isValidId(leadId);
+    }
+
+    match /ai_conversations/{conversationId} {
+      allow read: if isStaffEditor();
+      allow create: if isStaffEditor() && isValidId(conversationId) && isValidAIConversation(incoming()) && incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isStaffEditor() && isValidId(conversationId) && isValidAIConversation(incoming()) && incoming().createdAt == existing().createdAt && incoming().updatedAt == request.time;
+      allow delete: if isAdmin() && isValidId(conversationId);
+    }
+
+    match /ai_approval_queue/{itemId} {
+      allow read: if isStaffEditor();
+      allow create: if isStaffEditor() && isValidId(itemId) && isValidAIApprovalItem(incoming()) && incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isStaffEditor() && isValidId(itemId) && isValidAIApprovalItem(incoming()) && incoming().createdAt == existing().createdAt && incoming().updatedAt == request.time;
+      allow delete: if isAdmin() && isValidId(itemId);
+    }
+
+    match /ai_tasks/{taskId} {
+      allow read: if isStaffEditor();
+      allow create: if isStaffEditor() && isValidId(taskId) && isValidAITask(incoming()) && incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isStaffEditor() && isValidId(taskId) && isValidAITask(incoming()) && incoming().createdAt == existing().createdAt && incoming().updatedAt == request.time;
+      allow delete: if isAdmin() && isValidId(taskId);
+    }
+
+    match /ai_daily_reports/{reportId} {
+      allow read: if isStaffEditor();
+      allow create: if isStaffEditor() && isValidId(reportId) && isValidAIDailyReport(incoming()) && incoming().createdAt == request.time;
+      allow update: if isStaffEditor() && isValidId(reportId) && isValidAIDailyReport(incoming()) && incoming().createdAt == existing().createdAt;
+      allow delete: if isAdmin() && isValidId(reportId);
     }
 
     // Startup connection probe

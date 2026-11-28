@@ -28,15 +28,13 @@ export interface FooterAccordionProps {
 
 const CORE_PILLAR_SEO_LINKS: SeoFooterLinkItem[] = [
   { path: '/', label: 'AV Live Pakistan Home' },
-  { path: '/shop', label: 'All Enterprise AV Hardware (53 SKUs)' },
-  { path: '/sitemap', label: 'Complete HTML Sitemap (157 Pages)' },
+  { path: '/shop', label: 'All Enterprise AV & Display Hardware (88 SKUs)' },
+  { path: '/sitemap', label: 'Complete HTML Sitemap' },
   { path: '/video-conference-in-pakistan', label: 'Video Conference in Pakistan' },
   { path: '/event-management-in-pakistan', label: 'Event Management in Pakistan' },
-  { path: '/corporate-event-management', label: 'Corporate Event Management Pakistan' },
-  { path: '/video-conference', label: 'Video Conference Systems & Configurator' },
-  { path: '/video-conferencing', label: 'Video Conferencing Room Architecture' },
-  { path: '/video-conferencing-solutions', label: 'Turnkey Video Conferencing Solutions' },
-  { path: '/conference-room-solutions', label: 'Executive Conference Room Solutions' },
+  { path: '/video-conference', label: 'Boardroom Configurator & SIP Planner' },
+  { path: '/services/boardroom-integration', label: 'Turnkey Boardroom AV Integration' },
+  { path: '/services/corporate-events', label: 'Corporate Event Production & Staging' },
   { path: '/zoom-rooms', label: 'Zoom Rooms Certified Hardware' },
   { path: '/microsoft-teams-rooms', label: 'Microsoft Teams Rooms (MTR)' },
   { path: '/3d-hologram', label: '3D Hologram Display Stages' },
@@ -63,6 +61,7 @@ const HARDWARE_CATEGORY_SEO_LINKS: SeoFooterLinkItem[] = [
   { path: '/category/voip-phone-systems', label: 'VoIP Phone Systems & IP PBX' },
   { path: '/category/headsets', label: 'ANC Call Center & Office Headsets' },
   { path: '/category/projectors', label: 'Commercial Laser Projectors' },
+  { path: '/category/led-tv-displays', label: 'LED TVs & Commercial Displays (Samsung & TCL)' },
   { path: '/category/ip-cameras', label: 'NDAA Commercial IP Cameras' },
   { path: '/category/intercom-paging-access', label: 'Intercom, Paging & PA Systems' },
 ];
@@ -92,6 +91,8 @@ const BRAND_PORTAL_SEO_LINKS: SeoFooterLinkItem[] = [
   { path: '/brands/freepbx', label: 'FreePBX Open-Standards VoIP' },
   { path: '/brands/sangoma', label: 'Sangoma PBXact & Gateways' },
   { path: '/brands/horion', label: 'Horion 4K Interactive Panels' },
+  { path: '/brands/samsung', label: 'Samsung Crystal UHD & Smart TVs' },
+  { path: '/brands/tcl', label: 'TCL 4K Google & Smart LED TVs' },
   { path: '/brands/google', label: 'Google Meet Room Hardware' },
 ];
 
@@ -180,7 +181,7 @@ export function buildAll155SeoFooterCategories(): SeoFooterCategoryGroup[] {
     },
     {
       id: 'products',
-      title: 'Enterprise Hardware SKUs (53)',
+      title: `Enterprise Hardware & LED TV SKUs (${productLinks.length})`,
       links: productLinks,
     },
   ];

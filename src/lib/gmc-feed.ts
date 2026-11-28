@@ -6,6 +6,7 @@ import {
   normalizeSupportedCurrency,
 } from './currency';
 import { inferDefaultGoogleCategory } from './google-taxonomy';
+import { TV_CATALOG_GMC_METADATA, TV_SKU_TO_CANONICAL_SLUG } from './tv-catalog';
 
 export interface GmcFeedCurrencyOptions {
   currency?: SupportedCurrency;
@@ -43,6 +44,8 @@ export const GMC_EXACT_FEED_HEADERS = [
   'multipack',
   'mobile_link',
   'sale_price',
+  'size',
+  'item_group_id',
 ] as const;
 
 export const GMC_40_HEADERS = [
@@ -121,9 +124,15 @@ export const PRODUCT_GMC_METADATA: Record<
     gmcId?: string;
     gtin: string;
     mpn: string;
+    identifierExists?: 'yes' | 'no';
     brand: string;
     title?: string;
     color?: string;
+    size?: string;
+    itemGroupId?: string;
+    modelSeries?: string;
+    typeKeyFeature?: string;
+    priceNote?: string;
     isBundle?: 'yes' | 'no';
     multipack?: number;
     shippingWeight?: string;
@@ -961,7 +970,7 @@ export const PRODUCT_GMC_METADATA: Record<
     isBundle: 'yes',
     regularPrice: 450000,
     salePrice: 415000,
-    categorySlugs: ['touch-panels', 'video-conferencing', 'large-room'],
+    categorySlugs: ['touch-panels', 'video-conferencing', 'large-room', 'led-tv-displays'],
     images: [
       'https://img.directindustry.com/images_di/photo-g/244341-19545255.webp',
       'https://m.media-amazon.com/images/I/61LyfXz7CZL._AC_UF894,1000_QL80_.jpg',
@@ -1600,6 +1609,7 @@ export const PRODUCT_GMC_METADATA: Record<
     defaultDescription:
       'AV Live Fold-Flat Podium Teleprompter (17" Compact & 22" Flagship Series, AV-PP-17C) in Pakistan. Deploys in 30 seconds onto any lectern with 400+ nit privacy IPS, 80% speaker readability, and 0% audience glow across Lahore, Karachi, and Islamabad.',
   },
+  ...TV_CATALOG_GMC_METADATA,
 };
 
 export const GMC_20_SHEET_HEADERS = [
@@ -1918,6 +1928,7 @@ export const PRODUCT_ID_TO_SEO_SLUG: Record<string, string> = {
   'poly-studio-x50-tc8-bundle-pakistan': 'poly-studio-x50-tc8-special-offer-pakistan',
   'poly-studio-x50-tc8-pakistan': 'poly-studio-x50-tc8-special-offer-pakistan',
   'poly-studio-x50-special-offer': 'poly-studio-x50-tc8-special-offer-pakistan',
+  ...TV_SKU_TO_CANONICAL_SLUG,
 };
 
 export const SEO_SLUG_TO_PRODUCT_ID: Record<string, string> = {
@@ -1963,10 +1974,14 @@ export function resolveCanonicalProductSlugByIdentifier(idOrSlugOrMpn?: string |
     return lower;
   }
 
-  // Match by MPN / SKU (case-insensitive)
+  // Match by MPN / SKU / GMC ID (case-insensitive)
   for (const [slugKey, meta] of Object.entries(PRODUCT_GMC_METADATA)) {
     if (PRODUCT_ID_TO_SEO_SLUG[slugKey]) continue;
-    if (meta.mpn.toLowerCase() === lower || meta.gtin === trimmed) {
+    if (
+      (meta.gmcId && meta.gmcId.toLowerCase() === lower) ||
+      (meta.mpn && meta.mpn.toLowerCase() === lower) ||
+      (meta.gtin && meta.gtin === trimmed)
+    ) {
       return slugKey;
     }
   }
@@ -2033,10 +2048,18 @@ export function buildFallbackProductFromGmcMeta(slugOrId: string): Record<string
     slug: canonicalSlug,
     customPagePath: PRODUCT_CUSTOM_PAGE_ROUTES[canonicalSlug],
     productName: readableName,
-    sku: meta.mpn,
+    sku: meta.mpn || meta.gmcId || canonicalSlug,
     mpn: meta.mpn,
     gtin: meta.gtin,
+    ...(meta.identifierExists ? { identifierExists: meta.identifierExists } : {}),
     brand: meta.brand,
+    ...(meta.size ? { size: meta.size } : {}),
+    ...(meta.itemGroupId ? { itemGroupId: meta.itemGroupId } : {}),
+    ...(meta.modelSeries ? { modelSeries: meta.modelSeries } : {}),
+    ...(meta.typeKeyFeature ? { typeKeyFeature: meta.typeKeyFeature } : {}),
+    ...(meta.priceNote ? { priceNote: meta.priceNote } : {}),
+    availability: 'in_stock',
+    condition: 'new',
     shippingWeight: meta.shippingWeight || DEFAULT_SHIPPING_WEIGHT_BY_SLUG[canonicalSlug] || '2.50 kg',
     ...(meta.shippingLength ? { shippingLength: meta.shippingLength } : {}),
     ...(meta.shippingWidth ? { shippingWidth: meta.shippingWidth } : {}),
@@ -2201,7 +2224,7 @@ export function formatProductToGmcRow(
     PRODUCT_GMC_METADATA[canonicalSlug] || PRODUCT_GMC_METADATA[rawId] || {};
 
   const identifierExists: 'yes' | 'no' =
-    String(product.identifierExists || 'yes').toLowerCase() === 'no' ? 'no' : 'yes';
+    String(product.identifierExists || meta.identifierExists || 'yes').toLowerCase() === 'no' ? 'no' : 'yes';
 
   const rawGtin = sanitizeTsvText(product.gtin || meta.gtin || (identifierExists === 'yes' ? computeUpc12('61080799001') : '')).replace(/\D/g, '');
   const gtin = identifierExists === 'no' ? '' : rawGtin;
@@ -2426,7 +2449,7 @@ export function formatProductToGmcRow(
     condition,
     adult: 'no',
     color: meta.color || 'Black',
-    size: '',
+    size: sanitizeTsvText(product.size || meta.size || ''),
     size_type: '',
     size_system: '',
     gender: '',
@@ -2447,7 +2470,7 @@ export function formatProductToGmcRow(
     energy_efficiency_class: '',
     min_energy_efficiency_class: '',
     max_energy_efficiency: '',
-    item_group_id: '',
+    item_group_id: sanitizeTsvText(product.itemGroupId || meta.itemGroupId || ''),
     video_link: videoLink,
     virtual_model_link: '',
     cost_of_goods_sold: '',
@@ -2560,6 +2583,8 @@ export function generateGmcXml(products: Record<string, any>[], options?: GmcFee
       pushTag('video_link', r.video_link);
       pushTag('is_bundle', r.is_bundle);
       pushTag('multipack', r.multipack);
+      pushTag('size', r.size);
+      pushTag('item_group_id', r.item_group_id);
       pushTag('shopping_ads_excluded_country', r.shopping_ads_excluded_country);
 
       const highlights = String(r.product_highlight || '')

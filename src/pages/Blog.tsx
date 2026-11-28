@@ -58,7 +58,7 @@ export function Blog() {
                 : typeof p.content === 'string' && p.content.trim()
                 ? p.content.split('\n\n')
                 : fallbackEntry?.content || [p.excerpt || ''],
-              image: p.image || p.featuredImage || fallbackEntry?.image || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&q=80',
+              image: p.image || p.featuredImage || fallbackEntry?.image || '/images/projects/multicity-teams-boardrooms.webp',
               readTime: fallbackEntry?.readTime || '5 min read',
               publishedIso: p.publishedAt ? new Date(p.publishedAt).toISOString().split('T')[0] : (fallbackEntry?.publishedIso || '2026-07-15'),
               date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : (fallbackEntry?.date || 'July 2026')
@@ -165,8 +165,8 @@ export function Blog() {
           <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 mt-4 lg:mt-6">
             <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-lg p-6 sm:p-12">
               {/* Answer-First AEO Direct Verdict Block */}
-              <div className="bg-[#1A2B4C]/5 border-l-4 border-[#00B4D8] rounded-2xl p-6 mb-8">
-                <span className="block text-[11px] font-black uppercase tracking-widest text-[#00B4D8] mb-2">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-8">
+                <span className="block text-[11px] font-black uppercase tracking-widest text-[#0077B6] mb-2">
                   Direct Engineering Verdict (TL;DR)
                 </span>
                 <p className="text-base sm:text-lg font-bold text-[#1A2B4C] leading-relaxed">
@@ -274,10 +274,10 @@ export function Blog() {
 
               <div className="mt-10 pt-8 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap gap-3">
-                  <Link to="/shop" className="bg-[#1A2B4C] text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-[#00B4D8] transition-colors">
+                  <Link to="/shop" className="bg-[#1A2B4C] text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#00B4D8] transition-colors">
                     Explore Enterprise Hardware
                   </Link>
-                  <Link to="/room-designer" className="bg-[#00B4D8] text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-[#1A2B4C] transition-colors">
+                  <Link to="/room-designer" className="bg-[#00B4D8] text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#1A2B4C] transition-colors">
                     3D Room Designer &amp; LED Calculator
                   </Link>
                 </div>
@@ -304,7 +304,7 @@ export function Blog() {
         keywords="AV Live Blog, Video Conferencing Guide Pakistan, Boardroom AV System Price Guide Pakistan, Logitech vs Poly Comparison Pakistan, Yealink vs Cisco Pakistan"
         url="https://avlive.com.pk/blog"
         type="website"
-        image="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1200"
+        image="/images/video-conference/boardroom-hero.webp"
         imageAlt="AV Live Communications - Tech Blog and Pro AV Guides"
         schema={{
           "@context": "https://schema.org",
@@ -373,7 +373,7 @@ export function Blog() {
                     <img loading="lazy" src={post.image} title={cardBlogSeo.title} alt={cardBlogSeo.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   );
                 })()}
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-[#1A2B4C]">
+                <div className="absolute top-3 left-3 bg-white/95 px-2.5 py-1 rounded-md text-xs font-bold text-[#1A2B4C] border border-slate-200">
                   {post.category}
                 </div>
               </div>
@@ -410,9 +410,7 @@ export function Blog() {
 
       {/* Newsletter Signup */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="bg-[#1A2B4C] rounded-[2rem] p-10 md:p-16 text-center relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#00B4D8] rounded-full blur-3xl opacity-20 -mr-32 -mt-32"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#F26522] rounded-full blur-3xl opacity-20 -ml-32 -mb-32"></div>
+        <div className="bg-[#1A2B4C] rounded-2xl p-10 md:p-14 text-center relative overflow-hidden border border-slate-700">
           
           <div className="relative z-10">
             <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">

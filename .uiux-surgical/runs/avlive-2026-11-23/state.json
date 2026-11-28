@@ -1,0 +1,104 @@
+{
+  "run_id": "avlive-2026-11-23",
+  "created_at": "2026-11-23T18:22:00Z",
+  "status": "awaiting_approval",
+  "degraded": true,
+  "cost_usd": 0.0,
+  "worktree": {
+    "path": ".uiux-surgical/worktree",
+    "branch": "uiux/iter-0",
+    "base_commit": "workspace-snapshot-2026-11-23"
+  },
+  "design_system": {
+    "primary": "tailwind",
+    "secondary": ["custom_tokens"],
+    "mapping_file": ".uiux-surgical/runs/avlive-2026-11-23/system_mapping.json"
+  },
+  "baseline": {
+    "screenshots": [
+      {
+        "viewport": "1280x800",
+        "path": ".uiux-surgical/runs/avlive-2026-11-23/proposal.html#desktop-before",
+        "sha256": "source-dom-blueprint-desktop"
+      },
+      {
+        "viewport": "390x844",
+        "path": ".uiux-surgical/runs/avlive-2026-11-23/proposal.html#mobile-before",
+        "sha256": "source-dom-blueprint-mobile"
+      }
+    ],
+    "tokens": {
+      "primary": "#1A2B4C",
+      "secondary": "#00B4D8",
+      "accessible_cyan": "#0077B6",
+      "dark_surface_cyan": "#38BDF8",
+      "canvas": "#F8F9FA",
+      "surface": "#FFFFFF"
+    },
+    "dom_hash": "home-tsx-baseline-2026-11-23",
+    "axe_violations": [
+      {
+        "rule": "color-contrast",
+        "nodes": 5,
+        "detail": "#00B4D8 text on #FFFFFF/#F9FAFB measures 2.46:1 (< 4.5:1 AA)"
+      },
+      {
+        "rule": "target-size",
+        "nodes": 2,
+        "detail": "Mobile hero CTAs measure 34px (< 44px WCAG 2.2 AA)"
+      }
+    ],
+    "lighthouse": {
+      "lcp_ms": 1750,
+      "cls": 0.0,
+      "tbt_ms": 45
+    }
+  },
+  "niche_profile": {
+    "industry": "enterprise-av-communications",
+    "sub_vertical": "b2b video conferencing, voip & corporate event production",
+    "competitor_set": [
+      "poly.com",
+      "logitech.com/video-collaboration",
+      "webex.com/devices",
+      "avixa.org"
+    ],
+    "aesthetic_direction": [
+      "enterprise-precision",
+      "crisp-light-catalog",
+      "high-contrast-navy-cyan",
+      "spec-dense-clean"
+    ]
+  },
+  "inspiration_set": [
+    {
+      "source": "web_benchmark",
+      "title": "HP Poly Enterprise Hardware Catalog (poly.com)",
+      "niche_score": 0.96,
+      "applicable_component": "Featured Hardware Cards"
+    },
+    {
+      "source": "web_benchmark",
+      "title": "Logitech Video Collaboration B2B Grid (logitech.com/video-collaboration)",
+      "niche_score": 0.94,
+      "applicable_component": "Dual Commercial Pillars & Service Grid"
+    },
+    {
+      "source": "web_benchmark",
+      "title": "Cisco Webex Devices Spec Showcase (webex.com/devices)",
+      "niche_score": 0.93,
+      "applicable_component": "Desktop & Mobile Hero Scrim & Eyebrow"
+    },
+    {
+      "source": "web_benchmark",
+      "title": "AVIXA Commercial Pro-AV Standards Hub (avixa.org)",
+      "niche_score": 0.89,
+      "applicable_component": "Flagship Video Bento Grid & Reduced-Motion A11y"
+    }
+  ],
+  "human_gate": {
+    "decision": "pending",
+    "notes": "Phase 0-3 complete (read-only). Zero storefront src/ files edited. Awaiting APPROVE / EDIT / REJECT."
+  },
+  "iterations": []
+}

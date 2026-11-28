@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, Phone, Video, Headphones, ShieldCheck, Box, Mic, Sparkles, Projector, Heart, Plus } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Phone, Video, Headphones, ShieldCheck, Box, Mic, Projector, Heart, Pause, Play, Check, Truck, FileCheck2, Clock, ShoppingCart } from 'lucide-react';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import type {
   Product,
@@ -17,8 +17,7 @@ import { getCanonicalProductSlug, getProductHref, PRODUCT_GMC_METADATA, buildFal
 import { MobileProductCard } from "../components/MobileProductCard";
 import { BlurProductImage } from "../components/BlurProductImage";
 import { useCurrency } from "../contexts/CurrencyContext";
-import { buildProductImageSeo, buildEditorialImageSeo } from "../lib/image-seo";
-import { cleanRichTextHtml } from "../lib/html-sanitize";
+import { buildProductImageSeo, buildEditorialImageSeo, VIDEO_CONFERENCE_MEDIA_SEO } from "../lib/image-seo";
 
 const TopBrands = React.lazy(() => import('../components/TopBrands').then(m => ({ default: m.TopBrands })));
 const RealProjectsAndClients = React.lazy(() => import('../components/RealProjectsAndClients').then(m => ({ default: m.RealProjectsAndClients })));
@@ -26,10 +25,10 @@ const RealProjectsAndClients = React.lazy(() => import('../components/RealProjec
 const DEFAULT_HERO_SLIDES = [
   {
     id: 'slide-1',
-    title: 'Video Conference in Pakistan | Corporate Event Management | AV Live',
-    subtitle: 'Pakistan’s premier Video Conference in Pakistan & Corporate Event Management company — 1,000+ Events & Boardrooms Engineered for Meta, World Bank, Nestlé & USAID.',
-    ctaText: 'Explore Catalog',
-    ctaLink: '/shop',
+    title: 'Enterprise Boardrooms & Corporate Stages',
+    subtitle: 'Authorized Poly, Cisco & Logitech conference rooms plus 1,000+ live corporate events across Pakistan.',
+    ctaText: 'Get BoQ Quote',
+    ctaLink: '/programs/quote',
     imageUrl: '/images/projects/world-bank-president-stage.webp',
     mediaType: 'image' as const,
     isActive: true,
@@ -39,9 +38,9 @@ const DEFAULT_HERO_SLIDES = [
   },
   {
     id: 'slide-2',
-    title: '1,000+ Corporate Events & Hybrid Broadcast Stages Across Pakistan',
-    subtitle: 'In-House P2.5 3840Hz SMD LED Walls, Multi-Cam 4K SDI Broadcast Switchers & 3D Hologram Displays.',
-    ctaText: 'Plan Your Event',
+    title: 'In-House SMD LED & Live Broadcast',
+    subtitle: 'High-refresh P2.5 SMD video walls, concert line-array sound, and 3D hologram stage production.',
+    ctaText: 'Plan Corporate Event',
     ctaLink: '/event-management-in-pakistan',
     imageUrl: '/images/projects/meta-values-summit.webp',
     mediaType: 'image' as const,
@@ -52,10 +51,10 @@ const DEFAULT_HERO_SLIDES = [
   },
   {
     id: 'slide-3',
-    title: 'Turnkey Executive Boardrooms & Delegate Conference Systems',
-    subtitle: 'HP Poly Studio X72, Cisco Room Kit Plus, Logitech Rally Bar & VISSONIC Digital Chairman/Delegate Microphones.',
-    ctaText: 'Video Conference Hub',
-    ctaLink: '/video-conference-in-pakistan',
+    title: 'Official Samsung, TCL & Horion Displays',
+    subtitle: 'Commercial Crystal UHD LED TVs, 4K Google TVs, and 98-inch interactive flat panels with warranty.',
+    ctaText: 'Shop Displays & TVs',
+    ctaLink: '/category/led-tv-displays',
     imageUrl: '/images/projects/vissonic-delegate-boardroom.webp',
     mediaType: 'image' as const,
     isActive: true,
@@ -179,12 +178,6 @@ function sanitizeHomepagePayload(data: HomepageData): HomepageData {
   };
 }
 
-function buildHeroSrcSet(rawUrl: string): string | undefined {
-  if (!rawUrl || !rawUrl.includes('images.unsplash.com')) return undefined;
-  const base = rawUrl.split('?')[0];
-  return `${base}?auto=format&fit=crop&w=480&q=68&fm=webp 480w, ${base}?auto=format&fit=crop&w=640&q=70&fm=webp 640w, ${base}?auto=format&fit=crop&w=1024&q=75 1024w, ${base}?auto=format&fit=crop&w=1600&q=75 1600w`;
-}
-
 export function Home() {
   const [content, setContent] = useState<HomepageData>(DEFAULT_HOMEPAGE_DATA);
   const [settings, setSettings] = useState<GeneralSettings | null>(null);
@@ -192,12 +185,72 @@ export function Home() {
   const [products, setProducts] = useState<Product[]>(DEFAULT_INITIAL_PRODUCTS);
   const [services, setServices] = useState<Service[]>(FALLBACK_SERVICES_CATALOG as unknown as Service[]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
+  const [isUserPaused, setIsUserPaused] = useState(false);
+  const [isHoverPaused, setIsHoverPaused] = useState(false);
   const [activeIntentTab, setActiveIntentTab] = useState<'solutions' | 'shop'>('solutions');
   const [activeFilter, setActiveFilter] = useState('All');
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
+  const [addedProductId, setAddedProductId] = useState<string | null>(null);
+  const [brokenCategoryThumbs, setBrokenCategoryThumbs] = useState<Record<string, boolean>>({});
   const sliderRef = useRef<HTMLDivElement>(null);
   const { currency, formatPrice } = useCurrency();
+
+  const isAutoplayPaused = isUserPaused || isHoverPaused;
+
+  const handleQuickAddProduct = useCallback((prod: Product) => {
+    const prodSlug = getCanonicalProductSlug(prod, prod.id);
+    const images = Array.isArray(prod.images)
+      ? prod.images
+      : typeof prod.images === 'string'
+        ? [prod.images]
+        : prod.image
+          ? [prod.image]
+          : [];
+    addToCart({
+      id: prod.id || prodSlug,
+      name: prod.productName,
+      price: (prod.salePrice || prod.regularPrice) ?? 0,
+      image: optimizeGalleryImageUrl(images[0] || '/images/products/poly-x70-studio.webp', 360, 75),
+      brand: prod.brand || 'AV Live',
+    } as any);
+    const key = prod.id || prodSlug;
+    setAddedProductId(key);
+    window.setTimeout(() => {
+      setAddedProductId((curr) => (curr === key ? null : curr));
+    }, 1200);
+  }, []);
+
+  const renderTwoToneHeadline = useCallback((rawTitle: string) => {
+    const clean = (rawTitle || '').trim();
+    if (!clean) return null;
+    if (clean.includes('|')) {
+      const [first, ...rest] = clean.split('|');
+      const restText = rest.join(' · ').trim();
+      return (
+        <>
+          <span>{first.trim()} </span>
+          <span className="text-[#38BDF8]">{restText}</span>
+        </>
+      );
+    }
+    if (clean.includes('&')) {
+      const idx = clean.indexOf('&');
+      return (
+        <>
+          <span>{clean.slice(0, idx).trim()} </span>
+          <span className="text-[#38BDF8]">{clean.slice(idx).trim()}</span>
+        </>
+      );
+    }
+    const words = clean.split(/\s+/);
+    if (words.length <= 2) return clean;
+    return (
+      <>
+        <span>{words.slice(0, -2).join(' ')} </span>
+        <span className="text-[#38BDF8]">{words.slice(-2).join(' ')}</span>
+      </>
+    );
+  }, []);
 
   const nextSlide = useCallback(() => {
     if (content?.heroSlides && content.heroSlides.length > 0) {
@@ -261,18 +314,19 @@ export function Home() {
   }, []);
 
   const CATEGORIES = [
-    { name: "Video Conferencing", icon: Video, link: "/category/video-conferencing", id: "video-conferencing" },
-    { name: "Boardroom Codecs", icon: Video, link: "/category/boardroom-codecs", id: "boardroom-codecs" },
-    { name: "Large Room AV", icon: Video, link: "/category/large-room", id: "large-room" },
-    { name: "PTZ Cameras", icon: Video, link: "/category/ptz-cameras", id: "ptz-cameras" },
-    { name: "Touch Panels", icon: Box, link: "/category/touch-panels", id: "touch-panels" },
-    { name: "Speakerphones", icon: Mic, link: "/category/speakerphones", id: "speakerphones" },
-    { name: "IP Phones", icon: Phone, link: "/category/ip-phones", id: "ip-phones" },
-    { name: "VoIP Phone Systems", icon: Box, link: "/category/voip-phone-systems", id: "voip-phone-systems" },
-    { name: "Headsets", icon: Headphones, link: "/category/headsets", id: "headsets" },
-    { name: "Projectors", icon: Projector, link: "/category/projectors", id: "projectors" },
-    { name: "IP Cameras", icon: ShieldCheck, link: "/category/ip-cameras", id: "ip-cameras" },
-    { name: "Intercom & Paging", icon: Mic, link: "/category/intercom-paging-access", id: "intercom-paging-access" }
+    { name: "Video Conferencing", sublabel: "4K AI Bars", icon: Video, link: "/category/video-conferencing", id: "video-conferencing", thumb: "/images/categories/video-conferencing-4k-bars-pakistan.webp" },
+    { name: "LED TVs & Displays", sublabel: "Samsung & TCL", icon: Box, link: "/category/led-tv-displays", id: "led-tv-displays", thumb: "/images/products/tv-samsung-u8000f.webp" },
+    { name: "Boardroom Codecs", sublabel: "SIP & H.323", icon: Video, link: "/category/boardroom-codecs", id: "boardroom-codecs", thumb: "/images/products/polycom-group-500-eagleeye-iv.webp" },
+    { name: "Large Room AV", sublabel: "Quad Optics", icon: Video, link: "/category/large-room", id: "large-room", thumb: "/images/categories/large-room-auditorium-av-pakistan.webp" },
+    { name: "PTZ Cameras", sublabel: "12x–30x Zoom", icon: Video, link: "/category/ptz-cameras", id: "ptz-cameras", thumb: "/images/categories/ptz-optical-conference-cameras-pakistan.webp" },
+    { name: "Touch Panels", sublabel: "PoE Control", icon: Box, link: "/category/touch-panels", id: "touch-panels", thumb: "/images/categories/touch-panels-interactive-displays-pakistan.webp" },
+    { name: "Speakerphones", sublabel: "Beamforming", icon: Mic, link: "/category/speakerphones", id: "speakerphones", thumb: "/images/video-conference/huddle-space.webp" },
+    { name: "IP Phones", sublabel: "PoE HD Voice", icon: Phone, link: "/category/ip-phones", id: "ip-phones", thumb: "/images/products/poly-vvx-411-main.webp" },
+    { name: "VoIP Systems", sublabel: "SIP PBX Hubs", icon: Box, link: "/category/voip-phone-systems", id: "voip-phone-systems", thumb: "/images/categories/voip-ip-pbx-phone-systems-pakistan.webp" },
+    { name: "Headsets", sublabel: "DECT & ANC", icon: Headphones, link: "/category/headsets", id: "headsets", thumb: "/images/categories/enterprise-anc-headsets-pakistan.webp" },
+    { name: "Projectors", sublabel: "4K & 3D SMD", icon: Projector, link: "/category/projectors", id: "projectors", thumb: "/images/categories/4k-laser-projectors-pakistan.webp" },
+    { name: "IP Cameras", sublabel: "AI Security", icon: ShieldCheck, link: "/category/ip-cameras", id: "ip-cameras", thumb: "/images/projects/foh-broadcast-control.webp" },
+    { name: "Intercom & PA", sublabel: "Zone Paging", icon: Mic, link: "/category/intercom-paging-access", id: "intercom-paging-access", thumb: "/images/projects/vissonic-delegate-boardroom.webp" }
   ];
 
   const scrollSlider = useCallback((direction: 'left' | 'right') => {
@@ -495,79 +549,50 @@ export function Home() {
         }}
       />
       
-      {/* Always-Visible Primary H1 Authority Bar (Visible on Mobile <1024px & Desktop >=1024px for Googlebot Mobile-First Indexing) */}
+      {/* Primary H1 Authority Bar */}
       <div className="bg-[#111E36] border-b border-white/10 text-white px-3 sm:px-6 lg:px-8 py-2">
-        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-1.5">
-          <h1 className="text-xs sm:text-sm lg:text-base font-black tracking-tight text-white leading-snug">
-            Video Conference in Pakistan, Event Management in Pakistan &amp; Corporate Event Production — <span className="text-[#00B4D8]">AV Live (Est. 2011)</span>
+        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-1">
+          <h1 className="text-xs sm:text-sm font-bold tracking-tight text-white leading-snug">
+            Video Conference in Pakistan, Event Management &amp; Corporate AV Systems — <span className="text-[#38BDF8]">AV Live (Est. 2011)</span>
           </h1>
-          <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar text-xs font-bold shrink-0">
-            <Link to="/video-conference-in-pakistan" className="px-2.5 py-1 rounded bg-[#00B4D8]/20 border border-[#00B4D8]/40 text-[#00B4D8] hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
-              Video Conference in Pakistan
-            </Link>
-            <Link to="/event-management-in-pakistan" className="px-2.5 py-1 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
-              Event Management in Pakistan
-            </Link>
-            <Link to="/corporate-event-management" className="px-2.5 py-1 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
-              Corporate Events
-            </Link>
-            <Link to="/av-equipment-rental" className="px-2.5 py-1 rounded bg-white/10 border border-white/20 text-white hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors whitespace-nowrap">
-              SMD &amp; Sound Rental
-            </Link>
+          <div className="text-[11px] font-medium text-slate-300 whitespace-nowrap">
+            Lahore · Karachi · Islamabad &middot; <span className="font-mono text-white">0321 425 6263</span>
           </div>
         </div>
       </div>
 
-      {/* Mobile Storefront Showcase (< 1024px — Compact High-Density Above-the-Fold Layout) */}
-      <section aria-label="Mobile Storefront Highlights" className="lg:hidden px-3 pt-2 pb-4 space-y-3 bg-[#F8F9FA]">
-        {/* Compact Deep Navy Rounded Hero Promo Card (Dynamic Slide Switcher) */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1A2B4C] via-[#1E325C] to-[#2B4C8C] text-white p-3.5 shadow-md">
-          <div className="relative z-10 flex items-center justify-between gap-2.5">
+      {/* Mobile Storefront Showcase (< 1024px) */}
+      <section aria-label="Mobile Storefront Highlights" className="lg:hidden px-3 pt-2.5 pb-4 space-y-3 bg-[#F8F9FA]">
+        {/* Clean Enterprise Mobile Hero Card */}
+        <div className="rounded-xl bg-[#1A2B4C] text-white p-4 shadow-sm border border-white/10">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0 space-y-1.5">
-              <span className="inline-block text-xs font-black uppercase tracking-wider text-[#00B4D8] bg-white/10 px-2.5 py-0.5 rounded-full">
-                Official PK Partner • Est. 2011
+              <span className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[#38BDF8]">
+                Official PK Integrator &middot; Est. 2011
               </span>
-              <h2 className="text-base sm:text-lg font-black leading-tight tracking-tight text-white line-clamp-2">
-                {activeHeroSlide.title}
+              <h2 className="text-base sm:text-lg font-extrabold leading-tight tracking-tight text-white line-clamp-2">
+                {renderTwoToneHeadline(activeHeroSlide.title)}
               </h2>
-              <p className="text-xs text-white/85 font-medium leading-snug line-clamp-2">
+              <p className="text-xs text-slate-200 font-normal leading-snug line-clamp-2">
                 {(activeHeroSlide.subtitle || '').replace(/<[^>]*>?/gm, '')}
               </p>
-              <div className="pt-1 flex flex-wrap items-center gap-2">
+              <div className="pt-1.5 flex flex-wrap items-center gap-2">
                 <Link
-                  to={activeHeroSlide.ctaLink || '/shop'}
-                  className="px-3.5 py-1.5 min-h-[34px] rounded-lg bg-white text-[#1A2B4C] font-black text-xs uppercase tracking-wider inline-flex items-center justify-center shadow-xs"
+                  to={activeHeroSlide.ctaLink || '/programs/quote'}
+                  className="px-3.5 py-2 min-h-[44px] rounded-lg bg-[#00B4D8] text-[#0F172A] font-bold text-xs tracking-wide inline-flex items-center justify-center gap-1.5 hover:bg-white transition-colors"
                 >
-                  {activeHeroSlide.ctaText || 'Shop Catalog'}
+                  <span>{activeHeroSlide.ctaText || 'Get BoQ Quote'}</span>
+                  <ArrowRight size={14} />
                 </Link>
                 <Link
-                  to="/event-quote"
-                  className="px-3 py-1.5 min-h-[34px] rounded-lg bg-white/15 border border-white/25 text-white font-bold text-xs inline-flex items-center justify-center"
+                  to="/shop"
+                  className="px-3.5 py-2 min-h-[44px] rounded-lg bg-white/10 border border-white/30 text-white font-semibold text-xs inline-flex items-center justify-center hover:bg-white/20 transition-colors"
                 >
-                  15m Quote
+                  Browse 88 SKUs
                 </Link>
-                {slides.length > 1 && (
-                  <div className="flex items-center gap-1 ml-1">
-                    {slides.map((_: any, idx: number) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setCurrentSlide(idx)}
-                        aria-label={`View hero slide ${idx + 1}`}
-                        className="p-1 cursor-pointer"
-                      >
-                        <span
-                          className={`block h-1.5 rounded-full transition-all ${
-                            idx === currentSlide ? 'w-4 bg-[#00B4D8]' : 'w-1.5 bg-white/35'
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
-            <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 p-1.5 flex items-center justify-center">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-lg bg-white/10 border border-white/15 p-1.5 flex items-center justify-center">
               {(() => {
                 const mobileHeroSeo = products[0]
                   ? buildProductImageSeo(products[0], products[0].images?.[0], 0)
@@ -582,47 +607,60 @@ export function Home() {
                     src={optimizeGalleryImageUrl(products[0]?.images?.[0] || activeHeroSlide.imageUrl, 240, 75)}
                     title={mobileHeroSeo.title}
                     alt={mobileHeroSeo.alt}
-                    className="w-full h-full object-contain drop-shadow-md"
+                    className="w-full h-full object-contain"
                   />
                 );
               })()}
             </div>
           </div>
-          <div className="absolute -right-8 -bottom-10 w-28 h-28 rounded-full bg-[#00B4D8]/15 pointer-events-none" />
         </div>
 
-        {/* Compact Circular Category Strip */}
-        <div className="space-y-1.5">
+        {/* Category Strip */}
+        <div className="space-y-2 pt-0.5">
           <div className="flex items-center justify-between px-0.5">
-            <span className="text-xs font-black text-[#1A2B4C] tracking-tight uppercase">Categories</span>
+            <span className="text-xs font-extrabold text-[#1A2B4C] tracking-tight">Shop by AV Category</span>
             <Link
               to="/shop"
-              className="text-[11px] font-bold text-[#2B4C8C] hover:text-[#00B4D8] inline-flex items-center justify-end py-0.5"
+              className="text-xs font-bold text-[#0077B6] hover:text-[#1A2B4C] inline-flex items-center gap-1 py-1 min-h-[44px]"
             >
-              See all →
+              View All <ArrowRight size={12} />
             </Link>
           </div>
-          <div className="flex items-start gap-2.5 overflow-x-auto pb-0.5 hide-scrollbar">
-            {CATEGORIES.slice(0, 8).map((cat, idx) => (
+          <div className="flex items-start gap-3 overflow-x-auto pb-1 hide-scrollbar">
+            {CATEGORIES.slice(0, 8).map((cat) => {
+              const catSeo = VIDEO_CONFERENCE_MEDIA_SEO[cat.thumb];
+              return (
               <Link
                 key={cat.id}
                 to={cat.link}
-                className="flex flex-col items-center shrink-0 w-13 group"
+                className="flex flex-col items-center shrink-0 w-16 group"
               >
-                <div
-                  className={`w-11 h-11 rounded-full flex items-center justify-center shadow-xs border transition-all ${
-                    idx === 0
-                      ? 'bg-[#1A2B4C] text-white border-[#1A2B4C]'
-                      : 'bg-white text-[#1A2B4C] border-gray-100 group-hover:border-[#00B4D8]'
-                  }`}
-                >
-                  <cat.icon size={17} strokeWidth={1.8} />
+                <div className="w-13 h-13 rounded-xl bg-white border border-slate-200/90 group-hover:border-[#0077B6] shadow-xs p-2 flex items-center justify-center overflow-hidden transition-colors">
+                  {!brokenCategoryThumbs[cat.id] ? (
+                    <img
+                      loading="eager"
+                      decoding="async"
+                      width={44}
+                      height={44}
+                      src={cat.thumb}
+                      title={catSeo?.title || `${cat.name} in Pakistan | AV Live`}
+                      alt={catSeo?.alt || `${cat.name} (${cat.sublabel}) commercial hardware in Pakistan`}
+                      onError={() => setBrokenCategoryThumbs((prev) => ({ ...prev, [cat.id]: true }))}
+                      className="w-full h-full object-contain mix-blend-multiply"
+                    />
+                  ) : (
+                    <cat.icon size={18} strokeWidth={1.8} className="text-[#1A2B4C]" />
+                  )}
                 </div>
-                <span className="text-[10px] font-semibold text-[#1A2B4C] text-center truncate w-full mt-1">
+                <span className="text-[10px] font-extrabold text-[#1A2B4C] text-center truncate w-full mt-1">
                   {cat.name.split(' ')[0]}
                 </span>
+                <span className="text-[9px] font-medium text-slate-500 text-center truncate w-full">
+                  {cat.sublabel}
+                </span>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -634,7 +672,7 @@ export function Home() {
               to="/shop"
               className="text-[11px] font-bold text-[#2B4C8C] hover:text-[#00B4D8] inline-flex items-center justify-end py-0.5"
             >
-              View 53 SKUs →
+              View 88 SKUs →
             </Link>
           </div>
 
@@ -651,11 +689,19 @@ export function Home() {
         </div>
       </section>
 
-      {/* Hero Slider (Desktop >= 1024px — 16:6 Aspect Ratio, max-h 380px so Categories & Content are visible above the fold) */}
+      {/* Clean Enterprise Hero Slider (Desktop >= 1024px) */}
       <div 
-        className="hidden lg:flex relative w-full aspect-[16/6] min-h-[280px] max-h-[380px] overflow-hidden bg-[#1A2B4C] group/slider items-center"
-        onMouseEnter={() => setIsAutoplayPaused(true)}
-        onMouseLeave={() => setIsAutoplayPaused(false)}
+        className="hidden lg:flex relative w-full aspect-[16/6] min-h-[300px] max-h-[380px] overflow-hidden bg-[#0F172A] group/slider items-center"
+        aria-roledescription="carousel"
+        aria-label="Featured AV Live Enterprise Solutions"
+        onMouseEnter={() => setIsHoverPaused(true)}
+        onMouseLeave={() => setIsHoverPaused(false)}
+        onFocus={() => setIsHoverPaused(true)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+            setIsHoverPaused(false);
+          }
+        }}
       >
         <div className="w-full absolute inset-0">
           {slides.map((slide, index) => {
@@ -665,11 +711,11 @@ export function Home() {
               <div
                 key={`${slide.id || 'slide'}-${index}`}
                 aria-hidden={!isCurrentSlide}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
+                className={`absolute inset-0 w-full h-full transition-opacity duration-500 motion-reduce:transition-none ${
                   isCurrentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                 }`}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-[#1A2B4C]/95 via-[#1A2B4C]/75 to-transparent z-10"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0F172A]/95 via-[#0F172A]/75 to-[#0F172A]/25 z-10"></div>
                 {(() => {
                   const slideSeo = buildEditorialImageSeo(slide.title, 'hero', slide.subtitle);
                   return (
@@ -680,7 +726,6 @@ export function Home() {
                       width={1280}
                       height={480}
                       src={slide.imageUrl}
-                      srcSet={buildHeroSrcSet(slide.imageUrl)}
                       sizes="100vw"
                       title={slideSeo.title}
                       alt={slideSeo.alt}
@@ -692,51 +737,52 @@ export function Home() {
             );
           })}
 
-          <div className="relative md:absolute md:inset-0 z-20 flex flex-col items-start justify-center text-left px-8 lg:px-16 max-w-[1400px] mx-auto">
-             <div className="bg-[#00B4D8] px-3 py-1 rounded-md shadow-md mb-2 inline-flex items-center gap-1.5">
-                <span className="font-black text-[#1A2B4C] uppercase tracking-widest text-[9px]">Enterprise AV &amp; Events Pakistan</span>
-             </div>
+          <div className="relative md:absolute md:inset-0 z-20 flex flex-col items-start justify-center text-left px-14 lg:px-20 pb-8 max-w-[1400px] mx-auto">
+             <span className="block font-bold text-[#38BDF8] uppercase tracking-[0.16em] text-xs mb-2">
+                Authorized Pro-AV &amp; Events &middot; Est. 2011
+             </span>
 
-             <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black text-white mb-2 drop-shadow-xl leading-tight max-w-2xl font-sans">
-               {activeHeroSlide.title}
+             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-2 leading-[1.12] tracking-tight text-balance max-w-2xl">
+               {renderTwoToneHeadline(activeHeroSlide.title)}
              </h2>
 
-             <div 
-               className="text-xs sm:text-sm text-white/90 mb-3.5 max-w-xl drop-shadow-sm font-medium leading-relaxed line-clamp-2 prose prose-p:m-0 prose-invert" 
-               dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(activeHeroSlide.subtitle || '') }} 
-             />
+             <p className="text-sm sm:text-base text-slate-200 mb-5 max-w-xl font-normal leading-relaxed line-clamp-1">
+               {(activeHeroSlide.subtitle || '').replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ')}
+             </p>
              
-             <div className="flex flex-row flex-wrap gap-2.5">
+             <div className="flex flex-row flex-wrap items-center gap-3">
                <Link 
-                to={activeHeroSlide.ctaLink || '/shop'} 
-                className="bg-white text-[#1A2B4C] px-5 py-2 min-h-[36px] rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors shadow-lg flex items-center justify-center gap-2 group"
+                to={activeHeroSlide.ctaLink || '/programs/quote'} 
+                className="bg-[#00B4D8] text-[#0F172A] px-5 py-2.5 min-h-[44px] rounded-lg font-bold tracking-wide text-xs hover:bg-white transition-colors shadow-sm inline-flex items-center justify-center gap-2 group"
                >
-                 {activeHeroSlide.ctaText || 'Explore Now'}
-                 <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                 <span>{activeHeroSlide.ctaText || 'Get BoQ Quote'}</span>
+                 <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform motion-reduce:transform-none" />
                </Link>
                <Link 
-                to="/event-quote" 
-                className="bg-[#00B4D8]/20 border border-[#00B4D8] text-white px-5 py-2 min-h-[36px] rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#00B4D8] hover:text-[#1A2B4C] transition-colors flex items-center justify-center gap-2"
+                to="/shop" 
+                className="bg-white/10 border border-white/35 text-white px-5 py-2.5 min-h-[44px] rounded-lg font-semibold tracking-wide text-xs hover:bg-white/20 transition-colors inline-flex items-center justify-center gap-2"
                >
-                 15-Min Event / AV Quote
+                 Browse 88 Verified SKUs
                </Link>
              </div>
           </div>
         </div>
 
-        {/* Floating Arrows */}
+        {/* Subtle Prev/Next Arrows */}
         {slides.length > 1 && (
           <>
             <button 
+              type="button"
               onClick={(e) => { e.stopPropagation(); prevSlide(); }}
-              className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-xl bg-[#1A2B4C]/40 hover:bg-[#00B4D8] border border-white/10 text-white transition-all shadow-md backdrop-blur-xs opacity-0 group-hover/slider:opacity-100 -translate-x-3 group-hover/slider:translate-x-0 duration-300 items-center justify-center cursor-pointer"
+              className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 z-30 min-w-[44px] min-h-[44px] p-2.5 rounded-lg bg-[#0F172A]/60 hover:bg-[#00B4D8] hover:text-[#0F172A] border border-white/20 text-white transition-colors motion-reduce:transition-none opacity-75 group-hover/slider:opacity-100 items-center justify-center cursor-pointer"
               aria-label="Previous slide"
             >
               <ArrowLeft size={18} />
             </button>
             <button 
+              type="button"
               onClick={(e) => { e.stopPropagation(); nextSlide(); }}
-              className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-xl bg-[#1A2B4C]/40 hover:bg-[#00B4D8] border border-white/10 text-white transition-all shadow-md backdrop-blur-xs opacity-0 group-hover/slider:opacity-100 translate-x-3 group-hover/slider:translate-x-0 duration-300 items-center justify-center cursor-pointer"
+              className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 z-30 min-w-[44px] min-h-[44px] p-2.5 rounded-lg bg-[#0F172A]/60 hover:bg-[#00B4D8] hover:text-[#0F172A] border border-white/20 text-white transition-colors motion-reduce:transition-none opacity-75 group-hover/slider:opacity-100 items-center justify-center cursor-pointer"
               aria-label="Next slide"
             >
               <ArrowRight size={18} />
@@ -744,74 +790,123 @@ export function Home() {
           </>
         )}
 
-        {/* Pagination Dots (Bottom-Right so they never collide with left-aligned CTA buttons) */}
+        {/* Minimal Dot Indicators + Accessible Pause/Play & Next Controls */}
         {slides.length > 1 && (
-          <div className="absolute bottom-3 right-8 lg:right-16 z-30 flex items-center gap-2">
-            {slides.map((_: any, index: number) => {
-              const isActive = index === currentSlide;
-              return (
-                <button 
-                  key={index} 
-                  onClick={() => setCurrentSlide(index)}
-                  className="relative group/dot py-2 px-1 flex items-center justify-center cursor-pointer"
-                  aria-label={`Go to slide ${index + 1}`}
-                >
-                  <div className={`h-1.5 w-8 rounded-full overflow-hidden relative border transition-colors duration-300 ${isActive ? 'bg-[#00B4D8] border-white/30' : 'bg-white/25 border-transparent hover:bg-white/40'}`} />
-                </button>
-              );
-            })}
+          <div className="absolute bottom-3.5 left-14 right-14 lg:left-20 lg:right-20 z-30 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2" role="tablist" aria-label="Slide selector">
+              {slides.map((slide: any, index: number) => {
+                const isActive = index === currentSlide;
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-label={`Go to slide ${index + 1}: ${slide.title}`}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-2 rounded-sm transition-all cursor-pointer ${
+                      isActive ? 'w-7 bg-[#38BDF8]' : 'w-2.5 bg-white/40 hover:bg-white/75'
+                    }`}
+                  />
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsUserPaused((prev) => !prev)}
+              aria-pressed={isUserPaused}
+              aria-label={isUserPaused ? 'Resume automatic slide rotation' : 'Pause automatic slide rotation'}
+              className="px-3 py-1.5 min-w-[44px] min-h-[36px] rounded-lg bg-[#0F172A]/75 hover:bg-[#00B4D8] hover:text-[#0F172A] border border-white/25 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+            >
+              {isUserPaused ? <Play size={13} /> : <Pause size={13} />}
+              <span>{isUserPaused ? 'Play' : 'Pause'}</span>
+            </button>
           </div>
         )}
       </div>
 
-      {/* Category Icons (Desktop >= 1024px — Compact Strip Visible Above the Fold) */}
-      <section aria-label="Enterprise AV & Unified Communications Categories" className="hidden lg:block bg-white border border-gray-100 shadow-xs py-3.5 relative z-20 mx-auto">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 overflow-x-auto pb-1 hide-scrollbar">
-          <h2 className="sr-only">Primary Enterprise AV &amp; Unified Communications Categories in Pakistan</h2>
-          <div className="flex items-start justify-between min-w-max gap-5">
-             {CATEGORIES.map((cat, i) => (
-               <Link key={i} to={cat.link} className="flex flex-col items-center group w-24">
-                 <div className="w-13 h-13 rounded-2xl bg-gray-50 flex items-center justify-center text-[#1A2B4C] group-hover:bg-[#1A2B4C] group-hover:text-white transition-all shadow-xs border border-gray-100 mb-1.5 group-hover:shadow-md group-hover:-translate-y-0.5">
-                   <cat.icon size={22} strokeWidth={1.6} />
-                 </div>
-                  <span className="text-xs font-extrabold text-center leading-tight tracking-tight text-slate-700 group-hover:text-[#1A2B4C] transition-colors">{cat.name}</span>
-               </Link>
-             ))}
+      {/* Category Strip (Clean Rounded-xl Hardware Tiles + SEO Title/Alt) */}
+      <section aria-label="Enterprise AV & Unified Communications Categories" className="hidden lg:block bg-white border-b border-slate-200/80 py-5 relative z-20 mx-auto">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8">
+          <div className="flex items-center justify-between mb-3.5">
+            <h2 className="text-base font-extrabold text-[#1A2B4C] tracking-tight">Shop by AV Category</h2>
+            <Link
+              to="/shop"
+              className="text-xs font-bold text-[#0077B6] hover:text-[#1A2B4C] inline-flex items-center gap-1.5 min-h-[44px] py-1 transition-colors"
+            >
+              <span>View All 13 Categories</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+          <div className="overflow-x-auto pb-1 hide-scrollbar">
+            <div className="flex items-start justify-between min-w-max gap-5">
+               {CATEGORIES.map((cat, i) => {
+                 const catSeo = VIDEO_CONFERENCE_MEDIA_SEO[cat.thumb];
+                 return (
+                 <Link key={cat.id} to={cat.link} className="flex flex-col items-center group w-24">
+                   <div className="w-16 h-16 rounded-xl bg-[#F8F9FA] flex items-center justify-center text-[#1A2B4C] group-hover:border-[#0077B6] group-hover:shadow-sm transition-all border border-slate-200/90 mb-2 overflow-hidden p-2">
+                     {!brokenCategoryThumbs[cat.id] ? (
+                       <img
+                         loading={i < 6 ? 'eager' : 'lazy'}
+                         decoding="async"
+                         width={56}
+                         height={56}
+                         src={cat.thumb}
+                         title={catSeo?.title || `${cat.name} in Pakistan | AV Live`}
+                         alt={catSeo?.alt || `${cat.name} (${cat.sublabel}) enterprise AV equipment in Pakistan`}
+                         onError={() => setBrokenCategoryThumbs((prev) => ({ ...prev, [cat.id]: true }))}
+                         className="w-full h-full object-contain mix-blend-multiply"
+                       />
+                     ) : (
+                       <cat.icon size={22} strokeWidth={1.6} />
+                     )}
+                   </div>
+                   <span className="text-xs font-bold text-center leading-tight tracking-tight text-[#1A2B4C] group-hover:text-[#0077B6] transition-colors">{cat.name}</span>
+                 </Link>
+                 );
+               })}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Tabbed Intent Split */}
+      {/* Tabbed Intent Split (UPG-3: Tier 2 Segmented Control + C1 WCAG AA #0077B6) */}
       <section className="w-full py-8 lg:py-14 bg-white">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-8">
           <div className="text-center max-w-3xl mx-auto mb-6 lg:mb-9">
-            <span className="text-[#00B4D8] text-[10px] lg:text-xs font-black uppercase tracking-[0.25em] mb-1.5 block">Dual Commercial Pillars</span>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#1A2B4C] tracking-tight">
+            <span className="text-[#0077B6] text-xs font-bold uppercase tracking-[0.18em] mb-1.5 block">Dual Commercial Pillars</span>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#1A2B4C] tracking-tight text-balance">
               Turnkey Corporate Event Management, AI &amp; Pro-AV Solutions in Pakistan
             </h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-3 mb-7 lg:mb-10">
-            <button 
-              onClick={() => setActiveIntentTab('solutions')}
-              className={`px-6 py-2.5 min-w-[48px] min-h-[42px] rounded-full font-black uppercase tracking-widest text-xs transition-all cursor-pointer ${activeIntentTab === 'solutions' ? 'bg-[#1A2B4C] text-white shadow-lg' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
-            >
-              Event &amp; AI Solutions (9)
-            </button>
-            <button 
-              onClick={() => setActiveIntentTab('shop')}
-              className={`px-6 py-2.5 min-w-[48px] min-h-[42px] rounded-full font-black uppercase tracking-widest text-xs transition-all cursor-pointer ${activeIntentTab === 'shop' ? 'bg-[#1A2B4C] text-white shadow-lg' : 'bg-gray-100 text-slate-700 hover:bg-gray-200'}`}
-            >
-              Professional AV Shop
-            </button>
+          <div className="flex justify-center mb-7 lg:mb-10">
+            <div className="inline-flex flex-wrap justify-center gap-1 p-1.5 bg-slate-100 rounded-xl border border-slate-200/80">
+              <button 
+                type="button"
+                onClick={() => setActiveIntentTab('solutions')}
+                aria-pressed={activeIntentTab === 'solutions'}
+                className={`px-5 py-2.5 min-w-[48px] min-h-[44px] rounded-lg font-bold text-xs tracking-wide transition-colors cursor-pointer ${activeIntentTab === 'solutions' ? 'bg-white text-[#1A2B4C] shadow-xs' : 'text-slate-600 hover:text-[#1A2B4C]'}`}
+              >
+                Event &amp; AI Solutions (9)
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveIntentTab('shop')}
+                aria-pressed={activeIntentTab === 'shop'}
+                className={`px-5 py-2.5 min-w-[48px] min-h-[44px] rounded-lg font-bold text-xs tracking-wide transition-colors cursor-pointer ${activeIntentTab === 'shop' ? 'bg-white text-[#1A2B4C] shadow-xs' : 'text-slate-600 hover:text-[#1A2B4C]'}`}
+              >
+                Professional AV Shop
+              </button>
+            </div>
           </div>
 
           <div className="min-h-[340px]">
             {activeIntentTab === 'solutions' ? (
-              <div className="grid md:grid-cols-3 gap-5 lg:gap-7">
+              <div className="grid md:grid-cols-3 gap-6">
                 {services.filter(s => s.isActive).slice(0, 9).map((s) => {
                   const serviceImgSeo = buildEditorialImageSeo(s.title, 'service', s.description);
                   return (
-                  <div key={s.id} className="bg-gray-50 rounded-3xl p-8 border border-gray-100 hover:shadow-xl transition-all flex flex-col">
+                  <div key={s.id} className="bg-white rounded-2xl p-6 border border-slate-200/80 hover:border-[#1A2B4C]/25 hover:shadow-md transition-all motion-reduce:transition-none flex flex-col">
                     <img
                       loading="lazy"
                       decoding="async"
@@ -820,11 +915,11 @@ export function Home() {
                       src={optimizeGalleryImageUrl(s.imageUrl, 480, 75)}
                       title={serviceImgSeo.title}
                       alt={serviceImgSeo.alt}
-                      className="w-full h-48 object-cover rounded-2xl mb-6"
+                      className="w-full h-48 object-cover rounded-xl mb-5"
                     />
-                    <h3 className="text-xl font-black text-[#1A2B4C] mb-3">{s.title}</h3>
-                    <p className="text-gray-600 mb-6 line-clamp-3 text-sm flex-grow">{s.description.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ')}</p>
-                    <Link to={`/services/${s.slug}`} className="text-[#00B4D8] hover:text-[#1A2B4C] font-bold text-sm inline-flex items-center gap-2 mt-auto min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 py-1">
+                    <h3 className="text-xl font-black text-[#1A2B4C] mb-2.5">{s.title}</h3>
+                    <p className="text-slate-600 mb-5 line-clamp-3 text-sm flex-grow leading-relaxed">{s.description.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ')}</p>
+                    <Link to={`/services/${s.slug}`} className="text-[#0077B6] hover:text-[#1A2B4C] font-bold text-sm inline-flex items-center gap-2 mt-auto min-h-[44px] py-1 transition-colors">
                       Explore {s.title} <ArrowRight size={16} />
                     </Link>
                   </div>
@@ -832,14 +927,14 @@ export function Home() {
                 })}
               </div>
             ) : (
-              <div className="grid md:grid-cols-3 gap-8">
+              <div className="grid md:grid-cols-3 gap-6">
                 {products.filter(p => p.isFeatured).slice(0, 6).map((p) => {
                   const pSlug = getCanonicalProductSlug(p, p.id);
                   const pHref = getProductHref(p, p.id);
                   const pImgSeo = buildProductImageSeo(p, p.images?.[0], 0);
                   return (
-                  <div key={p.id} className="bg-white rounded-3xl p-6 border border-gray-100 hover:shadow-xl transition-all flex flex-col">
-                    <div className="relative w-full h-48 aspect-[2/1] rounded-2xl overflow-hidden mb-6 bg-gray-50">
+                  <div key={p.id} className="bg-white rounded-2xl p-6 border border-slate-200/80 hover:border-[#1A2B4C]/25 hover:shadow-md transition-all motion-reduce:transition-none flex flex-col">
+                    <div className="relative w-full h-48 aspect-[2/1] rounded-xl overflow-hidden mb-5 bg-[#F8F9FA]">
                       <BlurProductImage
                         loading="lazy"
                         decoding="async"
@@ -854,7 +949,7 @@ export function Home() {
                     </div>
                     <h3 className="text-lg font-bold text-[#1A2B4C] mb-2">{p.productName}</h3>
                     <p className="text-xs text-slate-600 mb-4 line-clamp-2 flex-grow">{p.shortDescription}</p>
-                    <Link to={pHref} className="text-[#00B4D8] font-bold text-sm mt-auto inline-flex items-center min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 py-1">
+                    <Link to={pHref} className="text-[#0077B6] hover:text-[#1A2B4C] font-bold text-sm mt-auto inline-flex items-center min-h-[44px] py-1 transition-colors">
                       View {p.productName} Price PKR →
                     </Link>
                   </div>
@@ -866,18 +961,18 @@ export function Home() {
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Featured Products (UPG-4: Inline Brand · SKU + Tabular PKR Pricing + C1 AA) */}
       <section className="bg-white py-8 lg:py-12 border-t border-gray-100">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 relative">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-3">
             <div>
-              <span className="text-[#00B4D8] text-[10px] lg:text-xs font-black uppercase tracking-[0.25em] mb-1.5 block">Authorized Pakistan Stock &amp; Price PKR</span>
+              <span className="text-[#0077B6] text-xs font-bold uppercase tracking-[0.18em] mb-1.5 block">Authorized Pakistan Stock &amp; Price PKR</span>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#1A2B4C] tracking-tight">
                 Featured Video Conference in Pakistan &amp; Enterprise AV Hardware
               </h2>
             </div>
-            <Link to="/shop" className="text-xs font-black text-[#1A2B4C] uppercase tracking-[0.2em] hover:text-[#00B4D8] transition-colors inline-flex items-center gap-2 min-h-[44px] lg:min-h-0 py-1.5">
-              View All 53 Models <ArrowRight size={16} />
+            <Link to="/shop" className="text-xs font-black text-[#1A2B4C] uppercase tracking-[0.18em] hover:text-[#0077B6] transition-colors inline-flex items-center gap-2 min-h-[44px] py-1.5">
+              View All 88 Models <ArrowRight size={16} />
             </Link>
           </div>
           
@@ -905,14 +1000,14 @@ export function Home() {
             <button 
               onClick={() => scrollSlider('left')} 
               aria-label="Scroll featured products left"
-              className="absolute left-2 lg:-left-3 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/slider:opacity-100 p-3.5 bg-white border border-gray-100 text-[#1A2B4C] rounded-full hover:bg-[#00B4D8] hover:border-[#00B4D8] hover:text-[#1A2B4C] transition-all shadow-xl hidden md:block cursor-pointer"
+              className="absolute left-2 lg:-left-3 top-1/2 -translate-y-1/2 z-10 min-w-[44px] min-h-[44px] opacity-0 group-hover/slider:opacity-100 p-3 bg-white border border-slate-200 text-[#1A2B4C] rounded-full hover:bg-[#00B4D8] hover:border-[#00B4D8] hover:text-[#1A2B4C] transition-all motion-reduce:transition-none shadow-xl hidden md:flex items-center justify-center cursor-pointer"
             >
               <ArrowLeft size={20} />
             </button>
             <button 
               onClick={() => scrollSlider('right')} 
               aria-label="Scroll featured products right"
-              className="absolute right-2 lg:-right-3 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/slider:opacity-100 p-3.5 bg-white border border-gray-100 text-[#1A2B4C] rounded-full hover:bg-[#00B4D8] hover:border-[#00B4D8] hover:text-[#1A2B4C] transition-all shadow-xl hidden md:block cursor-pointer"
+              className="absolute right-2 lg:-right-3 top-1/2 -translate-y-1/2 z-10 min-w-[44px] min-h-[44px] opacity-0 group-hover/slider:opacity-100 p-3 bg-white border border-slate-200 text-[#1A2B4C] rounded-full hover:bg-[#00B4D8] hover:border-[#00B4D8] hover:text-[#1A2B4C] transition-all motion-reduce:transition-none shadow-xl hidden md:flex items-center justify-center cursor-pointer"
             >
               <ArrowRight size={20} />
             </button>
@@ -920,89 +1015,97 @@ export function Home() {
             ref={sliderRef}
             className="flex overflow-x-auto gap-6 md:gap-8 pb-12 snap-x snap-mandatory scroll-smooth hide-scrollbar [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {featuredCarouselProducts.length > 0 ? featuredCarouselProducts.map((prod) => (
-               <Link 
-                to={getProductHref(prod, prod.id)} 
-                key={prod.id} 
+            {featuredCarouselProducts.length > 0 ? featuredCarouselProducts.map((prod) => {
+               const cardKey = prod.id || getCanonicalProductSlug(prod, prod.id);
+               const cardHref = getProductHref(prod, prod.id);
+               const isJustAdded = addedProductId === cardKey;
+               const images = Array.isArray(prod.images) ? prod.images : (typeof prod.images === 'string' ? [prod.images] : (prod.image ? [prod.image] : []));
+               const firstImage = optimizeGalleryImageUrl(images[0] || '/images/products/poly-x70-studio.webp', 480, 75);
+               const prodSlug = getCanonicalProductSlug(prod, prod.id);
+               const cardSeo = buildProductImageSeo(prod, images[0], 0);
+               return (
+               <article 
+                key={cardKey} 
                 onMouseEnter={() => setHoveredProductId(prod.id || null)}
                 onMouseLeave={() => setHoveredProductId(null)}
-                onFocus={() => setHoveredProductId(prod.id || null)}
-                className="bg-white group cursor-pointer rounded-3xl overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-2 relative shrink-0 w-[280px] sm:w-[320px] lg:w-[calc(25%-1.5rem)] snap-start"
+                className="bg-white group rounded-2xl overflow-hidden flex flex-col border border-slate-200/80 hover:border-[#1A2B4C]/25 transition-all motion-reduce:transition-none duration-200 shadow-xs hover:shadow-md hover:-translate-y-0.5 motion-reduce:transform-none relative shrink-0 w-[280px] sm:w-[300px] lg:w-[calc(25%-1.35rem)] snap-start"
                >
-                  <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1A2B4C]/5 to-[#00B4D8]/10 overflow-hidden">
-                    {(() => {
-                       const images = Array.isArray(prod.images) ? prod.images : (typeof prod.images === 'string' ? [prod.images] : (prod.image ? [prod.image] : []));
-                       const firstImage = optimizeGalleryImageUrl(images[0] || '/images/products/poly-x70-studio.webp', 480, 75);
-                       const prodSlug = getCanonicalProductSlug(prod, prod.id);
-                       const cardSeo = buildProductImageSeo(prod, images[0], 0);
-                       return (
-                         <BlurProductImage
-                           loading="lazy"
-                           decoding="async"
-                           width={400}
-                           height={300}
-                           src={firstImage}
-                           seed={prodSlug}
-                           title={cardSeo.title}
-                           alt={cardSeo.alt}
-                           className="absolute inset-0 z-10 w-full h-full object-contain p-3 mix-blend-multiply transition-transform duration-500 ease-in-out group-hover:scale-105"
-                         />
-                       );
-                    })()}
+                  <div className="relative aspect-[4/3] bg-[#F8F9FA] border-b border-slate-100 overflow-hidden">
+                    <Link
+                      to={cardHref}
+                      onFocus={() => setHoveredProductId(prod.id || null)}
+                      className="block w-full h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0077B6]"
+                    >
+                      <BlurProductImage
+                        loading="lazy"
+                        decoding="async"
+                        width={400}
+                        height={300}
+                        src={firstImage}
+                        seed={prodSlug}
+                        title={cardSeo.title}
+                        alt={cardSeo.alt}
+                        className="w-full h-full object-contain p-3 mix-blend-multiply transition-transform duration-300 ease-in-out group-hover:scale-105 motion-reduce:transform-none"
+                      />
+                    </Link>
                     
                     <button 
+                      type="button"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                       }}
                       aria-label={`Save ${prod.productName} to wishlist`}
-                      className="absolute top-3 right-3 min-w-[48px] min-h-[48px] lg:min-w-0 lg:min-h-0 w-12 h-12 lg:w-10 lg:h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-[#1A2B4C] hover:bg-[#1A2B4C] hover:text-white transition-colors z-10 shadow-sm"
+                      className="absolute top-3 right-3 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#1A2B4C] hover:bg-[#1A2B4C] hover:text-white transition-colors z-10 shadow-sm cursor-pointer"
                     >
                       <Heart size={16} />
                     </button>
 
                     {prod.salePrice > 0 && (
-                      <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-[#1A2B4C] text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-sm z-10">
+                      <span className="absolute top-3 left-3 bg-[#F0F9FF] border border-[#BAE6FD] text-[#026896] text-xs font-extrabold px-2.5 py-1 rounded-md z-10 pointer-events-none">
                         Special Offer
-                      </div>
+                      </span>
                     )}
                   </div>
 
-                  <div className="p-6 flex flex-col flex-grow bg-white z-10 relative">
-                    <h3 className="font-bold text-lg text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors mb-2 line-clamp-1">
-                      {prod.productName}
-                    </h3>
+                  <div className="p-4 sm:p-5 flex flex-col flex-grow bg-white z-10 relative">
+                    <Link to={cardHref} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0077B6] rounded-md">
+                      <h3 className="font-bold text-base text-[#1A2B4C] group-hover:text-[#0077B6] transition-colors mb-1 line-clamp-1">
+                        {prod.productName}
+                      </h3>
+                      {(prod.brand || prod.sku) && (
+                        <p className="text-xs text-slate-600 font-semibold tracking-wide mb-3 truncate">
+                          {prod.brand ? <span>{prod.brand}</span> : null}
+                          {prod.brand && prod.sku ? <span className="mx-1.5 text-slate-400" aria-hidden="true">&middot;</span> : null}
+                          {prod.sku ? <span>{prod.sku}</span> : null}
+                        </p>
+                      )}
+                    </Link>
                     
-                    <div className="flex flex-wrap gap-2 mb-4">
-                       {prod.brand && (
-                         <span className="text-xs text-slate-600 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
-                           {prod.brand}
-                         </span>
-                       )}
-                       {prod.sku && (
-                         <span className="text-xs text-slate-600 font-bold uppercase tracking-wider border border-gray-200 px-2 py-0.5 rounded-sm">
-                           {prod.sku}
-                         </span>
-                       )}
-                    </div>
-
-                    <div className="text-slate-600 text-xs font-medium leading-relaxed line-clamp-2 mb-6" dangerouslySetInnerHTML={{ __html: cleanRichTextHtml(prod.shortDescription || 'Professional unified communications equipment.') }} />
-                    
-                    <div className="mt-auto flex items-end justify-between gap-4 pt-4 border-t border-gray-50">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-black text-slate-600 uppercase tracking-widest mb-1">Price ({currency})</span>
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-black text-xl text-[#1A2B4C]">{formatPrice((prod.salePrice || prod.regularPrice) ?? 0)}</span>
-                        </div>
+                    <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Price ({currency})</span>
+                        <span className="font-black text-lg text-[#1A2B4C] tabular-nums truncate">{formatPrice((prod.salePrice || prod.regularPrice) ?? 0)}</span>
                       </div>
-                      <span className="bg-[#1A2B4C] text-white px-4 py-2.5 rounded-lg text-xs font-bold group-hover:bg-[#00B4D8] group-hover:text-[#1A2B4C] transition-all shadow-md shrink-0 whitespace-nowrap">
-                         View Specs
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleQuickAddProduct(prod)}
+                        aria-label={`Add ${prod.productName} to quote cart`}
+                        title={isJustAdded ? 'Added to Cart / BoQ' : 'Quick Add to Cart / BoQ'}
+                        className={`min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl inline-flex items-center justify-center border transition-colors shrink-0 cursor-pointer ${
+                          isJustAdded
+                            ? 'bg-emerald-600 border-emerald-600 text-white'
+                            : 'bg-slate-100 border-slate-200 text-[#1A2B4C] hover:bg-[#1A2B4C] hover:border-[#1A2B4C] hover:text-white'
+                        }`}
+                      >
+                        {isJustAdded ? <Check size={18} strokeWidth={2.5} /> : <ShoppingCart size={18} />}
+                      </button>
                     </div>
                   </div>
-               </Link>
-            )) : (
-              <div className="w-full py-16 text-center border-2 border-dashed border-gray-100 rounded-[3rem]">
+               </article>
+               );
+            }) : (
+              <div className="w-full py-16 text-center border-2 border-dashed border-gray-100 rounded-2xl">
                  <Box size={48} className="mx-auto text-gray-300 mb-4" />
                  <p className="text-slate-600 font-bold uppercase tracking-widest text-xs">No products found for this category.</p>
               </div>
@@ -1011,19 +1114,19 @@ export function Home() {
           </div>
           
           <div className="flex justify-center mt-4">
-             <Link to="/shop" className="text-xs font-black text-[#1A2B4C] uppercase tracking-[0.2em] hover:text-[#00B4D8] transition-colors flex items-center gap-2 group mb-2 bg-gray-50 hover:bg-gray-100 px-6 py-3.5 min-w-[48px] min-h-[48px] rounded-full">
-                Browse Full 53-SKU Hardware Catalog <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+             <Link to="/shop" className="text-xs font-black text-[#1A2B4C] uppercase tracking-[0.18em] hover:text-[#0077B6] transition-colors flex items-center gap-2 group mb-2 bg-slate-100 hover:bg-slate-200/70 px-6 py-3.5 min-w-[48px] min-h-[48px] rounded-lg">
+                Browse Full 88-SKU Hardware Catalog <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform motion-reduce:transform-none" />
              </Link>
           </div>
         </div>
       </section>
 
-      {/* Flagship Video Conferencing Bento Grid (Zero Inline Styles & Lean DOM) */}
+      {/* Flagship Video Conferencing Bento Grid (UPG-5: C1 AA #0077B6 Tabular PKR + Unified Rounded-2xl) */}
       {flagshipVideoSet.length > 0 && (
         <section className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-8 lg:py-14 overflow-hidden">
            <div className="text-center mb-6 lg:mb-9">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#1A2B4C] tracking-tight">Video Conference in Pakistan — Poly X70 &amp; Cisco Room Kit Solutions</h2>
-              <p className="text-gray-600 mt-1.5 text-xs sm:text-sm md:text-base">Empowering boardrooms with certified visual collaboration &amp; transparent price PKR across Lahore, Karachi &amp; Islamabad</p>
+              <p className="text-slate-600 mt-1.5 text-xs sm:text-sm md:text-base">Empowering boardrooms with certified visual collaboration &amp; transparent price PKR across Lahore, Karachi &amp; Islamabad</p>
            </div>
            
            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[580px] h-auto">
@@ -1032,24 +1135,24 @@ export function Home() {
                  {flagshipVideoSet[0] && (() => {
                    const imgSeo = buildProductImageSeo(flagshipVideoSet[0], flagshipVideoSet[0].images?.[0], 0);
                    return (
-                    <Link to={getProductHref(flagshipVideoSet[0], flagshipVideoSet[0].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                    <Link to={getProductHref(flagshipVideoSet[0], flagshipVideoSet[0].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:border-[#1A2B4C]/25 hover:shadow-md transition-all motion-reduce:transition-none group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[0].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[0].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[0].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 motion-reduce:transform-none transition-transform duration-500 mb-4" />
                        )}
-                       <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[0].productName}</h3>
-                       <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[0].salePrice > 0 ? (flagshipVideoSet[0].salePrice ?? 0) : (flagshipVideoSet[0].regularPrice ?? 0))}</p>
+                       <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#0077B6] transition-colors line-clamp-2">{flagshipVideoSet[0].productName}</h3>
+                       <p className="text-[#0077B6] font-extrabold tabular-nums mt-2">{formatPrice(flagshipVideoSet[0].salePrice > 0 ? (flagshipVideoSet[0].salePrice ?? 0) : (flagshipVideoSet[0].regularPrice ?? 0))}</p>
                     </Link>
                    );
                  })()}
                  {flagshipVideoSet[1] && (() => {
                    const imgSeo = buildProductImageSeo(flagshipVideoSet[1], flagshipVideoSet[1].images?.[0], 0);
                    return (
-                    <Link to={getProductHref(flagshipVideoSet[1], flagshipVideoSet[1].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                    <Link to={getProductHref(flagshipVideoSet[1], flagshipVideoSet[1].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:border-[#1A2B4C]/25 hover:shadow-md transition-all motion-reduce:transition-none group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[1].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[1].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[1].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 motion-reduce:transform-none transition-transform duration-500 mb-4" />
                        )}
-                       <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[1].productName}</h3>
-                       <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[1].salePrice > 0 ? (flagshipVideoSet[1].salePrice ?? 0) : (flagshipVideoSet[1].regularPrice ?? 0))}</p>
+                       <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#0077B6] transition-colors line-clamp-2">{flagshipVideoSet[1].productName}</h3>
+                       <p className="text-[#0077B6] font-extrabold tabular-nums mt-2">{formatPrice(flagshipVideoSet[1].salePrice > 0 ? (flagshipVideoSet[1].salePrice ?? 0) : (flagshipVideoSet[1].regularPrice ?? 0))}</p>
                     </Link>
                    );
                  })()}
@@ -1060,15 +1163,15 @@ export function Home() {
                  {flagshipVideoSet[2] && (() => {
                    const imgSeo = buildProductImageSeo(flagshipVideoSet[2], flagshipVideoSet[2].images?.[0], 0);
                    return (
-                    <Link to={getProductHref(flagshipVideoSet[2], flagshipVideoSet[2].id)} className="w-full h-full min-h-[340px] md:min-h-0 bg-white border border-gray-100 shadow-sm hover:shadow-lg rounded-[2.5rem] p-8 md:p-10 group flex flex-col items-center justify-center relative overflow-hidden text-center">
+                    <Link to={getProductHref(flagshipVideoSet[2], flagshipVideoSet[2].id)} className="w-full h-full min-h-[340px] md:min-h-0 bg-white border border-slate-200/80 shadow-xs hover:border-[#1A2B4C]/25 hover:shadow-md transition-all motion-reduce:transition-none rounded-2xl p-8 md:p-10 group flex flex-col items-center justify-center relative overflow-hidden text-center">
                        {flagshipVideoSet[2].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={540} height={360} src={optimizeGalleryImageUrl(flagshipVideoSet[2].images[0], 560, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-48 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 relative z-20 mb-6" />
+                         <img loading="lazy" decoding="async" width={540} height={360} src={optimizeGalleryImageUrl(flagshipVideoSet[2].images[0], 560, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-48 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 motion-reduce:transform-none transition-transform duration-500 relative z-20 mb-6" />
                        )}
                        <div className="relative z-20">
-                          <span className="text-[#00B4D8] font-black uppercase tracking-widest text-xs mb-2 block">Flagship Boardroom Endpoint</span>
-                          <h3 className="text-2xl md:text-3xl font-black text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[2].productName}</h3>
-                          <p className="text-[#00B4D8] text-xl font-black mt-2">{formatPrice(flagshipVideoSet[2].salePrice > 0 ? (flagshipVideoSet[2].salePrice ?? 0) : (flagshipVideoSet[2].regularPrice ?? 0))}</p>
-                          <p className="text-gray-600 mt-3 line-clamp-2 max-w-md mx-auto text-sm">{flagshipVideoSet[2].shortDescription?.replace(/<[^>]*>?/gm, '') || 'Professional video conferencing solution.'}</p>
+                          <span className="text-[#0077B6] font-bold uppercase tracking-widest text-xs mb-2 block">Flagship Boardroom Endpoint</span>
+                          <h3 className="text-2xl md:text-3xl font-black text-[#1A2B4C] group-hover:text-[#0077B6] transition-colors line-clamp-2">{flagshipVideoSet[2].productName}</h3>
+                          <p className="text-[#0077B6] text-xl font-extrabold tabular-nums mt-2">{formatPrice(flagshipVideoSet[2].salePrice > 0 ? (flagshipVideoSet[2].salePrice ?? 0) : (flagshipVideoSet[2].regularPrice ?? 0))}</p>
+                          <p className="text-slate-600 mt-3 line-clamp-2 max-w-md mx-auto text-sm">{flagshipVideoSet[2].shortDescription?.replace(/<[^>]*>?/gm, '') || 'Professional video conferencing solution.'}</p>
                        </div>
                     </Link>
                    );
@@ -1080,24 +1183,24 @@ export function Home() {
                  {flagshipVideoSet[3] && (() => {
                    const imgSeo = buildProductImageSeo(flagshipVideoSet[3], flagshipVideoSet[3].images?.[0], 0);
                    return (
-                    <Link to={getProductHref(flagshipVideoSet[3], flagshipVideoSet[3].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                    <Link to={getProductHref(flagshipVideoSet[3], flagshipVideoSet[3].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:border-[#1A2B4C]/25 hover:shadow-md transition-all motion-reduce:transition-none group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[3].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[3].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[3].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 motion-reduce:transform-none transition-transform duration-500 mb-4" />
                        )}
-                       <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[3].productName}</h3>
-                       <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[3].salePrice > 0 ? (flagshipVideoSet[3].salePrice ?? 0) : (flagshipVideoSet[3].regularPrice ?? 0))}</p>
+                       <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#0077B6] transition-colors line-clamp-2">{flagshipVideoSet[3].productName}</h3>
+                       <p className="text-[#0077B6] font-extrabold tabular-nums mt-2">{formatPrice(flagshipVideoSet[3].salePrice > 0 ? (flagshipVideoSet[3].salePrice ?? 0) : (flagshipVideoSet[3].regularPrice ?? 0))}</p>
                     </Link>
                    );
                  })()}
                  {flagshipVideoSet[4] && (() => {
                    const imgSeo = buildProductImageSeo(flagshipVideoSet[4], flagshipVideoSet[4].images?.[0], 0);
                    return (
-                    <Link to={getProductHref(flagshipVideoSet[4], flagshipVideoSet[4].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-center justify-center relative overflow-hidden">
+                    <Link to={getProductHref(flagshipVideoSet[4], flagshipVideoSet[4].id)} className="flex-1 min-h-[240px] md:min-h-0 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:border-[#1A2B4C]/25 hover:shadow-md transition-all motion-reduce:transition-none group flex flex-col items-center justify-center relative overflow-hidden">
                        {flagshipVideoSet[4].images?.[0] && (
-                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[4].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 mb-4" />
+                         <img loading="lazy" decoding="async" width={320} height={200} src={optimizeGalleryImageUrl(flagshipVideoSet[4].images[0], 420, 75)} title={imgSeo.title} alt={imgSeo.alt} className="w-full h-32 md:flex-1 min-h-0 object-contain mix-blend-multiply group-hover:scale-105 motion-reduce:transform-none transition-transform duration-500 mb-4" />
                        )}
-                       <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#00B4D8] transition-colors line-clamp-2">{flagshipVideoSet[4].productName}</h3>
-                       <p className="text-[#00B4D8] font-black mt-2">{formatPrice(flagshipVideoSet[4].salePrice > 0 ? (flagshipVideoSet[4].salePrice ?? 0) : (flagshipVideoSet[4].regularPrice ?? 0))}</p>
+                       <h3 className="text-center font-bold text-[#1A2B4C] group-hover:text-[#0077B6] transition-colors line-clamp-2">{flagshipVideoSet[4].productName}</h3>
+                       <p className="text-[#0077B6] font-extrabold tabular-nums mt-2">{formatPrice(flagshipVideoSet[4].salePrice > 0 ? (flagshipVideoSet[4].salePrice ?? 0) : (flagshipVideoSet[4].regularPrice ?? 0))}</p>
                     </Link>
                    );
                  })()}
@@ -1109,23 +1212,19 @@ export function Home() {
       {/* Setup Wizard Banner */}
       <section className="bg-[#F8F9FA] pb-12 md:pb-16 cv-auto-mobile">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8">
-          <div className="bg-gradient-to-r from-[#1A2B4C] to-[#0A192F] rounded-3xl md:rounded-[3.5rem] p-6 sm:p-8 md:p-16 text-white relative overflow-hidden shadow-2xl border border-gray-800">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#00B4D8]/20 to-transparent rounded-full translate-x-32 -translate-y-32"></div>
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-[#00B4D8]/10 to-transparent rounded-full -translate-x-32 translate-y-32"></div>
-
+          <div className="bg-[#1A2B4C] rounded-2xl p-6 sm:p-8 md:p-14 text-white relative overflow-hidden shadow-lg border border-slate-800">
             <div className="relative z-10 max-w-5xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-10">
-              <div className="space-y-3 md:space-y-4">
-                <div className="inline-flex items-center gap-2 bg-[#00B4D8]/20 text-[#00B4D8] px-4 py-2 rounded-full">
-                  <Sparkles size={12} />
-                  <span className="text-[9px] font-black uppercase tracking-widest text-white">Smart Configurator</span>
-                </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+              <div className="space-y-3">
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#38BDF8] block">
+                  Interactive Hardware Sizing
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
                   Unsure of Room Scale &amp; VoIP Requirements?
                 </h2>
-                <h3 className="text-xs sm:text-sm font-bold text-[#00B4D8] uppercase tracking-wider">
+                <h3 className="text-xs sm:text-sm font-semibold text-slate-300 uppercase tracking-wider">
                   Interactive 60-Second Conference Room &amp; SIP PBX Sizing Tool
                 </h3>
-                <p className="text-gray-300 font-medium text-xs md:text-sm leading-relaxed max-w-2xl">
+                <p className="text-slate-300 font-normal text-xs md:text-sm leading-relaxed max-w-2xl">
                   Take our interactive 3-question hardware wizard. We'll instantly size up your space and recommend the perfect pre-configured starter bundle of certified IP phones and video bars in under 60 seconds.
                 </p>
               </div>
@@ -1133,14 +1232,14 @@ export function Home() {
               <div className="w-full md:w-auto shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <Link
                   to="/room-designer"
-                  className="bg-[#00B4D8] hover:bg-white text-[#1A2B4C] px-5 sm:px-8 py-4 min-h-[48px] rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all shadow-lg active:scale-98 flex items-center justify-center gap-2 group text-center sm:whitespace-nowrap"
+                  className="bg-[#00B4D8] hover:bg-white text-[#0F172A] px-5 sm:px-7 py-3.5 min-h-[48px] rounded-lg font-bold uppercase tracking-wider text-xs transition-colors shadow-sm flex items-center justify-center gap-2 group text-center sm:whitespace-nowrap"
                 >
                   3D Room Designer &amp; LED Calculator <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform shrink-0" />
                 </Link>
                 <Link
                   to="/setup-wizard"
                   rel="nofollow"
-                  className="bg-white/10 hover:bg-white hover:text-[#1A2B4C] text-white border border-white/20 px-5 sm:px-6 py-4 min-h-[48px] rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 group text-center sm:whitespace-nowrap"
+                  className="bg-white/10 hover:bg-white hover:text-[#1A2B4C] text-white border border-white/25 px-5 sm:px-6 py-3.5 min-h-[48px] rounded-lg font-bold uppercase tracking-wider text-xs transition-colors flex items-center justify-center gap-2 group text-center sm:whitespace-nowrap"
                 >
                   60-Sec Bundle Wizard <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform shrink-0" />
                 </Link>
@@ -1150,52 +1249,96 @@ export function Home() {
         </div>
       </section>
 
-      {/* Trust & Services */}
+      {/* UPG-10: 4-Pillar Engineering Guarantee Strip */}
+      <section aria-label="AV Live Engineering & Procurement Guarantees" className="bg-[#F8F9FA] pb-10 md:pb-14">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8">
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-[#F0F9FF] text-[#0077B6] flex items-center justify-center shrink-0">
+                <Truck size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-[#1A2B4C] leading-snug">Same-Day Dispatch</h3>
+                <p className="text-xs text-slate-600 mt-0.5">Serial-verified stock in Lahore</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-[#F0F9FF] text-[#0077B6] flex items-center justify-center shrink-0">
+                <ShieldCheck size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-[#1A2B4C] leading-snug">Official OEM Warranty</h3>
+                <p className="text-xs text-slate-600 mt-0.5">1-to-3 year brand coverage</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-[#F0F9FF] text-[#0077B6] flex items-center justify-center shrink-0">
+                <FileCheck2 size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-[#1A2B4C] leading-snug">FBR GST &amp; PPRA Ready</h3>
+                <p className="text-xs text-slate-600 mt-0.5">Compliant tender invoicing</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-[#F0F9FF] text-[#0077B6] flex items-center justify-center shrink-0">
+                <Clock size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-[#1A2B4C] leading-snug">15-Minute Tech SLA</h3>
+                <p className="text-xs text-slate-600 mt-0.5">Engineers in LHR, KHI &amp; ISB</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust & Services (UPG-6: Dark Surface #38BDF8 6.56:1 Contrast + Tabular Stats) */}
       <section className="bg-[#1A2B4C] py-12 md:py-16 text-white overflow-hidden relative cv-auto-mobile">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 skew-x-12 translate-x-1/2"></div>
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
              <div>
-                <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.3em] mb-4 md:mb-6 block">Why AV Live?</span>
-                <h2 className="text-2xl sm:text-4xl md:text-5xl font-black mb-6 md:mb-8 leading-tight tracking-tight">Pakistan's Trusted Unified Communications Partner.</h2>
+                <span className="text-[#38BDF8] text-xs font-bold uppercase tracking-[0.22em] mb-4 md:mb-6 block">Why AV Live?</span>
+                <h2 className="text-2xl sm:text-4xl md:text-5xl font-black mb-6 md:mb-8 leading-tight tracking-tight text-balance">Pakistan's Trusted Unified Communications Partner.</h2>
                 <div className="space-y-6 md:space-y-8">
                    <div className="flex gap-4 sm:gap-6">
                       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/10">
-                         <ShieldCheck className="text-[#00B4D8]" size={28} />
+                         <ShieldCheck className="text-[#38BDF8]" size={28} />
                       </div>
                       <div>
                          <h3 className="font-bold text-base sm:text-lg mb-1.5 sm:mb-2">Certified Tech Support &amp; 15-Minute SLA</h3>
-                         <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">Our engineers hold certifications from Cisco, HP Poly, Logitech, and Yealink, delivering on-site boardroom calibration and standby event engineering across Lahore, Karachi, and Islamabad.</p>
+                         <p className="text-slate-200 text-xs sm:text-sm leading-relaxed">Our engineers hold certifications from Cisco, HP Poly, Logitech, and Yealink, delivering on-site boardroom calibration and standby event engineering across Lahore, Karachi, and Islamabad.</p>
                       </div>
                    </div>
                    <div className="flex gap-4 sm:gap-6">
                       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/10">
-                         <Box className="text-[#00B4D8]" size={28} />
+                         <Box className="text-[#38BDF8]" size={28} />
                       </div>
                       <div>
                          <h3 className="font-bold text-base sm:text-lg mb-1.5 sm:mb-2">Same Day Nationwide Dispatch &amp; FBR Tax Invoicing</h3>
-                         <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">We maintain serial-verified local stock in Lahore for rapid delivery across Pakistan, complete with official 1-to-3 year warranty and PPRA/FBR GST documentation.</p>
+                         <p className="text-slate-200 text-xs sm:text-sm leading-relaxed">We maintain serial-verified local stock in Lahore for rapid delivery across Pakistan, complete with official 1-to-3 year warranty and PPRA/FBR GST documentation.</p>
                       </div>
                    </div>
                 </div>
              </div>
-             <div className="bg-white/5 border border-white/10 rounded-3xl md:rounded-[3rem] p-5 sm:p-8 md:p-12 backdrop-blur-sm">
-                <div className="grid grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-                   <div className="text-center p-4 sm:p-6 border border-white/10 rounded-2xl md:rounded-3xl">
-                      <div className="text-2xl sm:text-4xl font-black text-[#00B4D8] mb-1.5 sm:mb-2">{content?.stats?.yearsExperience || 15}+</div>
-                      <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300">Years Experience</div>
+             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-8 md:p-10 backdrop-blur-sm">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                   <div className="text-center p-4 sm:p-6 border border-white/10 rounded-2xl">
+                      <div className="text-2xl sm:text-4xl font-black text-[#38BDF8] tabular-nums mb-1.5 sm:mb-2">{content?.stats?.yearsExperience || 15}+</div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-slate-200">Years Experience</div>
                    </div>
-                   <div className="text-center p-4 sm:p-6 border border-white/10 rounded-2xl md:rounded-3xl">
-                      <div className="text-2xl sm:text-4xl font-black text-[#00B4D8] mb-1.5 sm:mb-2">{content?.stats?.projectsCompleted || '5K'}+</div>
-                      <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300">Deployments</div>
+                   <div className="text-center p-4 sm:p-6 border border-white/10 rounded-2xl">
+                      <div className="text-2xl sm:text-4xl font-black text-[#38BDF8] tabular-nums mb-1.5 sm:mb-2">{content?.stats?.projectsCompleted || 1000}+</div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-slate-200">Deployments</div>
                    </div>
-                   <div className="text-center p-4 sm:p-6 border border-white/10 rounded-2xl md:rounded-3xl">
-                      <div className="text-2xl sm:text-4xl font-black text-[#00B4D8] mb-1.5 sm:mb-2">{content?.stats?.happyClients || '100%'}</div>
-                      <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300">Satisfied Clients</div>
+                   <div className="text-center p-4 sm:p-6 border border-white/10 rounded-2xl">
+                      <div className="text-2xl sm:text-4xl font-black text-[#38BDF8] tabular-nums mb-1.5 sm:mb-2">{content?.stats?.happyClients || 140}+</div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-slate-200">Enterprise Clients</div>
                    </div>
-                   <div className="text-center p-4 sm:p-6 border border-white/10 rounded-2xl md:rounded-3xl">
-                      <div className="text-2xl sm:text-4xl font-black text-[#00B4D8] mb-1.5 sm:mb-2">24/7</div>
-                      <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300">Remote Support</div>
+                   <div className="text-center p-4 sm:p-6 border border-white/10 rounded-2xl">
+                      <div className="text-2xl sm:text-4xl font-black text-[#38BDF8] tabular-nums mb-1.5 sm:mb-2">24/7</div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-slate-200">Remote Support</div>
                    </div>
                 </div>
              </div>
@@ -1203,32 +1346,32 @@ export function Home() {
         </div>
       </section>
 
-      {/* Answer Engine Optimization (AEO) Knowledge, Reference Matrix & FAQ Section */}
+      {/* Answer Engine Optimization (AEO) Knowledge, Reference Matrix & FAQ Section (UPG-6: C1 AA Contrast + Unboxed Kickers) */}
       <section className="bg-white py-14 md:py-20 border-t border-gray-100 cv-auto-mobile">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8">
           <div className="max-w-4xl mb-10 md:mb-14">
-            <span className="text-[#00B4D8] text-xs font-black uppercase tracking-[0.3em] mb-3 block">
+            <span className="text-[#0077B6] text-xs font-bold uppercase tracking-[0.2em] mb-3 block">
               Enterprise AV &amp; Event Intelligence
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1A2B4C] tracking-tight mb-4">
               Video Conference in Pakistan, Corporate Event Management &amp; 3D Hologram Solutions
             </h2>
-            <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-4">
+            <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4">
               AV Live Communications (Pvt) Ltd is Pakistan’s authoritative B2B distributor and systems integrator for enterprise <strong>Video conference</strong> rooms, unified SIP/VoIP telephony, and high-impact <strong>Corporate event management</strong>. From executive boardrooms in Lahore (Johar Town &amp; Gulberg), Karachi (I.I. Chundrigar Road, Clifton &amp; Shahrah-e-Faisal), and Islamabad (Blue Area &amp; Diplomatic Enclave) to nationwide hybrid townhalls and <strong>3D Hologram Display</strong> product launches, our engineering teams design, supply, and support mission-critical visual collaboration infrastructure.
             </p>
-            <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-              Every turnkey project is backed by a guaranteed <strong>15-minute technical response SLA</strong>, certified acoustic RT60 modeling, structured PoE+ network integration, and official OEM warranty across 25 global manufacturers including <Link to="/brands/poly" className="text-[#00B4D8] font-bold hover:underline">HP Poly (Polycom)</Link>, <Link to="/brands/logitech" className="text-[#00B4D8] font-bold hover:underline">Logitech</Link>, <Link to="/brands/cisco" className="text-[#00B4D8] font-bold hover:underline">Cisco</Link>, <Link to="/brands/yealink" className="text-[#00B4D8] font-bold hover:underline">Yealink</Link>, <Link to="/brands/jabra" className="text-[#00B4D8] font-bold hover:underline">Jabra</Link>, <Link to="/brands/bosch" className="text-[#00B4D8] font-bold hover:underline">Bosch</Link>, and <Link to="/brands/horion" className="text-[#00B4D8] font-bold hover:underline">Horion</Link>.
+            <p className="text-slate-600 text-sm md:text-base leading-relaxed">
+              Every turnkey project is backed by a guaranteed <strong>15-minute technical response SLA</strong>, certified acoustic RT60 modeling, structured PoE+ network integration, and official OEM warranty across 27 global manufacturers including <Link to="/brands/poly" className="text-[#0077B6] font-bold hover:underline">HP Poly (Polycom)</Link>, <Link to="/brands/logitech" className="text-[#0077B6] font-bold hover:underline">Logitech</Link>, <Link to="/brands/cisco" className="text-[#0077B6] font-bold hover:underline">Cisco</Link>, <Link to="/brands/samsung" className="text-[#0077B6] font-bold hover:underline">Samsung</Link>, <Link to="/brands/tcl" className="text-[#0077B6] font-bold hover:underline">TCL</Link>, <Link to="/brands/yealink" className="text-[#0077B6] font-bold hover:underline">Yealink</Link>, <Link to="/brands/bosch" className="text-[#0077B6] font-bold hover:underline">Bosch</Link>, and <Link to="/brands/horion" className="text-[#0077B6] font-bold hover:underline">Horion</Link>.
             </p>
           </div>
 
           {/* Reference Comparison Table */}
-          <div className="mb-12 md:mb-16 overflow-x-auto bg-[#F8F9FA] rounded-3xl p-4 sm:p-6 md:p-8 border border-gray-100">
+          <div className="mb-12 md:mb-16 overflow-x-auto bg-[#F8F9FA] rounded-2xl p-4 sm:p-6 md:p-8 border border-slate-200/80">
             <h3 className="text-lg sm:text-xl font-black text-[#1A2B4C] mb-4">
               2026 Pakistan Conference Room AV &amp; Corporate Event Production Reference Matrix
             </h3>
             <table className="w-full min-w-[560px] text-left border-collapse text-xs md:text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-[#1A2B4C] font-black uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-gray-200 text-[#1A2B4C] font-black uppercase tracking-wider text-xs">
                   <th className="py-3 pr-4">Deployment Tier / Event Scope</th>
                   <th className="py-3 px-4">Flagship Hardware &amp; Production Stack</th>
                   <th className="py-3 px-4">Capacity &amp; Acoustic Spec</th>
@@ -1240,43 +1383,43 @@ export function Home() {
                   <td className="py-3.5 pr-4 font-bold text-[#1A2B4C]">Focus &amp; Huddle Room (MTR / Zoom)</td>
                   <td className="py-3.5 px-4">Poly Studio R30 / Logitech Rally Bar Mini / Yealink UVC40</td>
                   <td className="py-3.5 px-4">2–6 Seats • 120° 4K AI Framing • 4m Beamforming Mic</td>
-                  <td className="py-3.5 pl-4 font-bold text-[#1A2B4C]">Rs. 240,000 – Rs. 490,000</td>
+                  <td className="py-3.5 pl-4 font-bold text-[#1A2B4C] tabular-nums">Rs. 240,000 – Rs. 490,000</td>
                 </tr>
                 <tr>
                   <td className="py-3.5 pr-4 font-bold text-[#1A2B4C]">Mid-Sized Corporate Conference Room</td>
                   <td className="py-3.5 px-4">Logitech Rally Bar / HP Poly Studio X52 / Cisco Room Bar</td>
                   <td className="py-3.5 px-4">8–14 Seats • 20MP 4K DirectorAI • Expansion Mic Array</td>
-                  <td className="py-3.5 pl-4 font-bold text-[#1A2B4C]">Rs. 680,000 – Rs. 1,350,000</td>
+                  <td className="py-3.5 pl-4 font-bold text-[#1A2B4C] tabular-nums">Rs. 680,000 – Rs. 1,350,000</td>
                 </tr>
                 <tr>
                   <td className="py-3.5 pr-4 font-bold text-[#1A2B4C]">Large Executive Boardroom Suite</td>
                   <td className="py-3.5 px-4">Polycom RealPresence Group 500 / Poly Studio X72 / Cisco Room Kit Plus</td>
                   <td className="py-3.5 px-4">16–28 Seats • 12x Optical PTZ / Dual 4K + Ceiling Mics</td>
-                  <td className="py-3.5 pl-4 font-bold text-[#1A2B4C]">Rs. 1,450,000 – Rs. 2,850,000</td>
+                  <td className="py-3.5 pl-4 font-bold text-[#1A2B4C] tabular-nums">Rs. 1,450,000 – Rs. 2,850,000</td>
                 </tr>
                 <tr>
                   <td className="py-3.5 pr-4 font-bold text-[#1A2B4C]">Hybrid Corporate Townhall &amp; SMD LED Stage</td>
                   <td className="py-3.5 px-4">P2.5 3840Hz SMD LED Wall, 3-Cam 4K SDI ATEM Switcher, Line-Array PA</td>
                   <td className="py-3.5 px-4">100–1,000+ Delegates • Bidirectional Zoom/Teams Bridge</td>
-                  <td className="py-3.5 pl-4 font-bold text-[#1A2B4C]">Rs. 350,000 – Rs. 1,850,000 / Event</td>
+                  <td className="py-3.5 pl-4 font-bold text-[#1A2B4C] tabular-nums">Rs. 350,000 – Rs. 1,850,000 / Event</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           {/* Competitor Benchmark Matrix: Why AV Live Outperforms Caterer/Decor Event Agencies & Box-Mover IT Resellers */}
-          <div className="mb-12 md:mb-16 overflow-x-auto bg-[#F8F9FA] rounded-3xl p-4 sm:p-6 md:p-8 border border-gray-100">
+          <div className="mb-12 md:mb-16 overflow-x-auto bg-[#F8F9FA] rounded-2xl p-4 sm:p-6 md:p-8 border border-slate-200/80">
             <h3 className="text-lg sm:text-xl font-black text-[#1A2B4C] mb-2">
               Why Enterprises Choose AV Live (Est. 2011) Over Traditional Event Caterers &amp; Box-Mover IT Vendors
             </h3>
-            <p className="text-xs sm:text-sm text-gray-600 mb-4 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed">
               Unlike catering/decor agencies that sub-rent audio-visual gear at a 40% markup—or IT box-movers who ship uncalibrated conference hardware without acoustic engineering—AV Live owns Pakistan&apos;s largest in-house inventory of P2.5 SMD LED walls, line-array concert sound, 3D hologram stages, and authorized Poly/Cisco/Logitech/Yealink video conferencing systems.
             </p>
             <table className="w-full min-w-[600px] text-left border-collapse text-xs md:text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-[#1A2B4C] font-black uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-gray-200 text-[#1A2B4C] font-black uppercase tracking-wider text-xs">
                   <th className="py-3 pr-4">Capability / Ranking Criteria</th>
-                  <th className="py-3 px-4 text-[#00B4D8]">AV Live Communications (Est. 2011)</th>
+                  <th className="py-3 px-4 text-[#0077B6]">AV Live Communications (Est. 2011)</th>
                   <th className="py-3 px-4">Decor &amp; Catering Event Agencies</th>
                   <th className="py-3 pl-4">Standard IT Hardware Resellers</th>
                 </tr>
@@ -1311,97 +1454,97 @@ export function Home() {
           </div>
 
           {/* 2011 Legacy Keyword & Regional Authority Hub */}
-          <div className="mb-12 bg-[#F8F9FA] rounded-3xl p-5 sm:p-7 border border-gray-100">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] block mb-1">
+          <div className="mb-12 bg-[#F8F9FA] rounded-2xl p-5 sm:p-7 border border-slate-200/80">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#0077B6] block mb-1">
               Pioneering Pakistan&apos;s AV &amp; Event Industry Since 2011
             </span>
             <h3 className="text-lg sm:text-xl font-black text-[#1A2B4C] mb-3">
               Direct Pillar Hubs: Video Conference, Event Management &amp; Rental Solutions Across Pakistan
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-              <Link to="/video-conference-in-pakistan" className="p-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#00B4D8] transition-all group">
-                <div className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] mb-1">Video Conference in Pakistan →</div>
-                <p className="text-gray-500 text-[11px]">Official Polycom Group 500, Poly Studio X70/X72, Logitech Rally Bar &amp; Cisco Room Kits.</p>
+              <Link to="/video-conference-in-pakistan" className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-[#0077B6] transition-colors group">
+                <div className="font-black text-[#1A2B4C] group-hover:text-[#0077B6] mb-1">Video Conference in Pakistan →</div>
+                <p className="text-slate-600 text-xs">Official Polycom Group 500, Poly Studio X70/X72, Logitech Rally Bar &amp; Cisco Room Kits.</p>
               </Link>
-              <Link to="/event-management-in-pakistan" className="p-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#00B4D8] transition-all group">
-                <div className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] mb-1">Event Management in Pakistan →</div>
-                <p className="text-gray-500 text-[11px]">Turnkey corporate events, AGMs, product launches, concerts &amp; diplomatic summits nationwide.</p>
+              <Link to="/event-management-in-pakistan" className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-[#0077B6] transition-colors group">
+                <div className="font-black text-[#1A2B4C] group-hover:text-[#0077B6] mb-1">Event Management in Pakistan →</div>
+                <p className="text-slate-600 text-xs">Turnkey corporate events, AGMs, product launches, concerts &amp; diplomatic summits nationwide.</p>
               </Link>
-              <Link to="/corporate-event-management" className="p-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#00B4D8] transition-all group">
-                <div className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] mb-1">Corporate Event Management →</div>
-                <p className="text-gray-500 text-[11px]">Executive conferences, hybrid townhalls, 3D hologram stages &amp; multi-cam broadcasting.</p>
+              <Link to="/services/corporate-events" className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-[#0077B6] transition-colors group">
+                <div className="font-black text-[#1A2B4C] group-hover:text-[#0077B6] mb-1">Corporate Event Production →</div>
+                <p className="text-slate-600 text-xs">Executive conferences, hybrid townhalls, 3D hologram stages &amp; multi-cam broadcasting.</p>
               </Link>
-              <Link to="/av-equipment-rental" className="p-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#00B4D8] transition-all group">
-                <div className="font-black text-[#1A2B4C] group-hover:text-[#00B4D8] mb-1">SMD Screen &amp; Sound Rental →</div>
-                <p className="text-gray-500 text-[11px]">In-house P2.5 SMD LED video walls, line-array PA sound, stage trussing, projectors &amp; mics.</p>
+              <Link to="/av-equipment-rental" className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-[#0077B6] transition-colors group">
+                <div className="font-black text-[#1A2B4C] group-hover:text-[#0077B6] mb-1">SMD Screen &amp; Sound Rental →</div>
+                <p className="text-slate-600 text-xs">In-house P2.5 SMD LED video walls, line-array PA sound, stage trussing, projectors &amp; mics.</p>
               </Link>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <article className="bg-[#F8F9FA] rounded-3xl p-8 border border-gray-100">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <article className="bg-[#F8F9FA] rounded-2xl p-6 md:p-8 border border-slate-200/80">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#0077B6] block">
                 Video Conference in Pakistan
               </span>
-              <h3 className="text-xl font-black text-[#1A2B4C] mt-4 mb-3">
+              <h3 className="text-xl font-black text-[#1A2B4C] mt-2 mb-3">
                 What is the best Video Conference in Pakistan solution for executive boardrooms?
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+              <p className="text-slate-600 text-sm leading-relaxed mb-4">
                 For medium-to-large corporate boardrooms and training halls in Pakistan, AV Live recommends the <strong>Poly Studio X70 / X72 (Poly X70)</strong> and the <strong>Polycom RealPresence Group 500 (Polycom Group 500)</strong>. Both systems deliver ultra-low latency 4K/1080p60 video, NoiseBlockAI acoustic filtering, and full compatibility with Zoom Rooms, Microsoft Teams Rooms, and standards-based SIP/H.323 networks.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
-                <Link to="/category/video-conferencing" className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider inline-flex items-center gap-1 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0">
+                <Link to="/category/video-conferencing" className="text-xs font-black text-[#1A2B4C] hover:text-[#0077B6] uppercase tracking-wider inline-flex items-center gap-1 min-h-[44px] py-1">
                   Explore Video Conference Hardware <ArrowRight size={14} />
                 </Link>
               </div>
             </article>
 
-            <article className="bg-[#F8F9FA] rounded-3xl p-8 border border-gray-100">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full">
+            <article className="bg-[#F8F9FA] rounded-2xl p-6 md:p-8 border border-slate-200/80">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#0077B6] block">
                 Polycom Group 500 vs. Poly X70
               </span>
-              <h3 className="text-xl font-black text-[#1A2B4C] mt-4 mb-3">
+              <h3 className="text-xl font-black text-[#1A2B4C] mt-2 mb-3">
                 How do Polycom Group 500 and Poly X70 compare for enterprise meetings?
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+              <p className="text-slate-600 text-sm leading-relaxed mb-4">
                 The <strong>Polycom Group 500</strong> (MPN 7200-64550-001) features a dedicated rack-mountable codec with an EagleEye IV 12x optical zoom PTZ camera, making it ideal for multi-display rooms and hardware MCU networks. The <strong>Poly X70</strong> is a modern all-in-one AI video bar with dual 4K 20MP sensors, Poly DirectorAI automatic speaker framing, and native cloud apps for Zoom and Microsoft Teams without an external PC.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
-                <Link to="/video-conferencing" className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider inline-flex items-center gap-1 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0">
+                <Link to="/video-conference-in-pakistan" className="text-xs font-black text-[#1A2B4C] hover:text-[#0077B6] uppercase tracking-wider inline-flex items-center gap-1 min-h-[44px] py-1">
                   Compare Boardroom Systems <ArrowRight size={14} />
                 </Link>
               </div>
             </article>
 
-            <article className="bg-[#F8F9FA] rounded-3xl p-8 border border-gray-100">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full">
+            <article className="bg-[#F8F9FA] rounded-2xl p-6 md:p-8 border border-slate-200/80">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#0077B6] block">
                 Corporate Event Management &amp; Hybrid Events
               </span>
-              <h3 className="text-xl font-black text-[#1A2B4C] mt-4 mb-3">
+              <h3 className="text-xl font-black text-[#1A2B4C] mt-2 mb-3">
                 How does AV Live execute Corporate event management and hybrid events?
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+              <p className="text-slate-600 text-sm leading-relaxed mb-4">
                 AV Live combines full-scale <strong>Event management</strong> and <strong>Corporate event management</strong> with broadcast-grade <strong>hybrid event</strong> engineering. We integrate SMD LED video walls, line-array PA sound, multi-camera SDI switching, and bidirectional <strong>Video conference</strong> bridges so remote executives and international keynote speakers interact live with in-person audiences in Lahore, Karachi, and Islamabad.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
-                <Link to="/services" className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider inline-flex items-center gap-1 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0">
+                <Link to="/services" className="text-xs font-black text-[#1A2B4C] hover:text-[#0077B6] uppercase tracking-wider inline-flex items-center gap-1 min-h-[44px] py-1">
                   Book Corporate Event Production <ArrowRight size={14} />
                 </Link>
               </div>
             </article>
 
-            <article className="bg-[#F8F9FA] rounded-3xl p-8 border border-gray-100">
-              <span className="text-xs font-black uppercase tracking-widest text-[#00B4D8] bg-[#00B4D8]/10 px-3 py-1 rounded-full">
+            <article className="bg-[#F8F9FA] rounded-2xl p-6 md:p-8 border border-slate-200/80">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#0077B6] block">
                 3D Hologram Display &amp; Events
               </span>
-              <h3 className="text-xl font-black text-[#1A2B4C] mt-4 mb-3">
+              <h3 className="text-xl font-black text-[#1A2B4C] mt-2 mb-3">
                 Where can we rent or install a 3D Hologram Display for events in Pakistan?
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+              <p className="text-slate-600 text-sm leading-relaxed mb-4">
                 AV Live engineers custom <strong>3D Hologram Display</strong> stages, 3D holographic fan arrays, and high-lumen optical Pepper's Ghost mesh projections for product launches, expos, and flagship corporate <strong>events</strong> across Pakistan. Our creative studio builds bespoke 3D holographic animations and handles complete on-site rigging and lighting synchronization.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
-                <Link to="/3d-hologram" className="text-xs font-black text-[#1A2B4C] hover:text-[#00B4D8] uppercase tracking-wider inline-flex items-center gap-1 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 py-1">
+                <Link to="/3d-hologram" className="text-xs font-black text-[#1A2B4C] hover:text-[#0077B6] uppercase tracking-wider inline-flex items-center gap-1 min-h-[44px] py-1">
                   View Hologram Display Solutions <ArrowRight size={14} />
                 </Link>
               </div>
@@ -1418,13 +1561,13 @@ export function Home() {
                 All AV Live boardroom codecs, SIP endpoints, and UC headsets conform to global enterprise standards from our technology partners:
               </p>
               <div className="flex flex-wrap gap-2.5 text-xs font-bold">
-                <a href="https://www.ipphone-warehouse.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors">IP Phone Warehouse</a>
-                <a href="https://www.hp.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors">HP.com (Poly)</a>
-                <a href="https://www.plantronics.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors">Plantronics.com</a>
-                <a href="https://www.cisco.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors">Cisco.com</a>
-                <a href="https://zoom.us/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors">Zoom.us</a>
-                <a href="https://www.webex.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors">Webex.com</a>
-                <a href="https://www.323.tv/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#00B4D8] hover:text-[#00B4D8] transition-colors">323.tv</a>
+                <a href="https://www.ipphone-warehouse.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#0077B6] hover:text-[#0077B6] transition-colors">IP Phone Warehouse</a>
+                <a href="https://www.hp.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#0077B6] hover:text-[#0077B6] transition-colors">HP.com (Poly)</a>
+                <a href="https://www.plantronics.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#0077B6] hover:text-[#0077B6] transition-colors">Plantronics.com</a>
+                <a href="https://www.cisco.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#0077B6] hover:text-[#0077B6] transition-colors">Cisco.com</a>
+                <a href="https://zoom.us/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#0077B6] hover:text-[#0077B6] transition-colors">Zoom.us</a>
+                <a href="https://www.webex.com/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#0077B6] hover:text-[#0077B6] transition-colors">Webex.com</a>
+                <a href="https://www.323.tv/" target="_blank" rel="noopener" className="px-3.5 py-2.5 min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center bg-white border border-gray-200 rounded-xl text-[#1A2B4C] hover:border-[#0077B6] hover:text-[#0077B6] transition-colors">323.tv</a>
               </div>
             </div>
 
